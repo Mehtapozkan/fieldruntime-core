@@ -1,0 +1,10 @@
+dist
+node_modules
+packages/ecc-pack/evals/*.jsonl
+packages/ecc-pack/evals/evaluation-case.v0.schema.json
+packages/ecc-pack/workflows/*.yaml
+packages/ecc-pack/contracts/*.yaml
+packages/ecc-pack/contracts/*.csv
+packages/contracts/schemas/*.json
+packages/contracts/reference/**
+docs/reference/**

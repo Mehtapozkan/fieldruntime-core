@@ -1,0 +1,24 @@
+capability_id,capability,TA,ES,WO,CO,DC,BA,FA,RA,EA,AA,MA,SI,AU
+view_case,View authorized case,C,S,S,S,S,S,S,S,S,S,S,S,S
+view_sensitive_evidence,View sensitive evidence,C,S,S,S,D,S,S,S,S,S,D,S,S
+add_evidence,Add evidence reference,D,D,S,S,S,D,D,D,P,P,D,D,D
+edit_artifact,Correct factual artifact,D,D,S,S,P,D,D,D,D,P,D,D,D
+set_severity,Set or change severity,D,S,A,P,D,S,D,D,D,D,D,D,D
+assign_owner,Assign or reassign case owner,D,S,A,P,D,S,D,D,D,D,P,D,D
+propose_internal_action,Propose internal action,D,P,P,P,P,P,D,D,P,P,P,D,D
+propose_external_message,Draft/propose external message,D,P,P,P,P,P,D,D,D,P,D,D,D
+propose_financial_remedy,Propose refund or credit,D,P,P,P,D,P,P,D,D,P,D,D,D
+propose_commitment,Propose contractual/product commitment,D,P,P,P,D,P,P,P,D,P,D,D,D
+approve_internal_action,Approve low-risk internal action,D,A,S,S,D,A,D,D,D,D,D,D,D
+approve_external_message,Approve external message,D,A,D,D,D,A,D,S,D,D,D,D,D
+approve_financial_remedy,Approve refund or credit,D,A,D,D,D,D,A,D,D,D,D,D,D
+approve_commitment,Approve contractual/product commitment,D,A,D,D,D,S,D,S,D,D,D,D,D
+execute_internal_write,Execute internal system write,D,D,D,D,D,D,D,D,D,D,D,R,D
+execute_external_write,Execute external communication/remedy,D,D,D,D,D,D,D,D,D,D,D,R,D
+verify_outcome,Verify and accept outcome,D,S,S,S,D,S,D,D,D,D,D,D,D
+create_learning_candidate,Create learning candidate,D,D,A,P,P,D,D,D,P,P,P,D,D
+promote_memory,Approve GBrain memory promotion,D,D,A,D,D,D,D,C,D,D,D,D,D
+promote_skill_or_eval,Approve skill or evaluation promotion,D,D,A,D,D,D,D,C,D,D,D,D,D
+change_workflow_or_policy,Approve workflow/policy version,D,C,C,D,D,D,D,C,D,D,D,D,D
+activate_kill_switch,Disable all external writes,A,D,P,D,D,D,D,P,D,D,D,D,D
+view_audit_export,View/export authorized audit,S,S,S,S,D,D,D,S,D,D,D,D,S

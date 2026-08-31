@@ -1,0 +1,181 @@
+workflow_id: customer_escalation_commitment_control
+version: 0.1.0
+date: '2026-08-26'
+product: Field Runtime Escalation and Commitment Control
+status: implementation_baseline
+operating_mode: synthetic_fixtures_and_human_approved_mock_writes
+purpose: >-
+  Move one consequential customer escalation from trigger to an accepted,
+  verified outcome while preserving evidence, ownership, authority,
+  commitments, action receipts and reusable learning.
+unit_of_work:
+  type: CoordinationCase
+  definition: >-
+    One customer-specific escalation outcome linking authoritative records,
+    messages, evidence, participants, decisions, actions, commitments and outcomes.
+qualification:
+  expression: consequence_signal AND coordination_signal AND (authority_signal OR exception_signal) AND measurable_outcome AND NOT explicit_exclusion
+  consequence_signals:
+    - material_customer_blockage
+    - renewal_or_revenue_risk
+    - executive_attention
+    - material_service_or_reputation_exposure
+    - financial_remedy
+    - contractual_security_privacy_or_compliance_exposure
+  coordination_signals:
+    - two_or_more_teams
+    - two_or_more_systems
+    - conflicting_or_incomplete_evidence
+    - missing_or_disputed_owner
+    - blocked_cross_team_dependency
+    - customer_commitment_or_deadline
+  authority_or_exception_signals:
+    - non_routine_customer_communication
+    - financial_remedy
+    - contractual_or_product_commitment
+    - security_privacy_or_compliance_representation
+    - policy_exception
+    - closure_under_uncertainty
+  exclusions:
+    - routine_low_risk_single_team_ticket
+    - spam_test_or_malformed_event
+    - no_identifiable_customer_or_measurable_outcome_after_review
+    - regulated_professional_judgment_outside_boundary
+triggers:
+  - slack_or_qm_escalation_message
+  - crm_escalation_renewal_risk_or_executive_attention_change
+  - high_priority_ticket_created_reopened_or_materially_changed
+  - customer_commitment_created_or_changed
+  - scheduled_watch_finds_overdue_commitment_or_dependency
+  - authorized_manual_case_creation
+merge_rules:
+  merge_when:
+    - same_tenant_and_customer
+    - same_normalized_issue_or_linked_incident
+    - inside_configured_merge_window
+    - same_material_outcome_and_authority_path
+  keep_separate_when:
+    - different_customers_require_separate_permissions_or_outcomes
+    - different_tenants_or_legal_entities
+    - different_authority_paths_or_accepted_outcomes
+    - merge_would_expose_evidence_across_scopes
+truth_hierarchy:
+  - rank: 1
+    source: live_system_of_record
+  - rank: 2
+    source: current_approved_policy_or_authorized_decision
+  - rank: 3
+    source: cited_scoped_gbrain_memory
+  - rank: 4
+    source: extracted_message_or_document_claim
+  - rank: 5
+    source: model_inference_or_recommendation
+same_rank_conflict: human_review_required
+states:
+  detected: [qualifying, dismissed]
+  qualifying: [enriching, dismissed, blocked]
+  enriching: [needs_review, blocked, failed]
+  blocked: [enriching, needs_review, cancelled]
+  needs_review: [ready, blocked, cancelled]
+  ready: [executing, monitoring, cancelled]
+  executing: [monitoring, verifying, failed]
+  monitoring: [needs_review, verifying, failed]
+  verifying: [resolved, needs_review, failed]
+  resolved: [learning_review]
+  learning_review: [closed]
+  failed: [ready, blocked, cancelled]
+  dismissed: []
+  cancelled: []
+  closed: []
+participants:
+  - case_owner
+  - customer_or_account_owner
+  - domain_contributors
+  - decision_approvers
+  - workflow_owner
+  - evidence_agent
+  - analysis_agent
+  - monitoring_agent
+  - action_service_identity
+  - auditor_or_risk_reviewer
+minimum_evidence_packet:
+  - customer_or_account_identity
+  - trigger_and_business_consequence
+  - current_ticket_or_issue_state
+  - current_policy_or_authorized_decision
+  - commitments_owner_and_due_date
+  - participants_and_dependencies
+  - relevant_prior_cases_or_memory_with_provenance_and_freshness
+  - conflicts_missing_evidence_and_open_questions
+  - proposed_options_and_expected_effects
+human_approval_required_before:
+  - external_customer_communication
+  - refund_credit_or_financial_concession
+  - contractual_promise
+  - product_roadmap_or_delivery_commitment
+  - security_privacy_or_compliance_representation
+  - irreversible_or_high_impact_system_action
+  - closure_with_critical_conflict_or_missing_evidence
+  - learning_promotion
+rollout:
+  stage_1_synthetic:
+    - create_or_merge_mock_case
+    - retrieve_fixture_evidence
+    - prepare_recommendation_and_exact_action_preview
+    - record_mock_approval_or_rejection
+    - execute_mock_idempotent_write
+    - verify_mock_outcome
+  stage_2_live_read_only:
+    - read_scoped_messages_crm_tickets_and_approved_memory
+    - post_authorized_internal_case_summaries
+    - no_source_of_record_or_external_write
+  stage_3_staged_writes:
+    - draft_external_message
+    - create_internal_task_or_approved_crm_ticket_note
+    - show_exact_target_and_payload_before_approval
+    - execute_only_the_approved_payload
+  stage_4_bounded_authority:
+    - only_narrow_reversible_preapproved_actions
+    - requires_representative_and_held_out_evaluations
+    - financial_contractual_security_and_roadmap_actions_remain_human_authorized
+stop_conditions:
+  - acceptance_criteria_pass
+  - required_evidence_unavailable_after_configured_attempts
+  - unresolved_same_rank_conflict
+  - no_accountable_owner
+  - token_time_cost_or_tool_budget_reached
+  - no_material_progress
+  - prohibited_action_or_policy_conflict
+  - connector_failure_after_safe_retry
+  - authorized_human_cancellation
+case_resolved_only_when:
+  - authorized_action_or_no_action_decision_complete
+  - current_source_state_verified
+  - commitments_completed_transferred_or_owned_under_accepted_monitoring_plan
+  - customer_or_workflow_owner_accepts_resolution
+  - outcome_event_has_evidence_and_verifier_identity
+  - material_human_corrections_captured
+  - case_audit_complete
+learning:
+  candidate_types:
+    - scoped_memory
+    - evaluation_case
+    - skill
+    - routing_rule
+    - policy_change
+    - workflow_change
+  promotion_requires:
+    - verified_outcome_or_material_correction
+    - provenance_and_scope
+    - evaluation_and_replay
+    - named_human_approval
+    - version
+    - rollback
+  automatic_promotion: false
+service_targets:
+  event_ingestion_p95_seconds: 5
+  sourced_brief_p95_seconds: 90
+  evidence_coverage: 1.0
+  unauthorized_retrievals: 0
+  unauthorized_external_actions: 0
+  duplicate_external_effects: 0

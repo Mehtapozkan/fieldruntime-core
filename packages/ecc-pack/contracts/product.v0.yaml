@@ -1,0 +1,173 @@
+product_id: field_runtime_escalation_commitment_control
+version: 0.1.0
+date: '2026-08-26'
+status: implementation_baseline_for_synthetic_mvp
+category: multiplayer_sovereign_decision_runtime
+initial_market_category: consequential_exception_to_outcome_control
+promise: No consequential customer escalation loses context, ownership, authority, or a commitment; every
+  verified resolution can improve the next similar case.
+unit_of_work: CoordinationCase
+unit_of_value: accepted_outcome
+primary_buyers:
+- CIO
+- CTO
+- Chief Digital Officer
+- COO
+business_sponsors:
+- Chief Customer Officer
+- VP Customer Success
+- VP Support
+daily_users:
+- workflow_owner
+- case_owner
+- domain_contributor
+- business_approver
+- manager
+- auditor
+jobs_to_be_done:
+  operational: Assemble current truth, identify ownership and authority, prepare the decision, execute
+    only approved actions, track commitments, and verify the result.
+  management: Show where important cases wait, what is blocked, which commitments are at risk, and where
+    human judgment is needed.
+  institutional_learning: Turn verified outcomes and material human corrections into governed memory,
+    eval, skill, policy, or workflow candidates.
+scope:
+  requires_all:
+  - consequence_signal
+  - coordination_signal
+  - authority_or_exception_signal
+  - measurable_outcome
+  consequence_signals:
+  - customer_blockage
+  - renewal_or_revenue_risk
+  - executive_escalation
+  - material_service_impact
+  - contractual_exposure
+  - financial_remedy
+  - security_or_compliance_exposure
+  - material_reputation_risk
+  coordination_signals:
+  - two_or_more_teams
+  - two_or_more_systems
+  - conflicting_or_missing_evidence
+  - missing_or_disputed_owner
+  - cross_team_dependency
+  - explicit_customer_commitment
+  - recurring_handoff_failure
+  authority_or_exception_signals:
+  - non_routine_external_communication
+  - financial_remedy
+  - contractual_or_product_commitment
+  - security_or_compliance_representation
+  - policy_exception
+  - closure_under_uncertainty
+  excluded:
+  - routine_low_risk_single_owner_ticket
+  - autonomous_customer_communication
+  - autonomous_refund_or_credit
+  - autonomous_contract_change
+  - autonomous_roadmap_commitment
+  - production_system_control
+  - regulated_professional_judgment
+  - company_wide_unrestricted_search
+  - generic_no_code_workflow_builder
+  - unreviewed_self_modification
+product_surfaces:
+  p0:
+  - shared_case_room
+  - decision_packet
+  - approval_experience
+  - case_timeline_and_audit
+  - outcome_and_correction_capture
+  - learning_review
+  p1:
+  - judgment_queue
+  - manager_command_center
+  - provider_health_and_cost_per_accepted_outcome
+  - read_only_live_connectors
+  - approval_gated_staged_writes
+component_boundaries:
+  field_runtime_core:
+  - canonical_case_state
+  - participants
+  - decision_graph
+  - truth_hierarchy
+  - policy
+  - approval
+  - action_gateway
+  - commitments
+  - outcomes
+  - corrections
+  - evaluations
+  - audit
+  postgresql:
+  - canonical_operational_record
+  - append_only_event_and_audit_journal
+  gbrain_adapter:
+  - permission_scoped_context
+  - similar_cases
+  - approved_learning_writes
+  qm_slack_adapter:
+  - multiplayer_work_surface
+  - case_updates
+  - tasks
+  - approvals
+  - scheduled_watches
+  model_gateway:
+  - structured_extraction
+  - grounded_synthesis
+  - contradiction_detection
+  - drafting
+  work_connectors:
+  - authoritative_reads
+  - action_preview
+  - approved_write
+  - action_receipt
+non_negotiable_principles:
+- one_shared_case_not_private_copilots
+- systems_of_record_remain_authoritative
+- deterministic_control_before_agentic_judgment
+- evidence_or_inference_label
+- explicit_human_authority
+- no_direct_model_to_system_write
+- memory_is_not_learning
+- customer_owned_exportable_institutional_intelligence
+- replaceable_providers_through_adapter_contracts
+- next_similar_case_improves_for_inspectable_reason
+required_case_outputs:
+- canonical_case_id
+- evidence_linked_current_truth
+- named_owner_and_participants
+- gaps_conflicts_dependencies_and_deadlines
+- decision_packet
+- approval_records_and_exact_action_previews
+- idempotent_action_receipts
+- tracked_commitments
+- verified_outcome
+- intelligence_receipt
+- correction_record
+- governed_learning_candidate_when_justified
+rollout:
+- synthetic_fixtures
+- live_read_only
+- human_approved_staged_writes
+- evaluated_bounded_authority
+p0_release_gates:
+- thirty_cases_run_from_clean_install
+- canonical_happy_path_reaches_verified_outcome_and_learning_candidate
+- duplicate_events_create_no_duplicate_effect
+- no_unapproved_action_executes
+- zero_cross_tenant_or_cross_scope_exposure
+- all_factual_artifacts_evidence_linked
+- human_correction_creates_versioned_candidate
+- replay_failing_candidate_cannot_promote
+- tests_run_without_external_credentials
+design_partner_assumptions_to_validate:
+- qualifying_case_volume
+- economic_consequence
+- severity_thresholds
+- owner_and_approval_rules
+- pilot_data_and_retention_boundary
+- current_cycle_time_missed_commitments_and_coordination_effort
+- safest_live_reads_and_first_reversible_write
+- accepted_outcome_definition
