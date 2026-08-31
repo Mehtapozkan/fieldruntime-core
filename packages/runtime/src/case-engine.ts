@@ -152,6 +152,7 @@ const CASE_SEED_KEYS = new Set(["tenant", "workflow_version", "case"]);
 const CASE_RECORD_SEED_KEYS = new Set([
   "customer_ref",
   "due_at",
+  "due_at_source_timezone",
   "id",
   "issue_fingerprint",
   "owner_identity_id",
@@ -165,7 +166,7 @@ const CASE_RECORD_SEED_KEYS = new Set([
 const CANONICAL_ID_PATTERN = /^[A-Za-z][A-Za-z0-9_-]{2,127}$/;
 const SOURCE_TIMEZONE_PATTERN =
   /^(?:UTC(?:[+-](?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9])?|[A-Za-z][A-Za-z0-9._+-]*(?:\/[A-Za-z0-9._+-]+)+)$/;
-const WORK_EVENT_TIMESTAMP_PATTERN =
+const RFC3339_TIMESTAMP_PATTERN =
   /^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?([Zz]|([+-])(\d{2}):(\d{2}))$/;
 const COMMAND_KEYS = Object.freeze({
   "case.attach_work_event": new Set([
@@ -599,7 +600,10 @@ function assertWorkEvent(
   requireString(workEvent, "id", "$/work_event");
   requireString(workEvent, "event_type", "$/work_event");
   const occurredAt = requireString(workEvent, "occurred_at", "$/work_event");
-  if (canonicalWorkEventOccurredAt(occurredAt) !== occurredAt) {
+  if (
+    canonicalRfc3339Instant(occurredAt, "$/work_event/occurred_at") !==
+    occurredAt
+  ) {
     throw new CaseEngineError(
       "INVALID_COMMAND",
       "$/work_event/occurred_at must be a canonical UTC instant with millisecond precision",
@@ -639,12 +643,21 @@ function assertWorkEvent(
   }
 }
 
-function canonicalWorkEventOccurredAt(value: string): string {
-  const match = WORK_EVENT_TIMESTAMP_PATTERN.exec(value);
+function assertSourceTimezone(value: string, path: string): void {
+  if (!SOURCE_TIMEZONE_PATTERN.test(value)) {
+    throw new CaseEngineError(
+      "INVALID_COMMAND",
+      `${path} must be UTC, a UTC fixed-offset label, or an IANA-style timezone identifier`,
+    );
+  }
+}
+
+function canonicalRfc3339Instant(value: string, path: string): string {
+  const match = RFC3339_TIMESTAMP_PATTERN.exec(value);
   if (match === null) {
     throw new CaseEngineError(
       "INVALID_COMMAND",
-      "$/work_event/occurred_at must be an RFC 3339 instant with at most millisecond precision",
+      `${path} must be an RFC 3339 instant with at most millisecond precision`,
     );
   }
   const [
@@ -670,10 +683,7 @@ function canonicalWorkEventOccurredAt(value: string): string {
     secondText === undefined ||
     zoneText === undefined
   ) {
-    throw new CaseEngineError(
-      "INVALID_COMMAND",
-      "$/work_event/occurred_at is incomplete",
-    );
+    throw new CaseEngineError("INVALID_COMMAND", `${path} is incomplete`);
   }
 
   const year = Number(yearText);
@@ -712,7 +722,7 @@ function canonicalWorkEventOccurredAt(value: string): string {
   ) {
     throw new CaseEngineError(
       "INVALID_COMMAND",
-      "$/work_event/occurred_at is not a valid RFC 3339 calendar instant",
+      `${path} is not a valid RFC 3339 calendar instant`,
     );
   }
 
@@ -730,18 +740,98 @@ function canonicalWorkEventOccurredAt(value: string): string {
   if (!/^\d{4}-/.test(canonical)) {
     throw new CaseEngineError(
       "INVALID_COMMAND",
-      "$/work_event/occurred_at normalizes outside the supported four-digit year range",
+      `${path} normalizes outside the supported four-digit year range`,
     );
   }
   return canonical;
 }
 
 function normalizeInboundWorkEvent(workEvent: UnknownRecord): UnknownRecord {
-  requireString(workEvent, "source_timezone", "$/work_event");
+  const sourceTimezone = requireString(
+    workEvent,
+    "source_timezone",
+    "$/work_event",
+  );
+  assertSourceTimezone(sourceTimezone, "$/work_event/source_timezone");
   const occurredAt = requireString(workEvent, "occurred_at", "$/work_event");
   return {
     ...workEvent,
-    occurred_at: canonicalWorkEventOccurredAt(occurredAt),
+    occurred_at: canonicalRfc3339Instant(
+      occurredAt,
+      "$/work_event/occurred_at",
+    ),
+  };
+}
+
+function normalizeRequiredSeedInstant(
+  record: UnknownRecord,
+  instantField: string,
+  timezoneField: string,
+  path: string,
+): UnknownRecord {
+  const instant = requireString(record, instantField, path);
+  const sourceTimezone = requireString(record, timezoneField, path);
+  assertSourceTimezone(sourceTimezone, `${path}/${timezoneField}`);
+  return {
+    ...record,
+    [instantField]: canonicalRfc3339Instant(instant, `${path}/${instantField}`),
+  };
+}
+
+function normalizeOptionalSeedInstant(
+  record: UnknownRecord,
+  instantField: string,
+  timezoneField: string,
+  path: string,
+): UnknownRecord {
+  const instant = record[instantField];
+  const sourceTimezone = record[timezoneField];
+  if (instant === undefined || instant === null) {
+    if (sourceTimezone !== undefined) {
+      throw new CaseEngineError(
+        "INVALID_COMMAND",
+        `${path}/${timezoneField} requires a non-null ${instantField}`,
+      );
+    }
+    return record;
+  }
+  if (typeof instant !== "string") {
+    throw new CaseEngineError(
+      "INVALID_COMMAND",
+      `${path}/${instantField} must be a string`,
+    );
+  }
+  const requiredTimezone = requireString(record, timezoneField, path);
+  assertSourceTimezone(requiredTimezone, `${path}/${timezoneField}`);
+  return {
+    ...record,
+    [instantField]: canonicalRfc3339Instant(instant, `${path}/${instantField}`),
+  };
+}
+
+function normalizeCaseSeed(seed: UnknownRecord): UnknownRecord {
+  let workflow = normalizeRequiredSeedInstant(
+    requireRecord(seed, "workflow_version", "$/case_seed"),
+    "effective_from",
+    "effective_from_source_timezone",
+    "$/case_seed/workflow_version",
+  );
+  workflow = normalizeOptionalSeedInstant(
+    workflow,
+    "effective_to",
+    "effective_to_source_timezone",
+    "$/case_seed/workflow_version",
+  );
+  const caseSeed = normalizeOptionalSeedInstant(
+    requireRecord(seed, "case", "$/case_seed"),
+    "due_at",
+    "due_at_source_timezone",
+    "$/case_seed/case",
+  );
+  return {
+    ...seed,
+    workflow_version: workflow,
+    case: caseSeed,
   };
 }
 
@@ -752,6 +842,14 @@ function normalizeWorkEventCommand(
   return {
     ...command,
     [field]: normalizeInboundWorkEvent(requireRecord(command, field)),
+  };
+}
+
+function normalizeCreateCommand(command: UnknownRecord): UnknownRecord {
+  const withTriggerEvent = normalizeWorkEventCommand(command, "trigger_event");
+  return {
+    ...withTriggerEvent,
+    case_seed: normalizeCaseSeed(requireRecord(command, "case_seed")),
   };
 }
 
@@ -1930,7 +2028,7 @@ export function executeCaseCommand(
       assertCommandKeys(command, type);
       return createCase(
         trustedState,
-        normalizeWorkEventCommand(command, "trigger_event"),
+        normalizeCreateCommand(command),
         dependencies,
       );
     }

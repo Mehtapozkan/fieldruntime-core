@@ -72,6 +72,60 @@ test("stored WorkEvents require canonical UTC time and source timezone metadata"
   );
 });
 
+test("stored creation times require canonical UTC and source timezone metadata", () => {
+  for (const mutate of [
+    (document) => {
+      document.workflow_version.effective_from = "2026-08-25T17:00:00-07:00";
+    },
+    (document) => {
+      document.workflow_version.effective_to = "2026-08-31T17:00:00-07:00";
+      document.workflow_version.effective_to_source_timezone =
+        "America/Los_Angeles";
+    },
+    (document) => {
+      document.case.due_at = "2026-08-28T17:00:00-07:00";
+    },
+  ]) {
+    const nonCanonical = structuredClone(fixture);
+    mutate(nonCanonical);
+    assert.equal(validate(nonCanonical), false);
+    assert.ok(validate.errors?.some((error) => error.keyword === "pattern"));
+  }
+
+  const missingEffectiveTimezone = structuredClone(fixture);
+  delete missingEffectiveTimezone.workflow_version
+    .effective_from_source_timezone;
+  assert.equal(validate(missingEffectiveTimezone), false);
+  assert.ok(
+    validate.errors?.some(
+      (error) =>
+        error.instancePath === "/workflow_version" &&
+        error.keyword === "required",
+    ),
+  );
+
+  const missingDueTimezone = structuredClone(fixture);
+  delete missingDueTimezone.case.due_at_source_timezone;
+  assert.equal(validate(missingDueTimezone), false);
+  assert.ok(
+    validate.errors?.some(
+      (error) => error.instancePath === "/case" && error.keyword === "required",
+    ),
+  );
+
+  const missingEffectiveToTimezone = structuredClone(fixture);
+  missingEffectiveToTimezone.workflow_version.effective_to =
+    "2026-09-01T00:00:00.000Z";
+  assert.equal(validate(missingEffectiveToTimezone), false);
+  assert.ok(
+    validate.errors?.some(
+      (error) =>
+        error.instancePath === "/workflow_version" &&
+        error.keyword === "required",
+    ),
+  );
+});
+
 test("the canonical contract rejects unknown authoritative fields", () => {
   const invalid = structuredClone(fixture);
   invalid.case.model_authorized = true;

@@ -40,6 +40,10 @@ document prevents silent normalization.
   SQL also makes the separate WorkEvent `id` a global primary key and has no column
   for the Case contract's required `source_timezone`. Resolve both before PR4
   without leaking cross-tenant existence or dropping timezone context.
+- The reference SQL has no columns for the JSON contract's
+  `effective_from_source_timezone`, `effective_to_source_timezone`, or
+  `due_at_source_timezone` fields. PR4 must preserve these alongside their
+  canonical UTC instants.
 - JSON Schema alone cannot enforce cross-collection approval, receipt,
   verification, or closure semantics.
 

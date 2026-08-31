@@ -95,6 +95,7 @@ function createCommand(overrides = {}) {
         policy_version_ids: ["policy_customer_comms_v3"],
         eval_suite_version: "0.1.0",
         effective_from: "2026-08-26T00:00:00.000Z",
+        effective_from_source_timezone: "UTC",
       },
       case: {
         id: "case_runtime_001",
@@ -355,6 +356,172 @@ test("WorkEvent normalization rejects invalid or under-specified source time", (
     (error) => error?.code === "INVALID_COMMAND",
   );
   assert.deepEqual(invalidTimezoneHarness.stats, { ids: 0, now: 0 });
+});
+
+test("case seed times are canonicalized before persistence and every fingerprint", () => {
+  const harness = makeDependencies();
+  const localTime = createCommand();
+  localTime.case_seed.workflow_version.effective_from =
+    "2026-08-25T17:00:00-07:00";
+  localTime.case_seed.workflow_version.effective_from_source_timezone =
+    "America/Los_Angeles";
+  localTime.case_seed.workflow_version.effective_to =
+    "2026-08-31T17:00:00-07:00";
+  localTime.case_seed.workflow_version.effective_to_source_timezone =
+    "America/Los_Angeles";
+  localTime.case_seed.case.due_at = "2026-08-31T14:30:00.25-05:30";
+  localTime.case_seed.case.due_at_source_timezone = "UTC-05:30";
+
+  const created = executeCaseCommand(
+    emptyCaseEngine(),
+    localTime,
+    harness.dependencies,
+  );
+  assert.equal(created.status, "applied");
+  assert.equal(
+    created.aggregate.document.workflow_version.effective_from,
+    "2026-08-26T00:00:00.000Z",
+  );
+  assert.equal(
+    created.aggregate.document.workflow_version.effective_to,
+    "2026-09-01T00:00:00.000Z",
+  );
+  assert.equal(
+    created.aggregate.document.workflow_version.effective_from_source_timezone,
+    "America/Los_Angeles",
+  );
+  assert.equal(
+    created.aggregate.document.workflow_version.effective_to_source_timezone,
+    "America/Los_Angeles",
+  );
+  assert.equal(
+    created.aggregate.document.case.due_at,
+    "2026-08-31T20:00:00.250Z",
+  );
+  assert.equal(
+    created.aggregate.document.case.due_at_source_timezone,
+    "UTC-05:30",
+  );
+  assert.equal(
+    created.entry.payload.document.workflow_version.effective_from,
+    "2026-08-26T00:00:00.000Z",
+  );
+  assert.equal(
+    created.entry.payload.document.workflow_version.effective_to,
+    "2026-09-01T00:00:00.000Z",
+  );
+  assert.equal(
+    created.entry.payload.document.case.due_at,
+    "2026-08-31T20:00:00.250Z",
+  );
+
+  const consumed = { ...harness.stats };
+  const canonicalRetry = createCommand();
+  canonicalRetry.case_seed.workflow_version.effective_from_source_timezone =
+    "America/Los_Angeles";
+  canonicalRetry.case_seed.workflow_version.effective_to =
+    "2026-09-01T00:00:00.000Z";
+  canonicalRetry.case_seed.workflow_version.effective_to_source_timezone =
+    "America/Los_Angeles";
+  canonicalRetry.case_seed.case.due_at = "2026-08-31T20:00:00.250Z";
+  canonicalRetry.case_seed.case.due_at_source_timezone = "UTC-05:30";
+  const duplicate = executeCaseCommand(
+    created.state,
+    canonicalRetry,
+    harness.dependencies,
+  );
+  assert.equal(duplicate.status, "duplicate");
+  assert.deepEqual(harness.stats, consumed);
+
+  canonicalRetry.idempotency_key = "create-equivalent-seed-time-fresh-key";
+  const freshKeyReplay = executeCaseCommand(
+    created.state,
+    canonicalRetry,
+    harness.dependencies,
+  );
+  assert.equal(freshKeyReplay.status, "conflict");
+  assert.equal(freshKeyReplay.code, "SOURCE_EVENT_ALREADY_PROCESSED");
+  assert.deepEqual(harness.stats, consumed);
+
+  const nullHarness = makeDependencies();
+  const nullTimes = createCommand();
+  nullTimes.case_seed.workflow_version.effective_to = null;
+  nullTimes.case_seed.case.due_at = null;
+  const createdWithNulls = executeCaseCommand(
+    emptyCaseEngine(),
+    nullTimes,
+    nullHarness.dependencies,
+  );
+  assert.equal(createdWithNulls.status, "applied");
+  assert.equal(
+    createdWithNulls.aggregate.document.workflow_version.effective_to,
+    null,
+  );
+  assert.equal(createdWithNulls.aggregate.document.case.due_at, null);
+  assert.equal(
+    Object.hasOwn(
+      createdWithNulls.aggregate.document.workflow_version,
+      "effective_to_source_timezone",
+    ),
+    false,
+  );
+  assert.equal(
+    Object.hasOwn(
+      createdWithNulls.aggregate.document.case,
+      "due_at_source_timezone",
+    ),
+    false,
+  );
+});
+
+test("case seed time normalization fails closed before dependencies", () => {
+  const invalidCommands = [];
+
+  const invalidCalendar = createCommand();
+  invalidCalendar.case_seed.workflow_version.effective_to =
+    "2026-02-30T00:00:00Z";
+  invalidCalendar.case_seed.workflow_version.effective_to_source_timezone =
+    "UTC";
+  invalidCommands.push(invalidCalendar);
+
+  const excessPrecision = createCommand();
+  excessPrecision.case_seed.case.due_at = "2026-08-31T20:00:00.1234Z";
+  excessPrecision.case_seed.case.due_at_source_timezone = "UTC";
+  invalidCommands.push(excessPrecision);
+
+  const missingTimezone = createCommand();
+  missingTimezone.case_seed.case.due_at = "2026-08-31T20:00:00Z";
+  invalidCommands.push(missingTimezone);
+
+  const missingOffset = createCommand();
+  missingOffset.case_seed.workflow_version.effective_from =
+    "2026-08-26T00:00:00";
+  invalidCommands.push(missingOffset);
+
+  const missingEffectiveFromTimezone = createCommand();
+  delete missingEffectiveFromTimezone.case_seed.workflow_version
+    .effective_from_source_timezone;
+  invalidCommands.push(missingEffectiveFromTimezone);
+
+  const invalidTimezone = createCommand();
+  invalidTimezone.case_seed.workflow_version.effective_from_source_timezone =
+    "PST";
+  invalidCommands.push(invalidTimezone);
+
+  const orphanedTimezone = createCommand();
+  orphanedTimezone.case_seed.workflow_version.effective_to_source_timezone =
+    "UTC";
+  invalidCommands.push(orphanedTimezone);
+
+  for (const command of invalidCommands) {
+    const harness = makeDependencies();
+    assert.throws(
+      () =>
+        executeCaseCommand(emptyCaseEngine(), command, harness.dependencies),
+      (error) => error?.code === "INVALID_COMMAND",
+    );
+    assert.deepEqual(harness.stats, { ids: 0, now: 0 });
+  }
 });
 
 test("unknown or schema-invalid commands fail before time and ids are consumed", () => {
@@ -791,6 +958,36 @@ test("replay rejects coherently rehashed histories the engine could not emit", (
   rehashEntry(genesis);
   assert.throws(
     () => replayCaseJournal(nonCanonicalWorkEventTime),
+    /validation|canonical UTC/,
+  );
+
+  const nonCanonicalSeedTime = structuredClone(created.aggregate.journal);
+  const seedGenesis = nonCanonicalSeedTime[0];
+  const seedDocument = seedGenesis.payload.document;
+  seedDocument.workflow_version.effective_from = "2026-08-25T17:00:00-07:00";
+  const replaySeedCase = structuredClone(seedDocument.case);
+  delete replaySeedCase.state;
+  delete replaySeedCase.created_at;
+  delete replaySeedCase.updated_at;
+  delete replaySeedCase.version;
+  const seedCommandFingerprint = sha256Json({
+    type: "case.create",
+    tenant_id: seedGenesis.tenant_id,
+    expected_case_version: 0,
+    actor_identity_id: seedGenesis.actor_identity_id,
+    case_seed: {
+      tenant: seedDocument.tenant,
+      workflow_version: seedDocument.workflow_version,
+      case: replaySeedCase,
+    },
+    trigger_event: seedDocument.events[0],
+  });
+  seedGenesis.command_fingerprint = seedCommandFingerprint;
+  seedDocument.audit_entries[0].metadata.command_fingerprint =
+    seedCommandFingerprint;
+  rehashEntry(seedGenesis);
+  assert.throws(
+    () => replayCaseJournal(nonCanonicalSeedTime),
     /validation|canonical UTC/,
   );
 });

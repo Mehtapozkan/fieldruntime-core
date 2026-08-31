@@ -26,10 +26,21 @@ PR7 scope.
 millisecond precision and is normalized to exact `.sssZ` UTC before every
 fingerprint and stored copy. `source_timezone` is separately required and preserved
 unchanged as `UTC`, a fixed `UTC+/-HH:MM` label, or an IANA-style timezone identifier.
-The core validates its syntax; source adapters own registry validation. This prevents
-equivalent offset spellings from creating different command/source identities when
-their timezone metadata agrees, without discarding the source's business-time
-context. Greater-than-millisecond precision is rejected rather than truncated.
+The core validates its syntax; source adapters own registry validation and
+label/instant coherence. This prevents equivalent offset spellings from creating
+different command/source identities when their timezone metadata agrees, without
+discarding the supplied source context. Greater-than-millisecond precision is
+rejected rather than truncated.
+
+The `case.create` seed has three additional inbound instants:
+`workflow_version.effective_from`, optional `workflow_version.effective_to`, and
+optional `case.due_at`. They cross the same normalization boundary before command
+and creation-binding fingerprints, validation, journaling, or projection. Stored
+values use exact millisecond UTC. Their field-specific
+`effective_from_source_timezone`, `effective_to_source_timezone`, and
+`due_at_source_timezone` labels retain the supplied source context; optional
+timezone metadata cannot exist without its instant. Adapters must validate that
+each label agrees with its instant.
 
 ## Command boundary
 
@@ -58,6 +69,8 @@ authority decision. PR2 therefore attaches only to a case named by the caller.
   the case scopes.
 - Stored WorkEvent time is canonical millisecond UTC and retains required source
   timezone metadata.
+- Stored workflow effective times and case deadlines are canonical millisecond UTC
+  and retain field-specific source timezone metadata.
 - Accepted attachments/transitions and attributed transition rejections increment
   the case version once. Conflicts and duplicates do not append.
 - Time and IDs come only from injected dependencies and are not consumed by exact

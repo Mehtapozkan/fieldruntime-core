@@ -15,6 +15,9 @@ Current milestone: PR2 — Case and event engine
 - Idempotent case creation and explicitly targeted WorkEvent attachment.
 - Canonical millisecond-UTC WorkEvent time before persistence and hashing, with
   required preserved source timezone metadata.
+- Canonical millisecond-UTC workflow effective times and case deadlines before
+  creation identity, persistence, and hashing, with field-specific source timezone
+  metadata.
 - Optimistic case versions, tenant/scope enforcement, and deterministic conflict
   results.
 - Schema-validated, hash-chained case journal with replay and projection-drift
@@ -31,10 +34,10 @@ Current milestone: PR2 — Case and event engine
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- 45 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 48 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
-  drift, authority/verification negative cases, graph activation blockers, and
-  local database exposure checks.
+  drift, seed and WorkEvent time normalization, authority/verification negative
+  cases, graph activation blockers, and local database exposure checks.
 - Docker's native `compose config` check remains in CI; Docker is unavailable in
   the current build environment.
 

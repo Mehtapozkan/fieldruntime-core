@@ -17,6 +17,19 @@ idempotency, source-event comparison, hashing, journaling, or projection. Equiva
 instant spellings therefore have the same identity when their supplied timezone
 metadata is the same; the original `source_timezone` label remains attached.
 
+Case creation applies the same rule to every caller-supplied seed instant before
+validation, idempotency, creation binding, journaling, or projection. The required
+
+- `workflow_version.effective_from_source_timezone`,
+- `workflow_version.effective_to_source_timezone` when `effective_to` is present,
+  and
+- `case.due_at_source_timezone` when `due_at` is present
+
+preserve the supplied source-timezone labels while the corresponding stored
+timestamps use exact millisecond UTC. Optional null or absent instants remain null
+or absent and must not carry orphaned timezone metadata. Source adapters validate
+that each supplied label agrees with its instant.
+
 Every accepted or journaled rejection returns a new deeply frozen engine state.
 Journal entries carry a contiguous sequence, aggregate version, command
 fingerprint, actor, correlation/causation, case before/after hashes, predecessor
