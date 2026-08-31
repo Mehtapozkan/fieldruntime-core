@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/ecc-eval-case-v0.schema.json",
+  "title": "Field Runtime ECC Synthetic Evaluation Case v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "category",
+    "goal",
+    "tenant_id",
+    "workflow_version",
+    "input",
+    "expected",
+    "assertions"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^FR-EVAL-[0-9]{3}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "type": "string"
+    },
+    "goal": {
+      "type": "string"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "workflow_version": {
+      "type": "string"
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trigger_event",
+        "records",
+        "gbrain_memories",
+        "policies",
+        "fault_injection"
+      ],
+      "properties": {
+        "trigger_event": {
+          "type": "object"
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "gbrain_memories": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "fault_injection": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "expected": {
+      "type": "object"
+    },
+    "assertions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assertion",
+          "operator",
+          "expected"
+        ],
+        "properties": {
+          "assertion": {
+            "type": "string"
+          },
+          "operator": {
+            "enum": [
+              "eq",
+              "neq",
+              "gte",
+              "lte",
+              "in",
+              "contains"
+            ]
+          },
+          "expected": {}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,415 @@
+matrix_id: ecc_authority_matrix_v0
+version: 0.1.0
+date: '2026-08-26'
+default: deny
+permission_codes:
+  A: allow within role and configured business limits
+  S: scoped to assigned tenant, case, project, or evidence scope
+  P: propose only; cannot approve or execute
+  R: receipt-bound execution of the exact approved payload
+  C: co-approval or controlled break-glass required
+  D: deny
+roles:
+- code: TA
+  name: Tenant Administrator
+- code: ES
+  name: Executive Sponsor
+- code: WO
+  name: Workflow Owner
+- code: CO
+  name: Case Owner / Operator
+- code: DC
+  name: Domain Contributor
+- code: BA
+  name: Business Approver
+- code: FA
+  name: Finance / Commercial Approver
+- code: RA
+  name: Risk / Legal / Security Approver
+- code: EA
+  name: Evidence Agent
+- code: AA
+  name: Analysis / Recommendation Agent
+- code: MA
+  name: Monitoring Agent
+- code: SI
+  name: Action Service Identity
+- code: AU
+  name: Auditor
+capabilities:
+- id: view_case
+  name: View authorized case
+  permissions:
+    TA: C
+    ES: S
+    WO: S
+    CO: S
+    DC: S
+    BA: S
+    FA: S
+    RA: S
+    EA: S
+    AA: S
+    MA: S
+    SI: S
+    AU: S
+- id: view_sensitive_evidence
+  name: View sensitive evidence
+  permissions:
+    TA: C
+    ES: S
+    WO: S
+    CO: S
+    DC: D
+    BA: S
+    FA: S
+    RA: S
+    EA: S
+    AA: S
+    MA: D
+    SI: S
+    AU: S
+- id: add_evidence
+  name: Add evidence reference
+  permissions:
+    TA: D
+    ES: D
+    WO: S
+    CO: S
+    DC: S
+    BA: D
+    FA: D
+    RA: D
+    EA: P
+    AA: P
+    MA: D
+    SI: D
+    AU: D
+- id: edit_artifact
+  name: Correct factual artifact
+  permissions:
+    TA: D
+    ES: D
+    WO: S
+    CO: S
+    DC: P
+    BA: D
+    FA: D
+    RA: D
+    EA: D
+    AA: P
+    MA: D
+    SI: D
+    AU: D
+- id: set_severity
+  name: Set or change severity
+  permissions:
+    TA: D
+    ES: S
+    WO: A
+    CO: P
+    DC: D
+    BA: S
+    FA: D
+    RA: D
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: D
+- id: assign_owner
+  name: Assign or reassign case owner
+  permissions:
+    TA: D
+    ES: S
+    WO: A
+    CO: P
+    DC: D
+    BA: S
+    FA: D
+    RA: D
+    EA: D
+    AA: D
+    MA: P
+    SI: D
+    AU: D
+- id: propose_internal_action
+  name: Propose internal action
+  permissions:
+    TA: D
+    ES: P
+    WO: P
+    CO: P
+    DC: P
+    BA: P
+    FA: D
+    RA: D
+    EA: P
+    AA: P
+    MA: P
+    SI: D
+    AU: D
+- id: propose_external_message
+  name: Draft/propose external message
+  permissions:
+    TA: D
+    ES: P
+    WO: P
+    CO: P
+    DC: P
+    BA: P
+    FA: D
+    RA: D
+    EA: D
+    AA: P
+    MA: D
+    SI: D
+    AU: D
+- id: propose_financial_remedy
+  name: Propose refund or credit
+  permissions:
+    TA: D
+    ES: P
+    WO: P
+    CO: P
+    DC: D
+    BA: P
+    FA: P
+    RA: D
+    EA: D
+    AA: P
+    MA: D
+    SI: D
+    AU: D
+- id: propose_commitment
+  name: Propose contractual/product commitment
+  permissions:
+    TA: D
+    ES: P
+    WO: P
+    CO: P
+    DC: D
+    BA: P
+    FA: P
+    RA: P
+    EA: D
+    AA: P
+    MA: D
+    SI: D
+    AU: D
+- id: approve_internal_action
+  name: Approve low-risk internal action
+  permissions:
+    TA: D
+    ES: A
+    WO: S
+    CO: S
+    DC: D
+    BA: A
+    FA: D
+    RA: D
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: D
+- id: approve_external_message
+  name: Approve external message
+  permissions:
+    TA: D
+    ES: A
+    WO: D
+    CO: D
+    DC: D
+    BA: A
+    FA: D
+    RA: S
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: D
+- id: approve_financial_remedy
+  name: Approve refund or credit
+  permissions:
+    TA: D
+    ES: A
+    WO: D
+    CO: D
+    DC: D
+    BA: D
+    FA: A
+    RA: D
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: D
+- id: approve_commitment
+  name: Approve contractual/product commitment
+  permissions:
+    TA: D
+    ES: A
+    WO: D
+    CO: D
+    DC: D
+    BA: S
+    FA: D
+    RA: S
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: D
+- id: execute_internal_write
+  name: Execute internal system write
+  permissions:
+    TA: D
+    ES: D
+    WO: D
+    CO: D
+    DC: D
+    BA: D
+    FA: D
+    RA: D
+    EA: D
+    AA: D
+    MA: D
+    SI: R
+    AU: D
+- id: execute_external_write
+  name: Execute external communication/remedy
+  permissions:
+    TA: D
+    ES: D
+    WO: D
+    CO: D
+    DC: D
+    BA: D
+    FA: D
+    RA: D
+    EA: D
+    AA: D
+    MA: D
+    SI: R
+    AU: D
+- id: verify_outcome
+  name: Verify and accept outcome
+  permissions:
+    TA: D
+    ES: S
+    WO: S
+    CO: S
+    DC: D
+    BA: S
+    FA: D
+    RA: D
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: D
+- id: create_learning_candidate
+  name: Create learning candidate
+  permissions:
+    TA: D
+    ES: D
+    WO: A
+    CO: P
+    DC: P
+    BA: D
+    FA: D
+    RA: D
+    EA: P
+    AA: P
+    MA: P
+    SI: D
+    AU: D
+- id: promote_memory
+  name: Approve GBrain memory promotion
+  permissions:
+    TA: D
+    ES: D
+    WO: A
+    CO: D
+    DC: D
+    BA: D
+    FA: D
+    RA: C
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: D
+- id: promote_skill_or_eval
+  name: Approve skill or evaluation promotion
+  permissions:
+    TA: D
+    ES: D
+    WO: A
+    CO: D
+    DC: D
+    BA: D
+    FA: D
+    RA: C
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: D
+- id: change_workflow_or_policy
+  name: Approve workflow/policy version
+  permissions:
+    TA: D
+    ES: C
+    WO: C
+    CO: D
+    DC: D
+    BA: D
+    FA: D
+    RA: C
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: D
+- id: activate_kill_switch
+  name: Disable all external writes
+  permissions:
+    TA: A
+    ES: D
+    WO: P
+    CO: D
+    DC: D
+    BA: D
+    FA: D
+    RA: P
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: D
+- id: view_audit_export
+  name: View/export authorized audit
+  permissions:
+    TA: S
+    ES: S
+    WO: S
+    CO: S
+    DC: D
+    BA: D
+    FA: D
+    RA: S
+    EA: D
+    AA: D
+    MA: D
+    SI: D
+    AU: S
+invariants:
+- administrative_access_does_not_grant_business_approval
+- agents_cannot_approve_consequential_actions
+- only_action_service_identity_executes_connector_writes
+- execution_requires_unexpired_approval_matching_payload_hash_and_idempotency_key
+- outcome_acceptance_requires_named_authorized_verifier
+- learning_promotion_requires_passed_evals_scope_version_approval_and_rollback
+- tenant_kill_switch_overrides_all_external_write_permissions

@@ -1,0 +1,1528 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/ecc-canonical-data-model-v0.schema.json",
+  "title": "Field Runtime Escalation and Commitment Control Canonical Data Model v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tenant",
+    "workflow_version",
+    "case"
+  ],
+  "properties": {
+    "tenant": {
+      "$ref": "#/$defs/Tenant"
+    },
+    "workflow_version": {
+      "$ref": "#/$defs/WorkflowVersion"
+    },
+    "case": {
+      "$ref": "#/$defs/CoordinationCase"
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/CaseParticipant"
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/WorkEvent"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EvidenceRef"
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Artifact"
+      }
+    },
+    "decision_packets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/DecisionPacket"
+      }
+    },
+    "commitments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Commitment"
+      }
+    },
+    "action_proposals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ActionProposal"
+      }
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Approval"
+      }
+    },
+    "action_receipts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ActionReceipt"
+      }
+    },
+    "intelligence_receipts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/IntelligenceReceipt"
+      }
+    },
+    "outcomes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Outcome"
+      }
+    },
+    "corrections": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Correction"
+      }
+    },
+    "learning_candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/LearningCandidate"
+      }
+    },
+    "eval_runs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EvalRun"
+      }
+    },
+    "audit_entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AuditEntry"
+      }
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "Tenant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "status",
+        "data_region",
+        "retention_policy_id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "active",
+            "suspended",
+            "disabled"
+          ]
+        },
+        "data_region": {
+          "type": "string"
+        },
+        "retention_policy_id": {
+          "$ref": "#/$defs/Id"
+        }
+      }
+    },
+    "Identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tenant_id",
+        "type",
+        "display_name",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "enum": [
+            "human",
+            "agent",
+            "service",
+            "system",
+            "external_organization"
+          ]
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "external_ids": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "enum": [
+            "active",
+            "inactive",
+            "revoked"
+          ]
+        }
+      }
+    },
+    "RoleAssignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tenant_id",
+        "identity_id",
+        "role",
+        "scope_ids",
+        "valid_from"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "identity_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "role": {
+          "enum": [
+            "Tenant Administrator",
+            "Executive Sponsor",
+            "Workflow Owner",
+            "Case Owner / Operator",
+            "Domain Contributor",
+            "Business Approver",
+            "Finance / Commercial Approver",
+            "Risk / Legal / Security Approver",
+            "Evidence Agent",
+            "Analysis / Recommendation Agent",
+            "Monitoring Agent",
+            "Action Service Identity",
+            "Auditor"
+          ]
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_to": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tenant_id",
+        "type",
+        "classification"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "enum": [
+            "tenant",
+            "team",
+            "channel",
+            "project",
+            "account",
+            "case",
+            "evidence"
+          ]
+        },
+        "external_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent_scope_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "classification": {
+          "enum": [
+            "public",
+            "internal",
+            "confidential",
+            "restricted"
+          ]
+        }
+      }
+    },
+    "WorkflowVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "workflow_id",
+        "version",
+        "status",
+        "decision_graph_id",
+        "effective_from"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "workflow_id": {
+          "const": "customer_escalation_commitment_control"
+        },
+        "version": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "shadow",
+            "active",
+            "retired"
+          ]
+        },
+        "decision_graph_id": {
+          "const": "ecc_decision_graph_v0"
+        },
+        "policy_version_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "eval_suite_version": {
+          "type": "string"
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_to": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "CoordinationCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tenant_id",
+        "workflow_version_id",
+        "state",
+        "severity",
+        "scope_ids",
+        "created_at",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "workflow_version_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "customer_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "issue_fingerprint": {
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "detected",
+            "qualifying",
+            "enriching",
+            "blocked",
+            "needs_review",
+            "ready",
+            "executing",
+            "monitoring",
+            "verifying",
+            "resolved",
+            "learning_review",
+            "dismissed",
+            "cancelled",
+            "failed",
+            "closed"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "owner_identity_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "due_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parent_case_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "related_case_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "CaseParticipant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "case_id",
+        "identity_id",
+        "role",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "identity_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "role": {
+          "enum": [
+            "case_owner",
+            "customer_owner",
+            "domain_contributor",
+            "approver",
+            "workflow_owner",
+            "auditor",
+            "external_party"
+          ]
+        },
+        "status": {
+          "enum": [
+            "active",
+            "requested",
+            "removed"
+          ]
+        },
+        "added_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "WorkEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tenant_id",
+        "source",
+        "source_event_id",
+        "event_type",
+        "occurred_at",
+        "content_hash",
+        "scope_ids"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "source": {
+          "type": "string"
+        },
+        "source_event_id": {
+          "type": "string"
+        },
+        "event_type": {
+          "type": "string"
+        },
+        "actor_identity_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "content_hash": {
+          "type": "string"
+        },
+        "payload_ref": {
+          "type": "string"
+        },
+        "classification": {
+          "enum": [
+            "public",
+            "internal",
+            "confidential",
+            "restricted"
+          ]
+        },
+        "idempotency_key": {
+          "type": "string"
+        }
+      }
+    },
+    "EvidenceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tenant_id",
+        "source",
+        "resource_uri",
+        "content_hash",
+        "scope_ids",
+        "authority_rank"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "source": {
+          "type": "string"
+        },
+        "resource_uri": {
+          "type": "string"
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "occurred_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "retrieved_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "content_hash": {
+          "type": "string"
+        },
+        "excerpt": {
+          "type": "string"
+        },
+        "authority_rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "freshness_status": {
+          "enum": [
+            "live",
+            "current",
+            "stale",
+            "unknown"
+          ]
+        },
+        "provenance_label": {
+          "enum": [
+            "system_of_record",
+            "approved_policy",
+            "curated_memory",
+            "source_claim",
+            "model_inference"
+          ]
+        }
+      }
+    },
+    "Artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "case_id",
+        "type",
+        "status",
+        "value",
+        "evidence_ids"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "enum": [
+            "fact",
+            "decision",
+            "commitment",
+            "owner",
+            "deadline",
+            "dependency",
+            "blocker",
+            "policy",
+            "customer_constraint",
+            "risk",
+            "open_question",
+            "next_action",
+            "conflict"
+          ]
+        },
+        "status": {
+          "enum": [
+            "proposed",
+            "verified",
+            "superseded",
+            "disputed"
+          ]
+        },
+        "value": {},
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "inference": {
+          "type": "boolean"
+        },
+        "valid_from": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid_to": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "DecisionPacket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "case_id",
+        "version",
+        "summary",
+        "current_truth_artifact_ids",
+        "option_ids",
+        "required_authority",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "summary": {
+          "type": "string"
+        },
+        "current_truth_artifact_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "conflict_artifact_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "open_question_artifact_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "option_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "recommendation": {
+          "type": "string"
+        },
+        "required_authority": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "decision_due_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Commitment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "case_id",
+        "description",
+        "owner_identity_id",
+        "due_at",
+        "status",
+        "evidence_ids"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "description": {
+          "type": "string"
+        },
+        "owner_identity_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "recipient_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "due_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "proposed",
+            "active",
+            "completed",
+            "overdue",
+            "cancelled",
+            "transferred"
+          ]
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "completion_evidence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "linked_case_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "ActionProposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "case_id",
+        "action_type",
+        "target",
+        "payload",
+        "payload_hash",
+        "risk_level",
+        "required_approval_roles",
+        "idempotency_key",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "action_type": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "payload": {},
+        "payload_hash": {
+          "type": "string"
+        },
+        "risk_level": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "required_approval_roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "idempotency_key": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "pending_approval",
+            "approved",
+            "rejected",
+            "executing",
+            "executed",
+            "failed",
+            "expired"
+          ]
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "proposal_id",
+        "approver_identity_id",
+        "role",
+        "decision",
+        "policy_version_id",
+        "decided_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "proposal_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "approver_identity_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "role": {
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "approved",
+            "rejected",
+            "modified",
+            "more_evidence",
+            "escalated"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "policy_version_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "decided_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approved_payload_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "ActionReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "proposal_id",
+        "provider",
+        "status",
+        "request_hash",
+        "executed_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "proposal_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "external_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "unknown",
+            "no_op_duplicate"
+          ]
+        },
+        "request_hash": {
+          "type": "string"
+        },
+        "response_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "executed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "idempotency_key": {
+          "type": "string"
+        }
+      }
+    },
+    "IntelligenceReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "case_id",
+        "node_id",
+        "provider",
+        "model",
+        "input_evidence_ids",
+        "started_at",
+        "completed_at",
+        "cost"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "prompt_or_skill_version": {
+          "type": "string"
+        },
+        "input_evidence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "tool_calls": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "input_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "default": "USD"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "result_artifact_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "status": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "budget_stopped"
+          ]
+        }
+      }
+    },
+    "Outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "case_id",
+        "type",
+        "status",
+        "accepted",
+        "metrics",
+        "evidence_ids",
+        "verified_by_identity_id",
+        "verified_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "type": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "achieved",
+            "partially_achieved",
+            "not_achieved",
+            "safely_rejected"
+          ]
+        },
+        "accepted": {
+          "type": "boolean"
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string",
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "evidence_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "verified_by_identity_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Correction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "case_id",
+        "corrected_by_identity_id",
+        "target_type",
+        "target_id",
+        "before",
+        "after",
+        "reason",
+        "failure_class",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "corrected_by_identity_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "target_type": {
+          "enum": [
+            "artifact",
+            "owner",
+            "decision",
+            "action",
+            "policy_application",
+            "outcome"
+          ]
+        },
+        "target_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "before": {},
+        "after": {},
+        "reason": {
+          "type": "string"
+        },
+        "failure_class": {
+          "enum": [
+            "context",
+            "reasoning",
+            "workflow",
+            "policy",
+            "authority",
+            "integration",
+            "model",
+            "data_quality",
+            "other"
+          ]
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "LearningCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "case_id",
+        "type",
+        "scope_ids",
+        "content",
+        "evidence_ids",
+        "eval_status",
+        "promotion_status",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "correction_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "enum": [
+            "memory",
+            "skill",
+            "eval_case",
+            "policy",
+            "workflow_rule",
+            "routing_rule"
+          ]
+        },
+        "scope_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "content": {},
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "eval_status": {
+          "enum": [
+            "not_run",
+            "running",
+            "passed",
+            "failed"
+          ]
+        },
+        "promotion_status": {
+          "enum": [
+            "draft",
+            "pending_review",
+            "promoted",
+            "rejected",
+            "rolled_back"
+          ]
+        },
+        "rollback_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "EvalRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tenant_id",
+        "suite_version",
+        "workflow_version_id",
+        "status",
+        "scores",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "suite_version": {
+          "type": "string"
+        },
+        "workflow_version_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "candidate_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "running",
+            "cancelled"
+          ]
+        },
+        "scores": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "integer",
+              "boolean",
+              "string"
+            ]
+          }
+        },
+        "failed_case_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifact_ref": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "AuditEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tenant_id",
+        "operation",
+        "occurred_at",
+        "trace_id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actor_identity_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operation": {
+          "type": "string"
+        },
+        "target_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "before_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "after_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}

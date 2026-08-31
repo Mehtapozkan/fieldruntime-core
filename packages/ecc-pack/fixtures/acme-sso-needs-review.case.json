@@ -1,0 +1,296 @@
+{
+  "tenant": {
+    "id": "tenant_orchid",
+    "name": "Orchid Evaluation Tenant",
+    "status": "active",
+    "data_region": "local",
+    "retention_policy_id": "retention_eval_v0"
+  },
+  "workflow_version": {
+    "id": "workflow_ecc_v0_1_0",
+    "workflow_id": "customer_escalation_commitment_control",
+    "version": "0.1.0",
+    "status": "shadow",
+    "decision_graph_id": "ecc_decision_graph_v0",
+    "policy_version_ids": ["policy_customer_comms_v3"],
+    "eval_suite_version": "0.1.0",
+    "effective_from": "2026-08-26T00:00:00Z"
+  },
+  "case": {
+    "id": "case_acme_sso_001",
+    "tenant_id": "tenant_orchid",
+    "workflow_version_id": "workflow_ecc_v0_1_0",
+    "customer_ref": "crm://accounts/acme-aero",
+    "issue_fingerprint": "acme-aero:sso-failure:rollout-blocked",
+    "state": "needs_review",
+    "severity": "high",
+    "owner_identity_id": "user_jane",
+    "scope_ids": ["scope_customer_ops", "scope_acme_aero"],
+    "due_at": "2026-08-28T17:00:00-07:00",
+    "related_case_ids": [],
+    "created_at": "2026-08-26T16:00:01Z",
+    "updated_at": "2026-08-26T16:01:30Z",
+    "version": 4
+  },
+  "participants": [
+    {
+      "id": "participant_jane_owner",
+      "case_id": "case_acme_sso_001",
+      "identity_id": "user_jane",
+      "role": "case_owner",
+      "status": "active",
+      "added_at": "2026-08-26T16:00:02Z"
+    },
+    {
+      "id": "participant_sam_engineering",
+      "case_id": "case_acme_sso_001",
+      "identity_id": "user_sam",
+      "role": "domain_contributor",
+      "status": "active",
+      "added_at": "2026-08-26T16:00:02Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "event_acme_slack_001",
+      "tenant_id": "tenant_orchid",
+      "source": "fixture_slack",
+      "source_event_id": "Ev001",
+      "event_type": "message.created",
+      "actor_identity_id": "user_case_owner",
+      "scope_ids": ["scope_customer_ops"],
+      "occurred_at": "2026-08-26T16:00:00Z",
+      "content_hash": "sha256:4cf6a5a19e7ad7d0d8c9e7804d9bb76b8a31d62075b8d073765fbbf17bd83cc4",
+      "payload_ref": "fixture://events/Ev001",
+      "classification": "internal",
+      "idempotency_key": "tenant_orchid:fixture_slack:Ev001"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evidence_slack_claim",
+      "tenant_id": "tenant_orchid",
+      "source": "fixture_slack",
+      "resource_uri": "fixture://slack/messages/Ev001",
+      "version": "1",
+      "occurred_at": "2026-08-26T16:00:00Z",
+      "retrieved_at": "2026-08-26T16:00:05Z",
+      "scope_ids": ["scope_customer_ops"],
+      "content_hash": "sha256:4cf6a5a19e7ad7d0d8c9e7804d9bb76b8a31d62075b8d073765fbbf17bd83cc4",
+      "excerpt": "The fix shipped. Acme is blocked and renewal is at risk.",
+      "authority_rank": 4,
+      "freshness_status": "current",
+      "provenance_label": "source_claim"
+    },
+    {
+      "id": "evidence_crm_account",
+      "tenant_id": "tenant_orchid",
+      "source": "fixture_crm",
+      "resource_uri": "fixture://crm/accounts/acme-aero",
+      "version": "42",
+      "retrieved_at": "2026-08-26T16:00:06Z",
+      "scope_ids": ["scope_customer_ops", "scope_acme_aero"],
+      "content_hash": "sha256:2ed778581767f718e85f247c136d137416e06732e4ebc62c3ea6a20ce4f92bc5",
+      "excerpt": "Renewal risk: true. Account owner: Jane.",
+      "authority_rank": 1,
+      "freshness_status": "live",
+      "provenance_label": "system_of_record"
+    },
+    {
+      "id": "evidence_linear_issue",
+      "tenant_id": "tenant_orchid",
+      "source": "fixture_linear",
+      "resource_uri": "fixture://linear/issues/ENG-482",
+      "version": "17",
+      "retrieved_at": "2026-08-26T16:00:07Z",
+      "scope_ids": ["scope_customer_ops", "scope_acme_aero"],
+      "content_hash": "sha256:389cfa262978277b5013817e2c78f9d7c06d28e2e77f1118a0511396972d5b71",
+      "excerpt": "Status: in review. Deployed: false. Engineering owner: Sam.",
+      "authority_rank": 1,
+      "freshness_status": "live",
+      "provenance_label": "system_of_record"
+    },
+    {
+      "id": "evidence_customer_comms_policy",
+      "tenant_id": "tenant_orchid",
+      "source": "fixture_policy_registry",
+      "resource_uri": "fixture://policies/customer-comms/v3",
+      "version": "v3",
+      "retrieved_at": "2026-08-26T16:00:08Z",
+      "scope_ids": ["scope_customer_ops"],
+      "content_hash": "sha256:cc0a5291976a86cba8f192c0f663dc2296cf998f3bc03f0a54fa74274730167b",
+      "excerpt": "External customer updates require Business Approver approval.",
+      "authority_rank": 2,
+      "freshness_status": "current",
+      "provenance_label": "approved_policy"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "artifact_renewal_risk",
+      "case_id": "case_acme_sso_001",
+      "type": "risk",
+      "status": "verified",
+      "value": { "renewal_risk": true },
+      "confidence": 1,
+      "evidence_ids": ["evidence_crm_account"],
+      "inference": false
+    },
+    {
+      "id": "artifact_deployment_conflict",
+      "case_id": "case_acme_sso_001",
+      "type": "conflict",
+      "status": "verified",
+      "value": {
+        "claim": "fix shipped",
+        "source_state": "in review; not deployed"
+      },
+      "confidence": 1,
+      "evidence_ids": ["evidence_slack_claim", "evidence_linear_issue"],
+      "inference": false
+    },
+    {
+      "id": "artifact_customer_update_deadline",
+      "case_id": "case_acme_sso_001",
+      "type": "deadline",
+      "status": "verified",
+      "value": { "due_at": "2026-08-28T17:00:00-07:00" },
+      "confidence": 1,
+      "evidence_ids": ["evidence_slack_claim"],
+      "inference": false
+    }
+  ],
+  "decision_packets": [
+    {
+      "id": "decision_packet_acme_001",
+      "case_id": "case_acme_sso_001",
+      "version": 1,
+      "summary": "Acme's rollout is blocked and renewal is at risk. A source claim that the fix shipped conflicts with live engineering state showing it is not deployed.",
+      "current_truth_artifact_ids": [
+        "artifact_renewal_risk",
+        "artifact_customer_update_deadline"
+      ],
+      "conflict_artifact_ids": ["artifact_deployment_conflict"],
+      "open_question_artifact_ids": [],
+      "option_ids": [
+        "action_verify_deployment",
+        "action_draft_update",
+        "action_offer_credit"
+      ],
+      "recommendation": "Verify deployment first, then send only the approved evidence-linked customer update.",
+      "required_authority": [
+        "Business Approver",
+        "Finance / Commercial Approver"
+      ],
+      "decision_due_at": "2026-08-28T15:00:00-07:00",
+      "created_at": "2026-08-26T16:01:25Z"
+    }
+  ],
+  "commitments": [
+    {
+      "id": "commitment_customer_update",
+      "case_id": "case_acme_sso_001",
+      "description": "Provide Acme an evidence-grounded rollout update.",
+      "owner_identity_id": "user_jane",
+      "recipient_ref": "crm://accounts/acme-aero",
+      "due_at": "2026-08-28T17:00:00-07:00",
+      "status": "active",
+      "evidence_ids": ["evidence_slack_claim"],
+      "completion_evidence_ids": []
+    }
+  ],
+  "action_proposals": [
+    {
+      "id": "action_verify_deployment",
+      "case_id": "case_acme_sso_001",
+      "action_type": "independent_readback",
+      "target": "fixture://linear/issues/ENG-482",
+      "payload": { "operation": "read_current_deployment_state" },
+      "payload_hash": "sha256:d2052415dbbead3d94bb7bb1124cf1d7d8bb00b211610494377482941fb8b39d",
+      "risk_level": "low",
+      "required_approval_roles": [],
+      "idempotency_key": "case_acme_sso_001:verify:ENG-482:v1",
+      "status": "draft"
+    },
+    {
+      "id": "action_draft_update",
+      "case_id": "case_acme_sso_001",
+      "action_type": "customer_communication",
+      "target": "fixture://crm/accounts/acme-aero/customer-update",
+      "payload": {
+        "mode": "simulation",
+        "message": "Deployment is still being verified."
+      },
+      "payload_hash": "sha256:3f66e2da315d9a9557a94a985c1b7dadd8f774697df93eae16c59bd1588d590e",
+      "risk_level": "high",
+      "required_approval_roles": ["Business Approver"],
+      "idempotency_key": "case_acme_sso_001:customer-update:v1",
+      "status": "pending_approval"
+    },
+    {
+      "id": "action_offer_credit",
+      "case_id": "case_acme_sso_001",
+      "action_type": "financial_remedy",
+      "target": "fixture://crm/accounts/acme-aero/credit",
+      "payload": { "mode": "simulation", "amount": 15000, "currency": "USD" },
+      "payload_hash": "sha256:af5dc137ee43b48dadc72cffbc5b3d33f1055b3482586e841c5e01b51ff8a47e",
+      "risk_level": "critical",
+      "required_approval_roles": [
+        "Finance / Commercial Approver",
+        "Executive Sponsor"
+      ],
+      "idempotency_key": "case_acme_sso_001:credit:v1",
+      "status": "pending_approval"
+    }
+  ],
+  "approvals": [],
+  "action_receipts": [],
+  "intelligence_receipts": [
+    {
+      "id": "intelligence_receipt_packet_001",
+      "case_id": "case_acme_sso_001",
+      "node_id": "N5",
+      "provider": "fixture",
+      "model": "deterministic-evaluation",
+      "prompt_or_skill_version": "ecc-packet-v0.1.0",
+      "input_evidence_ids": [
+        "evidence_slack_claim",
+        "evidence_crm_account",
+        "evidence_linear_issue",
+        "evidence_customer_comms_policy"
+      ],
+      "tool_calls": [],
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost": 0,
+      "currency": "USD",
+      "started_at": "2026-08-26T16:01:20Z",
+      "completed_at": "2026-08-26T16:01:25Z",
+      "result_artifact_ids": [
+        "artifact_renewal_risk",
+        "artifact_deployment_conflict",
+        "artifact_customer_update_deadline"
+      ],
+      "status": "succeeded"
+    }
+  ],
+  "outcomes": [],
+  "corrections": [],
+  "learning_candidates": [],
+  "eval_runs": [],
+  "audit_entries": [
+    {
+      "id": "audit_case_created_001",
+      "tenant_id": "tenant_orchid",
+      "case_id": "case_acme_sso_001",
+      "actor_identity_id": "system_fieldruntime",
+      "operation": "case.created",
+      "target_ref": "case://case_acme_sso_001",
+      "before_hash": null,
+      "after_hash": "sha256:825b6593c1f2a42880ad3fd04f78f9b5548da617107deddafc359c01032f5464",
+      "occurred_at": "2026-08-26T16:00:01Z",
+      "trace_id": "trace_acme_sso_001",
+      "metadata": { "mode": "simulation", "source_event_id": "Ev001" }
+    }
+  ]
+}

@@ -1,0 +1,547 @@
+graph_id: ecc_decision_graph_v0
+version: 0.1.0
+date: '2026-08-26'
+product: Field Runtime Escalation and Commitment Control
+entry_node: N0
+principles:
+- Canonical case state lives in Field Runtime.
+- Systems of record remain authoritative.
+- Models may extract, synthesize and recommend but cannot approve or execute.
+- Every factual claim requires evidence or an inference label.
+- Every external effect requires a policy-valid approval by default.
+- Learning requires evaluation, replay, named approval, versioning and rollback.
+states:
+- detected
+- qualifying
+- enriching
+- blocked
+- needs_review
+- ready
+- executing
+- monitoring
+- verifying
+- resolved
+- learning_review
+- dismissed
+- cancelled
+- failed
+- closed
+nodes:
+- id: N0
+  name: Detect trigger
+  controller: deterministic
+  responsible_role: system
+  state_enter: detected
+  purpose: Authenticate, verify signature, normalize the incoming event and prevent
+    duplicates.
+  inputs:
+  - source event
+  - authenticated tenant and actor context
+  required_evidence:
+  - immutable source event reference
+  actions:
+  - verify source signature
+  - normalize WorkEvent
+  - check idempotency key
+  authority: No business action. Deny malformed, unauthenticated or replayed events.
+  outputs:
+  - accepted WorkEvent or rejected security event
+  transitions:
+  - when: valid and not duplicate
+    to: N1
+  - when: duplicate
+    to: END_DEDUPED
+  - when: invalid or unauthorized
+    to: END_REJECTED
+  stop_conditions:
+  - invalid signature
+  - tenant mismatch
+  evaluations:
+  - webhook verification
+  - event schema validity
+  - idempotency
+  target_sla_seconds: 5
+- id: N1
+  name: Qualify and scope
+  controller: deterministic_with_model_assist
+  responsible_role: workflow_owner_policy
+  state_enter: qualifying
+  purpose: Determine whether the event belongs to the high-value escalation subset
+    and identify permitted scopes.
+  inputs:
+  - WorkEvent
+  - qualification policy
+  - account/customer identifiers
+  required_evidence:
+  - consequence signal
+  - coordination signal
+  - authority or exception signal
+  - measurable outcome candidate
+  actions:
+  - classify trigger
+  - resolve tenant and scopes
+  - identify exclusions
+  authority: Model may propose classification; deterministic policy makes the scope
+    decision.
+  outputs:
+  - qualification decision
+  - severity candidate
+  - scope set
+  transitions:
+  - when: in scope
+    to: N2
+  - when: out of scope
+    to: END_DISMISSED
+  - when: identity or scope unresolved
+    to: N4
+  stop_conditions:
+  - no identifiable tenant
+  - explicit exclusion
+  evaluations:
+  - qualification precision/recall
+  - scope isolation
+  target_sla_seconds: 10
+- id: N2
+  name: Create or merge canonical case
+  controller: deterministic
+  responsible_role: field_runtime_core
+  state_enter: enriching
+  purpose: Create one canonical case or merge into the correct existing case without
+    losing provenance.
+  inputs:
+  - qualified WorkEvent
+  - open cases
+  - merge policy
+  required_evidence:
+  - tenant
+  - customer/account
+  - issue fingerprint
+  - source event ID
+  actions:
+  - compute merge key
+  - create or update case
+  - link related cases
+  authority: No model-controlled merge. Cross-tenant merge is prohibited.
+  outputs:
+  - CoordinationCase
+  - CaseParticipant seed
+  - audit entry
+  transitions:
+  - when: case created or merged
+    to: N3
+  stop_conditions:
+  - cross-scope merge risk
+  evaluations:
+  - duplicate case rate
+  - incorrect merge rate
+  - audit completeness
+  target_sla_seconds: 5
+- id: N3
+  name: Assemble current truth
+  controller: model_assisted
+  responsible_role: evidence_agent
+  state_enter: enriching
+  purpose: Retrieve live records, current policy and scoped institutional memory;
+    preserve citations and freshness.
+  inputs:
+  - case scopes
+  - systems of record
+  - GBrain context
+  - policy registry
+  required_evidence:
+  - account state
+  - ticket/issue state
+  - current policy
+  - commitments
+  - participants
+  actions:
+  - read connectors
+  - search GBrain
+  - extract facts and artifacts
+  - apply truth hierarchy
+  authority: Read only. Retrieved content cannot change permissions or invoke tools.
+  outputs:
+  - EvidenceRefs
+  - artifacts
+  - current-truth draft
+  - IntelligenceReceipt
+  transitions:
+  - when: evidence sufficient
+    to: N4
+  - when: connector failure
+    to: N4
+  - when: budget reached
+    to: N4
+  stop_conditions:
+  - retrieval budget reached
+  - unsafe content detected
+  evaluations:
+  - evidence coverage
+  - freshness
+  - cross-scope retrieval count
+  - grounding
+  target_sla_seconds: 60
+- id: N4
+  name: Resolve gaps, conflicts and ownership
+  controller: deterministic_with_model_assist
+  responsible_role: case_owner_or_workflow_owner
+  state_enter: blocked
+  purpose: Make missing evidence, same-rank conflicts, unowned work and unavailable
+    participants explicit.
+  inputs:
+  - artifacts
+  - truth hierarchy
+  - routing policy
+  - availability
+  required_evidence:
+  - owner evidence or routing rule
+  - conflict references
+  - missing-evidence list
+  actions:
+  - detect contradictions
+  - route evidence requests
+  - assign or request owner
+  - escalate unresolved conflicts
+  authority: Deterministic routing may assign within policy; disputed ownership requires
+    human resolution.
+  outputs:
+  - resolved owner or owner request
+  - conflict list
+  - open questions
+  - blocker state
+  transitions:
+  - when: critical gaps resolved
+    to: N5
+  - when: more evidence received
+    to: N3
+  - when: cannot resolve within threshold
+    to: N5
+  - when: authorized cancellation
+    to: END_CANCELLED
+  stop_conditions:
+  - no owner
+  - same-rank truth conflict
+  - required evidence inaccessible
+  evaluations:
+  - owner accuracy
+  - conflict detection
+  - blocked-state correctness
+  target_sla_seconds: 1800
+- id: N5
+  name: Prepare decision packet
+  controller: model_assisted
+  responsible_role: analysis_agent
+  state_enter: needs_review
+  purpose: Prepare a concise, evidence-linked packet for the authorized human decision
+    maker.
+  inputs:
+  - current truth
+  - gaps
+  - participants
+  - policies
+  - outcome contract
+  required_evidence:
+  - material claims cited
+  - options
+  - risk
+  - required authority
+  - deadline
+  actions:
+  - summarize
+  - generate options
+  - draft recommendation
+  - preview proposed actions
+  authority: Recommendation only. Unsupported claims must be labeled inference.
+  outputs:
+  - DecisionPacket
+  - ActionProposals
+  - IntelligenceReceipt
+  transitions:
+  - when: packet valid
+    to: N6
+  - when: grounding fails
+    to: N3
+  stop_conditions:
+  - no evidence for material recommendation
+  - budget reached
+  evaluations:
+  - packet completeness
+  - claim grounding
+  - human usefulness
+  target_sla_seconds: 30
+- id: N6
+  name: Human decision and approval
+  controller: human
+  responsible_role: designated_approver
+  state_enter: needs_review
+  purpose: Approve, modify, reject, request evidence or escalate the exact proposed
+    decision and action.
+  inputs:
+  - DecisionPacket
+  - ActionProposals
+  - authority policy
+  required_evidence:
+  - approver identity
+  - policy version
+  - exact action preview
+  actions:
+  - approve
+  - modify
+  - reject
+  - request evidence
+  - escalate
+  authority: Approver must possess the required scoped authority. Administrative role
+    alone grants no business approval.
+  outputs:
+  - Approval records
+  - modified proposal or rejection reason
+  transitions:
+  - when: all approvals satisfied
+    to: N7
+  - when: evidence requested
+    to: N3
+  - when: proposal modified
+    to: N5
+  - when: rejected but case continues
+    to: N5
+  - when: authorized cancellation
+    to: END_CANCELLED
+  stop_conditions:
+  - approval expired
+  - approver unavailable past threshold
+  evaluations:
+  - approval policy compliance
+  - replayed approval rejection
+  - decision latency
+  target_sla_seconds: null
+- id: N7
+  name: Execute approved actions
+  controller: deterministic
+  responsible_role: action_service_identity
+  state_enter: executing
+  purpose: Execute only the approved payload with least privilege, idempotency and
+    an action receipt.
+  inputs:
+  - approved ActionProposal
+  - Approval records
+  - connector credentials reference
+  required_evidence:
+  - valid approval
+  - unchanged payload hash
+  - idempotency key
+  actions:
+  - re-check policy
+  - execute connector operation
+  - record receipt
+  authority: Service identity may execute only the exact approved target and payload.
+  outputs:
+  - ActionReceipt
+  - source-system reference
+  - audit entry
+  transitions:
+  - when: action succeeds and no waiting commitment
+    to: N9
+  - when: action succeeds with pending commitment
+    to: N8
+  - when: safe retry possible
+    to: N7
+  - when: unsafe or failed
+    to: N4
+  stop_conditions:
+  - payload changed after approval
+  - connector uncertainty
+  - kill switch active
+  evaluations:
+  - unauthorized action count
+  - duplicate external effects
+  - receipt completeness
+  target_sla_seconds: 30
+- id: N8
+  name: Monitor commitments and dependencies
+  controller: deterministic_with_model_assist
+  responsible_role: monitoring_agent
+  state_enter: monitoring
+  purpose: Track owners, due dates, dependencies and source-state changes until verification
+    is possible.
+  inputs:
+  - Commitments
+  - scheduled watches
+  - source records
+  required_evidence:
+  - owner
+  - due date
+  - completion evidence or overdue event
+  actions:
+  - schedule watch
+  - read state
+  - notify owner
+  - escalate overdue commitment
+  authority: May notify and propose reassignment; cannot make new customer commitments.
+  outputs:
+  - commitment status
+  - overdue event
+  - updated evidence
+  transitions:
+  - when: all material commitments ready for verification
+    to: N9
+  - when: new decision required
+    to: N5
+  - when: owner or evidence missing
+    to: N4
+  stop_conditions:
+  - overdue beyond escalation threshold
+  evaluations:
+  - missed-watch count
+  - commitment status accuracy
+  - duplicate notification rate
+  target_sla_seconds: null
+- id: N9
+  name: Verify accepted outcome
+  controller: human_with_deterministic_checks
+  responsible_role: case_owner_or_authorized_verifier
+  state_enter: verifying
+  purpose: Confirm the real source state and determine whether the accepted-outcome
+    contract is satisfied.
+  inputs:
+  - source-state reread
+  - ActionReceipts
+  - Commitments
+  - outcome contract
+  required_evidence:
+  - verification evidence
+  - verifier identity
+  - accepted/not accepted decision
+  actions:
+  - re-read authoritative state
+  - record metrics
+  - accept or reject outcome
+  authority: Only authorized verifier may accept the outcome. The model may summarize
+    but not verify.
+  outputs:
+  - Outcome record
+  - accepted outcome status
+  transitions:
+  - when: accepted
+    to: N10
+  - when: not accepted and new decision needed
+    to: N5
+  - when: verification failed
+    to: N4
+  stop_conditions:
+  - no verification evidence
+  evaluations:
+  - resolved-without-verification count
+  - outcome attribution completeness
+  target_sla_seconds: null
+- id: N10
+  name: Capture correction and learning candidate
+  controller: human_with_model_assist
+  responsible_role: workflow_owner
+  state_enter: learning_review
+  purpose: Record material human changes and propose reusable, scoped improvements.
+  inputs:
+  - Outcome
+  - human modifications
+  - case audit
+  - failure taxonomy
+  required_evidence:
+  - correction reason
+  - source case
+  - scope
+  - proposed candidate type
+  actions:
+  - classify failure
+  - create memory/eval/skill/policy/workflow candidate
+  authority: Candidate creation only; no automatic promotion.
+  outputs:
+  - Correction
+  - LearningCandidate or no-candidate decision
+  transitions:
+  - when: candidate created
+    to: N11
+  - when: no reusable candidate
+    to: END_CLOSED
+  stop_conditions: []
+  evaluations:
+  - correction capture rate
+  - candidate provenance completeness
+  target_sla_seconds: null
+- id: N11
+  name: Evaluate and replay candidate
+  controller: deterministic_with_model_judges
+  responsible_role: evaluation_runner
+  state_enter: learning_review
+  purpose: Test the proposed change against ordinary, difficult, conflict, security
+    and regression cases.
+  inputs:
+  - LearningCandidate
+  - golden dataset
+  - current workflow version
+  required_evidence:
+  - versioned eval output
+  - comparison to baseline
+  - failure artifacts
+  actions:
+  - branch
+  - replay
+  - score
+  - compare
+  authority: Evaluation may recommend promotion or rejection but cannot promote.
+  outputs:
+  - EvalRun
+  - promotion recommendation
+  transitions:
+  - when: all required gates pass
+    to: N12
+  - when: any hard safety or regression gate fails
+    to: END_REJECTED_CANDIDATE
+  stop_conditions:
+  - hard gate failure
+  evaluations:
+  - regression pass rate
+  - safety gate pass
+  - economic comparison
+  target_sla_seconds: null
+- id: N12
+  name: Approve promotion or reject
+  controller: human
+  responsible_role: named_workflow_or_risk_approver
+  state_enter: learning_review
+  purpose: Approve a scoped, versioned promotion with rollback or reject it with reason.
+  inputs:
+  - LearningCandidate
+  - EvalRun
+  - scope
+  - rollback plan
+  required_evidence:
+  - named approver
+  - approved target
+  - version
+  - rollback reference
+  actions:
+  - promote memory
+  - promote eval
+  - promote skill
+  - open policy/workflow version
+  - reject
+  authority: Policy and authority changes require privileged co-approval as configured.
+  outputs:
+  - promotion receipt or rejection
+  - new version reference
+  transitions:
+  - when: decision recorded
+    to: END_CLOSED
+  stop_conditions:
+  - missing rollback path
+  - scope too broad
+  evaluations:
+  - promotion without approval count
+  - rollback readiness
+  target_sla_seconds: null
+terminal_nodes:
+  END_DEDUPED: Duplicate event acknowledged with no duplicate case or effect.
+  END_REJECTED: Security or validation rejection recorded.
+  END_DISMISSED: Out-of-scope trigger recorded.
+  END_CANCELLED: Authorized cancellation recorded.
+  END_REJECTED_CANDIDATE: Learning candidate rejected; production unchanged.
+  END_CLOSED: Outcome and learning review complete.
