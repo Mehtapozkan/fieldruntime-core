@@ -1,0 +1,11 @@
+{
+  "name": "@fieldruntime/runtime",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@fieldruntime/contracts": "workspace:*",
+    "@fieldruntime/domain": "workspace:*"
+  }
+}

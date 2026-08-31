@@ -1,4 +1,4 @@
-export const CASE_STATES = [
+export const CASE_STATES = Object.freeze([
   "detected",
   "qualifying",
   "enriching",
@@ -14,37 +14,43 @@ export const CASE_STATES = [
   "dismissed",
   "cancelled",
   "closed",
-] as const;
+] as const);
 
 export type CaseState = (typeof CASE_STATES)[number];
 
-export const CASE_TRANSITIONS = {
-  detected: ["qualifying", "dismissed"],
-  qualifying: ["enriching", "dismissed", "blocked"],
-  enriching: ["needs_review", "blocked", "failed"],
-  blocked: ["enriching", "needs_review", "cancelled"],
-  needs_review: ["ready", "blocked", "cancelled"],
-  ready: ["executing", "monitoring", "cancelled"],
-  executing: ["monitoring", "verifying", "failed"],
-  monitoring: ["needs_review", "verifying", "failed"],
-  verifying: ["resolved", "needs_review", "failed"],
-  resolved: ["learning_review"],
-  learning_review: ["closed"],
-  failed: ["ready", "blocked", "cancelled"],
-  dismissed: [],
-  cancelled: [],
-  closed: [],
-} as const satisfies Record<CaseState, readonly CaseState[]>;
+export const CASE_TRANSITIONS = Object.freeze({
+  detected: Object.freeze(["qualifying", "dismissed"] as const),
+  qualifying: Object.freeze(["enriching", "dismissed", "blocked"] as const),
+  enriching: Object.freeze(["needs_review", "blocked", "failed"] as const),
+  blocked: Object.freeze(["enriching", "needs_review", "cancelled"] as const),
+  needs_review: Object.freeze(["ready", "blocked", "cancelled"] as const),
+  ready: Object.freeze(["executing", "monitoring", "cancelled"] as const),
+  executing: Object.freeze(["monitoring", "verifying", "failed"] as const),
+  monitoring: Object.freeze(["needs_review", "verifying", "failed"] as const),
+  verifying: Object.freeze(["resolved", "needs_review", "failed"] as const),
+  resolved: Object.freeze(["learning_review"] as const),
+  learning_review: Object.freeze(["closed"] as const),
+  failed: Object.freeze(["ready", "blocked", "cancelled"] as const),
+  dismissed: Object.freeze([] as const),
+  cancelled: Object.freeze([] as const),
+  closed: Object.freeze([] as const),
+}) satisfies Readonly<Record<CaseState, readonly CaseState[]>>;
+
+const CASE_STATE_SET = new Set<string>(CASE_STATES);
 
 export function isCaseState(value: string): value is CaseState {
-  return (CASE_STATES as readonly string[]).includes(value);
+  return CASE_STATE_SET.has(value);
 }
 
-export function canTransition(from: CaseState, to: CaseState): boolean {
+export function canTransition(from: string, to: string): boolean {
+  if (!isCaseState(from) || !isCaseState(to)) {
+    return false;
+  }
+
   return (CASE_TRANSITIONS[from] as readonly CaseState[]).includes(to);
 }
 
-export function assertTransition(from: CaseState, to: CaseState): void {
+export function assertTransition(from: string, to: string): void {
   if (!canTransition(from, to)) {
     throw new Error(`Invalid Field Runtime case transition: ${from} -> ${to}`);
   }

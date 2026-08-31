@@ -7,6 +7,6 @@ Versioned workflow assets for the first Field Runtime Core evaluation pack.
 - `workflows/decision-graph.v0.yaml` defines the governed decision path.
 - `evals/ecc.v0.jsonl` contains 30 synthetic evaluation cases.
 - `fixtures/acme-sso-needs-review.case.json` is a canonical schema-valid case
-  snapshot used by PR1 contract tests.
+  snapshot used by baseline contract tests.
 
 All actions are simulated. No file in this pack contains live credentials.

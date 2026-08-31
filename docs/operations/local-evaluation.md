@@ -16,7 +16,8 @@ docker compose up -d postgres
 docker compose ps
 ```
 
-The database is reserved for PR2 persistence work. PR1 tests do not require it.
+The database is reserved for PR4 persistence work. Current repository validation
+does not require it.
 The configured password and loopback port are for an isolated developer machine
 only.
 

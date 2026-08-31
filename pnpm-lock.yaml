@@ -48,6 +48,15 @@ importers:
 
   packages/ecc-pack: {}
 
+  packages/runtime:
+    dependencies:
+      "@fieldruntime/contracts":
+        specifier: workspace:*
+        version: link:../contracts
+      "@fieldruntime/domain":
+        specifier: workspace:*
+        version: link:../domain
+
 packages:
   "@eslint-community/eslint-utils@4.10.1":
     resolution:

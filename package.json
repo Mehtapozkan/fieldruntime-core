@@ -9,7 +9,7 @@
     "pnpm": ">=11 <12"
   },
   "scripts": {
-    "build": "pnpm clean && tsc -p tsconfig.json",
+    "build": "pnpm clean && tsc -p tsconfig.json && node scripts/copy-static.mjs",
     "clean": "node scripts/clean.mjs",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",

@@ -14,7 +14,8 @@
     "decision_graph_id": "ecc_decision_graph_v0",
     "policy_version_ids": ["policy_customer_comms_v3"],
     "eval_suite_version": "0.1.0",
-    "effective_from": "2026-08-26T00:00:00Z"
+    "effective_from": "2026-08-26T00:00:00.000Z",
+    "effective_from_source_timezone": "UTC"
   },
   "case": {
     "id": "case_acme_sso_001",
@@ -26,7 +27,8 @@
     "severity": "high",
     "owner_identity_id": "user_jane",
     "scope_ids": ["scope_customer_ops", "scope_acme_aero"],
-    "due_at": "2026-08-28T17:00:00-07:00",
+    "due_at": "2026-08-29T00:00:00.000Z",
+    "due_at_source_timezone": "UTC-07:00",
     "related_case_ids": [],
     "created_at": "2026-08-26T16:00:01Z",
     "updated_at": "2026-08-26T16:01:30Z",
@@ -59,7 +61,8 @@
       "event_type": "message.created",
       "actor_identity_id": "user_case_owner",
       "scope_ids": ["scope_customer_ops"],
-      "occurred_at": "2026-08-26T16:00:00Z",
+      "occurred_at": "2026-08-26T16:00:00.000Z",
+      "source_timezone": "UTC",
       "content_hash": "sha256:4cf6a5a19e7ad7d0d8c9e7804d9bb76b8a31d62075b8d073765fbbf17bd83cc4",
       "payload_ref": "fixture://events/Ev001",
       "classification": "internal",

@@ -10,11 +10,16 @@ document prevents silent normalization.
 2. `packages/ecc-pack/workflows/decision-graph.v0.yaml` — node orchestration.
 3. `packages/ecc-pack/contracts/authority-matrix.v0.yaml` — capability grants and
    human gates. The CSV is presentation-only.
-4. `packages/contracts/schemas/case.v0.schema.json` — provider-neutral boundary
-   shapes.
-5. Cross-record invariant code — semantics JSON Schema cannot express safely.
-6. PostgreSQL SQL under `reference/migrations-pending-reconciliation` — reference
-   only until PR2 reconciles and tests it.
+4. `packages/contracts/schemas/case.v0.schema.json` — provider-neutral Case
+   boundary shapes.
+5. `packages/contracts/schemas/case-journal-entry.v0.schema.json` — structural PR2
+   journal boundary.
+6. Runtime replay and engine-state integrity code — hash-chain, ordering,
+   fingerprint, transition, projection, and index semantics the journal schema
+   cannot prove.
+7. Cross-record invariant code — semantics JSON Schema cannot express safely.
+8. PostgreSQL SQL under `reference/migrations-pending-reconciliation` — reference
+   only until parity is reconciled and tested before PR4 persistence work.
 
 ## Known differences
 
@@ -31,12 +36,20 @@ document prevents silent normalization.
 - JSON requires case severity, while SQL permits null and some evaluation cases
   expect null severity.
 - SQL enables row-level security but defines no policies.
+- PR2 enforces source identity by tenant, source, and source-event ID. The reference
+  SQL also makes the separate WorkEvent `id` a global primary key and has no column
+  for the Case contract's required `source_timezone`. Resolve both before PR4
+  without leaking cross-tenant existence or dropping timezone context.
+- The reference SQL has no columns for the JSON contract's
+  `effective_from_source_timezone`, `effective_to_source_timezone`, or
+  `due_at_source_timezone` fields. PR4 must preserve these alongside their
+  canonical UTC instants.
 - JSON Schema alone cannot enforce cross-collection approval, receipt,
   verification, or closure semantics.
 
-PR2 must reconcile these differences through an explicit decision and executable
-tests before converting the reference SQL into a migration. Do not edit the
-upstream copies to hide drift.
+These differences require an explicit decision and executable tests before PR4 can
+convert the reference SQL into a migration. PR2 deliberately leaves the reference
+SQL untouched. Do not edit the upstream copies to hide drift.
 
 ## Activation status
 
