@@ -15,6 +15,7 @@ Activation blockers:
   evidence, receipt, reread, or audit tuple needed for runtime proof.
 - JSON Schema and the reference PostgreSQL SQL require explicit reconciliation.
 
-`tests/workflow.test.mjs` keeps these blockers visible. PR2 must introduce a new
-version rather than mutating this imported baseline, then obtain explicit approval
-before marking it active.
+`tests/workflow.test.mjs` keeps these blockers visible. A later workflow-pack change
+must introduce a new version rather than mutating this imported baseline, then
+obtain explicit approval before marking it active. The case engine does not
+activate or rewrite ECC v0.1.0.

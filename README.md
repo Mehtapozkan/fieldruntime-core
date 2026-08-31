@@ -10,22 +10,27 @@ controlled action, independent verification, receipt, correction, and replay.
 ## Current release boundary
 
 This repository is an **evaluation foundation**, not a production release. It is
-local-first, synthetic, deterministic where authority is involved, and makes no
-external writes. It needs no model API key or enterprise credentials.
+local-first, synthetic, deterministic in its implemented runtime slice, and makes
+no external writes. It needs no model API key or enterprise credentials.
 
-Implemented in this first scaffold:
+Implemented in the current evaluation foundation:
 
 - A TypeScript and pnpm monorepo foundation.
-- The canonical Field Runtime Case JSON Schema.
+- The canonical Field Runtime Case and CaseJournalEntry JSON Schemas.
 - The Escalation and Commitment Control (ECC) workflow contract and decision graph.
 - Thirty synthetic evaluation cases and one schema-valid canonical case fixture.
 - Deterministic case-state transition helpers.
-- Contract, fixture, and transition tests.
+- A pure in-memory case engine with idempotent creation, explicitly targeted event
+  attachment, optimistic version checks, and fail-closed transitions.
+- A schema-validated, hash-chained case journal with deterministic replay, audit
+  projection, and projection-drift detection.
+- Contract, fixture, transition, idempotency, journal, and adversarial tests.
 - PostgreSQL local-evaluation configuration and CI.
 
-Planned, not implemented yet: case persistence, authority evaluation, controlled
-action execution, independent read-back verification, the guided workbench, live
-connectors, identity federation, high availability, and production operations.
+Planned, not implemented yet: durable case persistence, automatic ECC case
+matching, authority evaluation, controlled action execution, independent read-back
+verification, the guided workbench, live connectors, identity federation, high
+availability, and production operations.
 
 ## Product boundary
 
@@ -61,7 +66,8 @@ docker compose ps
 ```
 
 The Compose credentials are intentionally local-only. Do not reuse them in a
-shared or production environment.
+shared or production environment. PR2 does not use this database; it is reserved
+for the PR4 local appliance.
 
 ## Repository map
 
@@ -69,6 +75,7 @@ shared or production environment.
 apps/                    Reserved deployable surfaces
 packages/domain/         Deterministic domain vocabulary and state rules
 packages/contracts/      Canonical boundary schemas
+packages/runtime/        Pure case command, journal, replay, and integrity engine
 packages/ecc-pack/       ECC workflow, decision graph, fixtures, and evals
 docs/                    Architecture, security, and operations
 tests/                   Cross-package contract tests

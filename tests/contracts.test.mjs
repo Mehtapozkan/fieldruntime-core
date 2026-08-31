@@ -53,13 +53,45 @@ test("resolution without an accepted independently verified outcome is rejected"
   );
 });
 
-test("an executed action requires exact-payload approval and a receipt", () => {
+test("an executed action fails closed and requires matching declared-hash records", () => {
   const invalid = structuredClone(fixture);
   invalid.action_proposals[1].status = "executed";
 
   assert.deepEqual(
     validateCrossRecordInvariants(invalid).map(({ code }) => code),
-    ["action.payload_bound_approval_required", "action.receipt_required"],
+    [
+      "action.execution_proof_engine_required",
+      "action.payload_bound_approval_required",
+      "action.receipt_required",
+    ],
+  );
+});
+
+test("declared hashes cannot stand in for the future execution-proof engine", () => {
+  const invalid = structuredClone(fixture);
+  const proposal = invalid.action_proposals[1];
+  proposal.status = "executed";
+  proposal.payload.message = "changed without recomputing the declared hash";
+  invalid.approvals = [
+    {
+      proposal_id: proposal.id,
+      decision: "approved",
+      approved_payload_hash: proposal.payload_hash,
+    },
+  ];
+  invalid.action_receipts = [
+    {
+      proposal_id: proposal.id,
+      status: "succeeded",
+      request_hash: proposal.payload_hash,
+    },
+  ];
+
+  assert.deepEqual(
+    validateCrossRecordInvariants(invalid)
+      .map(({ code }) => code)
+      .filter((code) => code.startsWith("action.")),
+    ["action.execution_proof_engine_required"],
   );
 });
 

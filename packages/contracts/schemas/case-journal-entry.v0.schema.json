@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/case-journal-entry.v0.schema.json",
+  "title": "Field Runtime Case Journal Entry v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "tenant_id",
+    "case_id",
+    "sequence",
+    "case_version",
+    "event_type",
+    "recorded_at",
+    "actor_identity_id",
+    "idempotency_key",
+    "command_fingerprint",
+    "correlation_id",
+    "previous_event_hash",
+    "before_hash",
+    "after_hash",
+    "payload",
+    "event_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "case-journal-entry.v0"
+    },
+    "id": {
+      "$ref": "#/$defs/Id"
+    },
+    "tenant_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "case_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "case_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "event_type": {
+      "enum": [
+        "case.created",
+        "case.work_event_attached",
+        "case.state_transitioned",
+        "case.transition_rejected"
+      ]
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "actor_identity_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "command_fingerprint": {
+      "$ref": "#/$defs/Sha256"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "causation_event_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "previous_event_hash": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Sha256"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "before_hash": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Sha256"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "after_hash": {
+      "$ref": "#/$defs/Sha256"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "event_hash": {
+      "$ref": "#/$defs/Sha256"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "case.created"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/CreatedPayload"
+          },
+          "previous_event_hash": {
+            "type": "null"
+          },
+          "before_hash": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "case.work_event_attached"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/WorkEventAttachedPayload"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "case.state_transitioned"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/StateTransitionedPayload"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "case.transition_rejected"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/TransitionRejectedPayload"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "CaseState": {
+      "enum": [
+        "detected",
+        "qualifying",
+        "enriching",
+        "blocked",
+        "needs_review",
+        "ready",
+        "executing",
+        "monitoring",
+        "verifying",
+        "resolved",
+        "learning_review",
+        "dismissed",
+        "cancelled",
+        "failed",
+        "closed"
+      ]
+    },
+    "AuditEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tenant_id",
+        "case_id",
+        "actor_identity_id",
+        "operation",
+        "target_ref",
+        "before_hash",
+        "after_hash",
+        "occurred_at",
+        "trace_id",
+        "metadata"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "case_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "actor_identity_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "operation": {
+          "enum": [
+            "case.created",
+            "case.work_event_attached",
+            "case.state_transitioned",
+            "case.transition_rejected"
+          ]
+        },
+        "target_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "before_hash": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "after_hash": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "CreatedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["document"],
+      "properties": {
+        "document": {
+          "type": "object"
+        }
+      }
+    },
+    "WorkEventAttachedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["work_event", "audit_entry"],
+      "properties": {
+        "work_event": {
+          "type": "object"
+        },
+        "audit_entry": {
+          "$ref": "#/$defs/AuditEntry"
+        }
+      }
+    },
+    "StateTransitionedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from_state", "to_state", "reason", "audit_entry"],
+      "properties": {
+        "from_state": {
+          "$ref": "#/$defs/CaseState"
+        },
+        "to_state": {
+          "$ref": "#/$defs/CaseState"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "audit_entry": {
+          "$ref": "#/$defs/AuditEntry"
+        }
+      }
+    },
+    "TransitionRejectedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from_state",
+        "to_state",
+        "reason_code",
+        "reason",
+        "audit_entry"
+      ],
+      "properties": {
+        "from_state": {
+          "$ref": "#/$defs/CaseState"
+        },
+        "to_state": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "reason_code": {
+          "enum": ["invalid_transition", "closure_proof_required"]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "audit_entry": {
+          "$ref": "#/$defs/AuditEntry"
+        }
+      }
+    }
+  }
+}
