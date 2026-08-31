@@ -61,6 +61,7 @@ function workEvent(suffix = "001", overrides = {}) {
     actor_identity_id: "user_operator",
     scope_ids: ["scope_customer_ops"],
     occurred_at: "2026-08-31T19:59:00.000Z",
+    source_timezone: "UTC",
     content_hash: sha256Json({ body: `event-${suffix}` }),
     payload_ref: `fixture://events/${suffix}`,
     classification: "internal",
@@ -203,6 +204,157 @@ test("case creation starts at detected version one with immutable attributed his
   assert.throws(() => {
     result.aggregate.document.case.state = "closed";
   }, TypeError);
+});
+
+test("WorkEvent time is canonicalized before persistence and every fingerprint", () => {
+  const harness = makeDependencies();
+  const localTime = createCommand({
+    trigger_event: workEvent("001", {
+      occurred_at: "2026-08-31T12:59:00-07:00",
+      source_timezone: "America/Los_Angeles",
+    }),
+  });
+  const created = executeCaseCommand(
+    emptyCaseEngine(),
+    localTime,
+    harness.dependencies,
+  );
+  assert.equal(created.status, "applied");
+  assert.equal(
+    created.aggregate.document.events[0].occurred_at,
+    "2026-08-31T19:59:00.000Z",
+  );
+  assert.equal(
+    created.aggregate.document.events[0].source_timezone,
+    "America/Los_Angeles",
+  );
+  assert.equal(
+    created.entry.payload.document.events[0].occurred_at,
+    "2026-08-31T19:59:00.000Z",
+  );
+
+  const consumed = { ...harness.stats };
+  const utcRetry = createCommand({
+    trigger_event: workEvent("001", {
+      occurred_at: "2026-08-31T19:59:00.000Z",
+      source_timezone: "America/Los_Angeles",
+    }),
+  });
+  const duplicate = executeCaseCommand(
+    created.state,
+    utcRetry,
+    harness.dependencies,
+  );
+  assert.equal(duplicate.status, "duplicate");
+  assert.deepEqual(harness.stats, consumed);
+
+  const freshKeyReplay = executeCaseCommand(
+    created.state,
+    { ...utcRetry, idempotency_key: "create-equivalent-time-fresh-key" },
+    harness.dependencies,
+  );
+  assert.equal(freshKeyReplay.status, "conflict");
+  assert.equal(freshKeyReplay.code, "SOURCE_EVENT_ALREADY_PROCESSED");
+  assert.deepEqual(harness.stats, consumed);
+
+  const localAttachment = attachCommand(1, "002", {
+    work_event: workEvent("002", {
+      occurred_at: "2026-08-31T14:29:00.25-05:30",
+      source_timezone: "UTC-05:30",
+    }),
+  });
+  const attached = executeCaseCommand(
+    created.state,
+    localAttachment,
+    harness.dependencies,
+  );
+  assert.equal(attached.status, "applied");
+  assert.equal(
+    attached.aggregate.document.events[1].occurred_at,
+    "2026-08-31T19:59:00.250Z",
+  );
+  assert.equal(
+    attached.entry.payload.work_event.occurred_at,
+    "2026-08-31T19:59:00.250Z",
+  );
+  assert.equal(attached.entry.payload.work_event.source_timezone, "UTC-05:30");
+
+  const consumedAfterAttachment = { ...harness.stats };
+  const equivalentAttachment = attachCommand(1, "002", {
+    work_event: workEvent("002", {
+      occurred_at: "2026-08-31T19:59:00.250Z",
+      source_timezone: "UTC-05:30",
+    }),
+  });
+  const duplicateAttachment = executeCaseCommand(
+    attached.state,
+    equivalentAttachment,
+    harness.dependencies,
+  );
+  assert.equal(duplicateAttachment.status, "duplicate");
+  assert.deepEqual(harness.stats, consumedAfterAttachment);
+});
+
+test("WorkEvent normalization rejects invalid or under-specified source time", () => {
+  const invalidHarness = makeDependencies();
+  assert.throws(
+    () =>
+      executeCaseCommand(
+        emptyCaseEngine(),
+        createCommand({
+          trigger_event: workEvent("001", {
+            occurred_at: "2026-02-30T19:59:00Z",
+          }),
+        }),
+        invalidHarness.dependencies,
+      ),
+    (error) => error?.code === "INVALID_COMMAND",
+  );
+  assert.deepEqual(invalidHarness.stats, { ids: 0, now: 0 });
+
+  const excessPrecisionHarness = makeDependencies();
+  assert.throws(
+    () =>
+      executeCaseCommand(
+        emptyCaseEngine(),
+        createCommand({
+          trigger_event: workEvent("001", {
+            occurred_at: "2026-08-31T19:59:00.1234Z",
+          }),
+        }),
+        excessPrecisionHarness.dependencies,
+      ),
+    (error) => error?.code === "INVALID_COMMAND",
+  );
+  assert.deepEqual(excessPrecisionHarness.stats, { ids: 0, now: 0 });
+
+  const missingTimezoneHarness = makeDependencies();
+  const missingTimezone = createCommand();
+  delete missingTimezone.trigger_event.source_timezone;
+  assert.throws(
+    () =>
+      executeCaseCommand(
+        emptyCaseEngine(),
+        missingTimezone,
+        missingTimezoneHarness.dependencies,
+      ),
+    (error) => error?.code === "INVALID_COMMAND",
+  );
+  assert.deepEqual(missingTimezoneHarness.stats, { ids: 0, now: 0 });
+
+  const invalidTimezoneHarness = makeDependencies();
+  assert.throws(
+    () =>
+      executeCaseCommand(
+        emptyCaseEngine(),
+        createCommand({
+          trigger_event: workEvent("001", { source_timezone: "PST" }),
+        }),
+        invalidTimezoneHarness.dependencies,
+      ),
+    (error) => error?.code === "INVALID_COMMAND",
+  );
+  assert.deepEqual(invalidTimezoneHarness.stats, { ids: 0, now: 0 });
 });
 
 test("unknown or schema-invalid commands fail before time and ids are consumed", () => {
@@ -370,6 +522,48 @@ test("attachment rejects cross-tenant and scope-expanding source events", () => 
   assert.equal(scopeConflict.status, "conflict");
   assert.equal(scopeConflict.code, "SCOPE_EXPANSION");
   assert.equal(created.aggregate.journal.length, 1);
+});
+
+test("attachment rejects a reused WorkEvent id before consuming dependencies", () => {
+  const { dependencies, result: created, stats } = createCase();
+  const consumed = { ...stats };
+  const duplicateId = attachCommand(1, "002", {
+    work_event: workEvent("002", { id: "work_event_001" }),
+  });
+
+  assert.throws(
+    () => executeCaseCommand(created.state, duplicateId, dependencies),
+    (error) =>
+      error?.code === "CASE_INVARIANT_VIOLATION" &&
+      error.message.includes("reference.duplicate_collection_id"),
+  );
+  assert.deepEqual(stats, consumed);
+  assert.equal(created.aggregate.journal.length, 1);
+  assert.equal(created.aggregate.document.events.length, 1);
+});
+
+test("attachment fresh-key source replay keeps conflict precedence", () => {
+  const { dependencies, result: created, stats } = createCase();
+  const attached = executeCaseCommand(
+    created.state,
+    attachCommand(1, "002"),
+    dependencies,
+  );
+  assert.equal(attached.status, "applied");
+  const consumed = { ...stats };
+  const replay = executeCaseCommand(
+    attached.state,
+    attachCommand(1, "002", {
+      idempotency_key: "attach-002-fresh-key",
+      correlation_id: "trace-attach-002-replay",
+    }),
+    dependencies,
+  );
+
+  assert.equal(replay.status, "conflict");
+  assert.equal(replay.code, "SOURCE_EVENT_ALREADY_PROCESSED");
+  assert.equal(replay.state, attached.state);
+  assert.deepEqual(stats, consumed);
 });
 
 test("optimistic concurrency permits only one command at an expected version", () => {
@@ -568,6 +762,37 @@ test("replay rejects coherently rehashed histories the engine could not emit", (
     changedHash;
   rehashEntry(mismatchedCreationTime[0]);
   assert.throws(() => replayCaseJournal(mismatchedCreationTime), /projection/);
+
+  const nonCanonicalWorkEventTime = structuredClone(created.aggregate.journal);
+  const genesis = nonCanonicalWorkEventTime[0];
+  const genesisDocument = genesis.payload.document;
+  const triggerEvent = genesisDocument.events[0];
+  triggerEvent.occurred_at = "2026-08-31T12:59:00-07:00";
+  const seedCase = structuredClone(genesisDocument.case);
+  delete seedCase.state;
+  delete seedCase.created_at;
+  delete seedCase.updated_at;
+  delete seedCase.version;
+  const commandFingerprint = sha256Json({
+    type: "case.create",
+    tenant_id: genesis.tenant_id,
+    expected_case_version: 0,
+    actor_identity_id: genesis.actor_identity_id,
+    case_seed: {
+      tenant: genesisDocument.tenant,
+      workflow_version: genesisDocument.workflow_version,
+      case: seedCase,
+    },
+    trigger_event: triggerEvent,
+  });
+  genesis.command_fingerprint = commandFingerprint;
+  genesisDocument.audit_entries[0].metadata.command_fingerprint =
+    commandFingerprint;
+  rehashEntry(genesis);
+  assert.throws(
+    () => replayCaseJournal(nonCanonicalWorkEventTime),
+    /validation|canonical UTC/,
+  );
 });
 
 test("commands fail closed when a stored projection drifts from its journal", () => {

@@ -37,8 +37,9 @@ document prevents silent normalization.
   expect null severity.
 - SQL enables row-level security but defines no policies.
 - PR2 enforces source identity by tenant, source, and source-event ID. The reference
-  SQL also makes the separate WorkEvent `id` a global primary key. Resolve that
-  identifier scope before PR4 without leaking cross-tenant existence.
+  SQL also makes the separate WorkEvent `id` a global primary key and has no column
+  for the Case contract's required `source_timezone`. Resolve both before PR4
+  without leaking cross-tenant existence or dropping timezone context.
 - JSON Schema alone cannot enforce cross-collection approval, receipt,
   verification, or closure semantics.
 

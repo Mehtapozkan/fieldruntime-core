@@ -33,6 +33,45 @@ test("the canonical ECC case fixture satisfies the JSON Schema", () => {
   assert.deepEqual(validateCrossRecordInvariants(fixture), []);
 });
 
+test("stored WorkEvents require canonical UTC time and source timezone metadata", () => {
+  const nonCanonicalTime = structuredClone(fixture);
+  nonCanonicalTime.events[0].occurred_at = "2026-08-26T09:00:00-07:00";
+  assert.equal(validate(nonCanonicalTime), false);
+  assert.ok(
+    validate.errors?.some(
+      (error) =>
+        error.instancePath === "/events/0/occurred_at" &&
+        error.keyword === "pattern",
+    ),
+  );
+
+  for (const occurredAt of [
+    "2026-08-26t16:00:00.000Z",
+    "2026-08-26 16:00:00.000Z",
+  ]) {
+    const nonCanonicalSeparator = structuredClone(fixture);
+    nonCanonicalSeparator.events[0].occurred_at = occurredAt;
+    assert.equal(validate(nonCanonicalSeparator), false);
+    assert.ok(
+      validate.errors?.some(
+        (error) =>
+          error.instancePath === "/events/0/occurred_at" &&
+          error.keyword === "pattern",
+      ),
+    );
+  }
+
+  const missingTimezone = structuredClone(fixture);
+  delete missingTimezone.events[0].source_timezone;
+  assert.equal(validate(missingTimezone), false);
+  assert.ok(
+    validate.errors?.some(
+      (error) =>
+        error.instancePath === "/events/0" && error.keyword === "required",
+    ),
+  );
+});
+
 test("the canonical contract rejects unknown authoritative fields", () => {
   const invalid = structuredClone(fixture);
   invalid.case.model_authorized = true;

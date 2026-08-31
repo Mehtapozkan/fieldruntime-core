@@ -11,6 +11,12 @@ PR2 accepts three commands:
 - `case.transition` derives the current state from trusted history and applies only
   a declared transition. Rejected attempts are also attributed journal facts.
 
+Create and attachment commands require source timezone context on each WorkEvent.
+The runtime converts an RFC 3339 `occurred_at` value to exact millisecond UTC before
+idempotency, source-event comparison, hashing, journaling, or projection. Equivalent
+instant spellings therefore have the same identity when their supplied timezone
+metadata is the same; the original `source_timezone` label remains attached.
+
 Every accepted or journaled rejection returns a new deeply frozen engine state.
 Journal entries carry a contiguous sequence, aggregate version, command
 fingerprint, actor, correlation/causation, case before/after hashes, predecessor

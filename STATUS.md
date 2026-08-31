@@ -13,6 +13,8 @@ Current milestone: PR2 — Case and event engine
 - Pure case command engine returning deeply frozen state with injected time and ID
   dependencies.
 - Idempotent case creation and explicitly targeted WorkEvent attachment.
+- Canonical millisecond-UTC WorkEvent time before persistence and hashing, with
+  required preserved source timezone metadata.
 - Optimistic case versions, tenant/scope enforcement, and deterministic conflict
   results.
 - Schema-validated, hash-chained case journal with replay and projection-drift
@@ -29,7 +31,7 @@ Current milestone: PR2 — Case and event engine
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- 40 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 45 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, authority/verification negative cases, graph activation blockers, and
   local database exposure checks.

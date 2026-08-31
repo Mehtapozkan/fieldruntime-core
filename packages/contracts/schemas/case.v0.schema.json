@@ -539,6 +539,7 @@
         "source_event_id",
         "event_type",
         "occurred_at",
+        "source_timezone",
         "content_hash",
         "scope_ids"
       ],
@@ -576,7 +577,16 @@
         },
         "occurred_at": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$",
+          "description": "Canonical UTC instant normalized to exact millisecond precision before persistence or hashing."
+        },
+        "source_timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^(?:UTC(?:[+-](?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9])?|[A-Za-z][A-Za-z0-9._+-]*(?:/[A-Za-z0-9._+-]+)+)$",
+          "description": "Required source context: UTC, a UTC fixed-offset label, or an IANA-style timezone identifier. Preserved unchanged when occurred_at is normalized; registry validation belongs to the source adapter."
         },
         "content_hash": {
           "type": "string"

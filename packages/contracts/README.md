@@ -10,6 +10,16 @@ The two event-shaped contracts have different jobs:
 - `CaseJournalEntry` is authoritative aggregate history with case sequence/version,
   attribution, correlation/causation, before/after hashes, and a predecessor hash.
 
+A stored WorkEvent uses an exact millisecond UTC `occurred_at` value and carries
+required `source_timezone` metadata (`UTC`, a `UTC+/-HH:MM` fixed-offset label, or
+an IANA-style timezone identifier). The runtime normalizes the source instant
+before any command, source-event, journal, or projection fingerprint while
+preserving the supplied timezone label unchanged. Inputs with more than millisecond
+precision fail closed instead of silently losing evidence precision.
+
+The core validates timezone syntax; source adapters remain responsible for checking
+named identifiers against the relevant timezone registry.
+
 `src/validators.ts` compiles strict Ajv 2020 validators with own-property checking.
 `src/invariants.ts` enforces tenant, case, workflow, scope, approval, receipt, and
 resolution relationships that JSON Schema cannot express.

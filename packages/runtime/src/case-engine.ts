@@ -163,6 +163,10 @@ const CASE_RECORD_SEED_KEYS = new Set([
   "workflow_version_id",
 ]);
 const CANONICAL_ID_PATTERN = /^[A-Za-z][A-Za-z0-9_-]{2,127}$/;
+const SOURCE_TIMEZONE_PATTERN =
+  /^(?:UTC(?:[+-](?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9])?|[A-Za-z][A-Za-z0-9._+-]*(?:\/[A-Za-z0-9._+-]+)+)$/;
+const WORK_EVENT_TIMESTAMP_PATTERN =
+  /^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?([Zz]|([+-])(\d{2}):(\d{2}))$/;
 const COMMAND_KEYS = Object.freeze({
   "case.attach_work_event": new Set([
     "type",
@@ -594,7 +598,24 @@ function assertWorkEvent(
 
   requireString(workEvent, "id", "$/work_event");
   requireString(workEvent, "event_type", "$/work_event");
-  requireString(workEvent, "occurred_at", "$/work_event");
+  const occurredAt = requireString(workEvent, "occurred_at", "$/work_event");
+  if (canonicalWorkEventOccurredAt(occurredAt) !== occurredAt) {
+    throw new CaseEngineError(
+      "INVALID_COMMAND",
+      "$/work_event/occurred_at must be a canonical UTC instant with millisecond precision",
+    );
+  }
+  const sourceTimezone = requireString(
+    workEvent,
+    "source_timezone",
+    "$/work_event",
+  );
+  if (!SOURCE_TIMEZONE_PATTERN.test(sourceTimezone)) {
+    throw new CaseEngineError(
+      "INVALID_COMMAND",
+      "$/work_event/source_timezone must be UTC, a UTC fixed-offset label, or an IANA-style timezone identifier",
+    );
+  }
   const contentHash = requireString(workEvent, "content_hash", "$/work_event");
   if (!/^sha256:[0-9a-f]{64}$/.test(contentHash)) {
     throw new CaseEngineError(
@@ -616,6 +637,122 @@ function assertWorkEvent(
       "work event scopes must be a subset of the case scopes",
     );
   }
+}
+
+function canonicalWorkEventOccurredAt(value: string): string {
+  const match = WORK_EVENT_TIMESTAMP_PATTERN.exec(value);
+  if (match === null) {
+    throw new CaseEngineError(
+      "INVALID_COMMAND",
+      "$/work_event/occurred_at must be an RFC 3339 instant with at most millisecond precision",
+    );
+  }
+  const [
+    ,
+    yearText,
+    monthText,
+    dayText,
+    hourText,
+    minuteText,
+    secondText,
+    fractionText = "",
+    zoneText,
+    offsetSign,
+    offsetHourText = "00",
+    offsetMinuteText = "00",
+  ] = match;
+  if (
+    yearText === undefined ||
+    monthText === undefined ||
+    dayText === undefined ||
+    hourText === undefined ||
+    minuteText === undefined ||
+    secondText === undefined ||
+    zoneText === undefined
+  ) {
+    throw new CaseEngineError(
+      "INVALID_COMMAND",
+      "$/work_event/occurred_at is incomplete",
+    );
+  }
+
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const offsetHour = Number(offsetHourText);
+  const offsetMinute = Number(offsetMinuteText);
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [
+    31,
+    leapYear ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
+  const maximumDay = daysInMonth[month - 1];
+  if (
+    maximumDay === undefined ||
+    day < 1 ||
+    day > maximumDay ||
+    hour > 23 ||
+    minute > 59 ||
+    second > 59 ||
+    offsetHour > 23 ||
+    offsetMinute > 59
+  ) {
+    throw new CaseEngineError(
+      "INVALID_COMMAND",
+      "$/work_event/occurred_at is not a valid RFC 3339 calendar instant",
+    );
+  }
+
+  const milliseconds = Number(fractionText.padEnd(3, "0"));
+  const local = new Date(0);
+  local.setUTCFullYear(year, month - 1, day);
+  local.setUTCHours(hour, minute, second, milliseconds);
+  const offsetDirection =
+    zoneText.toUpperCase() === "Z" ? 0 : offsetSign === "+" ? 1 : -1;
+  const offsetMilliseconds =
+    offsetDirection * (offsetHour * 60 + offsetMinute) * 60_000;
+  const canonical = new Date(
+    local.getTime() - offsetMilliseconds,
+  ).toISOString();
+  if (!/^\d{4}-/.test(canonical)) {
+    throw new CaseEngineError(
+      "INVALID_COMMAND",
+      "$/work_event/occurred_at normalizes outside the supported four-digit year range",
+    );
+  }
+  return canonical;
+}
+
+function normalizeInboundWorkEvent(workEvent: UnknownRecord): UnknownRecord {
+  requireString(workEvent, "source_timezone", "$/work_event");
+  const occurredAt = requireString(workEvent, "occurred_at", "$/work_event");
+  return {
+    ...workEvent,
+    occurred_at: canonicalWorkEventOccurredAt(occurredAt),
+  };
+}
+
+function normalizeWorkEventCommand(
+  command: UnknownRecord,
+  field: "trigger_event" | "work_event",
+): UnknownRecord {
+  return {
+    ...command,
+    [field]: normalizeInboundWorkEvent(requireRecord(command, field)),
+  };
 }
 
 function assertCreationInputs(
@@ -644,6 +781,19 @@ function assertAttachedWorkEventInput(
 ): void {
   assertNoInvariantViolations(
     immutableJson<UnknownRecord>({ ...document, events: [workEvent] }),
+  );
+}
+
+function assertProposedWorkEventCollection(
+  document: Readonly<UnknownRecord>,
+  workEvent: UnknownRecord,
+): void {
+  const events = asUnknownArray(document.events) ?? [];
+  assertNoInvariantViolations(
+    immutableJson<UnknownRecord>({
+      ...document,
+      events: [...events, workEvent],
+    }),
   );
 }
 
@@ -1161,6 +1311,7 @@ function attachWorkEvent(
       "expected_case_version does not match the current case version",
     );
   }
+  assertProposedWorkEventCollection(aggregate.document, workEvent);
   const generated = consumeDependencies(state, aggregate, dependencies);
   const currentCase = caseRecord(aggregate.document);
   const nextVersion = context.expectedVersion + 1;
@@ -1769,11 +1920,19 @@ export function executeCaseCommand(
   switch (type) {
     case "case.attach_work_event": {
       assertCommandKeys(command, type);
-      return attachWorkEvent(trustedState, command, dependencies);
+      return attachWorkEvent(
+        trustedState,
+        normalizeWorkEventCommand(command, "work_event"),
+        dependencies,
+      );
     }
     case "case.create": {
       assertCommandKeys(command, type);
-      return createCase(trustedState, command, dependencies);
+      return createCase(
+        trustedState,
+        normalizeWorkEventCommand(command, "trigger_event"),
+        dependencies,
+      );
     }
     case "case.transition": {
       assertCommandKeys(command, type);

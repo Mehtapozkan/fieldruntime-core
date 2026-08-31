@@ -22,6 +22,15 @@ declared `content_hash` format and fingerprints the complete normalized WorkEven
 but it cannot independently recompute that content hash. Adapter validation remains
 PR7 scope.
 
+`occurred_at` crosses the command boundary as RFC 3339 with no more than
+millisecond precision and is normalized to exact `.sssZ` UTC before every
+fingerprint and stored copy. `source_timezone` is separately required and preserved
+unchanged as `UTC`, a fixed `UTC+/-HH:MM` label, or an IANA-style timezone identifier.
+The core validates its syntax; source adapters own registry validation. This prevents
+equivalent offset spellings from creating different command/source identities when
+their timezone metadata agrees, without discarding the source's business-time
+context. Greater-than-millisecond precision is rejected rather than truncated.
+
 ## Command boundary
 
 The engine supports case creation, explicitly targeted WorkEvent attachment, and
@@ -47,6 +56,8 @@ authority decision. PR2 therefore attaches only to a case named by the caller.
 - A new mutation must match the current case version.
 - WorkEvent tenant must match the command tenant and its scopes must be a subset of
   the case scopes.
+- Stored WorkEvent time is canonical millisecond UTC and retains required source
+  timezone metadata.
 - Accepted attachments/transitions and attributed transition rejections increment
   the case version once. Conflicts and duplicates do not append.
 - Time and IDs come only from injected dependencies and are not consumed by exact
