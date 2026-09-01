@@ -84,7 +84,7 @@ execute, verify their own work, or promote learning inside the trusted core.
 
 The current preview makes that contract inspectable with synthetic fixtures and a
 guided simulation. The deterministic authority, action, and verification controls
-needed to enforce the complete contract at runtime are planned for GitHub PR #8;
+needed to enforce the complete contract at runtime are planned for Delivery PR6;
 they are not implemented in this release candidate.
 
 ## Quick start
@@ -144,19 +144,20 @@ behavior. Architecture decisions live in `DECISIONS.md`.
 
 ## Public roadmap
 
-These numbers match the actual GitHub pull-request sequence. Earlier planning
-drafts called authority and verification “PR6”; GitHub PR #6 became the public
-release-readiness change, so authority and verification is now PR #8.
+GitHub PR #6 delivered release readiness, and GitHub PR #12 finalized the public
+launch. Automated dependency updates can consume GitHub numbers, so the future
+capability sequence uses stable **Delivery PR** labels. Each roadmap item will link
+its actual GitHub pull request when work begins.
 
-| GitHub PR                                | Status  | Scope                                                                                                                                                     |
-| ---------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| #6 — Public Evaluation Preview Readiness | Merged  | Apache 2.0 boundary, governance and security files, pinned infrastructure, release checks, preview image, and first-run guide                             |
-| #7 — Public Launch Finalization          | Merged  | Final public copy, release-state reconciliation, repository metadata and protection checks, anonymous-clone verification, and prerelease publication gate |
-| #8 — Authority and Verification          | Planned | Deterministic authority matrix, payload-bound approvals, simulated action gateway, and runtime-enforced independent read-back                             |
-| #9 — Provider Adapters                   | Planned | Bounded model, memory, agent-harness, and connector interfaces, beginning with mocks and contract tests                                                   |
-| #10 — Receipts and Economics             | Planned | Full receipt chain plus resolution-time, handoff, intervention, commitment, and verified-result measures                                                  |
-| #11 — Correction and Replay              | Planned | Append-only correction, branching, changed-fact replay, and governed learning-candidate review                                                            |
-| #12 — Packaged Evaluation Release        | Planned | Installer, signed artifacts, SBOM, provenance, and documented upgrade and uninstall paths                                                                 |
+| Delivery item                             | Status  | Scope                                                                                                                                                     |
+| ----------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GitHub #6 — Preview Readiness             | Merged  | Apache 2.0 boundary, governance and security files, pinned infrastructure, release checks, preview image, and first-run guide                             |
+| GitHub #12 — Public Launch Finalization   | Merged  | Final public copy, release-state reconciliation, repository metadata and protection checks, anonymous-clone verification, and prerelease publication gate |
+| Delivery PR6 — Authority and Verification | Planned | Deterministic authority matrix, payload-bound approvals, simulated action gateway, and runtime-enforced independent read-back                             |
+| Delivery PR7 — Provider Adapters          | Planned | Bounded model, memory, agent-harness, and connector interfaces, beginning with mocks and contract tests                                                   |
+| Delivery PR8 — Receipts and Economics     | Planned | Full receipt chain plus resolution-time, handoff, intervention, commitment, and verified-result measures                                                  |
+| Delivery PR9 — Correction and Replay      | Planned | Append-only correction, branching, changed-fact replay, and governed learning-candidate review                                                            |
+| Delivery PR10 — Packaged Evaluation       | Planned | Installer, signed artifacts, SBOM, provenance, and documented upgrade and uninstall paths                                                                 |
 
 Planned means planned, not present in this evaluation preview. See [`PLAN.md`](PLAN.md)
 for exit criteria and [`STATUS.md`](STATUS.md) for the implemented boundary.

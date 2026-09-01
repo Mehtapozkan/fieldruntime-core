@@ -7,7 +7,7 @@ Treat visibility as a separate owner decision after the source change is merged.
 
 - Confirm GitHub PR #6 (Public Evaluation Preview Readiness) is merged with hosted
   CI and the Docker Compose smoke passing.
-- Merge GitHub PR #7 (Public Launch Finalization) only after its hosted CI and
+- Merge GitHub PR #12 (Public Launch Finalization) only after its hosted CI and
   Docker Compose smoke pass.
 - Run `pnpm release:check` on the final `main` commit.
 - Confirm `LICENSE`, `NOTICE`, `SECURITY.md`, `TRADEMARKS.md`, `OPEN_CORE.md`, and

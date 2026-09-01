@@ -60,7 +60,7 @@ requireText("README.md", [
   "Synthetic cases. Simulated authority. No external writes.",
   "complete case",
   "Public roadmap",
-  "#8 — Authority and Verification",
+  "Delivery PR6 — Authority and Verification",
   "docs/guides/5-minute-evaluation.md",
   "Apache License 2.0",
   "fieldruntime.ai",
@@ -72,14 +72,14 @@ requireText("SECURITY.md", [
 ]);
 requireText("OPEN_CORE.md", ["not lock-in", "Apache License 2.0"]);
 requireText("PLAN.md", [
-  "#7 — Public Launch Finalization",
-  "#8 — Authority and Verification",
-  "#12 — Packaged Evaluation Release",
+  "GitHub #12 — Public Launch Finalization",
+  "Delivery PR6 — Authority and Verification",
+  "Delivery PR10 — Packaged Evaluation",
 ]);
 requireText("docs/releases/v0.1.0-evaluation-preview.md", [
   "v0.1.0-evaluation-preview.0",
-  "PRs #6 and #7 are merged",
-  "PRs #8–#12 are planned",
+  "GitHub PRs #6 and #12 are merged",
+  "Delivery PR6–PR10 are planned",
 ]);
 
 const expectedPostgresImage =

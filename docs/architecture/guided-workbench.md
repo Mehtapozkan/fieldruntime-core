@@ -29,7 +29,7 @@ after the independent read-back matches. This effect-acceptance gate does not cl
 that deployment was verified or that the case can close; the authoritative fixture
 remains `needs_review`.
 
-Planned GitHub PR #8 must replace these presentation observations with
+Delivery PR6 must replace these presentation observations with
 deterministic authority envelopes, payload-bound approvals, an idempotent simulated
 effect ledger, and runtime-enforced independent verification. GitHub PR #6 was the
 public evaluation-preview readiness change; it did not add those controls. The

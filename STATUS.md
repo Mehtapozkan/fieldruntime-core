@@ -2,7 +2,7 @@
 
 Current milestone: v0.1.0 Evaluation Preview release candidate
 
-Release position: GitHub PRs #6 (Public Evaluation Preview Readiness) and #7
+Release position: GitHub PRs #6 (Public Evaluation Preview Readiness) and #12
 (Public Launch Finalization) are merged. The repository and
 `v0.1.0-evaluation-preview.0` GitHub prerelease are public.
 
@@ -159,7 +159,7 @@ Release position: GitHub PRs #6 (Public Evaluation Preview Readiness) and #7
   Production identity federation, authorization, tenancy administration, and
   network deployment are not implemented.
 - `fr up` intentionally runs only from a cloned Field Runtime Core repository root;
-  a standalone installer and signed distributable remain GitHub PR #12 scope.
+  a standalone installer and signed distributable remain Delivery PR10 scope.
 - Event attachment requires an explicitly selected case. Automatic ECC candidate
   matching and ambiguous-merge handling are not implemented yet.
 - No authority engine, action gateway, or independent verifier yet.
@@ -171,20 +171,20 @@ Release position: GitHub PRs #6 (Public Evaluation Preview Readiness) and #7
   explicit parity reconciliation and conformance tests.
 - ECC v0.1.0 is shadow/evaluation-only; activation is deliberately blocked.
 - The preview is source-clone distribution only. Signed artifacts, installers,
-  SBOM, provenance, upgrade, and uninstall flows remain GitHub PR #12 scope.
+  SBOM, provenance, upgrade, and uninstall flows remain Delivery PR10 scope.
 - Evaluation inputs and gold currently share the Core repository. The adapter
   cannot receive gold at runtime, but held-out and externally authored cases do not
   exist yet.
 - The current result is synthetic and deterministic; it does not measure live
   providers, human usefulness, resolution economics, or production performance.
 - The guided authority, connector response, read-back, recovery, receipt, and
-  learning trace is presentation-only. Planned GitHub PR #8 must replace it with
+  learning trace is presentation-only. Delivery PR6 must replace it with
   deterministic authority envelopes, a simulated action gateway, and
   runtime-enforced independent verification before those controls can mutate an
   authoritative case.
 
 ## Next
 
-Planned GitHub PR #8 is the next product capability: deterministic authority,
+Delivery PR6 is the next product capability: deterministic authority,
 payload-bound approval, a simulated action gateway, and independent verification
 without live connectors or external writes.
