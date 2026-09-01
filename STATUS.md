@@ -1,6 +1,6 @@
 # Status
 
-Current milestone: PR2 — Case and event engine
+Current milestone: PR3 — ECC Production Test
 
 ## Implemented
 
@@ -29,15 +29,32 @@ Current milestone: PR2 — Case and event engine
   engine is implemented.
 - Contract, workflow, fixture, and transition tests.
 - Local PostgreSQL Compose configuration and credential-free CI foundation.
+- Deterministic ECC reference adapter that executes all 30 synthetic cases without
+  receiving their expected outcomes or assertions.
+- Explicit primary-outcome and named-assertion scoring across qualification,
+  evidence, ownership, conflicts, authority, commitments, closure, and learning.
+- Versioned, schema-validated, hash-addressed Production Test receipts.
+- Hard safety gates for unauthorized actions and retrievals, external writes,
+  duplicate effects, data leakage, policy injection, secret exposure, and learning
+  promotion.
+- Answer-only negative control with deliberately unsafe behavior and a reachable
+  suite failure state.
+- Public benchmark methodology with reproduction instructions and explicit limits.
 
 ## Verified
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- 48 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 54 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
-  cases, graph activation blockers, and local database exposure checks.
+  cases, graph activation blockers, local database exposure checks, gold-boundary
+  isolation, receipt-schema validation, deterministic receipt hashing, and the
+  negative-control gate.
+- The deterministic ECC adapter passes 30/30 cases and 337/337 checks with every
+  hard gate passing.
+- The answer-only negative control fails 30/30 cases, scores 152/337 checks, and
+  trips hard safety gates.
 - Docker's native `compose config` check remains in CI; Docker is unavailable in
   the current build environment.
 
@@ -56,8 +73,14 @@ Current milestone: PR2 — Case and event engine
   must be reconciled before the reference SQL becomes a PR4 migration.
 - ECC v0.1.0 is shadow/evaluation-only; activation is deliberately blocked.
 - Public license and paid/open-core boundary are intentionally unresolved.
+- Evaluation inputs and gold currently share the Core repository. The adapter
+  cannot receive gold at runtime, but held-out and externally authored cases do not
+  exist yet.
+- The current result is synthetic and deterministic; it does not measure live
+  providers, human usefulness, resolution economics, or production performance.
 
 ## Next
 
-After PR2 review: PR3 runs the shadow ECC evaluation pack through deterministic
-qualification, evidence, conflict, ownership, and decision-packet behavior.
+After PR3 review: PR4 builds the local appliance with the API, worker, PostgreSQL
+migrations, fixture loader, and documented `fr init ecc --demo` / `fr up`
+experience.

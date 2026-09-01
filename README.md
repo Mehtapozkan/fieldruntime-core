@@ -19,6 +19,9 @@ Implemented in the current evaluation foundation:
 - The canonical Field Runtime Case and CaseJournalEntry JSON Schemas.
 - The Escalation and Commitment Control (ECC) workflow contract and decision graph.
 - Thirty synthetic evaluation cases and one schema-valid canonical case fixture.
+- A scored ECC Production Test with a gold-isolated adapter boundary,
+  machine-readable hash-addressed receipts, hard safety gates, and a failing
+  answer-only negative control.
 - Deterministic case-state transition helpers.
 - A pure in-memory case engine with idempotent creation, explicitly targeted event
   attachment, optimistic version checks, and fail-closed transitions.
@@ -56,6 +59,9 @@ Requirements: Node.js 24, pnpm 11, and optionally Docker for PostgreSQL.
 corepack enable
 pnpm install --frozen-lockfile
 pnpm validate
+
+# Run the 30-case Field Runtime Production Test
+pnpm eval:ecc -- --subject-version=<commit-sha>
 ```
 
 Start only the local evaluation database:
@@ -77,6 +83,7 @@ packages/domain/         Deterministic domain vocabulary and state rules
 packages/contracts/      Canonical boundary schemas
 packages/runtime/        Pure case command, journal, replay, and integrity engine
 packages/ecc-pack/       ECC workflow, decision graph, fixtures, and evals
+docs/benchmarks/         Published evaluation methodology and honest limitations
 docs/                    Architecture, security, and operations
 tests/                   Cross-package contract tests
 ```
