@@ -2,5 +2,9 @@
   "name": "@fieldruntime/worker",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@fieldruntime/contracts": "workspace:*",
+    "@fieldruntime/runtime": "workspace:*"
+  }
 }

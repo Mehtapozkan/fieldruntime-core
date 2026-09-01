@@ -1,10 +1,15 @@
 import { cp, mkdir } from "node:fs/promises";
 
-const source = new URL("../packages/contracts/schemas/", import.meta.url);
-const destination = new URL(
-  "../dist/packages/contracts/schemas/",
-  import.meta.url,
-);
+const directories = [
+  "packages/contracts/schemas",
+  "packages/contracts/openapi",
+  "packages/ecc-pack/fixtures",
+  "packages/runtime/migrations",
+];
 
-await mkdir(destination, { recursive: true });
-await cp(source, destination, { recursive: true });
+for (const directory of directories) {
+  const source = new URL(`../${directory}/`, import.meta.url);
+  const destination = new URL(`../dist/${directory}/`, import.meta.url);
+  await mkdir(destination, { recursive: true });
+  await cp(source, destination, { recursive: true });
+}

@@ -1,10 +1,11 @@
 # Case and Event Engine
 
-PR2 adds the smallest trusted runtime slice that can own a case without pretending
-to own the enterprise systems around it. It is a pure, in-memory evaluation engine:
-commands in, a result with deeply frozen state out. Applied commands and journaled
-transition rejections return a new state; duplicates and conflicts preserve the
-prior state.
+The pure engine introduced in PR2 is the smallest trusted runtime slice that can
+own a case without pretending to own the enterprise systems around it: commands in,
+a result with deeply frozen state and a validated append bundle out. Applied
+commands and journaled transition rejections return a new state; duplicates and
+conflicts preserve the prior state. PR4 keeps that engine pure and places a
+PostgreSQL transaction boundary around it.
 
 ## Three records, three responsibilities
 
@@ -95,11 +96,19 @@ and Case invariants. It then reconstructs the aggregate without clocks, generate
 IDs, provider calls, or models. Every new command first checks that stored
 projections and indexes still agree with replayed history.
 
-This is consistency and tamper detection inside the evaluation state, not durable
-storage. The hash chain is unsigned and externally unanchored; a privileged writer
-who can replace the whole state can recompute it. PR4 must commit the journal,
-projection, idempotency record, and source-event identity in one PostgreSQL
-transaction and enforce concurrent writers there.
+The hash chain remains unsigned and externally unanchored; it detects drift but
+does not make a privileged database administrator unable to rewrite every record.
+PR4 durably commits the journal, projection, idempotency record, source-event
+identity, and emitted journal/audit IDs in one PostgreSQL transaction. A singleton
+row lock serializes the local appliance's writers, projection compare-and-swap
+guards the expected head, and deferred foreign keys bind each predecessor,
+causation reference, and projection head to the same case. Append-only triggers
+deny update, delete, and truncate of durable history and identity records.
+
+Every command and read rehydrates the durable state and reruns replay/integrity
+checks. This deliberately favors an auditable single-node reference appliance over
+scale; sharded locking and incremental hydration require a later conformance
+design.
 
 ## Fail-closed lifecycle boundary
 
@@ -114,6 +123,8 @@ PR6 must define and recompute the versioned authorization envelope before declar
 payload hashes, approvals, and receipts can prove execution.
 
 The imported ECC v0.1.0 fixture remains a legacy snapshot: its version and audit
-history are not sufficient to reconstruct its earlier lifecycle. PR2 replay claims
-apply only to aggregates created through this engine, not to arbitrary imported
-snapshots or the future full workflow.
+history are not sufficient to reconstruct its earlier lifecycle. PR4 stores it
+only in an immutable evaluation catalog and serves it as
+`authoritative: false, replayable: false`. Replay claims apply only to aggregates
+created through runtime commands, not to arbitrary imported snapshots or the
+future full workflow.

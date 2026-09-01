@@ -1,4 +1,17 @@
 # API
 
-Reserved for the local case API in PR4. There is no network service in the current
-repository.
+Loopback-only HTTP boundary for the synthetic local evaluation appliance. The API
+provides process health, fail-closed readiness, tenant-scoped case commands and
+reads, immutable journal reads, and the explicitly non-authoritative ECC demo
+fixture.
+
+The process imports the transactional worker in-process; it is one modular
+deployable, not a network of services. Startup requires simulation mode, external
+writes disabled, and an authenticated PostgreSQL URL targeting loopback or the
+Compose `postgres` service. Binding to `0.0.0.0` is accepted only for that internal
+Compose path; Compose publishes the service on `127.0.0.1:3210`.
+
+The contract is
+[`local-appliance.v0.yaml`](../../packages/contracts/openapi/local-appliance.v0.yaml).
+Unexpected storage and integrity failures are returned as sanitized `500` or
+fail readiness with `503`; command-input failures are sanitized `400` responses.

@@ -154,3 +154,14 @@ test("the local database is loopback-only and uses evaluation credentials", () =
   assert.match(postgres.environment.POSTGRES_PASSWORD, /local-evaluation-only/);
   assert.ok(postgres.healthcheck);
 });
+
+test("the local appliance is loopback-only and fail-closed", () => {
+  const core = compose.services.core;
+
+  assert.deepEqual(core.ports, ["127.0.0.1:3210:3210"]);
+  assert.equal(core.environment.FIELD_RUNTIME_MODE, "simulation");
+  assert.equal(core.environment.FIELD_RUNTIME_EXTERNAL_WRITES, "false");
+  assert.equal(core.read_only, true);
+  assert.ok(core.healthcheck);
+  assert.equal(core.depends_on.postgres.condition, "service_healthy");
+});

@@ -18,16 +18,44 @@ export class CanonicalJsonError extends Error {
   }
 }
 
+function assertStorageCompatibleString(value: string, path: string): void {
+  for (let index = 0; index < value.length; index += 1) {
+    const unit = value.charCodeAt(index);
+    if (unit === 0) {
+      throw new CanonicalJsonError(
+        path,
+        "strings may not contain the null character",
+      );
+    }
+    if (unit >= 0xd800 && unit <= 0xdbff) {
+      const next = value.charCodeAt(index + 1);
+      if (!Number.isInteger(next) || next < 0xdc00 || next > 0xdfff) {
+        throw new CanonicalJsonError(
+          path,
+          "strings may not contain unpaired Unicode surrogates",
+        );
+      }
+      index += 1;
+    } else if (unit >= 0xdc00 && unit <= 0xdfff) {
+      throw new CanonicalJsonError(
+        path,
+        "strings may not contain unpaired Unicode surrogates",
+      );
+    }
+  }
+}
+
 function normalizeJson(
   value: unknown,
   path: string,
   ancestors: WeakSet<object>,
 ): JsonValue {
-  if (
-    value === null ||
-    typeof value === "boolean" ||
-    typeof value === "string"
-  ) {
+  if (value === null || typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    assertStorageCompatibleString(value, path);
     return value;
   }
 
@@ -130,6 +158,7 @@ function normalizeJson(
       if (key === undefined) {
         throw new CanonicalJsonError(path, "object normalization failed");
       }
+      assertStorageCompatibleString(key, `${path}/${key}`);
       if (PROHIBITED_KEYS.has(key)) {
         throw new CanonicalJsonError(
           `${path}/${key}`,
