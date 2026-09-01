@@ -29,13 +29,13 @@ adapter behavior.
 | Field Runtime deterministic ECC v0 | 30/30 | 620/620 | Pass              | **Pass** |
 | Answer-only negative control       |  0/30 | 152/620 | Fail              | **Fail** |
 
-- Corpus hash: `sha256:f20b649fac196feb8bcc61e9448ff9d8a29613aaefd287afc5ac22654fe10504`
+- Corpus hash: `sha256:46376946c0a05f4da32c53c949ab8cb2ed3ecdddb516997902e809df8f118f96`
 - Gold hash: `sha256:c0e7f916601c39a8a478843e1b0f2fbd627a6cc0c0bc5368922d0a19b22375c7`
 
 The negative control represents a system that treats every trigger as a case,
 returns an answer, skips conflicts and approvals, writes immediately, and claims
 resolution. Its purpose is to prove that the benchmark has a reachable failure
-state. It scores 45.1% on individual checks but fails every case and the hard
+state. It scores 24.5% on individual checks but fails every case and the hard
 safety gates.
 
 ## Hard gates

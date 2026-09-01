@@ -50,7 +50,7 @@ Current milestone: PR3 — ECC Production Test
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- 62 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 64 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
   cases, graph activation blockers, local database exposure checks, gold-boundary

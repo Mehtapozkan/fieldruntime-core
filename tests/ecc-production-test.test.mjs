@@ -182,7 +182,10 @@ test("trigger tenant mismatch fails closed before case creation", () => {
 
 test("accepted customer language cannot resolve a case without closure proof", () => {
   const changed = structuredClone(cases.find(({ id }) => id === "FR-EVAL-027"));
-  delete changed.input.records[0].state.verification_evidence_ref;
+  const verification = changed.input.records.find(
+    ({ source }) => source === "verification",
+  );
+  delete verification.state.verification_evidence_ref;
   changed.expected.final_state = "verifying";
   changed.assertions = [
     { assertion: "outcome_accepted", operator: "eq", expected: true },
@@ -197,14 +200,46 @@ test("accepted customer language cannot resolve a case without closure proof", (
 
 test("an accepted no-action decision can satisfy closure proof", () => {
   const changed = structuredClone(cases.find(({ id }) => id === "FR-EVAL-027"));
-  changed.input.records[0].state.action_or_no_action_decision =
-    "accepted_no_action";
+  const authority = changed.input.records.find(
+    ({ source }) => source === "authority",
+  );
+  authority.state.action_or_no_action_decision = "accepted_no_action";
 
   const receipt = runProductionTest([changed], new DeterministicEccAdapter(), {
     now: fixedClock,
   });
   assert.equal(receipt.verdict, "pass");
   assert.equal(receipt.case_results[0].passed, true);
+});
+
+test("closure proof requires separately attributable authoritative records", () => {
+  const wrongSource = structuredClone(
+    cases.find(({ id }) => id === "FR-EVAL-027"),
+  );
+  wrongSource.input.records.find(
+    ({ source }) => source === "verification",
+  ).source = "slack";
+  wrongSource.expected.final_state = "verifying";
+  wrongSource.assertions = [
+    { assertion: "case_resolved", operator: "eq", expected: false },
+  ];
+
+  const lowAuthority = structuredClone(wrongSource);
+  const verification = lowAuthority.input.records.find(
+    ({ source }) => source === "slack",
+  );
+  verification.source = "verification";
+  verification.authority_rank = 3;
+
+  for (const evaluationCase of [wrongSource, lowAuthority]) {
+    const receipt = runProductionTest(
+      [evaluationCase],
+      new DeterministicEccAdapter(),
+      { now: fixedClock },
+    );
+    assert.equal(receipt.verdict, "pass");
+    assert.equal(receipt.case_results[0].passed, true);
+  }
 });
 
 test("empty evaluation corpora fail closed", () => {
@@ -215,6 +250,28 @@ test("empty evaluation corpora fail closed", () => {
         now: fixedClock,
       }),
     /at least one case/,
+  );
+});
+
+test("empty receipt identity fields fail before evaluation", () => {
+  assert.throws(
+    () =>
+      runProductionTest(cases, new DeterministicEccAdapter(), {
+        now: fixedClock,
+        subjectVersion: "   ",
+      }),
+    /Subject version must not be empty/,
+  );
+  assert.throws(
+    () =>
+      runProductionTest(
+        cases,
+        { name: "", evaluate() {} },
+        {
+          now: fixedClock,
+        },
+      ),
+    /Adapter name must not be empty/,
   );
 });
 

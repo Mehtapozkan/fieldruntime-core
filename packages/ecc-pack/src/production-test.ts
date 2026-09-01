@@ -283,6 +283,16 @@ function recordBySource(
   return subject.input.records.find((record) => record.source === source);
 }
 
+function authoritativeRecordBySource(
+  subject: EccEvaluationSubject,
+  source: string,
+): JsonObject | undefined {
+  const record = recordBySource(subject, source);
+  return record?.authority_rank === 1 && record.freshness === "live"
+    ? record
+    : undefined;
+}
+
 function states(subject: EccEvaluationSubject): JsonObject[] {
   return subject.input.records.map(stateOf);
 }
@@ -609,19 +619,35 @@ function deriveLearningCandidate(
 }
 
 function hasClosureProof(subject: EccEvaluationSubject): boolean {
-  return states(subject).some((state) => {
-    const decision = state.action_or_no_action_decision;
-    return (
-      (decision === "authorized_action_complete" ||
-        decision === "accepted_no_action") &&
-      state.source_state_verified === true &&
-      typeof state.verification_evidence_ref === "string" &&
-      typeof state.verified_by_identity_id === "string" &&
-      typeof state.outcome_receipt_id === "string" &&
-      state.audit_complete === true &&
-      state.customer_accepted === true
-    );
-  });
+  const authority = stateOf(
+    authoritativeRecordBySource(subject, "authority") ?? {},
+  );
+  const verification = stateOf(
+    authoritativeRecordBySource(subject, "verification") ?? {},
+  );
+  const acceptance = stateOf(
+    authoritativeRecordBySource(subject, "support") ?? {},
+  );
+  const receipt = stateOf(
+    authoritativeRecordBySource(subject, "receipt_store") ?? {},
+  );
+  const decision = authority.action_or_no_action_decision;
+  return (
+    (decision === "authorized_action_complete" ||
+      decision === "accepted_no_action") &&
+    typeof authority.authorized_by_identity_id === "string" &&
+    typeof authority.authorization_receipt_id === "string" &&
+    verification.source_state_verified === true &&
+    verification.verification_independent === true &&
+    typeof verification.verification_evidence_ref === "string" &&
+    typeof verification.verified_by_identity_id === "string" &&
+    acceptance.customer_accepted === true &&
+    typeof acceptance.acceptance_evidence_ref === "string" &&
+    typeof receipt.outcome_receipt_id === "string" &&
+    receipt.commitments_disposition_complete === true &&
+    receipt.corrections_captured === true &&
+    receipt.audit_complete === true
+  );
 }
 
 function deriveFinalState(
@@ -1093,6 +1119,13 @@ export function runProductionTest(
   if (cases.length === 0) {
     throw new Error("Evaluation corpus must contain at least one case");
   }
+  const subjectVersion = options.subjectVersion ?? "working-tree";
+  if (subjectVersion.trim().length === 0) {
+    throw new Error("Subject version must not be empty");
+  }
+  if (adapter.name.trim().length === 0) {
+    throw new Error("Adapter name must not be empty");
+  }
   const now: () => Date = options.now ?? ((): Date => new Date());
   const startedAt = now().toISOString();
   const caseResults = cases.map((evaluationCase) =>
@@ -1110,7 +1143,7 @@ export function runProductionTest(
     suite_id: "fieldruntime-production-test-ecc" as const,
     suite_version: "0.1.0" as const,
     adapter: adapter.name,
-    subject_version: options.subjectVersion ?? "working-tree",
+    subject_version: subjectVersion,
     corpus_hash: corpusHash(cases),
     gold_hash: goldHash(cases),
     started_at: startedAt,
