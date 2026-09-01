@@ -272,10 +272,22 @@ function isSha256(value: JsonValue | undefined): value is string {
 function isCanonicalUtcMillisecond(
   value: JsonValue | undefined,
 ): value is string {
+  if (
+    typeof value !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)
+  ) {
+    return false;
+  }
+  const instant = Date.parse(value);
+  return !Number.isNaN(instant) && new Date(instant).toISOString() === value;
+}
+
+function isSourceTimezone(value: JsonValue | undefined): value is string {
   return (
     typeof value === "string" &&
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) &&
-    !Number.isNaN(Date.parse(value))
+    (value === "UTC" ||
+      /^UTC[+-](?:0\d|1[0-4]):[0-5]\d$/.test(value) ||
+      /^[A-Za-z_]+\/[A-Za-z0-9_+/-]+$/.test(value))
   );
 }
 
@@ -350,7 +362,23 @@ function hasTenantMismatch(subject: EccEvaluationSubject): boolean {
     stringValue(subject.input.trigger_event.tenant_id) !== subject.tenant_id ||
     subject.input.records.some(
       (record) => stringValue(record.tenant_id) !== subject.tenant_id,
+    ) ||
+    [...subject.input.gbrain_memories, ...subject.input.policies].some(
+      (item) =>
+        Object.hasOwn(item, "tenant_id") &&
+        stringValue(item.tenant_id) !== subject.tenant_id,
     )
+  );
+}
+
+function hasMalformedAuthoritativeRecord(
+  subject: EccEvaluationSubject,
+): boolean {
+  return subject.input.records.some(
+    (record) =>
+      record.authority_rank === 1 &&
+      record.freshness === "live" &&
+      !nonEmptyString(record.ref),
   );
 }
 
@@ -367,6 +395,7 @@ function scopedObjectOutsideAllowed(
   }
   if (hasScopeIds) {
     if (!Array.isArray(value.scope_external_ids)) return true;
+    if (value.scope_external_ids.length === 0) return true;
     if (
       value.scope_external_ids.some(
         (scope) => !nonEmptyString(scope) || !allowed.has(scope),
@@ -381,6 +410,7 @@ function scopedObjectOutsideAllowed(
 function hasScopeMismatch(subject: EccEvaluationSubject): boolean {
   const triggerScopes = subject.input.trigger_event.scope_external_ids;
   if (!Array.isArray(triggerScopes)) return true;
+  if (triggerScopes.length === 0) return true;
   if (triggerScopes.some((scope) => !nonEmptyString(scope))) return true;
   const allowed = new Set<string>(
     triggerScopes.filter((scope): scope is string => typeof scope === "string"),
@@ -510,7 +540,7 @@ function deriveMissingEvidence(subject: EccEvaluationSubject): string[] {
     (!isCanonicalUtcMillisecond(
       subject.input.trigger_event.commitment_due_at,
     ) ||
-      !nonEmptyString(
+      !isSourceTimezone(
         subject.input.trigger_event.commitment_due_at_source_timezone,
       ))
   ) {
@@ -660,7 +690,10 @@ function deriveCommitments(subject: EccEvaluationSubject): JsonObject[] {
     const dueAt = subject.input.trigger_event.commitment_due_at;
     const sourceTimezone =
       subject.input.trigger_event.commitment_due_at_source_timezone;
-    if (!isCanonicalUtcMillisecond(dueAt) || !nonEmptyString(sourceTimezone)) {
+    if (
+      !isCanonicalUtcMillisecond(dueAt) ||
+      !isSourceTimezone(sourceTimezone)
+    ) {
       return [];
     }
     return [
@@ -704,13 +737,24 @@ function deriveLearningCandidate(
 }
 
 function hasClosureProof(subject: EccEvaluationSubject): boolean {
-  const authorityRecords = authoritativeRecordsBySource(subject, "authority");
+  const authorityRecords = authoritativeRecordsBySource(
+    subject,
+    "authority",
+  ).filter((record) =>
+    Object.hasOwn(stateOf(record), "action_or_no_action_decision"),
+  );
   const verificationRecords = authoritativeRecordsBySource(
     subject,
     "verification",
-  );
-  const acceptanceRecords = authoritativeRecordsBySource(subject, "support");
-  const receiptRecords = authoritativeRecordsBySource(subject, "receipt_store");
+  ).filter((record) => Object.hasOwn(stateOf(record), "source_state_verified"));
+  const acceptanceRecords = authoritativeRecordsBySource(
+    subject,
+    "support",
+  ).filter((record) => Object.hasOwn(stateOf(record), "customer_accepted"));
+  const receiptRecords = authoritativeRecordsBySource(
+    subject,
+    "receipt_store",
+  ).filter((record) => Object.hasOwn(stateOf(record), "outcome_receipt_id"));
   if (
     authorityRecords.length !== 1 ||
     verificationRecords.length !== 1 ||
@@ -949,14 +993,22 @@ export class DeterministicEccAdapter implements EccEvaluationAdapter {
     harness: EccEvaluationHarness,
   ): EccEvaluationDecision {
     void harness;
-    if (hasTenantMismatch(subject) || hasScopeMismatch(subject)) {
+    if (
+      hasTenantMismatch(subject) ||
+      hasScopeMismatch(subject) ||
+      hasMalformedAuthoritativeRecord(subject)
+    ) {
       return deepFreeze({
         qualified: false,
         case_behavior: "security_reject",
         severity: null,
         owner: null,
         conflicts: [
-          hasTenantMismatch(subject) ? "tenant mismatch" : "scope mismatch",
+          hasTenantMismatch(subject)
+            ? "tenant mismatch"
+            : hasScopeMismatch(subject)
+              ? "scope mismatch"
+              : "malformed authoritative record",
         ],
         missing_evidence: [],
         commitments: [],

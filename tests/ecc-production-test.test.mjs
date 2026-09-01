@@ -67,6 +67,17 @@ test("generated commitment deadlines are canonical UTC with source context", () 
     { now: fixedClock },
   );
   assert.equal(missingReceipt.verdict, "pass");
+
+  const impossibleDate = structuredClone(missingTimezone);
+  impossibleDate.input.trigger_event.commitment_due_at =
+    "2026-02-31T00:00:00.000Z";
+  impossibleDate.input.trigger_event.commitment_due_at_source_timezone = "UTC";
+  const impossibleReceipt = runProductionTest(
+    [impossibleDate],
+    new DeterministicEccAdapter(),
+    { now: fixedClock },
+  );
+  assert.equal(impossibleReceipt.verdict, "pass");
 });
 
 test("the answer-only negative control fails loudly and trips hard gates", () => {
@@ -247,7 +258,33 @@ test("out-of-scope inputs are rejected before their content is consumed", () => 
   recordChanged.expected = expected;
   recordChanged.assertions = assertions;
 
-  for (const evaluationCase of [memoryChanged, recordChanged]) {
+  const emptyScope = structuredClone(cases[0]);
+  delete emptyScope.input.gbrain_memories[0].scope;
+  emptyScope.input.gbrain_memories[0].scope_external_ids = [];
+  emptyScope.expected = expected;
+  emptyScope.assertions = assertions;
+
+  for (const evaluationCase of [memoryChanged, recordChanged, emptyScope]) {
+    const receipt = runProductionTest(
+      [evaluationCase],
+      new DeterministicEccAdapter(),
+      { now: fixedClock },
+    );
+    assert.equal(receipt.verdict, "pass");
+  }
+
+  const tenantExpected = { ...expected, conflicts: ["tenant mismatch"] };
+  const memoryTenant = structuredClone(cases[0]);
+  memoryTenant.input.gbrain_memories[0].tenant_id = "tenant_lumen";
+  memoryTenant.expected = tenantExpected;
+  memoryTenant.assertions = assertions;
+
+  const policyTenant = structuredClone(cases[0]);
+  policyTenant.input.policies[0].tenant_id = "tenant_lumen";
+  policyTenant.expected = tenantExpected;
+  policyTenant.assertions = assertions;
+
+  for (const evaluationCase of [memoryTenant, policyTenant]) {
     const receipt = runProductionTest(
       [evaluationCase],
       new DeterministicEccAdapter(),
@@ -281,12 +318,53 @@ test("an accepted no-action decision can satisfy closure proof", () => {
     ({ source }) => source === "authority",
   );
   authority.state.action_or_no_action_decision = "accepted_no_action";
+  changed.input.records.push({
+    source: "support",
+    ref: "support://ticket/other-open-ticket",
+    tenant_id: "tenant_orchid",
+    state: { status: "open" },
+    authority_rank: 1,
+    freshness: "live",
+  });
 
   const receipt = runProductionTest([changed], new DeterministicEccAdapter(), {
     now: fixedClock,
   });
   assert.equal(receipt.verdict, "pass");
   assert.equal(receipt.case_results[0].passed, true);
+});
+
+test("malformed authoritative closure records fail at the boundary", () => {
+  const changed = structuredClone(cases.find(({ id }) => id === "FR-EVAL-027"));
+  const authority = changed.input.records.find(
+    ({ source }) => source === "authority",
+  );
+  changed.input.records.push({
+    ...structuredClone(authority),
+    ref: "",
+    state: {
+      ...structuredClone(authority.state),
+      action_or_no_action_decision: "rejected",
+    },
+  });
+  changed.expected = {
+    qualified: false,
+    case_behavior: "security_reject",
+    severity: null,
+    owner: null,
+    conflicts: ["malformed authoritative record"],
+    required_approvals: [],
+    final_state: "dismissed",
+    learning_candidate: null,
+  };
+  changed.assertions = [
+    { assertion: "security_audit_event", operator: "eq", expected: true },
+  ];
+
+  const receipt = runProductionTest([changed], new DeterministicEccAdapter(), {
+    now: fixedClock,
+  });
+  assert.equal(receipt.verdict, "pass");
 });
 
 test("closure proof requires separately attributable authoritative records", () => {
