@@ -31,7 +31,7 @@ if (receiptPath !== undefined) {
   await writeFile(
     resolve(receiptPath),
     `${JSON.stringify(receipt, null, 2)}\n`,
-    "utf8",
+    { encoding: "utf8", flag: "wx" },
   );
 }
 

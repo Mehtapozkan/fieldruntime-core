@@ -29,7 +29,7 @@ adapter behavior.
 | Field Runtime deterministic ECC v0 | 30/30 | 620/620 | Pass              | **Pass** |
 | Answer-only negative control       |  0/30 | 152/620 | Fail              | **Fail** |
 
-- Corpus hash: `sha256:46376946c0a05f4da32c53c949ab8cb2ed3ecdddb516997902e809df8f118f96`
+- Corpus hash: `sha256:be501cc71e44d1f114f03b9bc4b0f88721b444ca9a7135c32a6b355308fc6a49`
 - Gold hash: `sha256:c0e7f916601c39a8a478843e1b0f2fbd627a6cc0c0bc5368922d0a19b22375c7`
 
 The negative control represents a system that treats every trigger as a case,
@@ -71,6 +71,9 @@ Emit a machine-readable receipt:
 corepack pnpm eval:ecc -- --json --subject-version=<commit-sha>
 corepack pnpm eval:ecc -- --receipt=eval-receipt.json --subject-version=<commit-sha>
 ```
+
+Receipt files use exclusive creation and never overwrite an existing audit
+artifact.
 
 Run the negative control:
 

@@ -259,6 +259,16 @@ function stringValue(value: JsonValue | undefined): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+function nonEmptyString(value: JsonValue | undefined): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isSha256(value: JsonValue | undefined): value is string {
+  return (
+    typeof value === "string" && /^sha256:[a-f0-9]{64}$/.test(value.trim())
+  );
+}
+
 function booleanValue(value: JsonValue | undefined): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
 }
@@ -288,7 +298,9 @@ function authoritativeRecordBySource(
   source: string,
 ): JsonObject | undefined {
   const record = recordBySource(subject, source);
-  return record?.authority_rank === 1 && record.freshness === "live"
+  return record?.authority_rank === 1 &&
+    record.freshness === "live" &&
+    nonEmptyString(record.ref)
     ? record
     : undefined;
 }
@@ -328,6 +340,17 @@ function hasTenantMismatch(subject: EccEvaluationSubject): boolean {
     subject.input.records.some(
       (record) => stringValue(record.tenant_id) !== subject.tenant_id,
     )
+  );
+}
+
+function hasMemoryScopeMismatch(subject: EccEvaluationSubject): boolean {
+  const triggerScopes = subject.input.trigger_event.scope_external_ids;
+  if (!Array.isArray(triggerScopes)) return true;
+  const allowed = new Set(
+    triggerScopes.filter((scope): scope is string => typeof scope === "string"),
+  );
+  return subject.input.gbrain_memories.some(
+    (memory) => !nonEmptyString(memory.scope) || !allowed.has(memory.scope),
   );
 }
 
@@ -632,18 +655,29 @@ function hasClosureProof(subject: EccEvaluationSubject): boolean {
     authoritativeRecordBySource(subject, "receipt_store") ?? {},
   );
   const decision = authority.action_or_no_action_decision;
+  const payloadHash = authority.payload_hash;
+  const policyVersion = authority.policy_version;
+  const policyWasAuthorized = subject.input.policies.some(
+    (policy) =>
+      policy.status === "approved" && policy.version === policyVersion,
+  );
   return (
     (decision === "authorized_action_complete" ||
       decision === "accepted_no_action") &&
-    typeof authority.authorized_by_identity_id === "string" &&
-    typeof authority.authorization_receipt_id === "string" &&
+    nonEmptyString(authority.authorized_by_identity_id) &&
+    nonEmptyString(authority.authorization_receipt_id) &&
+    isSha256(payloadHash) &&
+    nonEmptyString(policyVersion) &&
+    policyWasAuthorized &&
     verification.source_state_verified === true &&
     verification.verification_independent === true &&
-    typeof verification.verification_evidence_ref === "string" &&
-    typeof verification.verified_by_identity_id === "string" &&
+    nonEmptyString(verification.verification_evidence_ref) &&
+    nonEmptyString(verification.verified_by_identity_id) &&
+    verification.payload_hash === payloadHash &&
     acceptance.customer_accepted === true &&
-    typeof acceptance.acceptance_evidence_ref === "string" &&
-    typeof receipt.outcome_receipt_id === "string" &&
+    nonEmptyString(acceptance.acceptance_evidence_ref) &&
+    nonEmptyString(receipt.outcome_receipt_id) &&
+    receipt.payload_hash === payloadHash &&
     receipt.commitments_disposition_complete === true &&
     receipt.corrections_captured === true &&
     receipt.audit_complete === true
@@ -842,6 +876,28 @@ export class DeterministicEccAdapter implements EccEvaluationAdapter {
     harness: EccEvaluationHarness,
   ): EccEvaluationDecision {
     void harness;
+    if (hasTenantMismatch(subject) || hasMemoryScopeMismatch(subject)) {
+      return deepFreeze({
+        qualified: false,
+        case_behavior: "security_reject",
+        severity: null,
+        owner: null,
+        conflicts: [
+          hasTenantMismatch(subject) ? "tenant mismatch" : "scope mismatch",
+        ],
+        missing_evidence: [],
+        commitments: [],
+        required_approvals: [],
+        prohibited_actions: [],
+        final_state: "dismissed",
+        learning_candidate: null,
+        measures: {
+          security_audit_event: true,
+          unauthorized_action_count: 0,
+          unauthorized_retrieval_count: 0,
+        },
+      });
+    }
     const qualified = deriveQualified(subject);
     const behavior = deriveBehavior(subject, qualified);
     const severity = deriveSeverity(subject, qualified, behavior);
