@@ -260,13 +260,13 @@ function stringValue(value: JsonValue | undefined): string | undefined {
 }
 
 function nonEmptyString(value: JsonValue | undefined): value is string {
-  return typeof value === "string" && value.trim().length > 0;
+  return (
+    typeof value === "string" && value.length > 0 && value === value.trim()
+  );
 }
 
 function isSha256(value: JsonValue | undefined): value is string {
-  return (
-    typeof value === "string" && /^sha256:[a-f0-9]{64}$/.test(value.trim())
-  );
+  return typeof value === "string" && /^sha256:[a-f0-9]{64}$/.test(value);
 }
 
 function booleanValue(value: JsonValue | undefined): boolean | undefined {
@@ -605,7 +605,8 @@ function deriveCommitments(subject: EccEvaluationSubject): JsonObject[] {
     return [
       {
         description: "Provide customer update",
-        due: "2026-08-28T17:00:00-07:00",
+        due_at: "2026-08-29T00:00:00.000Z",
+        due_at_source_timezone: "UTC-07:00",
         owner:
           firstStateString(subject, ["account_owner"]) ?? "user_case_owner",
       },
@@ -656,10 +657,13 @@ function hasClosureProof(subject: EccEvaluationSubject): boolean {
   );
   const decision = authority.action_or_no_action_decision;
   const payloadHash = authority.payload_hash;
+  const policyRef = authority.policy_ref;
   const policyVersion = authority.policy_version;
   const policyWasAuthorized = subject.input.policies.some(
     (policy) =>
-      policy.status === "approved" && policy.version === policyVersion,
+      policy.status === "approved" &&
+      policy.ref === policyRef &&
+      policy.version === policyVersion,
   );
   return (
     (decision === "authorized_action_complete" ||
@@ -667,6 +671,7 @@ function hasClosureProof(subject: EccEvaluationSubject): boolean {
     nonEmptyString(authority.authorized_by_identity_id) &&
     nonEmptyString(authority.authorization_receipt_id) &&
     isSha256(payloadHash) &&
+    nonEmptyString(policyRef) &&
     nonEmptyString(policyVersion) &&
     policyWasAuthorized &&
     verification.source_state_verified === true &&

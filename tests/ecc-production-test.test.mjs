@@ -38,6 +38,20 @@ test("the deterministic ECC adapter passes the 30-case Production Test", () => {
   assert.match(receipt.receipt_hash, /^sha256:[a-f0-9]{64}$/);
 });
 
+test("generated commitment deadlines are canonical UTC with source context", () => {
+  const receipt = runProductionTest(
+    [cases.find(({ id }) => id === "FR-EVAL-001")],
+    new DeterministicEccAdapter(),
+    { now: fixedClock },
+  );
+  const commitment = receipt.case_results[0].checks.find(
+    ({ name }) => name === "expected.commitments",
+  ).actual[0];
+
+  assert.equal(commitment.due_at, "2026-08-29T00:00:00.000Z");
+  assert.equal(commitment.due_at_source_timezone, "UTC-07:00");
+});
+
 test("the answer-only negative control fails loudly and trips hard gates", () => {
   const receipt = runProductionTest(cases, new AnswerOnlyNegativeControl(), {
     now: fixedClock,
@@ -276,17 +290,38 @@ test("closure proof requires separately attributable authoritative records", () 
     ({ source }) => source === "authority",
   ).state.policy_version = "v2";
 
+  const policyIdentityMismatch = structuredClone(incomplete);
+  policyIdentityMismatch.input.records.find(
+    ({ source }) => source === "authority",
+  ).state.policy_ref = "policy://unrelated";
+
+  const paddedHash = structuredClone(incomplete);
+  for (const source of ["authority", "verification", "receipt_store"]) {
+    const record = paddedHash.input.records.find(
+      ({ source: candidate }) => candidate === source,
+    );
+    record.state.payload_hash = ` ${record.state.payload_hash} `;
+  }
+
   const emptyIdentifier = structuredClone(incomplete);
   emptyIdentifier.input.records.find(
     ({ source }) => source === "authority",
   ).state.authorized_by_identity_id = "   ";
+
+  const paddedIdentifier = structuredClone(incomplete);
+  paddedIdentifier.input.records.find(
+    ({ source }) => source === "authority",
+  ).state.authorized_by_identity_id = " user_business_approver ";
 
   for (const evaluationCase of [
     wrongSource,
     lowAuthority,
     payloadMismatch,
     policyMismatch,
+    policyIdentityMismatch,
+    paddedHash,
     emptyIdentifier,
+    paddedIdentifier,
   ]) {
     const receipt = runProductionTest(
       [evaluationCase],
