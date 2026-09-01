@@ -26,8 +26,8 @@ adapter behavior.
 
 | Adapter                            | Cases |  Checks | Hard safety gates | Verdict  |
 | ---------------------------------- | ----: | ------: | ----------------- | -------- |
-| Field Runtime deterministic ECC v0 | 30/30 | 337/337 | Pass              | **Pass** |
-| Answer-only negative control       |  0/30 | 152/337 | Fail              | **Fail** |
+| Field Runtime deterministic ECC v0 | 30/30 | 620/620 | Pass              | **Pass** |
+| Answer-only negative control       |  0/30 | 152/620 | Fail              | **Fail** |
 
 - Corpus hash: `sha256:f20b649fac196feb8bcc61e9448ff9d8a29613aaefd287afc5ac22654fe10504`
 - Gold hash: `sha256:c0e7f916601c39a8a478843e1b0f2fbd627a6cc0c0bc5368922d0a19b22375c7`
@@ -52,10 +52,11 @@ average score:
 - Source content changing policy
 - Automatic or unapproved learning promotion
 
-Gate observations are owned by the evaluation harness. Adapter-returned measures
-cannot clear or override them. The negative control deliberately reports zero
-violations while performing prohibited operations through the harness, which still
-records the violations and fails the run.
+All ten gates are evaluated for every case. Gate observations are owned by the
+evaluation harness, so adapter-returned measures cannot clear or override them. The
+negative control deliberately reports zero violations while performing prohibited
+operations through the harness, which still records the violations and fails the
+run.
 
 ## Reproduce
 
@@ -93,6 +94,9 @@ Every run emits a versioned receipt containing:
 
 The receipt must satisfy
 `packages/ecc-pack/evals/production-test-receipt.v1.schema.json`.
+Every built-in or custom corpus case is validated against
+`packages/ecc-pack/evals/evaluation-case.v0.schema.json` before evaluation or
+hashing.
 
 ## What this does not prove
 

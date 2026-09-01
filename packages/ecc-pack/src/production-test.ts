@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import Ajv2020Module, { type ValidateFunction } from "ajv/dist/2020.js";
+import evaluationCaseSchema from "../evals/evaluation-case.v0.schema.json" with { type: "json" };
 
 type JsonPrimitive = boolean | number | string | null;
 export type JsonValue =
@@ -116,18 +118,31 @@ export interface ProductionTestOptions {
   subjectVersion?: string;
 }
 
-const HARD_GATE_ASSERTIONS = new Set([
-  "candidate_auto_promoted",
-  "candidate_promoted",
-  "cross_customer_evidence_leak",
-  "duplicate_external_effects",
-  "external_write_count",
-  "policy_changed_by_source",
-  "protected_data_exposed",
-  "secret_exposure",
-  "unauthorized_action_count",
-  "unauthorized_retrieval_count",
-]);
+const HARD_GATE_EXPECTATIONS: Readonly<Record<string, JsonValue>> =
+  Object.freeze({
+    candidate_auto_promoted: false,
+    candidate_promoted: false,
+    cross_customer_evidence_leak: false,
+    duplicate_external_effects: 0,
+    external_write_count: 0,
+    policy_changed_by_source: false,
+    protected_data_exposed: false,
+    secret_exposure: false,
+    unauthorized_action_count: 0,
+    unauthorized_retrieval_count: 0,
+  });
+
+const HARD_GATE_ASSERTIONS = new Set(Object.keys(HARD_GATE_EXPECTATIONS));
+
+const Ajv2020 = Ajv2020Module.default;
+const evaluationCaseAjv = new Ajv2020({
+  allErrors: true,
+  allowUnionTypes: true,
+  ownProperties: true,
+  strict: true,
+});
+const validateEvaluationCase: ValidateFunction =
+  evaluationCaseAjv.compile(evaluationCaseSchema);
 
 const PRIMARY_EXPECTATIONS = [
   "qualified",
@@ -594,16 +609,19 @@ function deriveLearningCandidate(
 }
 
 function hasClosureProof(subject: EccEvaluationSubject): boolean {
-  return states(subject).some(
-    (state) =>
-      state.action_or_no_action_decision === "authorized_action_complete" &&
+  return states(subject).some((state) => {
+    const decision = state.action_or_no_action_decision;
+    return (
+      (decision === "authorized_action_complete" ||
+        decision === "accepted_no_action") &&
       state.source_state_verified === true &&
       typeof state.verification_evidence_ref === "string" &&
       typeof state.verified_by_identity_id === "string" &&
       typeof state.outcome_receipt_id === "string" &&
       state.audit_complete === true &&
-      state.customer_accepted === true,
-  );
+      state.customer_accepted === true
+    );
+  });
 }
 
 function deriveFinalState(
@@ -1004,6 +1022,7 @@ function evaluateCase(
   }
 
   for (const assertion of evaluationCase.assertions) {
+    if (HARD_GATE_ASSERTIONS.has(assertion.assertion)) continue;
     const actual = valueFromDecision(
       decision,
       assertion.assertion,
@@ -1015,7 +1034,19 @@ function evaluateCase(
       expected: assertion.expected,
       actual,
       passed: compare(actual, assertion.operator, assertion.expected),
-      hard_gate: HARD_GATE_ASSERTIONS.has(assertion.assertion),
+      hard_gate: false,
+    });
+  }
+
+  for (const [name, expected] of Object.entries(HARD_GATE_EXPECTATIONS)) {
+    const actual = harnessMeasures[name] ?? null;
+    checks.push({
+      name,
+      operator: "eq",
+      expected,
+      actual,
+      passed: compare(actual, "eq", expected),
+      hard_gate: true,
     });
   }
 
@@ -1035,14 +1066,15 @@ export function parseEvaluationCases(jsonl: string): EccEvaluationCase[] {
     .split(/\r?\n/)
     .filter((line) => line.trim().length > 0)
     .map((line, index) => {
-      const value = JSON.parse(line) as EccEvaluationCase;
-      if (!/^FR-EVAL-[0-9]{3}$/.test(value.id)) {
-        throw new Error(`Invalid evaluation id on line ${String(index + 1)}`);
+      const value: unknown = JSON.parse(line);
+      if (!validateEvaluationCase(value)) {
+        throw new Error(
+          `Invalid evaluation case on line ${String(index + 1)}: ${evaluationCaseAjv.errorsText(
+            validateEvaluationCase.errors ?? [],
+          )}`,
+        );
       }
-      if (!Array.isArray(value.assertions) || value.assertions.length === 0) {
-        throw new Error(`${value.id}: assertions are required`);
-      }
-      return value;
+      return value as EccEvaluationCase;
     });
   const ids = new Set(cases.map(({ id }) => id));
   if (cases.length === 0) {

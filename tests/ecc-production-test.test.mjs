@@ -89,6 +89,15 @@ test("a changed gold expectation fails without changing adapter behavior", () =>
 
 test("hard gates use harness observations instead of adapter claims", () => {
   const delegate = new DeterministicEccAdapter();
+  const caseWithoutWriteAssertion = cases.find(
+    ({ id }) => id === "FR-EVAL-003",
+  );
+  assert.equal(
+    caseWithoutWriteAssertion.assertions.some(
+      ({ assertion }) => assertion === "external_write_count",
+    ),
+    false,
+  );
   const concealingAdapter = {
     name: "concealing-adapter",
     evaluate(subject, harness) {
@@ -106,9 +115,13 @@ test("hard gates use harness observations instead of adapter claims", () => {
     },
   };
 
-  const receipt = runProductionTest(cases, concealingAdapter, {
-    now: fixedClock,
-  });
+  const receipt = runProductionTest(
+    [caseWithoutWriteAssertion],
+    concealingAdapter,
+    {
+      now: fixedClock,
+    },
+  );
   assert.equal(receipt.verdict, "fail");
   assert.equal(receipt.hard_gates_passed, false);
   assert.ok(
@@ -119,6 +132,20 @@ test("hard gates use harness observations instead of adapter claims", () => {
       ),
     ),
   );
+});
+
+test("every case receives the complete harness-owned hard-gate set", () => {
+  const receipt = runProductionTest(cases, new DeterministicEccAdapter(), {
+    now: fixedClock,
+  });
+
+  for (const result of receipt.case_results) {
+    assert.equal(
+      result.checks.filter(({ hard_gate }) => hard_gate).length,
+      10,
+      result.id,
+    );
+  }
 });
 
 test("trigger tenant mismatch fails closed before case creation", () => {
@@ -168,6 +195,18 @@ test("accepted customer language cannot resolve a case without closure proof", (
   assert.equal(receipt.verdict, "pass");
 });
 
+test("an accepted no-action decision can satisfy closure proof", () => {
+  const changed = structuredClone(cases.find(({ id }) => id === "FR-EVAL-027"));
+  changed.input.records[0].state.action_or_no_action_decision =
+    "accepted_no_action";
+
+  const receipt = runProductionTest([changed], new DeterministicEccAdapter(), {
+    now: fixedClock,
+  });
+  assert.equal(receipt.verdict, "pass");
+  assert.equal(receipt.case_results[0].passed, true);
+});
+
 test("empty evaluation corpora fail closed", () => {
   assert.throws(() => parseEvaluationCases("\n  \n"), /at least one case/);
   assert.throws(
@@ -176,6 +215,16 @@ test("empty evaluation corpora fail closed", () => {
         now: fixedClock,
       }),
     /at least one case/,
+  );
+});
+
+test("custom evaluation corpora are schema-validated before execution", () => {
+  const changed = structuredClone(cases[0]);
+  changed.assertions[0].operator = "bogus";
+
+  assert.throws(
+    () => parseEvaluationCases(`${JSON.stringify(changed)}\n`),
+    /Invalid evaluation case.*operator/i,
   );
 });
 
