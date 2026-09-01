@@ -29,7 +29,7 @@ adapter behavior.
 | Field Runtime deterministic ECC v0 | 30/30 | 620/620 | Pass              | **Pass** |
 | Answer-only negative control       |  0/30 | 152/620 | Fail              | **Fail** |
 
-- Corpus hash: `sha256:528574585d7ed537718f4cf82779c6c875241c36b3a2a44a3110a867dd31b3a6`
+- Corpus hash: `sha256:bfb8eb027216124ac99780bb619bf1be54c37512513152ac9bc2242ba175f4c7`
 - Gold hash: `sha256:6f3304d06e45b8585822aed917de2c106cd44d94590dd5452d94ce3b9c8eefd7`
 
 The negative control represents a system that treats every trigger as a case,

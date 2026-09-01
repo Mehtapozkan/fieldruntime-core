@@ -269,6 +269,16 @@ function isSha256(value: JsonValue | undefined): value is string {
   return typeof value === "string" && /^sha256:[a-f0-9]{64}$/.test(value);
 }
 
+function isCanonicalUtcMillisecond(
+  value: JsonValue | undefined,
+): value is string {
+  return (
+    typeof value === "string" &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) &&
+    !Number.isNaN(Date.parse(value))
+  );
+}
+
 function booleanValue(value: JsonValue | undefined): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
 }
@@ -293,16 +303,17 @@ function recordBySource(
   return subject.input.records.find((record) => record.source === source);
 }
 
-function authoritativeRecordBySource(
+function authoritativeRecordsBySource(
   subject: EccEvaluationSubject,
   source: string,
-): JsonObject | undefined {
-  const record = recordBySource(subject, source);
-  return record?.authority_rank === 1 &&
-    record.freshness === "live" &&
-    nonEmptyString(record.ref)
-    ? record
-    : undefined;
+): JsonObject[] {
+  return subject.input.records.filter(
+    (record) =>
+      record.source === source &&
+      record.authority_rank === 1 &&
+      record.freshness === "live" &&
+      nonEmptyString(record.ref),
+  );
 }
 
 function states(subject: EccEvaluationSubject): JsonObject[] {
@@ -343,14 +354,47 @@ function hasTenantMismatch(subject: EccEvaluationSubject): boolean {
   );
 }
 
-function hasMemoryScopeMismatch(subject: EccEvaluationSubject): boolean {
+function scopedObjectOutsideAllowed(
+  value: JsonObject,
+  allowed: ReadonlySet<string>,
+  requireScope: boolean,
+): boolean {
+  const hasScope = Object.hasOwn(value, "scope");
+  const hasScopeIds = Object.hasOwn(value, "scope_external_ids");
+  if (requireScope && !hasScope && !hasScopeIds) return true;
+  if (hasScope) {
+    if (!nonEmptyString(value.scope) || !allowed.has(value.scope)) return true;
+  }
+  if (hasScopeIds) {
+    if (!Array.isArray(value.scope_external_ids)) return true;
+    if (
+      value.scope_external_ids.some(
+        (scope) => !nonEmptyString(scope) || !allowed.has(scope),
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function hasScopeMismatch(subject: EccEvaluationSubject): boolean {
   const triggerScopes = subject.input.trigger_event.scope_external_ids;
   if (!Array.isArray(triggerScopes)) return true;
-  const allowed = new Set(
+  if (triggerScopes.some((scope) => !nonEmptyString(scope))) return true;
+  const allowed = new Set<string>(
     triggerScopes.filter((scope): scope is string => typeof scope === "string"),
   );
-  return subject.input.gbrain_memories.some(
-    (memory) => !nonEmptyString(memory.scope) || !allowed.has(memory.scope),
+  return (
+    subject.input.records.some((record) =>
+      scopedObjectOutsideAllowed(record, allowed, false),
+    ) ||
+    subject.input.gbrain_memories.some((memory) =>
+      scopedObjectOutsideAllowed(memory, allowed, true),
+    ) ||
+    subject.input.policies.some((policy) =>
+      scopedObjectOutsideAllowed(policy, allowed, false),
+    )
   );
 }
 
@@ -461,6 +505,17 @@ function deriveConflicts(
 
 function deriveMissingEvidence(subject: EccEvaluationSubject): string[] {
   const missing: string[] = [];
+  if (
+    includesText(subject, "promised an update friday") &&
+    (!isCanonicalUtcMillisecond(
+      subject.input.trigger_event.commitment_due_at,
+    ) ||
+      !nonEmptyString(
+        subject.input.trigger_event.commitment_due_at_source_timezone,
+      ))
+  ) {
+    missing.push("commitment deadline");
+  }
   if (hasState(subject, "root_cause", null)) missing.push("root cause");
   if (hasState(subject, "deployment_status", null))
     missing.push("deployment status");
@@ -602,11 +657,17 @@ function deriveProhibitedActions(
 
 function deriveCommitments(subject: EccEvaluationSubject): JsonObject[] {
   if (includesText(subject, "promised an update friday")) {
+    const dueAt = subject.input.trigger_event.commitment_due_at;
+    const sourceTimezone =
+      subject.input.trigger_event.commitment_due_at_source_timezone;
+    if (!isCanonicalUtcMillisecond(dueAt) || !nonEmptyString(sourceTimezone)) {
+      return [];
+    }
     return [
       {
         description: "Provide customer update",
-        due_at: "2026-08-29T00:00:00.000Z",
-        due_at_source_timezone: "UTC-07:00",
+        due_at: dueAt,
+        due_at_source_timezone: sourceTimezone,
         owner:
           firstStateString(subject, ["account_owner"]) ?? "user_case_owner",
       },
@@ -643,18 +704,25 @@ function deriveLearningCandidate(
 }
 
 function hasClosureProof(subject: EccEvaluationSubject): boolean {
-  const authority = stateOf(
-    authoritativeRecordBySource(subject, "authority") ?? {},
+  const authorityRecords = authoritativeRecordsBySource(subject, "authority");
+  const verificationRecords = authoritativeRecordsBySource(
+    subject,
+    "verification",
   );
-  const verification = stateOf(
-    authoritativeRecordBySource(subject, "verification") ?? {},
-  );
-  const acceptance = stateOf(
-    authoritativeRecordBySource(subject, "support") ?? {},
-  );
-  const receipt = stateOf(
-    authoritativeRecordBySource(subject, "receipt_store") ?? {},
-  );
+  const acceptanceRecords = authoritativeRecordsBySource(subject, "support");
+  const receiptRecords = authoritativeRecordsBySource(subject, "receipt_store");
+  if (
+    authorityRecords.length !== 1 ||
+    verificationRecords.length !== 1 ||
+    acceptanceRecords.length !== 1 ||
+    receiptRecords.length !== 1
+  ) {
+    return false;
+  }
+  const authority = stateOf(authorityRecords[0] ?? {});
+  const verification = stateOf(verificationRecords[0] ?? {});
+  const acceptance = stateOf(acceptanceRecords[0] ?? {});
+  const receipt = stateOf(receiptRecords[0] ?? {});
   const decision = authority.action_or_no_action_decision;
   const payloadHash = authority.payload_hash;
   const policyRef = authority.policy_ref;
@@ -881,7 +949,7 @@ export class DeterministicEccAdapter implements EccEvaluationAdapter {
     harness: EccEvaluationHarness,
   ): EccEvaluationDecision {
     void harness;
-    if (hasTenantMismatch(subject) || hasMemoryScopeMismatch(subject)) {
+    if (hasTenantMismatch(subject) || hasScopeMismatch(subject)) {
       return deepFreeze({
         qualified: false,
         case_behavior: "security_reject",
@@ -1148,28 +1216,35 @@ function evaluateCase(
   };
 }
 
-export function parseEvaluationCases(jsonl: string): EccEvaluationCase[] {
-  const cases = jsonl
-    .split(/\r?\n/)
-    .filter((line) => line.trim().length > 0)
-    .map((line, index) => {
-      const value: unknown = JSON.parse(line);
-      if (!validateEvaluationCase(value)) {
-        throw new Error(
-          `Invalid evaluation case on line ${String(index + 1)}: ${evaluationCaseAjv.errorsText(
-            validateEvaluationCase.errors ?? [],
-          )}`,
-        );
-      }
-      return value as EccEvaluationCase;
-    });
-  const ids = new Set(cases.map(({ id }) => id));
-  if (cases.length === 0) {
+function assertEvaluationCases(
+  values: readonly unknown[],
+): asserts values is readonly EccEvaluationCase[] {
+  if (values.length === 0) {
     throw new Error("Evaluation corpus must contain at least one case");
   }
-  if (ids.size !== cases.length)
+  for (const [index, value] of values.entries()) {
+    if (!validateEvaluationCase(value)) {
+      throw new Error(
+        `Invalid evaluation case at index ${String(index)}: ${evaluationCaseAjv.errorsText(
+          validateEvaluationCase.errors ?? [],
+        )}`,
+      );
+    }
+  }
+  const validated = values as readonly EccEvaluationCase[];
+  const ids = new Set(validated.map(({ id }) => id));
+  if (ids.size !== values.length) {
     throw new Error("Evaluation ids must be unique");
-  return deepFreeze(cases);
+  }
+}
+
+export function parseEvaluationCases(jsonl: string): EccEvaluationCase[] {
+  const values: unknown[] = jsonl
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length > 0)
+    .map((line) => JSON.parse(line) as unknown);
+  assertEvaluationCases(values);
+  return deepFreeze(values as EccEvaluationCase[]);
 }
 
 export function runProductionTest(
@@ -1177,9 +1252,7 @@ export function runProductionTest(
   adapter: EccEvaluationAdapter,
   options: ProductionTestOptions = {},
 ): ProductionTestReceipt {
-  if (cases.length === 0) {
-    throw new Error("Evaluation corpus must contain at least one case");
-  }
+  assertEvaluationCases(cases);
   const subjectVersion = options.subjectVersion ?? "working-tree";
   if (subjectVersion.trim().length === 0) {
     throw new Error("Subject version must not be empty");
