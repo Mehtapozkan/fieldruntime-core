@@ -11,6 +11,8 @@
   "scripts": {
     "build": "pnpm clean && tsc -p tsconfig.json && node scripts/copy-static.mjs",
     "clean": "node scripts/clean.mjs",
+    "eval:ecc": "pnpm build && node dist/packages/ecc-pack/src/cli.js",
+    "eval:ecc:json": "pnpm build && node dist/packages/ecc-pack/src/cli.js --json",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint .",

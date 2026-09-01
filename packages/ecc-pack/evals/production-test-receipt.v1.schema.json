@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/production-test-receipt-v1.schema.json",
+  "title": "Field Runtime Production Test Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "suite_id",
+    "suite_version",
+    "adapter",
+    "subject_version",
+    "corpus_hash",
+    "gold_hash",
+    "started_at",
+    "completed_at",
+    "run_status",
+    "verdict",
+    "hard_gates_passed",
+    "total_cases",
+    "passed_cases",
+    "failed_cases",
+    "passed_checks",
+    "total_checks",
+    "score",
+    "case_results",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "suite_id": {
+      "const": "fieldruntime-production-test-ecc"
+    },
+    "suite_version": {
+      "const": "0.1.0"
+    },
+    "adapter": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "corpus_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "gold_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_status": {
+      "const": "completed"
+    },
+    "verdict": {
+      "enum": ["fail", "pass"]
+    },
+    "hard_gates_passed": {
+      "type": "boolean"
+    },
+    "total_cases": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "passed_cases": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failed_cases": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "passed_checks": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "total_checks": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "case_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "category", "passed", "score", "checks"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^FR-EVAL-[0-9]{3}$"
+          },
+          "category": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "checks": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "operator",
+                "expected",
+                "actual",
+                "passed",
+                "hard_gate"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "operator": {
+                  "enum": ["contains", "eq", "gte", "in", "lte", "neq"]
+                },
+                "expected": true,
+                "actual": true,
+                "passed": {
+                  "type": "boolean"
+                },
+                "hard_gate": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "receipt_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  }
+}

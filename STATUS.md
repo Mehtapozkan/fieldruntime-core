@@ -1,6 +1,6 @@
 # Status
 
-Current milestone: PR2 — Case and event engine
+Current milestone: PR3 — ECC Production Test
 
 ## Implemented
 
@@ -29,15 +29,55 @@ Current milestone: PR2 — Case and event engine
   engine is implemented.
 - Contract, workflow, fixture, and transition tests.
 - Local PostgreSQL Compose configuration and credential-free CI foundation.
+- Deterministic ECC reference adapter that executes all 30 synthetic cases without
+  receiving their expected outcomes or assertions.
+- Explicit primary-outcome and named-assertion scoring across qualification,
+  evidence, ownership, conflicts, authority, commitments, closure, and learning.
+- Versioned, schema-validated, hash-addressed Production Test receipts.
+- Hard safety gates for unauthorized actions and retrievals, external writes,
+  duplicate effects, data leakage, policy injection, secret exposure, and learning
+  promotion, derived from harness-owned observations rather than adapter claims.
+- Corpus and gold-answer hashes that bind every receipt to the exact evaluated
+  inputs and answer key.
+- Fail-closed closure evaluation requiring an authorized action, source-state
+  verification evidence, verifier identity, outcome receipt, completed audit, and
+  customer acceptance.
+- Canonical tenant identities at both corpus and adapter boundaries, including
+  direct adapter calls that bypass corpus schema validation.
+- Fail-closed rejection of malformed live rank-one authority state before proof
+  selection.
+- Same-rank account-owner conflict detection before deterministic owner routing.
+- Owner selection restricted to live rank-one authoritative records.
+- Customer acceptance bound to the exact authorized payload, independent
+  verification evidence, and outcome receipt being closed.
+- Authorized policy selection rejects duplicate or contradictory records for the
+  same policy identity and version.
+- Closure proof records bind to the evaluated trigger event identity, preventing
+  same-tenant proof reuse across cases.
+- Answer-only negative control with deliberately unsafe behavior and a reachable
+  suite failure state.
+- Public benchmark methodology with reproduction instructions and explicit limits.
 
 ## Verified
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- 48 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 76 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
-  cases, graph activation blockers, and local database exposure checks.
+  cases, graph activation blockers, local database exposure checks, gold-boundary
+  isolation, harness-owned gate observations, tenant/scope rejection, payload- and
+  policy-bound closure proof, canonical tenant identity at the adapter boundary,
+  malformed authority-state rejection, same-rank owner conflicts, authoritative
+  owner selection, contradictory policy rejection, trigger-bound closure proof,
+  outcome-bound customer acceptance,
+  empty-corpus rejection, immutable receipt output, receipt-schema validation,
+  corpus/gold bindings, deterministic receipt hashing, and the negative-control
+  gate.
+- The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
+  hard gate passing.
+- The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
+  trips hard safety gates.
 - Docker's native `compose config` check remains in CI; Docker is unavailable in
   the current build environment.
 
@@ -56,8 +96,14 @@ Current milestone: PR2 — Case and event engine
   must be reconciled before the reference SQL becomes a PR4 migration.
 - ECC v0.1.0 is shadow/evaluation-only; activation is deliberately blocked.
 - Public license and paid/open-core boundary are intentionally unresolved.
+- Evaluation inputs and gold currently share the Core repository. The adapter
+  cannot receive gold at runtime, but held-out and externally authored cases do not
+  exist yet.
+- The current result is synthetic and deterministic; it does not measure live
+  providers, human usefulness, resolution economics, or production performance.
 
 ## Next
 
-After PR2 review: PR3 runs the shadow ECC evaluation pack through deterministic
-qualification, evidence, conflict, ownership, and decision-packet behavior.
+After PR3 review: PR4 builds the local appliance with the API, worker, PostgreSQL
+migrations, fixture loader, and documented `fr init ecc --demo` / `fr up`
+experience.
