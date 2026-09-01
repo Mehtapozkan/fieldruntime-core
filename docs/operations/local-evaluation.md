@@ -26,6 +26,10 @@ repository surface, selects its explicit `compose.yaml`, forces simulation mode
 and external writes off, builds the API image, applies the checksum-bound migration,
 loads the immutable ECC fixture, and waits for readiness.
 
+When startup succeeds, the CLI prints the workbench URL. Open
+`http://127.0.0.1:3210/` to begin directly in the Acme case. There is no signup,
+API key, blank dashboard, or setup step before the four-stage walkthrough.
+
 Both published ports are loopback-only:
 
 - API: `http://127.0.0.1:3210`
@@ -40,6 +44,7 @@ only. Do not reuse them in a shared or production environment.
 curl http://127.0.0.1:3210/healthz
 curl http://127.0.0.1:3210/readyz
 curl http://127.0.0.1:3210/v0/evaluation-fixtures/ecc/case_acme_sso_001
+curl http://127.0.0.1:3210/v0/evaluation-walkthroughs/ecc/walkthrough_acme_sso_001
 ```
 
 `/healthz` reports process liveness only. `/readyz` additionally verifies the
@@ -47,6 +52,12 @@ exact migration and fixture hashes, the singleton writer lock, and complete
 PostgreSQL replay/projection integrity. The fixture response is labeled
 `authoritative: false` and `replayable: false`; authoritative cases enter through
 the tenant-scoped command endpoint defined by the OpenAPI contract.
+
+The walkthrough response and browser controls are presentation-only. They are
+schema-bound to the immutable fixture, but they do not create approvals, execute
+actions, mutate authoritative cases, emit production receipts, or make an
+external request. The workbench remains visibly labeled `Synthetic`,
+`Guided simulation`, and `External writes off` throughout.
 
 Useful diagnostics:
 

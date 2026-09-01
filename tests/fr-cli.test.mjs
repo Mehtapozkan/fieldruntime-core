@@ -172,6 +172,10 @@ test("up validates the manifest and invokes the exact Compose command", async ()
       },
     ]);
     assert.deepEqual(context.stderr, []);
+    assert.equal(
+      context.stdout.at(-1),
+      "Field Runtime workbench: http://127.0.0.1:3210/\n",
+    );
   });
 });
 
@@ -238,6 +242,7 @@ test("up propagates a valid nonzero Docker exit code", async () => {
     });
 
     assert.equal(await runCli(["up"], context.dependencies), 17);
+    assert.deepEqual(context.stdout, []);
   });
 });
 

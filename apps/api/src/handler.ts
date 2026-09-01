@@ -29,6 +29,14 @@ export interface EvaluationFixtureRecord {
   readonly document: JsonObject;
 }
 
+export interface GuidedWalkthroughRecord {
+  readonly walkthrough_id: string;
+  readonly walkthrough_hash: string;
+  readonly fixture_id: string;
+  readonly fixture_hash: string;
+  readonly document: JsonObject;
+}
+
 export interface ApiDependencies {
   readonly isReady: () => Promise<boolean>;
   readonly executeCaseCommand: (
@@ -47,6 +55,9 @@ export interface ApiDependencies {
   readonly getEvaluationFixture: (
     fixtureId: string,
   ) => Promise<EvaluationFixtureRecord | undefined>;
+  readonly getGuidedWalkthrough: (
+    walkthroughId: string,
+  ) => Promise<GuidedWalkthroughRecord | undefined>;
 }
 
 const JSON_HEADERS = Object.freeze({
@@ -178,6 +189,28 @@ export async function handleApiRequest(
           ...fixture,
           authoritative: false,
           replayable: false,
+        });
+  }
+
+  if (
+    method === "GET" &&
+    segments.length === 4 &&
+    segments[0] === "v0" &&
+    segments[1] === "evaluation-walkthroughs" &&
+    segments[2] === "ecc"
+  ) {
+    const walkthroughId = segments[3];
+    if (walkthroughId === undefined || !CANONICAL_ID.test(walkthroughId)) {
+      return response(404, { error: "not_found" });
+    }
+    const walkthrough = await dependencies.getGuidedWalkthrough(walkthroughId);
+    return walkthrough === undefined
+      ? response(404, { error: "not_found" })
+      : response(200, {
+          ...walkthrough,
+          authoritative: false,
+          replayable: false,
+          production_receipt: false,
         });
   }
 

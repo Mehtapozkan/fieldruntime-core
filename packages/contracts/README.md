@@ -4,6 +4,12 @@ Canonical JSON Schema boundary contracts plus deterministic cross-record
 invariants. The JSON Schema is the v0 boundary source of truth. Database parity is
 tracked separately and must not be assumed.
 
+`guided-walkthrough.v0.schema.json` defines the synthetic PR5 browser narrative.
+Its safety constants prohibit authority effects, external writes, replay, and
+production-receipt claims. Worker-side cross-binding checks keep the narrative
+attached to exact fixture evidence, actions, hashes, attempts, and verifier
+identities.
+
 The two event-shaped contracts have different jobs:
 
 - `WorkEvent` inside the Case schema is normalized inbound source evidence.
@@ -41,5 +47,5 @@ Those values are representable in JavaScript but not losslessly accepted by the
 canonical PostgreSQL JSONB target; rejecting them before hashing prevents an
 engine/persistence split.
 
-`openapi/local-appliance.v0.yaml` defines the loopback-only PR4 evaluation API and
+`openapi/local-appliance.v0.yaml` defines the loopback-only evaluation API and
 keeps its non-production authority boundary explicit.

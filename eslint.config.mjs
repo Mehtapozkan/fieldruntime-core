@@ -34,4 +34,16 @@ export default tseslint.config(
       },
     },
   },
+  {
+    ...tseslint.configs.disableTypeChecked,
+    files: ["apps/admin/public/**/*.js"],
+    languageOptions: {
+      ...tseslint.configs.disableTypeChecked.languageOptions,
+      globals: {
+        document: "readonly",
+        fetch: "readonly",
+        window: "readonly",
+      },
+    },
+  },
 );

@@ -12,6 +12,10 @@ Versioned workflow assets for the first Field Runtime Core evaluation pack.
   contract.
 - `fixtures/acme-sso-needs-review.case.json` is a canonical schema-valid case
   snapshot used by baseline contract tests.
+- `fixtures/acme-sso-guided-walkthrough.v0.json` is the schema-bound, immutable
+  presentation trace used by the PR5 workbench. It demonstrates a silent simulated
+  connector failure and independent read-back without creating an authoritative
+  case mutation or production receipt.
 
 All actions are simulated. No file in this pack contains live credentials.
 

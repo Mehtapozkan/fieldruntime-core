@@ -1,0 +1,275 @@
+{
+  "schema_version": "guided-walkthrough.v0",
+  "walkthrough_id": "walkthrough_acme_sso_001",
+  "title": "The connector said success. The work was not done.",
+  "pack": {
+    "id": "ecc",
+    "version": "0.1.0",
+    "workflow_id": "customer_escalation_commitment_control"
+  },
+  "safety": {
+    "immutable": true,
+    "synthetic": true,
+    "simulation": true,
+    "authoritative": false,
+    "replayable": false,
+    "external_writes": false,
+    "authority_effects": false,
+    "production_receipt": false
+  },
+  "source_fixture": {
+    "fixture_id": "case_acme_sso_001",
+    "fixture_hash": "sha256:30f38700f4d5b04b277b7e364ad527b2c8b20bf9deb6c6edd5a68a53581bc3e8",
+    "tenant_id": "tenant_orchid",
+    "case_id": "case_acme_sso_001",
+    "workflow_version_id": "workflow_ecc_v0_1_0"
+  },
+  "stages": {
+    "case": {
+      "stage_id": "case",
+      "title": "One case. Four sources. One contradiction.",
+      "narrative": "Acme's renewal is at risk. Slack says the SSO fix shipped, while the live engineering record says it is still in review and not deployed. Field Runtime keeps the contradiction visible instead of guessing which claim is true.",
+      "evidence_bindings": [
+        {
+          "evidence_id": "evidence_slack_claim",
+          "role": "source_claim",
+          "headline": "Slack: The fix shipped."
+        },
+        {
+          "evidence_id": "evidence_crm_account",
+          "role": "customer_record",
+          "headline": "CRM: Renewal risk is active; Jane owns the account."
+        },
+        {
+          "evidence_id": "evidence_linear_issue",
+          "role": "engineering_state",
+          "headline": "Engineering: In review. Deployed: false."
+        },
+        {
+          "evidence_id": "evidence_customer_comms_policy",
+          "role": "governing_policy",
+          "headline": "Policy: A Business Approver must authorize customer updates."
+        }
+      ],
+      "conflict_artifact_id": "artifact_deployment_conflict"
+    },
+    "decision": {
+      "stage_id": "decision",
+      "title": "The recommendation is easy. Authority is the work.",
+      "decision_packet_id": "decision_packet_acme_001",
+      "recommendation": "Verify deployment first, then send only the approved evidence-linked customer update.",
+      "options": [
+        {
+          "action_id": "action_verify_deployment",
+          "payload_hash": "sha256:d2052415dbbead3d94bb7bb1124cf1d7d8bb00b211610494377482941fb8b39d",
+          "label": "Verify deployment",
+          "risk_level": "low",
+          "required_approval_roles": [],
+          "authority_message": "The case owner may request an independent fixture read-back."
+        },
+        {
+          "action_id": "action_draft_update",
+          "payload_hash": "sha256:3f66e2da315d9a9557a94a985c1b7dadd8f774697df93eae16c59bd1588d590e",
+          "label": "Send a customer update",
+          "risk_level": "high",
+          "required_approval_roles": ["Business Approver"],
+          "authority_message": "A Business Approver must approve the exact message payload."
+        },
+        {
+          "action_id": "action_offer_credit",
+          "payload_hash": "sha256:af5dc137ee43b48dadc72cffbc5b3d33f1055b3482586e841c5e01b51ff8a47e",
+          "label": "Offer a $15,000 credit",
+          "risk_level": "critical",
+          "required_approval_roles": [
+            "Finance / Commercial Approver",
+            "Executive Sponsor"
+          ],
+          "authority_message": "Finance and the Executive Sponsor must approve the exact credit payload."
+        }
+      ],
+      "authority_exception": {
+        "action_id": "action_offer_credit",
+        "missing_roles": ["Finance / Commercial Approver", "Executive Sponsor"],
+        "disposition": "human_approval_required"
+      }
+    },
+    "act_verify": {
+      "stage_id": "act_verify",
+      "title": "A success response is not a verified result.",
+      "selected_action": {
+        "action_id": "action_draft_update",
+        "payload_hash": "sha256:3f66e2da315d9a9557a94a985c1b7dadd8f774697df93eae16c59bd1588d590e",
+        "idempotency_key": "case_acme_sso_001:customer-update:v1"
+      },
+      "authority_preview": {
+        "action_id": "action_draft_update",
+        "required_roles": ["Business Approver"],
+        "status": "simulation_only_no_approval_recorded"
+      },
+      "attempts": [
+        {
+          "attempt_id": "attempt_customer_update_silent_failure",
+          "sequence": 1,
+          "previous_attempt_id": null,
+          "action": {
+            "action_id": "action_draft_update",
+            "payload_hash": "sha256:3f66e2da315d9a9557a94a985c1b7dadd8f774697df93eae16c59bd1588d590e",
+            "idempotency_key": "case_acme_sso_001:customer-update:v1"
+          },
+          "mode": "guided_simulation",
+          "simulated_connector_response": {
+            "adapter_identity_id": "service_fixture_crm_action",
+            "status": "reported_success",
+            "reported_at": "2026-08-26T16:10:00.000Z",
+            "production_receipt": false
+          },
+          "independent_readback": {
+            "verifier_identity_id": "service_fixture_crm_readback",
+            "source": "fixture://crm/accounts/acme-aero/customer-update/readback",
+            "expected_value": {
+              "message": "Deployment is still being verified."
+            },
+            "observed_value": {
+              "message": null
+            },
+            "result": "mismatch",
+            "observed_at": "2026-08-26T16:10:05.000Z"
+          },
+          "effect_acceptance_evaluation": {
+            "decision": "rejected",
+            "reasons": [
+              "Independent read-back found no customer update, so the simulated effect was rejected.",
+              "A connector acknowledgement cannot prove that the exact customer record changed."
+            ],
+            "authoritative_transition_applied": false
+          },
+          "simulated_result": {
+            "status": "effect_rejected",
+            "accepted": false
+          }
+        },
+        {
+          "attempt_id": "attempt_customer_update_recovery",
+          "sequence": 2,
+          "previous_attempt_id": "attempt_customer_update_silent_failure",
+          "action": {
+            "action_id": "action_draft_update",
+            "payload_hash": "sha256:3f66e2da315d9a9557a94a985c1b7dadd8f774697df93eae16c59bd1588d590e",
+            "idempotency_key": "case_acme_sso_001:customer-update:v1"
+          },
+          "mode": "guided_simulation",
+          "simulated_connector_response": {
+            "adapter_identity_id": "service_fixture_crm_action",
+            "status": "reported_success",
+            "reported_at": "2026-08-26T16:12:00.000Z",
+            "production_receipt": false
+          },
+          "independent_readback": {
+            "verifier_identity_id": "service_fixture_crm_readback",
+            "source": "fixture://crm/accounts/acme-aero/customer-update/readback",
+            "expected_value": {
+              "message": "Deployment is still being verified."
+            },
+            "observed_value": {
+              "message": "Deployment is still being verified."
+            },
+            "result": "match",
+            "observed_at": "2026-08-26T16:12:05.000Z"
+          },
+          "effect_acceptance_evaluation": {
+            "decision": "accepted_simulation_only",
+            "reasons": [
+              "The exact bounded customer-update effect is accepted only inside this guided simulation after independent read-back matches.",
+              "Deployment remains unverified; PR5 creates no approvals, production action receipts, outcomes, or authoritative case transitions."
+            ],
+            "authoritative_transition_applied": false
+          },
+          "simulated_result": {
+            "status": "effect_accepted_simulation_only",
+            "accepted": true
+          }
+        }
+      ],
+      "recovery_strategy": "Retry the same simulated effect identity, preserve attempt lineage, and accept the exact customer update only after independent read-back matches. Deployment remains unverified; the authoritative case remains unchanged.",
+      "authoritative_case_state": "needs_review",
+      "external_effect_count": 0,
+      "production_receipt_emitted": false
+    },
+    "receipt_preview": {
+      "stage_id": "receipt_preview",
+      "title": "The whole decision can be reconstructed - as a preview, not a production receipt.",
+      "kind": "guided_simulation_trace",
+      "production_receipt": false,
+      "trace": [
+        {
+          "sequence": 1,
+          "kind": "evidence",
+          "ref_id": "artifact_deployment_conflict",
+          "label": "The source claim conflicts with live engineering state."
+        },
+        {
+          "sequence": 2,
+          "kind": "recommendation",
+          "ref_id": "decision_packet_acme_001",
+          "label": "Verify deployment, then send an evidence-linked update."
+        },
+        {
+          "sequence": 3,
+          "kind": "authority",
+          "ref_id": "action_draft_update",
+          "label": "The exact customer message requires a Business Approver."
+        },
+        {
+          "sequence": 4,
+          "kind": "payload",
+          "ref_id": "action_draft_update",
+          "label": "Both simulated attempts stay bound to the same declared payload hash and idempotency key."
+        },
+        {
+          "sequence": 5,
+          "kind": "connector_response",
+          "ref_id": "attempt_customer_update_silent_failure",
+          "label": "The simulated connector reports success."
+        },
+        {
+          "sequence": 6,
+          "kind": "independent_verification",
+          "ref_id": "attempt_customer_update_silent_failure",
+          "label": "An independently identified fixture verifier reads back no customer message."
+        },
+        {
+          "sequence": 7,
+          "kind": "effect_rejection",
+          "ref_id": "attempt_customer_update_silent_failure",
+          "label": "The simulated effect is rejected because the customer record does not match. It cannot be used as case-resolution proof."
+        },
+        {
+          "sequence": 8,
+          "kind": "accepted_simulated_result",
+          "ref_id": "attempt_customer_update_recovery",
+          "label": "The recovery is accepted in simulation only after independent read-back matches."
+        },
+        {
+          "sequence": 9,
+          "kind": "correction",
+          "ref_id": "correction_require_independent_readback",
+          "label": "The failure becomes an append-only correction and an unpromoted learning preview."
+        }
+      ],
+      "correction_preview": {
+        "correction_id": "correction_require_independent_readback",
+        "based_on_attempt_id": "attempt_customer_update_silent_failure",
+        "statement": "Never treat a connector success acknowledgement as outcome proof; require an independently identified read-back before accepting the result.",
+        "append_only_preview": true
+      },
+      "learning_candidate_preview": {
+        "candidate_id": "learning_candidate_independent_readback",
+        "source_correction_id": "correction_require_independent_readback",
+        "title": "Add silent connector success to held-out verification evaluations.",
+        "status": "preview_not_promoted",
+        "promotion_authorized": false,
+        "original_history_mutated": false
+      }
+    }
+  }
+}

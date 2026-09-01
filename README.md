@@ -33,13 +33,14 @@ Implemented in the current evaluation foundation:
 - A loopback-only HTTP API, in-process transactional worker, checksum-bound
   migrations, and immutable evaluation-fixture catalog.
 - A fail-closed `fr` CLI plus Docker Compose appliance for the ECC demo.
+- A direct-to-case guided workbench that makes the complete ECC story visible as
+  an explicitly synthetic, non-authoritative simulation.
 - Contract, fixture, transition, idempotency, journal, persistence, API, CLI, and
   adversarial tests.
 
-Planned, not implemented yet: automatic ECC case matching, authority evaluation,
-controlled action execution, independent read-back verification, the guided
-workbench, live connectors, identity federation, high availability, and production
-operations.
+Planned, not implemented yet: automatic ECC case matching, authoritative approval
+evaluation, controlled action execution, runtime-enforced independent read-back,
+live connectors, identity federation, high availability, and production operations.
 
 ## Product boundary
 
@@ -77,6 +78,7 @@ repository root:
 pnpm fr init ecc --demo
 pnpm fr up
 
+# Open http://127.0.0.1:3210/ in a browser
 curl http://127.0.0.1:3210/readyz
 curl http://127.0.0.1:3210/v0/evaluation-fixtures/ecc/case_acme_sso_001
 ```
@@ -93,6 +95,7 @@ routes, shutdown, data retention, and troubleshooting.
 
 ```text
 apps/api/                Loopback-only local evaluation API
+apps/admin/              Guided Case → Decision → Act & Verify → Receipt workbench
 apps/worker/             In-process transactional command and bootstrap services
 packages/domain/         Deterministic domain vocabulary and state rules
 packages/contracts/      Canonical boundary schemas

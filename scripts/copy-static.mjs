@@ -1,6 +1,7 @@
 import { cp, mkdir } from "node:fs/promises";
 
 const directories = [
+  "apps/admin/public",
   "packages/contracts/schemas",
   "packages/contracts/openapi",
   "packages/ecc-pack/fixtures",
