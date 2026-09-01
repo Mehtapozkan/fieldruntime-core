@@ -5,7 +5,9 @@ Treat visibility as a separate owner decision after the source change is merged.
 
 ## Before changing visibility
 
-- Merge the public evaluation-preview preparation only after hosted CI and the
+- Confirm GitHub PR #6 (Public Evaluation Preview Readiness) is merged with hosted
+  CI and the Docker Compose smoke passing.
+- Merge GitHub PR #12 (Public Launch Finalization) only after its hosted CI and
   Docker Compose smoke pass.
 - Run `pnpm release:check` on the final `main` commit.
 - Confirm `LICENSE`, `NOTICE`, `SECURITY.md`, `TRADEMARKS.md`, `OPEN_CORE.md`, and
@@ -23,7 +25,9 @@ Treat visibility as a separate owner decision after the source change is merged.
 ## Visibility change
 
 The repository owner changes visibility in GitHub repository settings only after
-the checklist above is complete. This codebase does not automate that action.
+the checklist above is complete. This codebase does not automate that action. Until
+signed-out access works, describe the project as Apache-2.0-licensed source pending
+publication—not as a publicly available open-source repository.
 
 ## Immediately after publication
 

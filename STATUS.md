@@ -1,6 +1,10 @@
 # Status
 
-Current milestone: v0.1.0 Public Evaluation Preview preparation
+Current milestone: v0.1.0 Evaluation Preview release candidate
+
+Release position: GitHub PRs #6 (Public Evaluation Preview Readiness) and #12
+(Public Launch Finalization) are merged. The repository and
+`v0.1.0-evaluation-preview.0` GitHub prerelease are public.
 
 ## Implemented
 
@@ -117,10 +121,10 @@ Current milestone: v0.1.0 Public Evaluation Preview preparation
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- `pnpm release:check` passes across 118 current files, complete reachable Git
+- `pnpm release:check` passes across 126 current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 135 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 136 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
   cases, graph activation blockers, local database exposure checks, gold-boundary
@@ -155,7 +159,7 @@ Current milestone: v0.1.0 Public Evaluation Preview preparation
   Production identity federation, authorization, tenancy administration, and
   network deployment are not implemented.
 - `fr up` intentionally runs only from a cloned Field Runtime Core repository root;
-  a standalone installer and signed distributable remain PR10 scope.
+  a standalone installer and signed distributable remain Delivery PR10 scope.
 - Event attachment requires an explicitly selected case. Automatic ECC candidate
   matching and ambiguous-merge handling are not implemented yet.
 - No authority engine, action gateway, or independent verifier yet.
@@ -166,22 +170,21 @@ Current milestone: v0.1.0 Public Evaluation Preview preparation
   its own lossless event-store migration; a normalized model still requires
   explicit parity reconciliation and conformance tests.
 - ECC v0.1.0 is shadow/evaluation-only; activation is deliberately blocked.
-- Repository visibility is an explicit owner action outside this code change. The
-  public-repository checklist requires green hosted CI before that action.
 - The preview is source-clone distribution only. Signed artifacts, installers,
-  SBOM, provenance, upgrade, and uninstall flows remain PR10 scope.
+  SBOM, provenance, upgrade, and uninstall flows remain Delivery PR10 scope.
 - Evaluation inputs and gold currently share the Core repository. The adapter
   cannot receive gold at runtime, but held-out and externally authored cases do not
   exist yet.
 - The current result is synthetic and deterministic; it does not measure live
   providers, human usefulness, resolution economics, or production performance.
 - The guided authority, connector response, read-back, recovery, receipt, and
-  learning trace is presentation-only. PR6 must replace it with deterministic
-  authority envelopes, a simulated action gateway, and runtime-enforced independent
-  verification before those controls can mutate an authoritative case.
+  learning trace is presentation-only. Delivery PR6 must replace it with
+  deterministic authority envelopes, a simulated action gateway, and
+  runtime-enforced independent verification before those controls can mutate an
+  authoritative case.
 
 ## Next
 
-After PR5 review: PR6 implements deterministic authority, payload-bound approval,
-the simulated action gateway, and independent verification behind the workbench
-without introducing live connectors or external writes.
+Delivery PR6 is the next product capability: deterministic authority,
+payload-bound approval, a simulated action gateway, and independent verification
+without live connectors or external writes.

@@ -1,7 +1,7 @@
 # Guided Workbench Boundary
 
-PR5 makes the existing evaluation appliance understandable without granting new
-authority.
+GitHub PR #5 made the existing evaluation appliance understandable without
+granting new authority.
 
 The browser loads two same-origin, immutable evaluation records:
 
@@ -29,7 +29,8 @@ after the independent read-back matches. This effect-acceptance gate does not cl
 that deployment was verified or that the case can close; the authoritative fixture
 remains `needs_review`.
 
-PR6 must replace these presentation observations with deterministic authority
-envelopes, payload-bound approvals, an idempotent simulated effect ledger, and
-runtime-enforced independent verification. The PR5 data is a replaceable work
-surface adapter, not part of the trusted core.
+Delivery PR6 must replace these presentation observations with
+deterministic authority envelopes, payload-bound approvals, an idempotent simulated
+effect ledger, and runtime-enforced independent verification. GitHub PR #6 was the
+public evaluation-preview readiness change; it did not add those controls. The
+PR #5 data is a replaceable work-surface adapter, not part of the trusted core.

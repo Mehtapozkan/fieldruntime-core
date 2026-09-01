@@ -21,7 +21,7 @@ for a raw provider payload. Adapters must retain those bodies outside the canoni
 Case and place only an opaque external reference in `payload_ref`. PR2 validates the
 declared `content_hash` format and fingerprints the complete normalized WorkEvent,
 but it cannot independently recompute that content hash. Adapter validation remains
-PR7 scope.
+planned Delivery PR7 scope.
 
 `occurred_at` crosses the command boundary as RFC 3339 with no more than
 millisecond precision and is normalized to exact `.sssZ` UTC before every
@@ -119,8 +119,8 @@ reread, commitment disposition, accepted evidenced outcome, correction capture,
 and reconstructable audit before enabling that transition.
 
 PR2 also fails closed on every Case document that claims an action is `executed`.
-PR6 must define and recompute the versioned authorization envelope before declared
-payload hashes, approvals, and receipts can prove execution.
+Delivery PR6 must define and recompute the versioned authorization envelope
+before declared payload hashes, approvals, and receipts can prove execution.
 
 The imported ECC v0.1.0 fixture remains a legacy snapshot: its version and audit
 history are not sufficient to reconstruct its earlier lifecycle. PR4 stores it

@@ -3,22 +3,30 @@
 Each pull request must remain independently reviewable and leave the repository in
 a passing state.
 
-Delivery position: PR1–PR5 are merged. Public evaluation-preview preparation is in
-progress; PR6 remains the next product milestone after release evidence passes.
+Delivery position: GitHub PRs #1–#6 and #12 are merged. The public source preview
+and `v0.1.0-evaluation-preview.0` prerelease are published. Delivery PR6 is the next
+planned product milestone.
 
-| PR                                | Outcome                                                                                                                                          | Exit criteria                                                                          |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| 1 — Constitution and scaffold     | Product boundary, monorepo, canonical Case schema, ECC contract, first fixture, tests, CI                                                        | Clean install and `pnpm validate` pass without credentials                             |
-| 2 — Case and event engine         | Deterministic state machine, hash-chained case journal, idempotent case creation, explicit case-targeted WorkEvent attachment, and audit lineage | Journal replay, tamper, projection-drift, transition, and duplicate-event tests pass   |
-| 3 — ECC pack runner               | Execute all 30 synthetic cases through qualification, evidence, conflicts, ownership, and decision packet                                        | Deterministic assertions pass and failures are explicit                                |
-| 4 — Local appliance               | API, in-process worker, lossless PostgreSQL event store, immutable fixture catalog, `fr init ecc --demo`, and `fr up`                            | Fresh-volume demo creates, updates, restarts, replays, and deduplicates in CI          |
-| 5 — Guided workbench              | Direct-to-case Case, Decision, Act & Verify, and Receipt experience with an explicitly non-authoritative guided simulation                       | Six-action walkthrough, accessibility, local-only browser, and appliance smoke pass    |
-| Release prep — Evaluation preview | Apache 2.0 boundary, public governance and security files, pinned infrastructure, release checks, screenshot, and five-minute walkthrough        | Public-release audit and hosted appliance CI pass before repository visibility changes |
-| 6 — Authority and verification    | Deterministic authority matrix, payload-bound approvals, simulated action gateway, independent read-back                                         | No bypass, self-verification, or duplicate-effect test passes                          |
-| 7 — Provider adapters             | Bounded model, memory, agent-harness, and connector interfaces with mocks first                                                                  | Contract suites pass without provider payload leakage                                  |
-| 8 — Receipts and economics        | Full receipt chain plus resolution-time, handoff, intervention, commitment, and verified-result measures                                         | Case is reconstructable and metrics are derivable from receipts                        |
-| 9 — Correction and replay         | Append-only correction, branch, changed-fact replay, and learning candidate review                                                               | Original history remains unchanged and replay is reproducible                          |
-| 10 — Evaluation release           | Installer, signed artifacts, SBOM, provenance, upgrade/uninstall docs                                                                            | Downloadable evaluation release with explicit non-production boundary                  |
+Actual GitHub numbers and delivery labels are separate. Automated dependency
+updates can consume GitHub numbers; stable Delivery PR6–PR10 labels preserve the
+capability sequence below. Each delivery item will link its GitHub pull request
+when implementation begins.
 
-Do not pull later-PR scope forward unless it is required to keep an earlier contract
-executable or safely testable.
+| Item                                      | Status  | Outcome                                                                                                                                                   | Exit criteria                                                                                                             |
+| ----------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| #1 — Constitution and scaffold            | Merged  | Product boundary, monorepo, canonical Case schema, ECC contract, first fixture, tests, and CI                                                             | Clean install and `pnpm validate` pass without credentials                                                                |
+| #2 — Case and event engine                | Merged  | Deterministic state machine, hash-chained case journal, idempotent case creation, explicit case-targeted WorkEvent attachment, and audit lineage          | Journal replay, tamper, projection-drift, transition, and duplicate-event tests pass                                      |
+| #3 — ECC pack runner                      | Merged  | Execute all 30 synthetic cases through qualification, evidence, conflicts, ownership, and decision packet                                                 | Deterministic assertions pass and failures are explicit                                                                   |
+| #4 — Local appliance                      | Merged  | API, in-process worker, lossless PostgreSQL event store, immutable fixture catalog, `fr init ecc --demo`, and `fr up`                                     | Fresh-volume demo creates, updates, restarts, replays, and deduplicates in CI                                             |
+| #5 — Guided workbench                     | Merged  | Direct-to-case Case, Decision, Act & Verify, and Receipt experience with an explicitly non-authoritative guided simulation                                | Six-action walkthrough, accessibility, local-only browser, and appliance smoke pass                                       |
+| GitHub #6 — Preview Readiness             | Merged  | Apache 2.0 boundary, public governance and security files, pinned infrastructure, release checks, preview image, and five-minute walkthrough              | Public-release audit and hosted appliance CI pass before repository visibility changes                                    |
+| GitHub #12 — Public Launch Finalization   | Merged  | Final public copy, release-state reconciliation, repository metadata and protection checks, anonymous-clone verification, and prerelease publication gate | Final `main` passes hosted CI and `pnpm release:check`; every checklist stop condition is clear before visibility changes |
+| Delivery PR6 — Authority and Verification | Planned | Deterministic authority matrix, payload-bound approvals, simulated action gateway, and independent read-back                                              | No bypass, self-verification, unbound-payload, or duplicate-effect test passes                                            |
+| Delivery PR7 — Provider Adapters          | Planned | Bounded model, memory, agent-harness, and connector interfaces with mocks first                                                                           | Contract suites pass without provider payload leakage or provider-owned canonical state                                   |
+| Delivery PR8 — Receipts and Economics     | Planned | Full receipt chain plus resolution-time, handoff, intervention, commitment, and verified-result measures                                                  | The case is reconstructable and metrics are derivable from immutable receipts                                             |
+| Delivery PR9 — Correction and Replay      | Planned | Append-only correction, branch, changed-fact replay, and governed learning-candidate review                                                               | Original history remains unchanged and replay is reproducible                                                             |
+| Delivery PR10 — Packaged Evaluation       | Planned | Installer, signed artifacts, SBOM, provenance, and upgrade/uninstall documentation                                                                        | Downloadable evaluation distribution retains the explicit non-production boundary                                         |
+
+“Planned” does not mean implemented or committed to a release date. Do not pull
+later-PR scope forward unless it is required to keep an earlier contract executable
+or safely testable.

@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a reproducible defect in the evaluation preview
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This project is an evaluation preview. Do not include secrets, customer data, proprietary payloads, security vulnerabilities, or sensitive conduct reports. Use the confidential paths in SECURITY.md or CODE_OF_CONDUCT.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Paste the release version or full commit SHA you evaluated.
+      placeholder: v0.1.0-evaluation-preview.0 or commit SHA
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Include operating system, Node.js, pnpm, Docker, and browser versions that matter.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: List the smallest synthetic-data-only sequence that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result and evidence
+      description: Include sanitized logs or screenshots when useful.
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: Evaluation boundary
+      options:
+        - label: I reproduced this with synthetic data and removed confidential information.
+          required: true
+        - label: I searched for an existing issue covering this defect.
+          required: true

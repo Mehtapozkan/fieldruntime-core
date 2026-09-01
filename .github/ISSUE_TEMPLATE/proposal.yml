@@ -1,0 +1,55 @@
+name: Product proposal
+description: Propose a scoped change to the official project
+title: "[Proposal]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read PRODUCT_SPEC.md, PLAN.md, and GOVERNANCE.md first. A roadmap item is intent, not a timing commitment. Please discuss material changes before investing in an implementation.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and affected user
+      description: Describe the problem without prescribing a solution.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Intended outcome
+      description: State the observable result and evidence that would show success.
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Product and trust-boundary impact
+      description: Identify effects on authority, verification, external writes, public contracts, licensing, or the evaluation-preview boundary.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include the option of making no change.
+    validations:
+      required: true
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Possible implementation
+      description: Optional. Keep the proposal distinct from a particular implementation.
+  - type: checkboxes
+    id: disclosure
+    attributes:
+      label: Contributor declaration
+      options:
+        - label: I have disclosed any material personal, financial, or organizational conflict relevant to this proposal below.
+          required: true
+  - type: textarea
+    id: conflicts
+    attributes:
+      label: Conflict disclosure
+      description: Write "None" if there is no relevant conflict.
+    validations:
+      required: true

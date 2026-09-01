@@ -1,18 +1,32 @@
 # Field Runtime Core
 
-Field Runtime Core is a self-hosted enterprise case runtime for consequential work.
-It carries a complete case from fragmented evidence through an authorized decision,
-controlled action, independent verification, receipt, correction, and replay.
+Field Runtime Core is an Apache-2.0-licensed, self-hosted evaluation preview of an
+**Enterprise Case Runtime**: a governed layer designed to carry consequential work
+from scattered evidence to an authorized, independently verified outcome.
+
+Most AI systems stop at an answer or a completed task. Consequential work does not.
+It crosses systems and people, accumulates contradictory evidence and commitments,
+and requires authority that changes with the consequence. Field Runtime keeps that
+work together as one complete case: evidence, conflicts, participants, commitments,
+decision options, authority, approvals, exact actions, independent verification,
+outcomes, corrections, receipts, and replay lineage.
+
+The goal is to increase an experienced operator's power without transferring
+control to a model or provider. Models and agents may propose; named people retain
+authority. Canonical case state and deterministic controls stay in the runtime,
+while models, agent harnesses, memory systems, work surfaces, and connectors remain
+replaceable adapters. Organizations can change providers without surrendering the
+case history, operating rules, or learning they created.
 
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external
 > writes. Not production software. Production authority must be earned.
 
 ![Field Runtime Guided Workbench](docs/assets/guided-workbench-preview.svg)
 
-The first-run story is direct-to-case: four sources disagree, the model proposes,
-named people retain authority, a connector reports success, and independent
-read-back proves the work did not happen. Field Runtime rejects the effect and
-keeps the case open.
+The first-run story is direct-to-case: four synthetic sources disagree, the model
+proposes, named people retain authority, a fixture connector reports success, and
+a simulated independent read-back finds no matching update. The walkthrough shows
+why the effect must be rejected and the case kept open.
 
 [Run the five-minute evaluation](docs/guides/5-minute-evaluation.md) ·
 [Read the security boundary](SECURITY.md) · [See the open-core boundary](OPEN_CORE.md)
@@ -52,21 +66,26 @@ Planned, not implemented yet: automatic ECC case matching, authoritative approva
 evaluation, controlled action execution, runtime-enforced independent read-back,
 live connectors, identity federation, high availability, and production operations.
 
-## Product boundary
+## Target product boundary
 
-| Layer              | What it does                                                | Typical authority                                     |
-| ------------------ | ----------------------------------------------------------- | ----------------------------------------------------- |
-| Copilot            | Produces an answer or insight                               | Advisory, with optional tool grants                   |
-| Automation         | Runs an expected procedure                                  | Predefined path only                                  |
-| Standalone agent   | Completes a bounded task                                    | Bounded task grant                                    |
-| Field Runtime Core | Carries the complete case to an authorized, verified result | Deterministic policy plus attributable human approval |
+| Layer              | What it does                                                     | Typical authority                                     |
+| ------------------ | ---------------------------------------------------------------- | ----------------------------------------------------- |
+| Copilot            | Produces an answer or insight                                    | Advisory, with optional tool grants                   |
+| Automation         | Runs an expected procedure                                       | Predefined path only                                  |
+| Standalone agent   | Completes a bounded task                                         | Bounded task grant                                    |
+| Field Runtime Core | Retains the complete case through an authorized, verified result | Deterministic policy plus attributable human approval |
 
-Field Runtime is not another agent. It is the governed runtime around agents and
-systems of record that retains the case through uncertainty, handoffs, approval,
-action, independent verification, and correction.
+Field Runtime is not another agent. Its product contract is the governed runtime
+around agents and systems of record that retains the case through uncertainty,
+handoffs, approval, action, independent verification, and correction.
 
 Models and agents may extract, synthesize, and recommend. They cannot authorize,
 execute, verify their own work, or promote learning inside the trusted core.
+
+The current preview makes that contract inspectable with synthetic fixtures and a
+guided simulation. The deterministic authority, action, and verification controls
+needed to enforce the complete contract at runtime are planned for Delivery PR6;
+they are not implemented in this release candidate.
 
 ## Quick start
 
@@ -123,14 +142,47 @@ tests/                   Cross-package contract tests
 Read `PRODUCT_SPEC.md`, `AGENTS.md`, and `STATUS.md` before changing product
 behavior. Architecture decisions live in `DECISIONS.md`.
 
+## Public roadmap
+
+GitHub PR #6 delivered release readiness, and GitHub PR #12 finalized the public
+launch. Automated dependency updates can consume GitHub numbers, so the future
+capability sequence uses stable **Delivery PR** labels. Each roadmap item will link
+its actual GitHub pull request when work begins.
+
+| Delivery item                             | Status  | Scope                                                                                                                                                     |
+| ----------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GitHub #6 — Preview Readiness             | Merged  | Apache 2.0 boundary, governance and security files, pinned infrastructure, release checks, preview image, and first-run guide                             |
+| GitHub #12 — Public Launch Finalization   | Merged  | Final public copy, release-state reconciliation, repository metadata and protection checks, anonymous-clone verification, and prerelease publication gate |
+| Delivery PR6 — Authority and Verification | Planned | Deterministic authority matrix, payload-bound approvals, simulated action gateway, and runtime-enforced independent read-back                             |
+| Delivery PR7 — Provider Adapters          | Planned | Bounded model, memory, agent-harness, and connector interfaces, beginning with mocks and contract tests                                                   |
+| Delivery PR8 — Receipts and Economics     | Planned | Full receipt chain plus resolution-time, handoff, intervention, commitment, and verified-result measures                                                  |
+| Delivery PR9 — Correction and Replay      | Planned | Append-only correction, branching, changed-fact replay, and governed learning-candidate review                                                            |
+| Delivery PR10 — Packaged Evaluation       | Planned | Installer, signed artifacts, SBOM, provenance, and documented upgrade and uninstall paths                                                                 |
+
+Planned means planned, not present in this evaluation preview. See [`PLAN.md`](PLAN.md)
+for exit criteria and [`STATUS.md`](STATUS.md) for the implemented boundary.
+
 ## Distribution
 
-Field Runtime Core is licensed under the [Apache License 2.0](LICENSE). The first
-workflow pack is ECC. Public distribution remains gated by the
-[repository checklist](docs/releases/public-repository-checklist.md), hosted CI,
-and an explicit repository-visibility decision by the owner.
+Field Runtime Core source is publicly distributed under the
+[Apache License 2.0](LICENSE). The first workflow pack is ECC. The
+`v0.1.0-evaluation-preview.0` source release is published as a GitHub prerelease
+after completing the [repository checklist](docs/releases/public-repository-checklist.md)
+and hosted CI.
 
 This source release is clone-based. Signed artifacts, a standalone installer,
 SBOM, provenance, upgrades, and uninstall flows remain a later milestone. See
 [`OPEN_CORE.md`](OPEN_CORE.md), [`TRADEMARKS.md`](TRADEMARKS.md), and the
 [`v0.1.0 evaluation preview`](docs/releases/v0.1.0-evaluation-preview.md) notes.
+
+## About Field Runtime
+
+Field Runtime is the company behind this project. Its broader product vision is:
+**run your company on intelligence you own.** Start with one decision-heavy
+workflow, assemble the evidence, keep the decision with the right person,
+coordinate action to a verified outcome, and carry reviewed learning into the next
+case—without replatforming or model lock-in. Your data and learning remain yours.
+
+Field Runtime Core is the inspectable, evaluation-only foundation for that vision;
+it is not the production platform or a hosted Field Runtime service. Learn more at
+[fieldruntime.ai](https://fieldruntime.ai).

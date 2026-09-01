@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Confidential vulnerability report
+    url: https://github.com/Mehtapozkan/fieldruntime-core/security/advisories/new
+    about: Use only if GitHub presents a private report form; otherwise see SECURITY.md and do not post details publicly.
+  - name: Confidential conduct report
+    url: https://github.com/Mehtapozkan/fieldruntime-core/security/advisories/new
+    about: Use only if GitHub presents a private report form; title it "Community conduct report" and do not post details publicly.
+  - name: Support policy
+    url: https://github.com/Mehtapozkan/fieldruntime-core/blob/main/SUPPORT.md
+    about: Check the evaluation-preview support boundary and response expectations before filing.

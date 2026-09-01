@@ -246,6 +246,28 @@ test("up propagates a valid nonzero Docker exit code", async () => {
   });
 });
 
+test("up explains when Docker is not installed without exposing process details", async () => {
+  await withTemporaryDirectory(async (directory) => {
+    await writeManifest(directory, expectedManifest);
+    await writeRepositorySurface(directory);
+    const missingDocker = Object.assign(new Error("private process detail"), {
+      code: "ENOENT",
+    });
+    const context = harness(directory, {
+      runProcess: async () => {
+        throw missingDocker;
+      },
+    });
+
+    assert.equal(await runCli(["up"], context.dependencies), 1);
+    assert.equal(
+      context.stderr.join(""),
+      "Docker is not available. Install Docker with Compose v2 and retry `fr up`.\n",
+    );
+    assert.doesNotMatch(context.stderr.join(""), /private process detail/);
+  });
+});
+
 test("unexpected filesystem and process failures are sanitized", async () => {
   await withTemporaryDirectory(async (directory) => {
     const writeFailure = harness(directory, {
@@ -275,17 +297,18 @@ test("unexpected filesystem and process failures are sanitized", async () => {
   });
 });
 
-test("the shebang entry point runs through a bin-style symlink", async () => {
+test("the bin-style symlink resolves the shebang entry point", async () => {
   await withTemporaryDirectory(async (directory) => {
     const source = new URL("../packages/cli/src/cli.ts", import.meta.url);
     const executable = join(directory, "fr");
     await symlink(source, executable);
 
-    const result = spawnSync(executable, ["--help"], {
+    const result = spawnSync(process.execPath, [executable, "--help"], {
       cwd: directory,
       encoding: "utf8",
     });
 
+    assert.match(await readFile(source, "utf8"), /^#!\/usr\/bin\/env node/);
     assert.equal(result.status, 2);
     assert.match(result.stderr, /^Usage: fr init ecc --demo/);
     await assert.rejects(
