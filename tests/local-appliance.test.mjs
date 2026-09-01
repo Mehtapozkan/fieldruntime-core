@@ -18,6 +18,9 @@ function dependencies(overrides = {}) {
     async getJournal() {
       return undefined;
     },
+    async getGuidedWalkthrough() {
+      return undefined;
+    },
     async isReady() {
       return true;
     },
@@ -294,5 +297,37 @@ test("evaluation fixtures are explicitly read-only and non-replayable", async ()
     ...fixture,
     authoritative: false,
     replayable: false,
+  });
+});
+
+test("guided walkthroughs are explicitly presentation-only", async () => {
+  const walkthrough = {
+    walkthrough_id: "walkthrough_acme_sso_001",
+    walkthrough_hash:
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    fixture_id: "case_acme_sso_001",
+    fixture_hash:
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    document: { schema_version: "guided-walkthrough.v0" },
+  };
+  const response = await handleApiRequest(
+    {
+      method: "GET",
+      path: "/v0/evaluation-walkthroughs/ecc/walkthrough_acme_sso_001",
+    },
+    dependencies({
+      async getGuidedWalkthrough(id) {
+        assert.equal(id, "walkthrough_acme_sso_001");
+        return walkthrough;
+      },
+    }),
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.body, {
+    ...walkthrough,
+    authoritative: false,
+    replayable: false,
+    production_receipt: false,
   });
 });

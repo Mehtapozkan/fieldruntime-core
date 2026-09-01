@@ -205,6 +205,11 @@ async function startAppliance(dependencies: CliDependencies): Promise<number> {
   if (!Number.isSafeInteger(result.exitCode) || result.exitCode < 0) {
     throw new CliError("Docker Compose returned an invalid exit code.", 1);
   }
+  if (result.exitCode === 0) {
+    dependencies.stdout.write(
+      "Field Runtime workbench: http://127.0.0.1:3210/\n",
+    );
+  }
   return result.exitCode;
 }
 

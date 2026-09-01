@@ -11,5 +11,6 @@ export type { InvariantViolation } from "./invariants.js";
 export {
   assertValidCaseDocument,
   assertValidCaseJournalEntry,
+  assertValidGuidedWalkthrough,
   ContractValidationError,
 } from "./validators.js";

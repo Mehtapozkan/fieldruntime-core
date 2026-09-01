@@ -4,6 +4,7 @@ import Ajv2020Module, {
 } from "ajv/dist/2020.js";
 import addFormatsModule from "ajv-formats";
 import caseSchema from "../schemas/case.v0.schema.json" with { type: "json" };
+import guidedWalkthroughSchema from "../schemas/guided-walkthrough.v0.schema.json" with { type: "json" };
 import journalEntrySchema from "../schemas/case-journal-entry.v0.schema.json" with { type: "json" };
 import { canonicalizeJson, type JsonValue } from "./canonical-json.js";
 
@@ -19,6 +20,7 @@ const ajv = new Ajv2020({
 addFormats(ajv);
 
 const validateCase = ajv.compile(caseSchema);
+const validateGuidedWalkthrough = ajv.compile(guidedWalkthroughSchema);
 const validateJournalEntry = ajv.compile(journalEntrySchema);
 
 export class ContractValidationError extends Error {
@@ -70,4 +72,10 @@ export function assertValidCaseJournalEntry(
   value: unknown,
 ): asserts value is Record<string, unknown> {
   assertContract(validateJournalEntry, value, "case-journal-entry.v0");
+}
+
+export function assertValidGuidedWalkthrough(
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(validateGuidedWalkthrough, value, "guided-walkthrough.v0");
 }

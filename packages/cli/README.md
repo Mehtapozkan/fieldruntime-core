@@ -22,6 +22,8 @@ For PR4, both commands run from the cloned `fieldruntime-core` repository root.
 `up` verifies the repository surface and pins `COMPOSE_FILE` to that root's
 `compose.yaml`; an initialized unrelated directory is refused before Docker runs.
 From a source checkout, use `pnpm fr init ecc --demo` and `pnpm fr up`.
+After Compose reaches readiness, `up` prints the direct workbench URL:
+`http://127.0.0.1:3210/`.
 
 The CLI does not accept credentials, live mode, or an external-write option. Its
 filesystem, current directory, output, and process runner are injected around the

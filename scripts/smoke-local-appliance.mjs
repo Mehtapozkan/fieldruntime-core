@@ -23,6 +23,13 @@ async function request(path, init) {
   return { response, body };
 }
 
+async function requestText(path) {
+  const response = await globalThis.fetch(`${baseUrl}${path}`, {
+    signal: globalThis.AbortSignal.timeout(5_000),
+  });
+  return { response, body: await response.text() };
+}
+
 const command = {
   type: "case.create",
   tenant_id: "tenant_orchid",
@@ -90,10 +97,34 @@ assert.deepEqual(readiness.body, {
   external_writes: false,
 });
 
+const workbench = await requestText("/");
+assert.equal(workbench.response.status, 200);
+assert.match(
+  workbench.response.headers.get("content-type") ?? "",
+  /^text\/html/,
+);
+assert.match(
+  workbench.response.headers.get("content-security-policy") ?? "",
+  /default-src 'none'/,
+);
+assert.match(workbench.body, /Guided Case Workbench/);
+assert.match(workbench.body, /External writes off/);
+
 const fixture = await request("/v0/evaluation-fixtures/ecc/case_acme_sso_001");
 assert.equal(fixture.response.status, 200);
 assert.equal(fixture.body.authoritative, false);
 assert.equal(fixture.body.replayable, false);
+
+const walkthrough = await request(
+  "/v0/evaluation-walkthroughs/ecc/walkthrough_acme_sso_001",
+);
+assert.equal(walkthrough.response.status, 200);
+assert.equal(walkthrough.body.walkthrough_id, "walkthrough_acme_sso_001");
+assert.equal(walkthrough.body.fixture_hash, fixture.body.fixture_hash);
+assert.equal(walkthrough.body.authoritative, false);
+assert.equal(walkthrough.body.replayable, false);
+assert.equal(walkthrough.body.production_receipt, false);
+assert.equal(walkthrough.body.document.safety.external_writes, false);
 
 const commandResult = await request("/v0/tenants/tenant_orchid/case-commands", {
   method: "POST",

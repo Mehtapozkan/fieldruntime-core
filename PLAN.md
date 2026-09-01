@@ -3,8 +3,8 @@
 Each pull request must remain independently reviewable and leave the repository in
 a passing state.
 
-Delivery position: PR1–PR3 are merged. PR4 is implemented and under review; PR5 is
-the next scope after the local-appliance exit evidence passes.
+Delivery position: PR1–PR4 are merged. PR5 is implemented and under review; PR6 is
+the next scope after the guided-workbench exit evidence passes.
 
 | PR                             | Outcome                                                                                                                                          | Exit criteria                                                                        |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
@@ -12,7 +12,7 @@ the next scope after the local-appliance exit evidence passes.
 | 2 — Case and event engine      | Deterministic state machine, hash-chained case journal, idempotent case creation, explicit case-targeted WorkEvent attachment, and audit lineage | Journal replay, tamper, projection-drift, transition, and duplicate-event tests pass |
 | 3 — ECC pack runner            | Execute all 30 synthetic cases through qualification, evidence, conflicts, ownership, and decision packet                                        | Deterministic assertions pass and failures are explicit                              |
 | 4 — Local appliance            | API, in-process worker, lossless PostgreSQL event store, immutable fixture catalog, `fr init ecc --demo`, and `fr up`                            | Fresh-volume demo creates, updates, restarts, replays, and deduplicates in CI        |
-| 5 — Guided workbench           | Case, Decision, Act & Verify, and Receipt experience                                                                                             | Under-12-minute walkthrough and accessibility tests pass                             |
+| 5 — Guided workbench           | Direct-to-case Case, Decision, Act & Verify, and Receipt experience with an explicitly non-authoritative guided simulation                       | Six-action walkthrough, accessibility, local-only browser, and appliance smoke pass  |
 | 6 — Authority and verification | Deterministic authority matrix, payload-bound approvals, simulated action gateway, independent read-back                                         | No bypass, self-verification, or duplicate-effect test passes                        |
 | 7 — Provider adapters          | Bounded model, memory, agent-harness, and connector interfaces with mocks first                                                                  | Contract suites pass without provider payload leakage                                |
 | 8 — Receipts and economics     | Full receipt chain plus resolution-time, handoff, intervention, commitment, and verified-result measures                                         | Case is reconstructable and metrics are derivable from receipts                      |

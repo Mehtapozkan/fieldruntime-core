@@ -8,6 +8,14 @@ info:
 servers:
   - url: http://127.0.0.1:3210
 paths:
+  /:
+    get:
+      operationId: getGuidedWorkbench
+      responses:
+        "200":
+          description: >-
+            Static guided evaluation workbench. The browser surface is synthetic,
+            non-authoritative, and cannot issue runtime commands or external writes.
   /healthz:
     get:
       operationId: getHealth
@@ -87,6 +95,24 @@ paths:
           description: Validated fixture labeled non-authoritative and non-replayable.
         "404":
           description: Fixture not found.
+  /v0/evaluation-walkthroughs/ecc/{walkthroughId}:
+    get:
+      operationId: getEccGuidedWalkthrough
+      parameters:
+        - name: walkthroughId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+      responses:
+        "200":
+          description: >-
+            Schema-validated guided simulation bound to an immutable evaluation
+            fixture. It is non-authoritative, non-replayable, and not a production
+            receipt.
+        "404":
+          description: Walkthrough not found.
 components:
   parameters:
     TenantId:

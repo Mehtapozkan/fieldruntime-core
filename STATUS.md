@@ -1,6 +1,6 @@
 # Status
 
-Current milestone: PR4 — Local Appliance
+Current milestone: PR5 — Guided Workbench
 
 ## Implemented
 
@@ -81,12 +81,32 @@ Current milestone: PR4 — Local Appliance
   case/journal reads, and append-only trigger enforcement.
 - Canonical JSON rejection of PostgreSQL-incompatible null characters and unpaired
   Unicode surrogates before identity, hashing, or dependency consumption.
+- Direct-to-case browser workbench served from the existing loopback appliance with
+  no signup, API key, blank dashboard, third-party asset, or external request.
+- Six-action Case, Decision, Act & Verify, and Receipt walkthrough that makes the
+  Acme evidence conflict, multiplayer authority route, exact payload boundary,
+  silent connector failure, independent read-back, effect rejection, safe recovery,
+  correction, and learning preview visible without typing or JSON knowledge.
+- Strict guided-walkthrough contract and immutable companion fixture bound to the
+  canonical Acme fixture hash, evidence, decision options, authority roles, action
+  IDs, payload hashes, idempotency key, attempt lineage, verifier identities, and
+  reconstructable nine-step trace.
+- Presentation boundary fixed to synthetic simulation, zero external effects, no
+  authority grant, no authoritative case mutation, no replay claim, and no
+  production receipt. Missing, unsafe, or drifted walkthrough data fails closed.
+- Exact static-route allowlist with raw MIME-correct responses, strict no-inline
+  same-origin CSP, traversal denial, no-referrer, nosniff, and same-origin browser
+  isolation.
+- Responsive, keyboard-operable workbench with semantic landmarks, explicit focus
+  handling, live announcements, reduced-motion behavior, contrast gates, and a
+  maximum six deliberate interactions through the guided path.
+- `fr up` now prints `http://127.0.0.1:3210/` after the appliance reaches readiness.
 
 ## Verified
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- 113 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 135 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
   cases, graph activation blockers, local database exposure checks, gold-boundary
@@ -99,8 +119,10 @@ Current milestone: PR4 — Local Appliance
   corpus/gold bindings, deterministic receipt hashing, the negative-control gate,
   migration checksum behavior, immutable fixture loading, API safety/error
   semantics, CLI fail-closed behavior, atomic persistence rollback, update rollback,
-  rollback-client eviction, concurrent writers, readiness integrity, and durable
-  topology contracts.
+  rollback-client eviction, concurrent writers, readiness integrity, durable
+  topology contracts, walkthrough schema and cross-bindings, simulation safety,
+  reducer gating, six-action journey, local-only browser behavior, accessible
+  static structure, security headers, exact asset routing, and traversal denial.
 - The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
@@ -137,9 +159,13 @@ Current milestone: PR4 — Local Appliance
   exist yet.
 - The current result is synthetic and deterministic; it does not measure live
   providers, human usefulness, resolution economics, or production performance.
+- The guided authority, connector response, read-back, recovery, receipt, and
+  learning trace is presentation-only. PR6 must replace it with deterministic
+  authority envelopes, a simulated action gateway, and runtime-enforced independent
+  verification before those controls can mutate an authoritative case.
 
 ## Next
 
-After PR4 review: PR5 builds the guided Case, Decision, Act & Verify, and Receipt
-workbench against the local appliance without pulling production authority or live
-connectors forward.
+After PR5 review: PR6 implements deterministic authority, payload-bound approval,
+the simulated action gateway, and independent verification behind the workbench
+without introducing live connectors or external writes.

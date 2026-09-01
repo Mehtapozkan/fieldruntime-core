@@ -16,7 +16,9 @@ import {
   createEvaluationFixtureRecord,
   getEvaluationFixture,
 } from "../../worker/src/fixture-catalog.js";
+import { createGuidedWalkthroughRecord } from "../../worker/src/guided-walkthrough.js";
 import { createApiServer } from "./server.js";
+import { loadWorkbenchAssets } from "./workbench-assets.js";
 
 interface Environment {
   readonly DATABASE_URL?: string;
@@ -130,51 +132,74 @@ class PgPoolAdapter implements SqlPool {
 
 async function start(): Promise<void> {
   const configuration = assertSafeConfiguration(process.env);
-  const [migrationSql, fixtureDocument] = await Promise.all([
-    readFile(
-      new URL(
-        "../../../packages/runtime/migrations/0001_local_appliance.sql",
-        import.meta.url,
+  const [migrationSql, fixtureDocument, walkthroughDocument] =
+    await Promise.all([
+      readFile(
+        new URL(
+          "../../../packages/runtime/migrations/0001_local_appliance.sql",
+          import.meta.url,
+        ),
+        "utf8",
       ),
-      "utf8",
-    ),
-    readFile(
-      new URL(
-        "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
-        import.meta.url,
-      ),
-      "utf8",
-    ).then((value) => JSON.parse(value) as unknown),
-  ]);
+      readFile(
+        new URL(
+          "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ).then((value) => JSON.parse(value) as unknown),
+      readFile(
+        new URL(
+          "../../../packages/ecc-pack/fixtures/acme-sso-guided-walkthrough.v0.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ).then((value) => JSON.parse(value) as unknown),
+    ]);
   const migration = createMigrationSource("0001_local_appliance", migrationSql);
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
+  const walkthrough = createGuidedWalkthroughRecord(
+    walkthroughDocument,
+    fixtureDocument,
+  );
   const pgPool = new Pool({ connectionString: configuration.databaseUrl });
   const pool = new PgPoolAdapter(pgPool);
   await bootstrapAppliance(pool, migration, fixture);
 
   const store = new PostgresCaseStore(pool);
   const worker = new TransactionalCaseWorker(store);
-  const server = createApiServer({
-    isReady: async () => {
-      if (!(await applianceIsReady(pool, migration, fixture))) return false;
-      await store.assertReady();
-      return true;
+  const workbenchAssets = await loadWorkbenchAssets();
+  const server = createApiServer(
+    {
+      isReady: async () => {
+        if (!(await applianceIsReady(pool, migration, fixture))) return false;
+        await store.assertReady();
+        return true;
+      },
+      executeCaseCommand: async (_tenantId, command) =>
+        await worker.execute(command),
+      listCases: async (tenantId) => await store.listCases(tenantId),
+      getCase: async (tenantId, caseId) =>
+        await store.getCase(tenantId, caseId),
+      getJournal: async (tenantId, caseId) =>
+        await store.getJournal(tenantId, caseId),
+      getEvaluationFixture: async (fixtureId) => {
+        const client = await pool.connect();
+        try {
+          return await getEvaluationFixture(client, fixtureId);
+        } finally {
+          client.release();
+        }
+      },
+      getGuidedWalkthrough: (walkthroughId) =>
+        Promise.resolve(
+          walkthroughId === walkthrough.walkthrough_id
+            ? walkthrough
+            : undefined,
+        ),
     },
-    executeCaseCommand: async (_tenantId, command) =>
-      await worker.execute(command),
-    listCases: async (tenantId) => await store.listCases(tenantId),
-    getCase: async (tenantId, caseId) => await store.getCase(tenantId, caseId),
-    getJournal: async (tenantId, caseId) =>
-      await store.getJournal(tenantId, caseId),
-    getEvaluationFixture: async (fixtureId) => {
-      const client = await pool.connect();
-      try {
-        return await getEvaluationFixture(client, fixtureId);
-      } finally {
-        client.release();
-      }
-    },
-  });
+    workbenchAssets,
+  );
   server.listen(configuration.port, configuration.bind, () => {
     process.stdout.write(
       `Field Runtime local evaluation API listening on ${configuration.bind}:${String(configuration.port)}\n`,

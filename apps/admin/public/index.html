@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A credential-free, synthetic walkthrough of the Field Runtime enterprise case runtime."
+    />
+    <title>Field Runtime — Guided Case Workbench</title>
+    <link rel="stylesheet" href="/workbench.css" />
+    <script type="module" src="/workbench.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#stage-content">Skip to case</a>
+
+    <div class="safety-rail" aria-label="Evaluation safety status">
+      <span class="safety-rail__lead">Evaluation boundary</span>
+      <span><i class="status-dot" aria-hidden="true"></i>Synthetic</span>
+      <span
+        ><i class="status-dot" aria-hidden="true"></i>Guided simulation</span
+      >
+      <span
+        ><i class="status-dot status-dot--locked" aria-hidden="true"></i
+        >External writes off</span
+      >
+    </div>
+
+    <header class="app-header">
+      <a class="brand" href="/" aria-label="Field Runtime home">
+        <span class="brand__mark" aria-hidden="true">
+          <i></i><i></i><i></i><i></i>
+        </span>
+        <span class="brand__name">FIELD <b>/</b> RUNTIME</span>
+      </a>
+      <div class="environment-chip" aria-label="Local evaluation appliance">
+        <span class="environment-chip__pulse" aria-hidden="true"></span>
+        Local appliance
+      </div>
+    </header>
+
+    <main class="shell" id="main-content">
+      <aside class="stage-rail" aria-label="Case walkthrough">
+        <p class="stage-rail__eyebrow">Guided case</p>
+        <nav id="stage-navigation" aria-label="Walkthrough stages"></nav>
+        <div class="stage-rail__foot">
+          <span>ECC / v0.1</span>
+          <span id="interaction-counter">0 of 6 guided actions</span>
+        </div>
+      </aside>
+
+      <section class="workbench" aria-labelledby="case-heading">
+        <div id="loading-state" class="loading-state" aria-live="polite">
+          <div class="loading-state__line loading-state__line--short"></div>
+          <div class="loading-state__line loading-state__line--title"></div>
+          <div class="loading-state__grid">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          <p>Assembling the synthetic case…</p>
+        </div>
+
+        <div id="error-state" class="error-state" hidden role="alert">
+          <span class="error-state__code">CASE DATA UNAVAILABLE</span>
+          <h1>We could not verify the evaluation fixture.</h1>
+          <p id="error-message">
+            The workbench stays closed when its source data cannot be verified.
+          </p>
+          <button
+            class="button button--primary"
+            id="retry-button"
+            type="button"
+          >
+            Retry local fixture
+          </button>
+        </div>
+
+        <div id="workbench-content" hidden>
+          <header class="case-header">
+            <div>
+              <p class="eyebrow" id="case-eyebrow">
+                Strategic customer escalation
+              </p>
+              <h1 id="case-heading">
+                Acme Aero <span>/</span> SSO rollout blocked
+              </h1>
+            </div>
+            <div class="case-header__status" aria-label="Case status">
+              <span class="severity-pill" id="severity-pill">High</span>
+              <span class="state-pill" id="state-pill">Needs review</span>
+            </div>
+          </header>
+
+          <div class="case-meta" aria-label="Case details">
+            <span><small>CASE</small><b id="case-id">—</b></span>
+            <span><small>OWNER</small><b id="case-owner">—</b></span>
+            <span><small>COMMITMENT</small><b id="case-due">—</b></span>
+            <span><small>MODE</small><b>Guided simulation</b></span>
+          </div>
+
+          <div id="stage-content" class="stage-content" tabindex="-1"></div>
+        </div>
+      </section>
+    </main>
+
+    <div
+      class="announcement"
+      id="announcement"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+  </body>
+</html>
