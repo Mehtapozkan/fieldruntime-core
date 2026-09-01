@@ -46,3 +46,115 @@ jobs:
             echo "append-only journal update unexpectedly succeeded"
             exit 1
           fi
+
+  publish-evaluation-preview:
+    name: publish evaluation preview
+    needs: validate
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      github.repository == 'Mehtapozkan/fieldruntime-core'
+    permissions:
+      contents: write
+    concurrency:
+      group: evaluation-preview-prerelease
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      RELEASE_TAG: v0.1.0-evaluation-preview.0
+      RELEASE_TITLE: Field Runtime Core v0.1.0 Evaluation Preview
+      RELEASE_SOURCE: docs/releases/v0.1.0-evaluation-preview.md
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare prerelease notes
+        id: notes
+        env:
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          expected_heading="# v0.1.0 Evaluation Preview"
+          if [[ "$(head -n 1 "${RELEASE_SOURCE}")" != "${expected_heading}" ]]; then
+            echo "::error file=${RELEASE_SOURCE}::Unexpected release-note heading"
+            exit 1
+          fi
+
+          release_notes="${RUNNER_TEMP}/evaluation-preview-notes.md"
+          {
+            printf '%s\n\n' \
+              'Synthetic cases. Simulated authority. No external writes. Not production software.'
+            tail -n +3 "${RELEASE_SOURCE}"
+            printf '\nLearn more at [fieldruntime.ai](https://fieldruntime.ai/).\n'
+          } > "${release_notes}"
+
+          sed -i \
+            -e "s#(../guides/5-minute-evaluation.md)#(${REPOSITORY_URL}/blob/${RELEASE_TAG}/docs/guides/5-minute-evaluation.md)#g" \
+            -e "s#(../../PLAN.md)#(${REPOSITORY_URL}/blob/${RELEASE_TAG}/PLAN.md)#g" \
+            "${release_notes}"
+
+          printf 'path=%s\n' "${release_notes}" >> "${GITHUB_OUTPUT}"
+      - name: Publish the immutable evaluation prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_NOTES: ${{ steps.notes.outputs.path }}
+          RELEASE_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          release_exists=false
+          if gh release view "${RELEASE_TAG}" --repo "${GH_REPO}" >/dev/null 2>&1; then
+            release_exists=true
+          fi
+
+          tag_exists=false
+          if tag_ref="$(
+            gh api "repos/${GH_REPO}/git/ref/tags/${RELEASE_TAG}" \
+              --jq '[.object.type, .object.sha] | @tsv' 2>/dev/null
+          )"; then
+            tag_exists=true
+            IFS=$'\t' read -r tag_type tag_sha <<< "${tag_ref}"
+
+            if [[ "${tag_type}" != "commit" ]]; then
+              echo "::error::Existing release tag is not a lightweight commit tag"
+              exit 1
+            fi
+
+            if [[ "${release_exists}" == "false" && "${tag_sha}" != "${RELEASE_SHA}" ]]; then
+              echo "::error::Existing ${RELEASE_TAG} points to ${tag_sha}, not validated commit ${RELEASE_SHA}"
+              exit 1
+            fi
+          fi
+
+          if [[ "${release_exists}" == "true" && "${tag_exists}" == "false" ]]; then
+            echo "::error::The release exists but its tag is missing"
+            exit 1
+          fi
+
+          if [[ "${release_exists}" == "true" ]]; then
+            echo "${RELEASE_TAG} already exists; leaving the published tag and release unchanged."
+            exit 0
+          fi
+
+          if [[ "${tag_exists}" == "false" ]]; then
+            gh api \
+              --method POST \
+              "repos/${GH_REPO}/git/refs" \
+              --field "ref=refs/tags/${RELEASE_TAG}" \
+              --field "sha=${RELEASE_SHA}" >/dev/null
+          fi
+
+          gh release create "${RELEASE_TAG}" \
+            --repo "${GH_REPO}" \
+            --verify-tag \
+            --title "${RELEASE_TITLE}" \
+            --notes-file "${RELEASE_NOTES}" \
+            --prerelease \
+            --latest=false
