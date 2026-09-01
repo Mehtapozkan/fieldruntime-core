@@ -1132,10 +1132,15 @@ test("canonical hashing is order-independent and rejects executable or lossy val
     namedArrayProperty,
     new CustomArray(),
     new Proxy({}, {}),
+    "contains\u0000null",
+    "unpaired-high-\ud800",
+    "unpaired-low-\udc00",
+    { "bad\u0000key": true },
   ]) {
     assert.throws(() => canonicalJson(value), CanonicalJsonError);
   }
   assert.equal(getterState.calls, 0);
+  assert.equal(canonicalJson({ emoji: "✅" }), '{"emoji":"✅"}');
 
   const cyclic = {};
   cyclic.self = cyclic;

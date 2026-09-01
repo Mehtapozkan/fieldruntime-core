@@ -2,5 +2,10 @@
   "name": "@fieldruntime/api",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@fieldruntime/runtime": "workspace:*",
+    "@fieldruntime/worker": "workspace:*",
+    "pg": "8.23.0"
+  }
 }

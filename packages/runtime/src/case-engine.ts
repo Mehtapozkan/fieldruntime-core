@@ -11,6 +11,7 @@ import {
 import {
   canonicalJson,
   canonicalizeJson,
+  CanonicalJsonError,
   immutableJson,
   sha256Json,
   type JsonValue,
@@ -52,7 +53,7 @@ export interface CaseAggregate {
   readonly journal: readonly CaseJournalEntry[];
 }
 
-interface IdempotencyRecord {
+export interface CaseIdempotencyRecord {
   readonly tenant_id: string;
   readonly idempotency_key: string;
   readonly command_fingerprint: `sha256:${string}`;
@@ -61,7 +62,7 @@ interface IdempotencyRecord {
   readonly result_status: "applied" | "rejected";
 }
 
-interface SourceEventRecord {
+export interface CaseSourceEventRecord {
   readonly tenant_id: string;
   readonly source: string;
   readonly source_event_id: string;
@@ -72,8 +73,26 @@ interface SourceEventRecord {
 
 export interface CaseEngineState {
   readonly cases: readonly CaseAggregate[];
-  readonly idempotency_records: readonly IdempotencyRecord[];
-  readonly source_event_records: readonly SourceEventRecord[];
+  readonly idempotency_records: readonly CaseIdempotencyRecord[];
+  readonly source_event_records: readonly CaseSourceEventRecord[];
+}
+
+/**
+ * The single append produced by an applied command or a journaled rejection.
+ *
+ * Persistence adapters commit this bundle atomically. It is deliberately SQL-
+ * agnostic so the deterministic engine remains the only component that derives
+ * journal, projection, idempotency, and source-event records.
+ */
+export interface CaseEngineAppend {
+  readonly expected_case_version: number;
+  readonly tenant_id: string;
+  readonly case_id: string;
+  readonly document: Readonly<Record<string, unknown>>;
+  readonly journal_entry: CaseJournalEntry;
+  readonly idempotency_record: CaseIdempotencyRecord;
+  readonly source_event_record?: CaseSourceEventRecord;
+  readonly audit_entry_id: string;
 }
 
 export interface CaseEngineDependencies {
@@ -99,6 +118,7 @@ interface SuccessfulCommandResult {
   readonly state: CaseEngineState;
   readonly aggregate: CaseAggregate;
   readonly entry: CaseJournalEntry;
+  readonly append: CaseEngineAppend;
 }
 
 export type CaseCommandResult =
@@ -509,7 +529,7 @@ function sourceEventIdentity(workEvent: UnknownRecord): {
 function findSourceEvent(
   state: CaseEngineState,
   identity: ReturnType<typeof sourceEventIdentity>,
-): SourceEventRecord | undefined {
+): CaseSourceEventRecord | undefined {
   return state.source_event_records.find(
     (record) =>
       record.tenant_id === identity.tenantId &&
@@ -1093,8 +1113,8 @@ function updateCaseRecord(
 function replaceAggregate(
   state: CaseEngineState,
   aggregate: CaseAggregate,
-  idempotencyRecord: IdempotencyRecord,
-  sourceEventRecord?: SourceEventRecord,
+  idempotencyRecord: CaseIdempotencyRecord,
+  sourceEventRecord?: CaseSourceEventRecord,
 ): CaseEngineState {
   const existingIndex = state.cases.findIndex(
     (item) =>
@@ -1115,6 +1135,43 @@ function replaceAggregate(
       sourceEventRecord === undefined
         ? state.source_event_records
         : [...state.source_event_records, sourceEventRecord],
+  });
+}
+
+function makeCaseEngineAppend(input: {
+  readonly state: CaseEngineState;
+  readonly aggregate: CaseAggregate;
+  readonly entry: CaseJournalEntry;
+  readonly expectedCaseVersion: number;
+  readonly auditEntryId: string;
+  readonly includesSourceEvent: boolean;
+}): CaseEngineAppend {
+  const idempotencyRecord = input.state.idempotency_records.find(
+    (record) => record.journal_entry_id === input.entry.id,
+  );
+  const sourceEventRecord = input.includesSourceEvent
+    ? input.state.source_event_records.at(-1)
+    : undefined;
+  if (
+    idempotencyRecord === undefined ||
+    (input.includesSourceEvent && sourceEventRecord === undefined)
+  ) {
+    throw new CaseEngineError(
+      "JOURNAL_INTEGRITY",
+      "engine append is missing its persistence indexes",
+    );
+  }
+  return immutableJson<CaseEngineAppend>({
+    expected_case_version: input.expectedCaseVersion,
+    tenant_id: input.aggregate.tenant_id,
+    case_id: input.aggregate.case_id,
+    document: input.aggregate.document,
+    journal_entry: input.entry,
+    idempotency_record: idempotencyRecord,
+    ...(sourceEventRecord === undefined
+      ? {}
+      : { source_event_record: sourceEventRecord }),
+    audit_entry_id: input.auditEntryId,
   });
 }
 
@@ -1335,6 +1392,14 @@ function createCase(
     state: nextState,
     aggregate: storedAggregate,
     entry,
+    append: makeCaseEngineAppend({
+      state: nextState,
+      aggregate: storedAggregate,
+      entry,
+      expectedCaseVersion: 0,
+      auditEntryId: generated.auditEntryId,
+      includesSourceEvent: true,
+    }),
   });
 }
 
@@ -1498,6 +1563,14 @@ function attachWorkEvent(
     state: nextState,
     aggregate: storedAggregate,
     entry,
+    append: makeCaseEngineAppend({
+      state: nextState,
+      aggregate: storedAggregate,
+      entry,
+      expectedCaseVersion: context.expectedVersion,
+      auditEntryId: generated.auditEntryId,
+      includesSourceEvent: true,
+    }),
   });
 }
 
@@ -1650,6 +1723,14 @@ function transitionCase(
       state: nextState,
       aggregate: storedAggregate,
       entry,
+      append: makeCaseEngineAppend({
+        state: nextState,
+        aggregate: storedAggregate,
+        entry,
+        expectedCaseVersion: context.expectedVersion,
+        auditEntryId: generated.auditEntryId,
+        includesSourceEvent: false,
+      }),
       code: rejectionCode,
     });
   }
@@ -1658,6 +1739,14 @@ function transitionCase(
     state: nextState,
     aggregate: storedAggregate,
     entry,
+    append: makeCaseEngineAppend({
+      state: nextState,
+      aggregate: storedAggregate,
+      entry,
+      expectedCaseVersion: context.expectedVersion,
+      auditEntryId: generated.auditEntryId,
+      includesSourceEvent: false,
+    }),
   });
 }
 
@@ -2009,7 +2098,18 @@ export function executeCaseCommand(
   dependencies: CaseEngineDependencies,
 ): CaseCommandResult {
   const trustedState = assertCaseEngineStateIntegrity(state);
-  const normalized = canonicalizeJson(untrustedCommand);
+  let normalized: JsonValue;
+  try {
+    normalized = canonicalizeJson(untrustedCommand);
+  } catch (error) {
+    if (error instanceof CanonicalJsonError) {
+      throw new CaseEngineError(
+        "INVALID_COMMAND",
+        "command is not canonical JSON",
+      );
+    }
+    throw error;
+  }
   if (!isRecord(normalized)) {
     throw new CaseEngineError("INVALID_COMMAND", "command must be an object");
   }

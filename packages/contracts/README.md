@@ -35,3 +35,11 @@ All public validators and invariants first canonicalize untrusted input without
 invoking accessors or proxy traps. Claimed `executed` actions fail closed in PR2:
 matching caller-declared hashes are not proof until the PR6 authority engine defines
 and recomputes the versioned authorization envelope.
+
+Canonical strings also reject the null character and unpaired Unicode surrogates.
+Those values are representable in JavaScript but not losslessly accepted by the
+canonical PostgreSQL JSONB target; rejecting them before hashing prevents an
+engine/persistence split.
+
+`openapi/local-appliance.v0.yaml` defines the loopback-only PR4 evaluation API and
+keeps its non-production authority boundary explicit.

@@ -1,0 +1,105 @@
+openapi: 3.1.0
+info:
+  title: Field Runtime Local Evaluation Appliance API
+  version: 0.1.0
+  description: >-
+    Loopback-only, synthetic evaluation API. It provides no production authority,
+    identity federation, external credentials, or live writes.
+servers:
+  - url: http://127.0.0.1:3210
+paths:
+  /healthz:
+    get:
+      operationId: getHealth
+      responses:
+        "200":
+          description: Process is alive; this does not imply database readiness.
+  /readyz:
+    get:
+      operationId: getReadiness
+      responses:
+        "200":
+          description: Database, migration, fixture, and safety-mode checks pass.
+        "503":
+          description: Appliance is not ready. Internal errors are not exposed.
+  /v0/tenants/{tenantId}/case-commands:
+    post:
+      operationId: executeCaseCommand
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Command applied, journaled as rejected, or returned as an exact duplicate.
+        "400":
+          description: Boundary payload is invalid.
+        "409":
+          description: Deterministic command conflict.
+        "500":
+          description: Sanitized storage or integrity failure.
+  /v0/tenants/{tenantId}/cases:
+    get:
+      operationId: listCases
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Tenant-scoped case projections.
+  /v0/tenants/{tenantId}/cases/{caseId}:
+    get:
+      operationId: getCase
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - $ref: "#/components/parameters/CaseId"
+      responses:
+        "200":
+          description: Tenant-scoped case projection.
+        "404":
+          description: Missing and cross-tenant cases are indistinguishable.
+  /v0/tenants/{tenantId}/cases/{caseId}/journal:
+    get:
+      operationId: getCaseJournal
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - $ref: "#/components/parameters/CaseId"
+      responses:
+        "200":
+          description: Immutable case journal in sequence order.
+        "404":
+          description: Missing and cross-tenant cases are indistinguishable.
+  /v0/evaluation-fixtures/ecc/{fixtureId}:
+    get:
+      operationId: getEccEvaluationFixture
+      parameters:
+        - name: fixtureId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+      responses:
+        "200":
+          description: Validated fixture labeled non-authoritative and non-replayable.
+        "404":
+          description: Fixture not found.
+components:
+  parameters:
+    TenantId:
+      name: tenantId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    CaseId:
+      name: caseId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[A-Za-z][A-Za-z0-9_-]{2,127}$"

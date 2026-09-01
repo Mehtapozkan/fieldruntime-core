@@ -1,6 +1,6 @@
 # Status
 
-Current milestone: PR3 — ECC Production Test
+Current milestone: PR4 — Local Appliance
 
 ## Implemented
 
@@ -57,12 +57,36 @@ Current milestone: PR3 — ECC Production Test
 - Answer-only negative control with deliberately unsafe behavior and a reachable
   suite failure state.
 - Public benchmark methodology with reproduction instructions and explicit limits.
+- Lossless PostgreSQL JSONB projection and journal persistence with atomic
+  idempotency, source-event identity, and globally disjoint journal/audit ID
+  records.
+- Singleton-writer serialization, projection compare-and-swap, deferred journal
+  predecessor/causation/head topology, and append-only durable records for the
+  single-node evaluation boundary.
+- Checksum-bound transactional migration bootstrap and immutable ECC fixture
+  catalog. The legacy Acme snapshot is served only as non-authoritative and
+  non-replayable evaluation data.
+- Loopback-only HTTP API for health, integrity-aware readiness, tenant-scoped case
+  commands and reads, journal reads, and evaluation-fixture inspection.
+- In-process transactional worker with a stable command-input error taxonomy;
+  unexpected store and integrity failures remain sanitized server failures.
+- Idempotent `fr init ecc --demo` safe manifest plus `fr up`, which verifies the
+  repository root, selects the explicit Compose file, and forces simulation mode
+  with external writes disabled.
+- Multi-stage API image and Docker Compose appliance with loopback-only API and
+  PostgreSQL ports, read-only application filesystem, health checks, and retained
+  local volume.
+- CI fresh-volume appliance smoke covering migration/bootstrap, real PostgreSQL
+  create and projection update paths, service restarts, durable exact duplicates,
+  case/journal reads, and append-only trigger enforcement.
+- Canonical JSON rejection of PostgreSQL-incompatible null characters and unpaired
+  Unicode surrogates before identity, hashing, or dependency consumption.
 
 ## Verified
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- 76 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 113 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
   cases, graph activation blockers, local database exposure checks, gold-boundary
@@ -72,19 +96,30 @@ Current milestone: PR3 — ECC Production Test
   owner selection, contradictory policy rejection, trigger-bound closure proof,
   outcome-bound customer acceptance,
   empty-corpus rejection, immutable receipt output, receipt-schema validation,
-  corpus/gold bindings, deterministic receipt hashing, and the negative-control
-  gate.
+  corpus/gold bindings, deterministic receipt hashing, the negative-control gate,
+  migration checksum behavior, immutable fixture loading, API safety/error
+  semantics, CLI fail-closed behavior, atomic persistence rollback, update rollback,
+  rollback-client eviction, concurrent writers, readiness integrity, and durable
+  topology contracts.
 - The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
   trips hard safety gates.
-- Docker's native `compose config` check remains in CI; Docker is unavailable in
-  the current build environment.
+- `docker compose config --quiet` and the fresh-volume, restart, persistence, and
+  append-only smoke are required by CI. Docker is unavailable in the current local
+  build environment, so the live Compose evidence is produced by the CI runner.
 
 ## Known gaps
 
-- The engine is an in-memory evaluation component. It does not provide durable or
-  concurrent persistence, an API, worker, CLI, or workbench yet.
+- The appliance is single-node and evaluation-only. Its singleton writer lock and
+  whole-state integrity hydration favor auditability over throughput; it does not
+  claim sharding, high availability, online migrations, backups, or production
+  operations.
+- The unauthenticated API is safe only inside the documented loopback appliance.
+  Production identity federation, authorization, tenancy administration, and
+  network deployment are not implemented.
+- `fr up` intentionally runs only from a cloned Field Runtime Core repository root;
+  a standalone installer and signed distributable remain PR10 scope.
 - Event attachment requires an explicitly selected case. Automatic ECC candidate
   matching and ambiguous-merge handling are not implemented yet.
 - No authority engine, action gateway, or independent verifier yet.
@@ -92,8 +127,9 @@ Current milestone: PR3 — ECC Production Test
   executed action therefore fails closed in this milestone.
 - No provider or live connector implementation.
 - PostgreSQL image digest must be pinned before a distributable release.
-- Upstream JSON, graph, and PostgreSQL contracts have documented parity gaps that
-  must be reconciled before the reference SQL becomes a PR4 migration.
+- The drifted upstream normalized PostgreSQL SQL remains reference-only. PR4 uses
+  its own lossless event-store migration; a normalized model still requires
+  explicit parity reconciliation and conformance tests.
 - ECC v0.1.0 is shadow/evaluation-only; activation is deliberately blocked.
 - Public license and paid/open-core boundary are intentionally unresolved.
 - Evaluation inputs and gold currently share the Core repository. The adapter
@@ -104,6 +140,6 @@ Current milestone: PR3 — ECC Production Test
 
 ## Next
 
-After PR3 review: PR4 builds the local appliance with the API, worker, PostgreSQL
-migrations, fixture loader, and documented `fr init ecc --demo` / `fr up`
-experience.
+After PR4 review: PR5 builds the guided Case, Decision, Act & Verify, and Receipt
+workbench against the local appliance without pulling production authority or live
+connectors forward.

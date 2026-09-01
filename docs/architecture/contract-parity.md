@@ -18,8 +18,11 @@ document prevents silent normalization.
    fingerprint, transition, projection, and index semantics the journal schema
    cannot prove.
 7. Cross-record invariant code — semantics JSON Schema cannot express safely.
-8. PostgreSQL SQL under `reference/migrations-pending-reconciliation` — reference
-   only until parity is reconciled and tested before PR4 persistence work.
+8. `packages/runtime/migrations/0001_local_appliance.sql` — lossless PR4
+   persistence for the runtime contracts; it does not redefine their business
+   vocabulary.
+9. PostgreSQL SQL under `reference/migrations-pending-reconciliation` — upstream
+   reference only until its normalized model is reconciled and tested.
 
 ## Known differences
 
@@ -36,20 +39,23 @@ document prevents silent normalization.
 - JSON requires case severity, while SQL permits null and some evaluation cases
   expect null severity.
 - SQL enables row-level security but defines no policies.
-- PR2 enforces source identity by tenant, source, and source-event ID. The reference
+- The runtime enforces source identity by tenant, source, and source-event ID. The reference
   SQL also makes the separate WorkEvent `id` a global primary key and has no column
-  for the Case contract's required `source_timezone`. Resolve both before PR4
-  without leaking cross-tenant existence or dropping timezone context.
+  for the Case contract's required `source_timezone`.
 - The reference SQL has no columns for the JSON contract's
   `effective_from_source_timezone`, `effective_to_source_timezone`, or
-  `due_at_source_timezone` fields. PR4 must preserve these alongside their
-  canonical UTC instants.
+  `due_at_source_timezone` fields.
 - JSON Schema alone cannot enforce cross-collection approval, receipt,
   verification, or closure semantics.
 
-These differences require an explicit decision and executable tests before PR4 can
-convert the reference SQL into a migration. PR2 deliberately leaves the reference
-SQL untouched. Do not edit the upstream copies to hide drift.
+PR4 does not convert the drifted normalized reference SQL into an authoritative
+migration. Instead, its event store preserves the validated Case and journal
+documents losslessly in JSONB and adds relational identities, topology, and
+append-only constraints required for atomic execution. Source timezone labels are
+therefore retained without inventing a second business contract. The reference
+SQL remains untouched and non-authoritative until every difference above has an
+explicit reconciliation and executable conformance test; do not edit the upstream
+copy to hide drift.
 
 ## Activation status
 

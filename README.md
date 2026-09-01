@@ -23,17 +23,23 @@ Implemented in the current evaluation foundation:
   machine-readable hash-addressed receipts, hard safety gates, and a failing
   answer-only negative control.
 - Deterministic case-state transition helpers.
-- A pure in-memory case engine with idempotent creation, explicitly targeted event
-  attachment, optimistic version checks, and fail-closed transitions.
+- A pure case engine with idempotent creation, explicitly targeted event attachment,
+  optimistic version checks, and fail-closed transitions.
 - A schema-validated, hash-chained case journal with deterministic replay, audit
   projection, and projection-drift detection.
-- Contract, fixture, transition, idempotency, journal, and adversarial tests.
-- PostgreSQL local-evaluation configuration and CI.
+- Durable PostgreSQL projection, journal, idempotency, source-identity, and emitted-ID
+  persistence with atomic commands, compare-and-swap projection updates, and
+  append-only controls.
+- A loopback-only HTTP API, in-process transactional worker, checksum-bound
+  migrations, and immutable evaluation-fixture catalog.
+- A fail-closed `fr` CLI plus Docker Compose appliance for the ECC demo.
+- Contract, fixture, transition, idempotency, journal, persistence, API, CLI, and
+  adversarial tests.
 
-Planned, not implemented yet: durable case persistence, automatic ECC case
-matching, authority evaluation, controlled action execution, independent read-back
-verification, the guided workbench, live connectors, identity federation, high
-availability, and production operations.
+Planned, not implemented yet: automatic ECC case matching, authority evaluation,
+controlled action execution, independent read-back verification, the guided
+workbench, live connectors, identity federation, high availability, and production
+operations.
 
 ## Product boundary
 
@@ -53,7 +59,7 @@ execute, verify their own work, or promote learning inside the trusted core.
 
 ## Quick start
 
-Requirements: Node.js 24, pnpm 11, and optionally Docker for PostgreSQL.
+Repository validation requires Node.js 24 and pnpm 11.
 
 ```bash
 corepack enable
@@ -64,24 +70,34 @@ pnpm validate
 pnpm eval:ecc -- --subject-version=<commit-sha>
 ```
 
-Start only the local evaluation database:
+The local appliance additionally requires Docker with Compose. From the cloned
+repository root:
 
 ```bash
-docker compose up -d postgres
-docker compose ps
+pnpm fr init ecc --demo
+pnpm fr up
+
+curl http://127.0.0.1:3210/readyz
+curl http://127.0.0.1:3210/v0/evaluation-fixtures/ecc/case_acme_sso_001
 ```
 
-The Compose credentials are intentionally local-only. Do not reuse them in a
-shared or production environment. PR2 does not use this database; it is reserved
-for the PR4 local appliance.
+`fr up` refuses contradictory configuration and directories that are not the
+Field Runtime Core repository root. The API and PostgreSQL ports are bound to
+loopback, the runtime is fixed to simulation mode, and external writes are
+disabled. The bundled credentials are local-evaluation credentials only.
+
+See [local evaluation operations](docs/operations/local-evaluation.md) for API
+routes, shutdown, data retention, and troubleshooting.
 
 ## Repository map
 
 ```text
-apps/                    Reserved deployable surfaces
+apps/api/                Loopback-only local evaluation API
+apps/worker/             In-process transactional command and bootstrap services
 packages/domain/         Deterministic domain vocabulary and state rules
 packages/contracts/      Canonical boundary schemas
-packages/runtime/        Pure case command, journal, replay, and integrity engine
+packages/runtime/        Pure engine plus PostgreSQL persistence boundary
+packages/cli/            Fail-closed local appliance CLI
 packages/ecc-pack/       ECC workflow, decision graph, fixtures, and evals
 docs/benchmarks/         Published evaluation methodology and honest limitations
 docs/                    Architecture, security, and operations

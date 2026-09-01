@@ -44,9 +44,22 @@ time or IDs.
 An already-processed source event presented under a fresh idempotency key returns a
 conflict rather than creating an unjournaled duplicate alias.
 
-This package is in-memory and credential-free. The caller must atomically replace
-the returned state; the package does not claim process-safe concurrency or durable
-immutability. PostgreSQL persistence, APIs, workers, automatic ECC case matching,
+The pure engine remains credential-free and returns the complete next state plus a
+validated SQL-neutral append bundle. `PostgresCaseStore` is the PR4 durable adapter:
+it serializes single-node writers with a singleton row lock, rehydrates and replays
+the full trusted state, invokes the pure engine, and atomically commits the
+projection, journal, idempotency record, source-event identity, and globally
+disjoint journal/audit IDs. Projection updates use compare-and-swap checks.
+
+The PostgreSQL migration preserves the canonical Case and journal documents
+losslessly in JSONB while relational columns and deferred foreign keys enforce
+tenant/case identity, predecessor topology, causation order, and projection-head
+binding. Journal, source identity, emitted ID, and evaluation-fixture records are
+append-only. Readiness fails if state cannot be replayed or the writer lock is
+missing.
+
+The singleton writer and whole-state hydration are explicit PR4 local-appliance
+tradeoffs, not a high-availability or scale claim. Automatic ECC case matching,
 authority evaluation, closure proof, and action execution remain later milestones.
 
 See the [case engine architecture](../../docs/architecture/case-event-engine.md) for
