@@ -42,12 +42,18 @@ Current milestone: PR3 — ECC Production Test
 - Fail-closed closure evaluation requiring an authorized action, source-state
   verification evidence, verifier identity, outcome receipt, completed audit, and
   customer acceptance.
-- Canonical non-empty tenant identities at both corpus and adapter boundaries.
+- Canonical tenant identities at both corpus and adapter boundaries, including
+  direct adapter calls that bypass corpus schema validation.
 - Fail-closed rejection of malformed live rank-one authority state before proof
   selection.
 - Same-rank account-owner conflict detection before deterministic owner routing.
+- Owner selection restricted to live rank-one authoritative records.
 - Customer acceptance bound to the exact authorized payload, independent
   verification evidence, and outcome receipt being closed.
+- Authorized policy selection rejects duplicate or contradictory records for the
+  same policy identity and version.
+- Closure proof records bind to the evaluated trigger event identity, preventing
+  same-tenant proof reuse across cases.
 - Answer-only negative control with deliberately unsafe behavior and a reachable
   suite failure state.
 - Public benchmark methodology with reproduction instructions and explicit limits.
@@ -56,13 +62,15 @@ Current milestone: PR3 — ECC Production Test
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- 72 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 76 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
   cases, graph activation blockers, local database exposure checks, gold-boundary
   isolation, harness-owned gate observations, tenant/scope rejection, payload- and
-  policy-bound closure proof, non-empty tenant identity, malformed authority-state
-  rejection, same-rank owner conflicts, outcome-bound customer acceptance,
+  policy-bound closure proof, canonical tenant identity at the adapter boundary,
+  malformed authority-state rejection, same-rank owner conflicts, authoritative
+  owner selection, contradictory policy rejection, trigger-bound closure proof,
+  outcome-bound customer acceptance,
   empty-corpus rejection, immutable receipt output, receipt-schema validation,
   corpus/gold bindings, deterministic receipt hashing, and the negative-control
   gate.

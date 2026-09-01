@@ -265,6 +265,10 @@ function nonEmptyString(value: JsonValue | undefined): value is string {
   );
 }
 
+function isCanonicalTenantId(value: JsonValue | undefined): value is string {
+  return nonEmptyString(value) && /^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(value);
+}
+
 function isSha256(value: JsonValue | undefined): value is string {
   return typeof value === "string" && /^sha256:[a-f0-9]{64}$/.test(value);
 }
@@ -328,6 +332,26 @@ function authoritativeRecordsBySource(
   );
 }
 
+function firstAuthoritativeStateString(
+  subject: EccEvaluationSubject,
+  keys: string[],
+): string | undefined {
+  for (const record of subject.input.records) {
+    if (
+      record.authority_rank !== 1 ||
+      record.freshness !== "live" ||
+      !isObject(record.state)
+    ) {
+      continue;
+    }
+    for (const key of keys) {
+      const value = stringValue(record.state[key]);
+      if (nonEmptyString(value)) return value;
+    }
+  }
+  return undefined;
+}
+
 function hasAuthoritativeOwnerConflict(subject: EccEvaluationSubject): boolean {
   const affectedAccounts = stateOf(
     recordBySource(subject, "incident") ?? {},
@@ -380,15 +404,19 @@ function firstStateString(
 
 function hasTenantMismatch(subject: EccEvaluationSubject): boolean {
   return (
-    !nonEmptyString(subject.tenant_id) ||
-    stringValue(subject.input.trigger_event.tenant_id) !== subject.tenant_id ||
+    !isCanonicalTenantId(subject.tenant_id) ||
+    !isCanonicalTenantId(subject.input.trigger_event.tenant_id) ||
+    subject.input.trigger_event.tenant_id !== subject.tenant_id ||
     subject.input.records.some(
-      (record) => stringValue(record.tenant_id) !== subject.tenant_id,
+      (record) =>
+        !isCanonicalTenantId(record.tenant_id) ||
+        record.tenant_id !== subject.tenant_id,
     ) ||
     [...subject.input.gbrain_memories, ...subject.input.policies].some(
       (item) =>
         Object.hasOwn(item, "tenant_id") &&
-        stringValue(item.tenant_id) !== subject.tenant_id,
+        (!isCanonicalTenantId(item.tenant_id) ||
+          item.tenant_id !== subject.tenant_id),
     )
   );
 }
@@ -597,20 +625,22 @@ function deriveOwner(
   ) {
     return null;
   }
-  const correction = recordBySource(subject, "correction");
-  const correctedOwner = stringValue(stateOf(correction ?? {}).after_owner);
+  const correctedOwner = stringValue(
+    stateOf(authoritativeRecordsBySource(subject, "correction")[0] ?? {})
+      .after_owner,
+  );
   if (correctedOwner !== undefined) return correctedOwner;
   if (recordBySource(subject, "availability") !== undefined) {
     const backup = stringValue(
-      stateOf(recordBySource(subject, "on_call") ?? {}).backup,
+      stateOf(authoritativeRecordsBySource(subject, "on_call")[0] ?? {}).backup,
     );
     if (backup !== undefined) return backup;
   }
-  const routed = firstStateString(subject, [
+  const routed = firstAuthoritativeStateString(subject, [
     "customer_success_manager_on_duty",
   ]);
   if (routed !== undefined) return routed;
-  const explicit = firstStateString(subject, [
+  const explicit = firstAuthoritativeStateString(subject, [
     "account_owner",
     "customer_success_manager",
     "account_executive",
@@ -801,12 +831,17 @@ function hasClosureProof(subject: EccEvaluationSubject): boolean {
   const payloadHash = authority.payload_hash;
   const policyRef = authority.policy_ref;
   const policyVersion = authority.policy_version;
-  const policyWasAuthorized = subject.input.policies.some(
-    (policy) =>
-      policy.status === "approved" &&
-      policy.ref === policyRef &&
-      policy.version === policyVersion,
+  const matchingPolicies = subject.input.policies.filter(
+    (policy) => policy.ref === policyRef && policy.version === policyVersion,
   );
+  const policyWasAuthorized =
+    matchingPolicies.length === 1 && matchingPolicies[0]?.status === "approved";
+  const sourceEventId = subject.input.trigger_event.source_event_id;
+  const proofBoundToSubject =
+    nonEmptyString(sourceEventId) &&
+    [authority, verification, acceptance, receipt].every(
+      (state) => state.source_event_id === sourceEventId,
+    );
   return (
     (decision === "authorized_action_complete" ||
       decision === "accepted_no_action") &&
@@ -816,6 +851,7 @@ function hasClosureProof(subject: EccEvaluationSubject): boolean {
     nonEmptyString(policyRef) &&
     nonEmptyString(policyVersion) &&
     policyWasAuthorized &&
+    proofBoundToSubject &&
     verification.source_state_verified === true &&
     verification.verification_independent === true &&
     nonEmptyString(verification.verification_evidence_ref) &&
