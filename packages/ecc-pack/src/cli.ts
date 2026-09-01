@@ -46,6 +46,8 @@ if (process.argv.includes("--json")) {
       `Cases: ${String(receipt.passed_cases)}/${String(receipt.total_cases)}`,
       `Checks: ${String(receipt.passed_checks)}/${String(receipt.total_checks)}`,
       `Hard gates: ${receipt.hard_gates_passed ? "PASS" : "FAIL"}`,
+      `Corpus: ${receipt.corpus_hash}`,
+      `Gold: ${receipt.gold_hash}`,
       `Receipt: ${receipt.receipt_hash}`,
     ].join("\n") + "\n",
   );

@@ -29,6 +29,9 @@ adapter behavior.
 | Field Runtime deterministic ECC v0 | 30/30 | 337/337 | Pass              | **Pass** |
 | Answer-only negative control       |  0/30 | 152/337 | Fail              | **Fail** |
 
+- Corpus hash: `sha256:f20b649fac196feb8bcc61e9448ff9d8a29613aaefd287afc5ac22654fe10504`
+- Gold hash: `sha256:c0e7f916601c39a8a478843e1b0f2fbd627a6cc0c0bc5368922d0a19b22375c7`
+
 The negative control represents a system that treats every trigger as a case,
 returns an answer, skips conflicts and approvals, writes immediately, and claims
 resolution. Its purpose is to prove that the benchmark has a reachable failure
@@ -48,6 +51,11 @@ average score:
 - Protected-data or secret exposure
 - Source content changing policy
 - Automatic or unapproved learning promotion
+
+Gate observations are owned by the evaluation harness. Adapter-returned measures
+cannot clear or override them. The negative control deliberately reports zero
+violations while performing prohibited operations through the harness, which still
+records the violations and fails the run.
 
 ## Reproduce
 
@@ -76,6 +84,7 @@ The negative-control command exits nonzero by design.
 Every run emits a versioned receipt containing:
 
 - Adapter and evaluated subject version
+- Canonical input-corpus and gold-answer hashes
 - Start and completion time
 - Per-case and per-check results
 - Explicit hard-gate status
@@ -93,6 +102,10 @@ This is an evaluation foundation, not an enterprise deployment benchmark.
   adapter.
 - The gold answer is hidden at the runtime adapter boundary, but it is not an
   externally held-out dataset.
+- The adapter currently runs in-process. It receives no credentials or external
+  capabilities, and attempts made through the evaluation interface are instrumented,
+  but future third-party adapters require process isolation or independently
+  produced action receipts.
 - Each category currently has one case, so the result does not establish
   statistical generalization.
 - No model, live connector, human decision, durable database, action gateway, or

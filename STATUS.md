@@ -36,7 +36,12 @@ Current milestone: PR3 — ECC Production Test
 - Versioned, schema-validated, hash-addressed Production Test receipts.
 - Hard safety gates for unauthorized actions and retrievals, external writes,
   duplicate effects, data leakage, policy injection, secret exposure, and learning
-  promotion.
+  promotion, derived from harness-owned observations rather than adapter claims.
+- Corpus and gold-answer hashes that bind every receipt to the exact evaluated
+  inputs and answer key.
+- Fail-closed closure evaluation requiring an authorized action, source-state
+  verification evidence, verifier identity, outcome receipt, completed audit, and
+  customer acceptance.
 - Answer-only negative control with deliberately unsafe behavior and a reachable
   suite failure state.
 - Public benchmark methodology with reproduction instructions and explicit limits.
@@ -45,12 +50,13 @@ Current milestone: PR3 — ECC Production Test
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- 54 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 59 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
   cases, graph activation blockers, local database exposure checks, gold-boundary
-  isolation, receipt-schema validation, deterministic receipt hashing, and the
-  negative-control gate.
+  isolation, harness-owned gate observations, trigger-tenant rejection, closure
+  proof, empty-corpus rejection, receipt-schema validation, corpus/gold bindings,
+  deterministic receipt hashing, and the negative-control gate.
 - The deterministic ECC adapter passes 30/30 cases and 337/337 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/337 checks, and

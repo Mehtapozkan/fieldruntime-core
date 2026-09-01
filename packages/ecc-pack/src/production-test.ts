@@ -52,7 +52,23 @@ export interface EccEvaluationDecision {
 
 export interface EccEvaluationAdapter {
   readonly name: string;
-  evaluate(subject: EccEvaluationSubject): EccEvaluationDecision;
+  evaluate(
+    subject: EccEvaluationSubject,
+    harness: EccEvaluationHarness,
+  ): EccEvaluationDecision;
+}
+
+export interface EccEvaluationHarness {
+  recordAutomaticPromotion(): void;
+  recordCandidatePromotion(): void;
+  recordCrossCustomerEvidenceLeak(): void;
+  recordDuplicateExternalEffect(): void;
+  recordExternalWrite(): void;
+  recordProtectedDataExposure(): void;
+  recordSecretExposure(): void;
+  recordSourcePolicyMutation(): void;
+  recordUnauthorizedAction(): void;
+  recordUnauthorizedRetrieval(): void;
 }
 
 export interface EvaluationCheck {
@@ -78,6 +94,8 @@ export interface ProductionTestReceipt {
   suite_version: "0.1.0";
   adapter: string;
   subject_version: string;
+  corpus_hash: string;
+  gold_hash: string;
   started_at: string;
   completed_at: string;
   run_status: "completed";
@@ -124,6 +142,60 @@ const PRIMARY_EXPECTATIONS = [
   "final_state",
   "learning_candidate",
 ] as const;
+
+function createEvaluationHarness(): {
+  harness: EccEvaluationHarness;
+  snapshot: () => Record<string, JsonValue>;
+} {
+  const observations = {
+    candidate_auto_promoted: false,
+    candidate_promoted: false,
+    cross_customer_evidence_leak: false,
+    duplicate_external_effects: 0,
+    external_write_count: 0,
+    policy_changed_by_source: false,
+    protected_data_exposed: false,
+    secret_exposure: false,
+    unauthorized_action_count: 0,
+    unauthorized_retrieval_count: 0,
+  };
+  const harness: EccEvaluationHarness = Object.freeze({
+    recordAutomaticPromotion(): void {
+      observations.candidate_auto_promoted = true;
+    },
+    recordCandidatePromotion(): void {
+      observations.candidate_promoted = true;
+    },
+    recordCrossCustomerEvidenceLeak(): void {
+      observations.cross_customer_evidence_leak = true;
+    },
+    recordDuplicateExternalEffect(): void {
+      observations.duplicate_external_effects += 1;
+    },
+    recordExternalWrite(): void {
+      observations.external_write_count += 1;
+    },
+    recordProtectedDataExposure(): void {
+      observations.protected_data_exposed = true;
+    },
+    recordSecretExposure(): void {
+      observations.secret_exposure = true;
+    },
+    recordSourcePolicyMutation(): void {
+      observations.policy_changed_by_source = true;
+    },
+    recordUnauthorizedAction(): void {
+      observations.unauthorized_action_count += 1;
+    },
+    recordUnauthorizedRetrieval(): void {
+      observations.unauthorized_retrieval_count += 1;
+    },
+  });
+  return {
+    harness,
+    snapshot: (): Record<string, JsonValue> => cloneJson(observations),
+  };
+}
 
 function isObject(value: JsonValue | undefined): value is JsonObject {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -225,11 +297,17 @@ function firstStateString(
   return undefined;
 }
 
-function deriveQualified(subject: EccEvaluationSubject): boolean {
-  const tenantMismatch = subject.input.records.some(
-    (record) => stringValue(record.tenant_id) !== subject.tenant_id,
+function hasTenantMismatch(subject: EccEvaluationSubject): boolean {
+  return (
+    stringValue(subject.input.trigger_event.tenant_id) !== subject.tenant_id ||
+    subject.input.records.some(
+      (record) => stringValue(record.tenant_id) !== subject.tenant_id,
+    )
   );
-  if (tenantMismatch) return false;
+}
+
+function deriveQualified(subject: EccEvaluationSubject): boolean {
+  if (hasTenantMismatch(subject)) return false;
   const routine = states(subject).some(
     (state) =>
       booleanValue(state.known_playbook) === true &&
@@ -244,11 +322,7 @@ function deriveBehavior(
   qualified: boolean,
 ): string {
   if (!qualified) {
-    return subject.input.records.some(
-      (record) => stringValue(record.tenant_id) !== subject.tenant_id,
-    )
-      ? "security_reject"
-      : "dismiss";
+    return hasTenantMismatch(subject) ? "security_reject" : "dismiss";
   }
   const actor =
     stringValue(subject.input.trigger_event.actor_external_id) ?? "";
@@ -304,11 +378,7 @@ function deriveConflicts(
   qualified: boolean,
 ): string[] {
   if (!qualified) {
-    return subject.input.records.some(
-      (record) => stringValue(record.tenant_id) !== subject.tenant_id,
-    )
-      ? ["tenant mismatch"]
-      : [];
+    return hasTenantMismatch(subject) ? ["tenant mismatch"] : [];
   }
   if (
     includesText(subject, "says sales owns it") &&
@@ -388,7 +458,11 @@ function deriveOwner(
   return actor.startsWith("user_") ? actor : "user_case_owner";
 }
 
-function deriveApprovals(subject: EccEvaluationSubject): string[] {
+function deriveApprovals(
+  subject: EccEvaluationSubject,
+  qualified: boolean,
+): string[] {
+  if (!qualified) return [];
   if (recordBySource(subject, "eval_run") !== undefined)
     return ["Workflow Owner"];
   if (includesText(subject, "credit")) {
@@ -519,6 +593,19 @@ function deriveLearningCandidate(
   return null;
 }
 
+function hasClosureProof(subject: EccEvaluationSubject): boolean {
+  return states(subject).some(
+    (state) =>
+      state.action_or_no_action_decision === "authorized_action_complete" &&
+      state.source_state_verified === true &&
+      typeof state.verification_evidence_ref === "string" &&
+      typeof state.verified_by_identity_id === "string" &&
+      typeof state.outcome_receipt_id === "string" &&
+      state.audit_complete === true &&
+      state.customer_accepted === true,
+  );
+}
+
 function deriveFinalState(
   subject: EccEvaluationSubject,
   qualified: boolean,
@@ -542,7 +629,9 @@ function deriveFinalState(
   if (recordBySource(subject, "connector") !== undefined) return "monitoring";
   if (recordBySource(subject, "availability") !== undefined)
     return "monitoring";
-  if (hasState(subject, "customer_accepted", true)) return "resolved";
+  if (hasState(subject, "customer_accepted", true)) {
+    return hasClosureProof(subject) ? "resolved" : "verifying";
+  }
   if (hasState(subject, "customer_accepted", false)) return "monitoring";
   const storedCase = stateOf(recordBySource(subject, "case_store") ?? {});
   if (
@@ -704,14 +793,18 @@ function deriveMeasures(
 export class DeterministicEccAdapter implements EccEvaluationAdapter {
   readonly name = "fieldruntime-deterministic-ecc-v0";
 
-  evaluate(subject: EccEvaluationSubject): EccEvaluationDecision {
+  evaluate(
+    subject: EccEvaluationSubject,
+    harness: EccEvaluationHarness,
+  ): EccEvaluationDecision {
+    void harness;
     const qualified = deriveQualified(subject);
     const behavior = deriveBehavior(subject, qualified);
     const severity = deriveSeverity(subject, qualified, behavior);
     const conflicts = deriveConflicts(subject, qualified);
     const missingEvidence = deriveMissingEvidence(subject);
     const owner = deriveOwner(subject, qualified, conflicts, behavior);
-    const requiredApprovals = deriveApprovals(subject);
+    const requiredApprovals = deriveApprovals(subject, qualified);
     const prohibitedActions = deriveProhibitedActions(
       subject,
       conflicts,
@@ -750,7 +843,20 @@ export class DeterministicEccAdapter implements EccEvaluationAdapter {
 export class AnswerOnlyNegativeControl implements EccEvaluationAdapter {
   readonly name = "negative-control-answer-only";
 
-  evaluate(subject: EccEvaluationSubject): EccEvaluationDecision {
+  evaluate(
+    subject: EccEvaluationSubject,
+    harness: EccEvaluationHarness,
+  ): EccEvaluationDecision {
+    harness.recordAutomaticPromotion();
+    harness.recordCandidatePromotion();
+    harness.recordCrossCustomerEvidenceLeak();
+    harness.recordDuplicateExternalEffect();
+    harness.recordExternalWrite();
+    harness.recordProtectedDataExposure();
+    harness.recordSecretExposure();
+    harness.recordSourcePolicyMutation();
+    harness.recordUnauthorizedAction();
+    harness.recordUnauthorizedRetrieval();
     const actor =
       stringValue(subject.input.trigger_event.actor_external_id) ?? null;
     return {
@@ -766,16 +872,16 @@ export class AnswerOnlyNegativeControl implements EccEvaluationAdapter {
       final_state: "resolved",
       learning_candidate: null,
       measures: {
-        candidate_auto_promoted: true,
-        candidate_promoted: true,
-        cross_customer_evidence_leak: true,
-        duplicate_external_effects: 1,
-        external_write_count: 1,
-        policy_changed_by_source: true,
-        protected_data_exposed: true,
-        secret_exposure: true,
-        unauthorized_action_count: 1,
-        unauthorized_retrieval_count: 1,
+        candidate_auto_promoted: false,
+        candidate_promoted: false,
+        cross_customer_evidence_leak: false,
+        duplicate_external_effects: 0,
+        external_write_count: 0,
+        policy_changed_by_source: false,
+        protected_data_exposed: false,
+        secret_exposure: false,
+        unauthorized_action_count: 0,
+        unauthorized_retrieval_count: 0,
       },
     };
   }
@@ -826,10 +932,46 @@ function subjectFor(evaluationCase: EccEvaluationCase): EccEvaluationSubject {
   );
 }
 
+function corpusHash(cases: EccEvaluationCase[]): string {
+  return hashJson(
+    cases.map(
+      ({
+        id,
+        title,
+        category,
+        goal,
+        tenant_id: tenantId,
+        workflow_version: workflowVersion,
+        input,
+      }) => ({
+        id,
+        title,
+        category,
+        goal,
+        tenant_id: tenantId,
+        workflow_version: workflowVersion,
+        input,
+      }),
+    ),
+  );
+}
+
+function goldHash(cases: EccEvaluationCase[]): string {
+  return hashJson(
+    cases.map(({ id, expected, assertions }) => ({
+      id,
+      expected,
+      assertions,
+    })) as unknown as JsonValue,
+  );
+}
+
 function valueFromDecision(
   decision: EccEvaluationDecision,
   key: string,
+  harnessMeasures: Record<string, JsonValue>,
 ): JsonValue {
+  if (HARD_GATE_ASSERTIONS.has(key)) return harnessMeasures[key] ?? null;
   if (key in decision.measures) return decision.measures[key] ?? null;
   const candidate = (decision as unknown as Record<string, JsonValue>)[key];
   return candidate ?? null;
@@ -839,13 +981,18 @@ function evaluateCase(
   evaluationCase: EccEvaluationCase,
   adapter: EccEvaluationAdapter,
 ): EvaluationCaseResult {
-  const decision = adapter.evaluate(subjectFor(evaluationCase));
+  const instrumentation = createEvaluationHarness();
+  const decision = adapter.evaluate(
+    subjectFor(evaluationCase),
+    instrumentation.harness,
+  );
+  const harnessMeasures = instrumentation.snapshot();
   const checks: EvaluationCheck[] = [];
 
   for (const key of PRIMARY_EXPECTATIONS) {
     if (!(key in evaluationCase.expected)) continue;
     const expected = evaluationCase.expected[key] ?? null;
-    const actual = valueFromDecision(decision, key);
+    const actual = valueFromDecision(decision, key, harnessMeasures);
     checks.push({
       name: `expected.${key}`,
       operator: "eq",
@@ -857,7 +1004,11 @@ function evaluateCase(
   }
 
   for (const assertion of evaluationCase.assertions) {
-    const actual = valueFromDecision(decision, assertion.assertion);
+    const actual = valueFromDecision(
+      decision,
+      assertion.assertion,
+      harnessMeasures,
+    );
     checks.push({
       name: assertion.assertion,
       operator: assertion.operator,
@@ -894,6 +1045,9 @@ export function parseEvaluationCases(jsonl: string): EccEvaluationCase[] {
       return value;
     });
   const ids = new Set(cases.map(({ id }) => id));
+  if (cases.length === 0) {
+    throw new Error("Evaluation corpus must contain at least one case");
+  }
   if (ids.size !== cases.length)
     throw new Error("Evaluation ids must be unique");
   return deepFreeze(cases);
@@ -904,6 +1058,9 @@ export function runProductionTest(
   adapter: EccEvaluationAdapter,
   options: ProductionTestOptions = {},
 ): ProductionTestReceipt {
+  if (cases.length === 0) {
+    throw new Error("Evaluation corpus must contain at least one case");
+  }
   const now: () => Date = options.now ?? ((): Date => new Date());
   const startedAt = now().toISOString();
   const caseResults = cases.map((evaluationCase) =>
@@ -922,6 +1079,8 @@ export function runProductionTest(
     suite_version: "0.1.0" as const,
     adapter: adapter.name,
     subject_version: options.subjectVersion ?? "working-tree",
+    corpus_hash: corpusHash(cases),
+    gold_hash: goldHash(cases),
     started_at: startedAt,
     completed_at: completedAt,
     run_status: "completed" as const,

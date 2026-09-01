@@ -10,6 +10,8 @@
     "suite_version",
     "adapter",
     "subject_version",
+    "corpus_hash",
+    "gold_hash",
     "started_at",
     "completed_at",
     "run_status",
@@ -41,6 +43,14 @@
     "subject_version": {
       "type": "string",
       "minLength": 1
+    },
+    "corpus_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "gold_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
     },
     "started_at": {
       "type": "string",

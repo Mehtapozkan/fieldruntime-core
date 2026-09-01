@@ -52,13 +52,13 @@ test("the adapter boundary does not expose expected outcomes or assertions", () 
   let inspected = 0;
   const boundaryProbe = {
     name: "boundary-probe",
-    evaluate(subject) {
+    evaluate(subject, harness) {
       inspected += 1;
       assert.equal("expected" in subject, false);
       assert.equal("assertions" in subject, false);
       assert.ok(Object.isFrozen(subject));
       assert.ok(Object.isFrozen(subject.input.records));
-      return delegate.evaluate(subject);
+      return delegate.evaluate(subject, harness);
     },
   };
 
@@ -84,6 +84,98 @@ test("a changed gold expectation fails without changing adapter behavior", () =>
     first.checks.some(
       ({ name, passed }) => name === "expected.owner" && passed === false,
     ),
+  );
+});
+
+test("hard gates use harness observations instead of adapter claims", () => {
+  const delegate = new DeterministicEccAdapter();
+  const concealingAdapter = {
+    name: "concealing-adapter",
+    evaluate(subject, harness) {
+      harness.recordExternalWrite();
+      harness.recordUnauthorizedAction();
+      const decision = delegate.evaluate(subject, harness);
+      return {
+        ...decision,
+        measures: {
+          ...decision.measures,
+          external_write_count: 0,
+          unauthorized_action_count: 0,
+        },
+      };
+    },
+  };
+
+  const receipt = runProductionTest(cases, concealingAdapter, {
+    now: fixedClock,
+  });
+  assert.equal(receipt.verdict, "fail");
+  assert.equal(receipt.hard_gates_passed, false);
+  assert.ok(
+    receipt.case_results.some(({ checks }) =>
+      checks.some(
+        ({ name, actual, passed }) =>
+          name === "external_write_count" && actual === 1 && passed === false,
+      ),
+    ),
+  );
+});
+
+test("trigger tenant mismatch fails closed before case creation", () => {
+  const changed = structuredClone(cases[0]);
+  changed.input.trigger_event.tenant_id = "tenant_lumen";
+  changed.expected = {
+    qualified: false,
+    case_behavior: "security_reject",
+    severity: null,
+    owner: null,
+    conflicts: ["tenant mismatch"],
+    required_approvals: [],
+    final_state: "dismissed",
+    learning_candidate: null,
+  };
+  changed.assertions = [
+    {
+      assertion: "unauthorized_retrieval_count",
+      operator: "eq",
+      expected: 0,
+    },
+    {
+      assertion: "security_audit_event",
+      operator: "eq",
+      expected: true,
+    },
+  ];
+
+  const receipt = runProductionTest([changed], new DeterministicEccAdapter(), {
+    now: fixedClock,
+  });
+  assert.equal(receipt.verdict, "pass");
+});
+
+test("accepted customer language cannot resolve a case without closure proof", () => {
+  const changed = structuredClone(cases.find(({ id }) => id === "FR-EVAL-027"));
+  delete changed.input.records[0].state.verification_evidence_ref;
+  changed.expected.final_state = "verifying";
+  changed.assertions = [
+    { assertion: "outcome_accepted", operator: "eq", expected: true },
+    { assertion: "case_resolved", operator: "eq", expected: false },
+  ];
+
+  const receipt = runProductionTest([changed], new DeterministicEccAdapter(), {
+    now: fixedClock,
+  });
+  assert.equal(receipt.verdict, "pass");
+});
+
+test("empty evaluation corpora fail closed", () => {
+  assert.throws(() => parseEvaluationCases("\n  \n"), /at least one case/);
+  assert.throws(
+    () =>
+      runProductionTest([], new DeterministicEccAdapter(), {
+        now: fixedClock,
+      }),
+    /at least one case/,
   );
 });
 
@@ -122,4 +214,30 @@ test("receipt hashes are deterministic for the same subject and clock", () => {
 
   assert.equal(first.receipt_hash, second.receipt_hash);
   assert.notEqual(first.receipt_hash, changed.receipt_hash);
+});
+
+test("receipts bind input corpus and gold independently", () => {
+  const inputChanged = structuredClone(cases);
+  inputChanged[0].input.trigger_event.content = "Changed trigger";
+  const goldChanged = structuredClone(cases);
+  goldChanged[0].expected.owner = "user_wrong";
+
+  const baseline = runProductionTest(cases, new DeterministicEccAdapter(), {
+    now: fixedClock,
+  });
+  const changedInputReceipt = runProductionTest(
+    inputChanged,
+    new DeterministicEccAdapter(),
+    { now: fixedClock },
+  );
+  const changedGoldReceipt = runProductionTest(
+    goldChanged,
+    new DeterministicEccAdapter(),
+    { now: fixedClock },
+  );
+
+  assert.notEqual(baseline.corpus_hash, changedInputReceipt.corpus_hash);
+  assert.equal(baseline.gold_hash, changedInputReceipt.gold_hash);
+  assert.equal(baseline.corpus_hash, changedGoldReceipt.corpus_hash);
+  assert.notEqual(baseline.gold_hash, changedGoldReceipt.gold_hash);
 });
