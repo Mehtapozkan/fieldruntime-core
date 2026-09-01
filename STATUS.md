@@ -1,6 +1,6 @@
 # Status
 
-Current milestone: PR5 — Guided Workbench
+Current milestone: v0.1.0 Public Evaluation Preview preparation
 
 ## Implemented
 
@@ -101,11 +101,25 @@ Current milestone: PR5 — Guided Workbench
   handling, live announcements, reduced-motion behavior, contrast gates, and a
   maximum six deliberate interactions through the guided path.
 - `fr up` now prints `http://127.0.0.1:3210/` after the appliance reaches readiness.
+- Apache License 2.0 source boundary with explicit trademark and open-core terms;
+  every workspace package remains registry-private to prevent accidental publish.
+- Public contribution, conduct, vulnerability-reporting, third-party-license, and
+  release-boundary documentation.
+- Five-minute first-run guide and committed Guided Workbench preview.
+- Automated public-release check for required artifacts, high-confidence secrets
+  in tracked files and history, approved production dependency licenses, package
+  metadata, and exact PostgreSQL image pinning.
+- PostgreSQL 17.11 Alpine and Node.js 24 Bookworm Slim images pinned to their
+  multi-platform OCI digests.
+- Dependabot coverage for pnpm, Docker, and GitHub Actions dependencies.
 
 ## Verified
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
+- `pnpm release:check` passes across 118 current files, complete reachable Git
+  history, required public-release artifacts, pinned container images, package
+  metadata, and production dependency licenses.
 - 135 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
@@ -148,12 +162,14 @@ Current milestone: PR5 — Guided Workbench
 - Declared action payload hashes are not independently recomputed; every claimed
   executed action therefore fails closed in this milestone.
 - No provider or live connector implementation.
-- PostgreSQL image digest must be pinned before a distributable release.
 - The drifted upstream normalized PostgreSQL SQL remains reference-only. PR4 uses
   its own lossless event-store migration; a normalized model still requires
   explicit parity reconciliation and conformance tests.
 - ECC v0.1.0 is shadow/evaluation-only; activation is deliberately blocked.
-- Public license and paid/open-core boundary are intentionally unresolved.
+- Repository visibility is an explicit owner action outside this code change. The
+  public-repository checklist requires green hosted CI before that action.
+- The preview is source-clone distribution only. Signed artifacts, installers,
+  SBOM, provenance, upgrade, and uninstall flows remain PR10 scope.
 - Evaluation inputs and gold currently share the Core repository. The adapter
   cannot receive gold at runtime, but held-out and externally authored cases do not
   exist yet.

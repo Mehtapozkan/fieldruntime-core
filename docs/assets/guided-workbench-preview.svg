@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Field Runtime Guided Workbench — Act and Verify stage</title>
+  <desc id="desc">A faithful design preview of the synthetic enterprise case workbench showing a connector success rejected after independent read-back found no customer update.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#0d211b" flood-opacity="0.08"/>
+    </filter>
+    <style>
+      .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+      .ink { fill: #15201d; }
+      .soft { fill: #61706a; }
+      .forest { fill: #123d32; }
+      .tiny { font-size: 12px; letter-spacing: 1.2px; font-weight: 700; }
+      .small { font-size: 14px; }
+      .body { font-size: 16px; }
+      .label { font-size: 13px; font-weight: 700; }
+      .title { font-size: 34px; font-weight: 720; letter-spacing: -0.8px; }
+      .stageTitle { font-size: 29px; font-weight: 720; letter-spacing: -0.5px; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="#f5f3ed"/>
+
+  <!-- Evaluation boundary -->
+  <rect width="1600" height="34" fill="#0d211b"/>
+  <text x="34" y="23" class="mono tiny" fill="#a9b8b2">EVALUATION BOUNDARY</text>
+  <circle cx="1192" cy="17" r="4" fill="#d6f25a"/>
+  <text x="1204" y="22" class="mono tiny" fill="#e5ede9">SYNTHETIC</text>
+  <circle cx="1311" cy="17" r="4" fill="#d6f25a"/>
+  <text x="1323" y="22" class="mono tiny" fill="#e5ede9">GUIDED SIMULATION</text>
+  <circle cx="1491" cy="17" r="4" fill="#e99b81"/>
+  <text x="1503" y="22" class="mono tiny" fill="#e5ede9">WRITES OFF</text>
+
+  <!-- Header -->
+  <rect y="34" width="1600" height="76" fill="#fbfaf6"/>
+  <line x1="0" y1="110" x2="1600" y2="110" stroke="#d7d8d2"/>
+  <g transform="translate(34 54)">
+    <circle cx="4" cy="4" r="4" fill="#123d32"/>
+    <circle cx="24" cy="7" r="4" fill="#123d32"/>
+    <circle cx="11" cy="25" r="4" fill="#123d32"/>
+    <circle cx="22" cy="23" r="4" fill="#d6f25a"/>
+    <line x1="7" y1="7" x2="20" y2="21" stroke="#123d32"/>
+    <line x1="12" y1="22" x2="22" y2="10" stroke="#123d32"/>
+  </g>
+  <text x="77" y="81" class="sans label forest" letter-spacing="2.6">FIELD <tspan fill="#278469">/</tspan> RUNTIME</text>
+  <rect x="1396" y="55" width="170" height="35" rx="17.5" fill="#e4f1ea" stroke="#b8d7c9"/>
+  <circle cx="1416" cy="72.5" r="5" fill="#278469"/>
+  <text x="1429" y="77" class="mono tiny forest">LOCAL APPLIANCE</text>
+
+  <!-- Stage rail -->
+  <rect y="110" width="252" height="890" fill="#f5f3ed"/>
+  <line x1="252" y1="110" x2="252" y2="1000" stroke="#d7d8d2"/>
+  <text x="34" y="164" class="mono tiny" fill="#278469">GUIDED CASE</text>
+  <line x1="51" y1="218" x2="51" y2="518" stroke="#c9ccc5"/>
+  <g class="sans">
+    <circle cx="51" cy="218" r="17" fill="#123d32"/>
+    <text x="51" y="223" text-anchor="middle" font-size="13" font-weight="700" fill="white">✓</text>
+    <text x="82" y="216" class="label forest">Case</text>
+    <text x="82" y="235" class="mono" font-size="10" fill="#7c8782">CONFLICT FOUND</text>
+
+    <circle cx="51" cy="318" r="17" fill="#123d32"/>
+    <text x="51" y="323" text-anchor="middle" font-size="13" font-weight="700" fill="white">✓</text>
+    <text x="82" y="316" class="label forest">Decision</text>
+    <text x="82" y="335" class="mono" font-size="10" fill="#7c8782">AUTHORITY ROUTED</text>
+
+    <circle cx="51" cy="418" r="19" fill="#123d32"/>
+    <circle cx="51" cy="418" r="25" fill="none" stroke="#123d32" stroke-opacity="0.12" stroke-width="7"/>
+    <text x="51" y="423" text-anchor="middle" class="mono" font-size="11" font-weight="700" fill="white">03</text>
+    <text x="82" y="416" class="label forest">Act &amp; Verify</text>
+    <text x="82" y="435" class="mono" font-size="10" fill="#278469">EFFECT REJECTED</text>
+
+    <circle cx="51" cy="518" r="17" fill="#f5f3ed" stroke="#b9bdb6"/>
+    <text x="51" y="523" text-anchor="middle" class="mono" font-size="11" fill="#7c8782">04</text>
+    <text x="82" y="516" class="label soft">Receipt</text>
+    <text x="82" y="535" class="mono" font-size="10" fill="#9aa19e">RECONSTRUCT</text>
+  </g>
+  <line x1="34" y1="936" x2="218" y2="936" stroke="#d7d8d2"/>
+  <text x="34" y="963" class="mono" font-size="11" fill="#7c8782">ECC / V0.1</text>
+  <text x="218" y="963" text-anchor="end" class="mono" font-size="11" fill="#7c8782">4 OF 6 ACTIONS</text>
+
+  <!-- Main workbench -->
+  <g transform="translate(308 146)">
+    <text x="0" y="16" class="mono tiny" fill="#278469">STRATEGIC CUSTOMER ESCALATION</text>
+    <text x="0" y="62" class="sans title ink">Acme Aero <tspan fill="#94a09b">/</tspan> SSO rollout blocked</text>
+    <rect x="1073" y="18" width="70" height="30" rx="15" fill="#fff0e9" stroke="#e1aa9b"/>
+    <text x="1108" y="38" text-anchor="middle" class="mono tiny" fill="#a3472e">HIGH</text>
+    <rect x="1153" y="18" width="128" height="30" rx="15" fill="#e4f1ea" stroke="#b8d7c9"/>
+    <text x="1217" y="38" text-anchor="middle" class="mono tiny forest">NEEDS REVIEW</text>
+
+    <rect x="0" y="86" width="1282" height="66" rx="7" fill="#f0efe9" stroke="#d7d8d2"/>
+    <line x1="305" y1="86" x2="305" y2="152" stroke="#d7d8d2"/>
+    <line x1="610" y1="86" x2="610" y2="152" stroke="#d7d8d2"/>
+    <line x1="974" y1="86" x2="974" y2="152" stroke="#d7d8d2"/>
+    <text x="20" y="111" class="mono" font-size="10" fill="#7c8782">CASE</text>
+    <text x="20" y="134" class="sans label ink">case_acme_sso_001</text>
+    <text x="325" y="111" class="mono" font-size="10" fill="#7c8782">OWNER</text>
+    <text x="325" y="134" class="sans label ink">Jane · Case owner</text>
+    <text x="630" y="111" class="mono" font-size="10" fill="#7c8782">COMMITMENT</text>
+    <text x="630" y="134" class="sans label ink">Aug 28, 2:00 PM PDT</text>
+    <text x="994" y="111" class="mono" font-size="10" fill="#7c8782">MODE</text>
+    <text x="994" y="134" class="sans label ink">Guided simulation</text>
+
+    <text x="0" y="200" class="mono tiny" fill="#278469">STAGE 3 · ACT &amp; VERIFY</text>
+    <text x="0" y="239" class="sans stageTitle ink">A success response is not a verified result.</text>
+    <text x="0" y="268" class="sans body soft">This simulation isolates the bounded customer-update effect; it does not claim deployment was verified or close the Acme case.</text>
+
+    <!-- Payload card -->
+    <g transform="translate(0 298)">
+      <rect width="596" height="340" rx="10" fill="#fbfaf6" stroke="#cfd2cb"/>
+      <rect width="596" height="54" rx="10" fill="#123d32"/>
+      <rect y="44" width="596" height="10" fill="#123d32"/>
+      <text x="22" y="34" class="sans label" fill="white">Exact payload preview</text>
+      <text x="574" y="34" text-anchor="end" class="mono tiny" fill="#cfe1d8">SYNTHETIC · READ ONLY</text>
+      <rect x="20" y="72" width="556" height="36" rx="6" fill="#e7ede8"/>
+      <text x="36" y="95" class="mono small forest">fixture://crm/accounts/acme-aero/customer-update</text>
+      <rect x="20" y="124" width="556" height="126" rx="7" fill="#0d211b"/>
+      <text x="38" y="151" class="mono small" fill="#b9cec5">{</text>
+      <text x="58" y="177" class="mono small" fill="#d6f25a">"message"<tspan fill="#c9d7d1">: "Deployment is still being verified.",</tspan></text>
+      <text x="58" y="203" class="mono small" fill="#d6f25a">"channel"<tspan fill="#c9d7d1">: "customer_record"</tspan></text>
+      <text x="38" y="229" class="mono small" fill="#b9cec5">}</text>
+      <line x1="20" y1="269" x2="576" y2="269" stroke="#d7d8d2"/>
+      <text x="20" y="294" class="mono" font-size="10" fill="#7c8782">PAYLOAD HASH</text>
+      <text x="20" y="318" class="mono small forest">sha256:3f66e2da…d590e</text>
+      <text x="314" y="294" class="mono" font-size="10" fill="#7c8782">IDEMPOTENCY</text>
+      <text x="314" y="318" class="mono small forest">case_acme_sso_001:update:v1</text>
+    </g>
+
+    <!-- Verification card -->
+    <g transform="translate(620 298)">
+      <rect width="662" height="340" rx="10" fill="#fbfaf6" stroke="#cfd2cb"/>
+      <rect width="662" height="54" rx="10" fill="#eef2ed"/>
+      <text x="22" y="34" class="sans label forest">Action / verification separation</text>
+      <text x="640" y="34" text-anchor="end" class="mono tiny" fill="#61706a">DETERMINISTIC FIXTURE</text>
+      <line x1="48" y1="90" x2="48" y2="300" stroke="#d2d5ce" stroke-width="2"/>
+
+      <circle cx="48" cy="94" r="16" fill="#278469"/>
+      <text x="48" y="100" text-anchor="middle" class="sans label" fill="white">✓</text>
+      <text x="82" y="91" class="sans label ink">Payload bound</text>
+      <text x="82" y="112" class="sans small soft">Target, body, declared payload hash, and idempotency key fixed.</text>
+      <rect x="558" y="82" width="78" height="24" rx="12" fill="#e4f1ea"/>
+      <text x="597" y="98" text-anchor="middle" class="mono" font-size="10" fill="#278469">READY</text>
+
+      <circle cx="48" cy="164" r="16" fill="#278469"/>
+      <text x="48" y="170" text-anchor="middle" class="sans label" fill="white">✓</text>
+      <text x="82" y="161" class="sans label ink">Fixture connector</text>
+      <text x="82" y="182" class="sans small soft">Returned an apparently successful simulated write.</text>
+      <rect x="535" y="152" width="101" height="24" rx="12" fill="#e4f1ea"/>
+      <text x="585" y="168" text-anchor="middle" class="mono" font-size="10" fill="#278469">200 SUCCESS</text>
+
+      <circle cx="48" cy="234" r="16" fill="#b44e34"/>
+      <text x="48" y="240" text-anchor="middle" class="sans label" fill="white">!</text>
+      <text x="82" y="231" class="sans label ink">Independent read-back</text>
+      <text x="82" y="252" class="sans small soft">A separately identified verifier found no customer message.</text>
+      <rect x="552" y="222" width="84" height="24" rx="12" fill="#fff0e9"/>
+      <text x="594" y="238" text-anchor="middle" class="mono" font-size="10" fill="#a3472e">MISMATCH</text>
+
+      <circle cx="48" cy="304" r="16" fill="#b44e34"/>
+      <text x="48" y="310" text-anchor="middle" class="sans label" fill="white">!</text>
+      <text x="82" y="301" class="sans label ink">Effect acceptance gate</text>
+      <text x="82" y="322" class="sans small soft">A connector response cannot prove the customer record changed.</text>
+      <rect x="518" y="292" width="118" height="24" rx="12" fill="#fff0e9"/>
+      <text x="577" y="308" text-anchor="middle" class="mono" font-size="10" fill="#a3472e">EFFECT REJECTED</text>
+    </g>
+
+    <!-- Failure moment -->
+    <g transform="translate(0 664)">
+      <rect width="1282" height="112" rx="10" fill="#fff3ed" stroke="#e1aa9b" stroke-width="2"/>
+      <circle cx="42" cy="56" r="21" fill="#b44e34"/>
+      <text x="42" y="64" text-anchor="middle" class="sans" font-size="23" font-weight="800" fill="white">!</text>
+      <text x="82" y="41" class="sans" font-size="20" font-weight="720" fill="#7e2e1e">Connector said success. The customer record did not change.</text>
+      <text x="82" y="68" class="sans small" fill="#765348">Independent read-back found no update, so Field Runtime rejected the simulated effect.</text>
+      <text x="82" y="91" class="sans small" fill="#765348">Deployment remains unverified. The authoritative Acme case stays in needs review.</text>
+      <rect x="1018" y="40" width="236" height="34" rx="17" fill="#b44e34"/>
+      <text x="1136" y="62" text-anchor="middle" class="mono tiny" fill="white">EFFECT REJECTED · CASE OPEN</text>
+    </g>
+
+    <text x="0" y="822" class="mono tiny" fill="#7c8782">5 OF 6 · REVEAL THE BOUNDED RECOVERY</text>
+    <rect x="1012" y="792" width="270" height="52" rx="7" fill="#123d32"/>
+    <text x="1147" y="824" text-anchor="middle" class="mono label" fill="white">REVEAL SAFE RECOVERY →</text>
+  </g>
+</svg>

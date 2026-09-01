@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim AS build
+FROM node:24-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS build
 
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@11.24.0 --activate
@@ -10,7 +10,7 @@ COPY scripts ./scripts
 RUN pnpm install --frozen-lockfile
 RUN pnpm build
 
-FROM node:24-bookworm-slim AS runtime
+FROM node:24-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS runtime
 
 ENV NODE_ENV=production
 WORKDIR /app

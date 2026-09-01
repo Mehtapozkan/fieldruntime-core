@@ -149,7 +149,10 @@ test("the evaluation suite contains the critical authority and resilience sentin
 test("the local database is loopback-only and uses evaluation credentials", () => {
   const postgres = compose.services.postgres;
 
-  assert.equal(postgres.image, "postgres:17-alpine");
+  assert.equal(
+    postgres.image,
+    "postgres:17.11-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73",
+  );
   assert.deepEqual(postgres.ports, ["127.0.0.1:5432:5432"]);
   assert.match(postgres.environment.POSTGRES_PASSWORD, /local-evaluation-only/);
   assert.ok(postgres.healthcheck);

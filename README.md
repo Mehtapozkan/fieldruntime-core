@@ -4,10 +4,20 @@ Field Runtime Core is a self-hosted enterprise case runtime for consequential wo
 It carries a complete case from fragmented evidence through an authorized decision,
 controlled action, independent verification, receipt, correction, and replay.
 
-> Local scaffold validation requires no credentials. Production authority must be
-> earned.
+> **Evaluation Preview** — Synthetic cases. Simulated authority. No external
+> writes. Not production software. Production authority must be earned.
 
-## Current release boundary
+![Field Runtime Guided Workbench](docs/assets/guided-workbench-preview.svg)
+
+The first-run story is direct-to-case: four sources disagree, the model proposes,
+named people retain authority, a connector reports success, and independent
+read-back proves the work did not happen. Field Runtime rejects the effect and
+keeps the case open.
+
+[Run the five-minute evaluation](docs/guides/5-minute-evaluation.md) ·
+[Read the security boundary](SECURITY.md) · [See the open-core boundary](OPEN_CORE.md)
+
+## Evaluation preview boundary
 
 This repository is an **evaluation foundation**, not a production release. It is
 local-first, synthetic, deterministic in its implemented runtime slice, and makes
@@ -91,6 +101,9 @@ disabled. The bundled credentials are local-evaluation credentials only.
 See [local evaluation operations](docs/operations/local-evaluation.md) for API
 routes, shutdown, data retention, and troubleshooting.
 
+For the complete six-action product story, use the
+[five-minute evaluation](docs/guides/5-minute-evaluation.md).
+
 ## Repository map
 
 ```text
@@ -112,7 +125,12 @@ behavior. Architecture decisions live in `DECISIONS.md`.
 
 ## Distribution
 
-The intended product is a downloadable, self-hosted Field Runtime Core with
-installable workflow packs. The first pack is ECC. Licensing and the commercial
-open-core boundary are deliberately unresolved; no public license is granted by
-this scaffold.
+Field Runtime Core is licensed under the [Apache License 2.0](LICENSE). The first
+workflow pack is ECC. Public distribution remains gated by the
+[repository checklist](docs/releases/public-repository-checklist.md), hosted CI,
+and an explicit repository-visibility decision by the owner.
+
+This source release is clone-based. Signed artifacts, a standalone installer,
+SBOM, provenance, upgrades, and uninstall flows remain a later milestone. See
+[`OPEN_CORE.md`](OPEN_CORE.md), [`TRADEMARKS.md`](TRADEMARKS.md), and the
+[`v0.1.0 evaluation preview`](docs/releases/v0.1.0-evaluation-preview.md) notes.
