@@ -190,18 +190,29 @@ async function startAppliance(dependencies: CliDependencies): Promise<number> {
   const cwd = dependencies.cwd();
   await readManifest(dependencies, projectPaths(cwd).manifest);
   await assertRepositoryRoot(dependencies, cwd);
-  const result = await dependencies.runProcess(
-    "docker",
-    ["compose", "up", "--build", "--detach", "--wait"],
-    {
-      cwd,
-      env: {
-        COMPOSE_FILE: join(cwd, "compose.yaml"),
-        FIELD_RUNTIME_EXTERNAL_WRITES: "false",
-        FIELD_RUNTIME_MODE: "simulation",
+  let result: ProcessRunResult;
+  try {
+    result = await dependencies.runProcess(
+      "docker",
+      ["compose", "up", "--build", "--detach", "--wait"],
+      {
+        cwd,
+        env: {
+          COMPOSE_FILE: join(cwd, "compose.yaml"),
+          FIELD_RUNTIME_EXTERNAL_WRITES: "false",
+          FIELD_RUNTIME_MODE: "simulation",
+        },
       },
-    },
-  );
+    );
+  } catch (error) {
+    if (errorCode(error) === "ENOENT") {
+      throw new CliError(
+        "Docker is not available. Install Docker with Compose v2 and retry `fr up`.",
+        1,
+      );
+    }
+    throw error;
+  }
   if (!Number.isSafeInteger(result.exitCode) || result.exitCode < 0) {
     throw new CliError("Docker Compose returned an invalid exit code.", 1);
   }

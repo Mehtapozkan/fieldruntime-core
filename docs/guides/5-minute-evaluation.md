@@ -1,7 +1,9 @@
 # Five-Minute Field Runtime Evaluation
 
 This walkthrough demonstrates why an enterprise runtime must retain the complete
-case—not merely return an AI answer.
+case—not merely return an AI answer. The complete case keeps evidence, conflicts,
+people, commitments, decision options, authority, actions, verification, outcomes,
+corrections, and receipts together across a multiplayer workflow.
 
 ## Boundary
 
@@ -10,7 +12,13 @@ Run it only on the documented loopback appliance.
 
 ## Start
 
-Requirements: Node.js 24, pnpm 11, and Docker with Compose.
+Requirements:
+
+- Node.js 24.x and pnpm 11.x (Corepack may provide pnpm).
+- Docker Engine or Docker Desktop with the Docker daemon running and Compose v2
+  available through `docker compose`.
+- Local ports `3210` and `5432` available.
+- Permission to build images and start local containers.
 
 ```bash
 git clone https://github.com/Mehtapozkan/fieldruntime-core.git
@@ -33,15 +41,15 @@ Open <http://127.0.0.1:3210/>.
    payload hash, and idempotency identity.
 4. **Run the simulation.** The fixture connector reports success.
 5. **Reveal safe recovery.** Independent read-back finds no customer update, so the
-   runtime rejects the effect and keeps the authoritative case open. A bounded
-   retry verifies only the exact simulated effect.
+   guided simulation rejects the effect and leaves the authoritative fixture open.
+   A bounded retry verifies only the exact simulated effect.
 6. **Open the receipt.** Reconstruct evidence, recommendation, authority, payload,
    connector response, independent observation, rejection, recovery, and
    correction.
 
 ![Guided Workbench Act and Verify stage](../assets/guided-workbench-preview.svg)
 
-## What this proves
+## What this demonstrates
 
 - The answer is not the outcome.
 - A connector acknowledgement is not verification.
@@ -52,6 +60,25 @@ Open <http://127.0.0.1:3210/>.
 ## What this does not prove
 
 The preview does not provide production identity, live connectors, human approval,
-external writes, high availability, or compliance certification. PR6 replaces the
-guided authority and verification story with deterministic runtime controls while
-keeping external writes off.
+external writes, high availability, or compliance certification. Deterministic
+runtime authority and verification controls are planned for GitHub PR #8, not
+included in this preview. GitHub PR #6 was the completed public
+evaluation-preview readiness change.
+
+## Stop and clean up
+
+Stop the containers while retaining the local evaluation database:
+
+```bash
+docker compose down
+```
+
+To delete the local evaluation database volume and start fresh next time:
+
+```bash
+docker compose down --volumes
+```
+
+Volume deletion is irreversible unless you made a backup. It affects only the
+local evaluation appliance; this preview has no enterprise connectors or external
+credentials.

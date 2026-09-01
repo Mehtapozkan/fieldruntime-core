@@ -1,0 +1,29 @@
+name: Documentation issue
+description: Report inaccurate, missing, or unclear project documentation
+title: "[Docs]: "
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Document and section
+      description: Link to the file and identify the heading or passage.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is inaccurate, missing, or unclear?
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Suggested correction
+      description: Explain the implemented behavior or source that supports the correction.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Public report check
+      options:
+        - label: This issue contains no secrets, customer data, vulnerability details, or sensitive conduct information.
+          required: true

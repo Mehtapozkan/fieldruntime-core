@@ -33,11 +33,19 @@ for (const file of [
   "LICENSE",
   "NOTICE",
   "SECURITY.md",
+  "SUPPORT.md",
   "CONTRIBUTING.md",
   "CODE_OF_CONDUCT.md",
+  "GOVERNANCE.md",
+  "MAINTAINERS.md",
   "TRADEMARKS.md",
   "OPEN_CORE.md",
   "THIRD_PARTY_NOTICES.md",
+  ".github/CODEOWNERS",
+  ".github/ISSUE_TEMPLATE/config.yml",
+  ".github/ISSUE_TEMPLATE/bug_report.yml",
+  ".github/ISSUE_TEMPLATE/proposal.yml",
+  ".github/ISSUE_TEMPLATE/documentation.yml",
   "docs/guides/5-minute-evaluation.md",
   "docs/releases/v0.1.0-evaluation-preview.md",
   "docs/releases/public-repository-checklist.md",
@@ -50,8 +58,12 @@ requireText("LICENSE", ["Apache License", "Version 2.0, January 2004"]);
 requireText("README.md", [
   "Evaluation Preview",
   "Synthetic cases. Simulated authority. No external writes.",
+  "complete case",
+  "Public roadmap",
+  "#8 — Authority and Verification",
   "docs/guides/5-minute-evaluation.md",
   "Apache License 2.0",
+  "fieldruntime.ai",
 ]);
 requireText("SECURITY.md", [
   "loopback-only",
@@ -59,6 +71,16 @@ requireText("SECURITY.md", [
   "not a production service",
 ]);
 requireText("OPEN_CORE.md", ["not lock-in", "Apache License 2.0"]);
+requireText("PLAN.md", [
+  "#7 — Public Launch Finalization",
+  "#8 — Authority and Verification",
+  "#12 — Packaged Evaluation Release",
+]);
+requireText("docs/releases/v0.1.0-evaluation-preview.md", [
+  "v0.1.0-evaluation-preview.0",
+  "PRs #6 and #7 are merged",
+  "PRs #8–#12 are planned",
+]);
 
 const expectedPostgresImage =
   "postgres:17.11-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73";
@@ -66,6 +88,41 @@ requireText("compose.yaml", [expectedPostgresImage]);
 const expectedNodeImage =
   "node:24-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e";
 requireText("Dockerfile", [expectedNodeImage]);
+
+const dockerfile = read("Dockerfile");
+const runtimeStageHeader = /^FROM\b[^\n]*\bAS\s+runtime\s*$/im.exec(dockerfile);
+if (runtimeStageHeader === null) {
+  fail("Dockerfile is missing the runtime image stage");
+} else {
+  const runtimeStageStart = runtimeStageHeader.index;
+  const followingStageOffset = dockerfile
+    .slice(runtimeStageStart + runtimeStageHeader[0].length)
+    .search(/^FROM\b/im);
+  const runtimeStageEnd =
+    followingStageOffset === -1
+      ? dockerfile.length
+      : runtimeStageStart + runtimeStageHeader[0].length + followingStageOffset;
+  const runtimeCopyInstructions = dockerfile
+    .slice(runtimeStageStart, runtimeStageEnd)
+    .replace(/\\\r?\n\s*/g, " ")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => /^COPY\s/i.test(line));
+
+  for (const artifact of ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]) {
+    const escapedArtifact = artifact.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const artifactToken = new RegExp(
+      `(?:^|[\\s"'\\[,/])${escapedArtifact}(?=$|[\\s"'\\],/])`,
+    );
+    if (
+      !runtimeCopyInstructions.some((instruction) =>
+        artifactToken.test(instruction),
+      )
+    ) {
+      fail(`Dockerfile runtime image must include ${artifact}`);
+    }
+  }
+}
 
 const packageFiles = [
   "package.json",
@@ -101,6 +158,14 @@ function git(args) {
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
   });
+}
+
+const isShallowRepository =
+  git(["rev-parse", "--is-shallow-repository"]).trim() === "true";
+if (isShallowRepository) {
+  fail(
+    "git repository is shallow; fetch the complete history before running the public release check",
+  );
 }
 
 const secretPatterns = [
@@ -148,10 +213,12 @@ for (const trackedFile of trackedFiles) {
   }
 }
 
-const history = git(["log", "-p", "--all", "--no-ext-diff", "--no-color"]);
-for (const pattern of secretPatterns) {
-  if (pattern.expression.test(history)) {
-    fail(`git history contains a possible ${pattern.name}`);
+if (!isShallowRepository) {
+  const history = git(["log", "-p", "--all", "--no-ext-diff", "--no-color"]);
+  for (const pattern of secretPatterns) {
+    if (pattern.expression.test(history)) {
+      fail(`git history contains a possible ${pattern.name}`);
+    }
   }
 }
 

@@ -246,6 +246,28 @@ test("up propagates a valid nonzero Docker exit code", async () => {
   });
 });
 
+test("up explains when Docker is not installed without exposing process details", async () => {
+  await withTemporaryDirectory(async (directory) => {
+    await writeManifest(directory, expectedManifest);
+    await writeRepositorySurface(directory);
+    const missingDocker = Object.assign(new Error("private process detail"), {
+      code: "ENOENT",
+    });
+    const context = harness(directory, {
+      runProcess: async () => {
+        throw missingDocker;
+      },
+    });
+
+    assert.equal(await runCli(["up"], context.dependencies), 1);
+    assert.equal(
+      context.stderr.join(""),
+      "Docker is not available. Install Docker with Compose v2 and retry `fr up`.\n",
+    );
+    assert.doesNotMatch(context.stderr.join(""), /private process detail/);
+  });
+});
+
 test("unexpected filesystem and process failures are sanitized", async () => {
   await withTemporaryDirectory(async (directory) => {
     const writeFailure = harness(directory, {

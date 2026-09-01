@@ -14,6 +14,7 @@ FROM node:24-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c
 
 ENV NODE_ENV=production
 WORKDIR /app
+COPY LICENSE NOTICE THIRD_PARTY_NOTICES.md ./
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
