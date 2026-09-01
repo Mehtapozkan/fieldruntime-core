@@ -328,6 +328,27 @@ function authoritativeRecordsBySource(
   );
 }
 
+function hasAuthoritativeOwnerConflict(subject: EccEvaluationSubject): boolean {
+  const affectedAccounts = stateOf(
+    recordBySource(subject, "incident") ?? {},
+  ).affected_accounts;
+  if (Array.isArray(affectedAccounts) && affectedAccounts.length > 1) {
+    return false;
+  }
+  const owners = new Set(
+    subject.input.records
+      .filter(
+        (record) =>
+          record.authority_rank === 1 &&
+          record.freshness === "live" &&
+          isObject(record.state),
+      )
+      .map((record) => stringValue(stateOf(record).account_owner))
+      .filter((owner): owner is string => nonEmptyString(owner)),
+  );
+  return owners.size > 1;
+}
+
 function states(subject: EccEvaluationSubject): JsonObject[] {
   return subject.input.records.map(stateOf);
 }
@@ -359,6 +380,7 @@ function firstStateString(
 
 function hasTenantMismatch(subject: EccEvaluationSubject): boolean {
   return (
+    !nonEmptyString(subject.tenant_id) ||
     stringValue(subject.input.trigger_event.tenant_id) !== subject.tenant_id ||
     subject.input.records.some(
       (record) => stringValue(record.tenant_id) !== subject.tenant_id,
@@ -378,7 +400,7 @@ function hasMalformedAuthoritativeRecord(
     (record) =>
       record.authority_rank === 1 &&
       record.freshness === "live" &&
-      !nonEmptyString(record.ref),
+      (!nonEmptyString(record.ref) || !isObject(record.state)),
   );
 }
 
@@ -502,6 +524,9 @@ function deriveConflicts(
   if (!qualified) {
     return hasTenantMismatch(subject) ? ["tenant mismatch"] : [];
   }
+  if (hasAuthoritativeOwnerConflict(subject)) {
+    return ["authoritative account owner conflict"];
+  }
   if (
     includesText(subject, "says sales owns it") &&
     includesText(subject, "customer success owns it")
@@ -566,7 +591,12 @@ function deriveOwner(
   behavior: string,
 ): string | null {
   if (!qualified || behavior === "create_two_linked_cases") return null;
-  if (conflicts.includes("business owner disputed")) return null;
+  if (
+    conflicts.includes("business owner disputed") ||
+    conflicts.includes("authoritative account owner conflict")
+  ) {
+    return null;
+  }
   const correction = recordBySource(subject, "correction");
   const correctedOwner = stringValue(stateOf(correction ?? {}).after_owner);
   if (correctedOwner !== undefined) return correctedOwner;
@@ -793,6 +823,10 @@ function hasClosureProof(subject: EccEvaluationSubject): boolean {
     verification.payload_hash === payloadHash &&
     acceptance.customer_accepted === true &&
     nonEmptyString(acceptance.acceptance_evidence_ref) &&
+    acceptance.accepted_payload_hash === payloadHash &&
+    acceptance.accepted_verification_evidence_ref ===
+      verification.verification_evidence_ref &&
+    acceptance.accepted_outcome_receipt_id === receipt.outcome_receipt_id &&
     nonEmptyString(receipt.outcome_receipt_id) &&
     receipt.payload_hash === payloadHash &&
     receipt.commitments_disposition_complete === true &&

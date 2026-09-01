@@ -225,6 +225,29 @@ test("trigger tenant mismatch fails closed before case creation", () => {
   assert.equal(receipt.verdict, "pass");
 });
 
+test("empty tenant identities are rejected at every evaluation boundary", () => {
+  const changed = structuredClone(cases[0]);
+  changed.tenant_id = "";
+  changed.input.trigger_event.tenant_id = "";
+  for (const record of changed.input.records) record.tenant_id = "";
+
+  assert.throws(
+    () =>
+      runProductionTest([changed], new DeterministicEccAdapter(), {
+        now: fixedClock,
+      }),
+    /Invalid evaluation case.*tenant_id/i,
+  );
+
+  const { expected, assertions, ...subject } = changed;
+  void expected;
+  void assertions;
+  const decision = new DeterministicEccAdapter().evaluate(subject);
+  assert.equal(decision.qualified, false);
+  assert.equal(decision.case_behavior, "security_reject");
+  assert.deepEqual(decision.conflicts, ["tenant mismatch"]);
+});
+
 test("out-of-scope inputs are rejected before their content is consumed", () => {
   const expected = {
     qualified: false,
@@ -365,6 +388,85 @@ test("malformed authoritative closure records fail at the boundary", () => {
     now: fixedClock,
   });
   assert.equal(receipt.verdict, "pass");
+});
+
+test("malformed authoritative state cannot disappear before closure checks", () => {
+  const changed = structuredClone(cases.find(({ id }) => id === "FR-EVAL-027"));
+  const authority = changed.input.records.find(
+    ({ source }) => source === "authority",
+  );
+  changed.input.records.push({
+    ...structuredClone(authority),
+    ref: "authority://decision/2727-malformed",
+    state: null,
+  });
+  changed.expected = {
+    qualified: false,
+    case_behavior: "security_reject",
+    severity: null,
+    owner: null,
+    conflicts: ["malformed authoritative record"],
+    required_approvals: [],
+    final_state: "dismissed",
+    learning_candidate: null,
+  };
+  changed.assertions = [
+    { assertion: "security_audit_event", operator: "eq", expected: true },
+  ];
+
+  const receipt = runProductionTest([changed], new DeterministicEccAdapter(), {
+    now: fixedClock,
+  });
+  assert.equal(receipt.verdict, "pass");
+});
+
+test("same-rank account-owner conflicts require review", () => {
+  const changed = structuredClone(cases.find(({ id }) => id === "FR-EVAL-009"));
+  const account = changed.input.records.find(({ source }) => source === "crm");
+  changed.input.records.push({
+    ...structuredClone(account),
+    state: { ...structuredClone(account.state), account_owner: "user_lee" },
+  });
+  changed.expected.owner = null;
+  changed.expected.conflicts = ["authoritative account owner conflict"];
+  changed.expected.final_state = "blocked";
+
+  const receipt = runProductionTest([changed], new DeterministicEccAdapter(), {
+    now: fixedClock,
+  });
+  assert.equal(receipt.verdict, "pass");
+  assert.equal(receipt.case_results[0].passed, true);
+});
+
+test("customer acceptance is bound to the exact closed outcome", () => {
+  const baseline = cases.find(({ id }) => id === "FR-EVAL-027");
+  const mutations = [
+    [
+      "accepted_payload_hash",
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ],
+    ["accepted_verification_evidence_ref", "support://ticket/other#verified"],
+    ["accepted_outcome_receipt_id", "receipt_outcome_other"],
+  ];
+
+  for (const [field, value] of mutations) {
+    const changed = structuredClone(baseline);
+    const acceptance = changed.input.records.find(
+      ({ source }) => source === "support",
+    );
+    acceptance.state[field] = value;
+    changed.expected.final_state = "verifying";
+    changed.assertions = [
+      { assertion: "case_resolved", operator: "eq", expected: false },
+    ];
+
+    const receipt = runProductionTest(
+      [changed],
+      new DeterministicEccAdapter(),
+      { now: fixedClock },
+    );
+    assert.equal(receipt.verdict, "pass", field);
+  }
 });
 
 test("closure proof requires separately attributable authoritative records", () => {
