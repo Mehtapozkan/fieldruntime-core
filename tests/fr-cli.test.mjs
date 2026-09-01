@@ -297,17 +297,18 @@ test("unexpected filesystem and process failures are sanitized", async () => {
   });
 });
 
-test("the shebang entry point runs through a bin-style symlink", async () => {
+test("the bin-style symlink resolves the shebang entry point", async () => {
   await withTemporaryDirectory(async (directory) => {
     const source = new URL("../packages/cli/src/cli.ts", import.meta.url);
     const executable = join(directory, "fr");
     await symlink(source, executable);
 
-    const result = spawnSync(executable, ["--help"], {
+    const result = spawnSync(process.execPath, [executable, "--help"], {
       cwd: directory,
       encoding: "utf8",
     });
 
+    assert.match(await readFile(source, "utf8"), /^#!\/usr\/bin\/env node/);
     assert.equal(result.status, 2);
     assert.match(result.stderr, /^Usage: fr init ecc --demo/);
     await assert.rejects(
