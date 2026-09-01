@@ -21,6 +21,10 @@ Treat visibility as a separate owner decision after the source change is merged.
   require pull requests for changes.
 - Set the repository description, `https://fieldruntime.ai` homepage, Apache-2.0
   license display, and relevant topics.
+- Confirm the `publish evaluation preview` job completed after validation in the
+  final green `main` CI run. It creates the immutable
+  `v0.1.0-evaluation-preview.0` prerelease with the repository's scoped GitHub
+  Actions token.
 
 ## Visibility change
 
@@ -36,10 +40,9 @@ publication—not as a publicly available open-source repository.
 - Clone anonymously into a clean directory and run the five-minute evaluation.
 - Confirm the application remains reachable only at `127.0.0.1` and reports
   external writes off.
-- Create the prerelease tag and GitHub release from the exact green `main` commit:
-  `v0.1.0-evaluation-preview.0`.
-- Mark the GitHub release as a prerelease and repeat the non-production boundary in
-  its opening lines.
+- Confirm the automated `v0.1.0-evaluation-preview.0` tag and prerelease point to
+  the exact green `main` commit and repeat the non-production boundary in their
+  opening lines.
 
 ## Stop conditions
 

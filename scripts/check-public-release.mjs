@@ -81,6 +81,21 @@ requireText("docs/releases/v0.1.0-evaluation-preview.md", [
   "GitHub PRs #6 and #12 are merged",
   "Delivery PR6–PR10 are planned",
 ]);
+requireText(".github/workflows/ci.yml", [
+  "publish-evaluation-preview:",
+  "needs: validate",
+  "github.event_name == 'push'",
+  "github.ref == 'refs/heads/main'",
+  "github.repository == 'Mehtapozkan/fieldruntime-core'",
+  "contents: write",
+  "v0.1.0-evaluation-preview.0",
+  "refs/tags/${RELEASE_TAG}",
+  "gh release create",
+  "--verify-tag",
+  "--prerelease",
+  "--latest=false",
+  "fieldruntime.ai",
+]);
 
 const expectedPostgresImage =
   "postgres:17.11-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73";
