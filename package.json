@@ -1,7 +1,17 @@
 {
   "name": "fieldruntime-core",
-  "version": "0.0.0",
+  "version": "0.1.0-evaluation-preview.0",
   "private": true,
+  "license": "Apache-2.0",
+  "description": "Self-hosted evaluation preview of the Field Runtime Enterprise Case Runtime",
+  "homepage": "https://fieldruntime.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mehtapozkan/fieldruntime-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Mehtapozkan/fieldruntime-core/issues"
+  },
   "type": "module",
   "bin": {
     "fr": "dist/packages/cli/src/cli.js"
@@ -20,9 +30,10 @@
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint .",
+    "release:check": "node scripts/check-public-release.mjs",
     "test": "pnpm build && node --test tests/*.test.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "validate": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
+    "validate": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm release:check"
   },
   "dependencies": {
     "ajv": "8.20.0",

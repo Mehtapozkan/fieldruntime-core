@@ -8,3 +8,4 @@ packages/ecc-pack/contracts/*.csv
 packages/contracts/schemas/*.json
 packages/contracts/reference/**
 docs/reference/**
+docs/assets/*.svg
