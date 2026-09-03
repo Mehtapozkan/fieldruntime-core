@@ -26,6 +26,8 @@ const schemaNames = [
   "authority-request.v0.schema.json",
   "authority-decision.v0.schema.json",
   "authority-resolution-result.v0.schema.json",
+  "authority-policy.v0.schema.json",
+  "authority-record.v0.schema.json",
 ];
 
 function clone(value) {
@@ -83,7 +85,7 @@ test("the synthetic D6-A fixture satisfies every canonical contract", () => {
   }
 });
 
-test("the six public schemas remain provider neutral", async () => {
+test("the public authority schemas remain provider neutral", async () => {
   const providerTerms = ["openai", "anthropic", "oauth", "slack", "okta"];
   for (const schemaName of schemaNames) {
     const schemaText = await readFile(
@@ -400,13 +402,26 @@ test("same-rank authority conflicts are explicit and unequal ranks cannot claim 
   );
 });
 
-test("authorized results require a named owner, an approval envelope, and a policy", () => {
-  const missingOwner = clone(fixture.resolution_results.threshold_crossing);
-  missingOwner.outcome = "authorized";
-  delete missingOwner.required_authority_classes;
-  assert.throws(() => assertValidAuthorityResolutionResult(missingOwner));
+test("authorized results require completed requirements, approval envelopes, and policy", () => {
+  const outstanding = clone(fixture.resolution_results.threshold_crossing);
+  outstanding.outcome = "authorized";
+  delete outstanding.required_authority_classes;
+  assert.throws(() => assertValidAuthorityResolutionResult(outstanding));
 
-  const authorized = clone(missingOwner);
-  authorized.authority_owner = clone(fixture.identities.executive_sponsor);
+  const authorized = clone(outstanding);
+  const executiveRequirement = authorized.authority_requirements.find(
+    ({ authority_class }) => authority_class === "executive_sponsor",
+  );
+  executiveRequirement.status = "satisfied";
+  executiveRequirement.satisfied_approval_ids = [
+    "authority_decision_executive_approval",
+  ];
+  executiveRequirement.remaining_approval_count = 0;
+  authorized.authority_decision_ids.push(
+    "authority_decision_executive_approval",
+  );
   assert.doesNotThrow(() => assertValidAuthorityResolutionResult(authorized));
+
+  delete authorized.authority_requirements;
+  assert.throws(() => assertValidAuthorityResolutionResult(authorized));
 });

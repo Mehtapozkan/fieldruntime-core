@@ -69,7 +69,11 @@ importers:
 
   packages/contracts: {}
 
-  packages/domain: {}
+  packages/domain:
+    dependencies:
+      "@fieldruntime/contracts":
+        specifier: workspace:*
+        version: link:../contracts
 
   packages/ecc-pack: {}
 

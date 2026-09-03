@@ -237,6 +237,9 @@
         "case_class_ids": {
           "$ref": "#/$defs/IdScope"
         },
+        "authority_classes": {
+          "$ref": "#/$defs/StringScope"
+        },
         "action_classes": {
           "$ref": "#/$defs/StringScope"
         },

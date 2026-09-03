@@ -6,7 +6,8 @@ Release position: GitHub PRs #6 (Public Evaluation Preview Readiness), #12
 (Public Launch Finalization), #14 (Automate the Evaluation Prerelease), and #15
 (Align public roadmap to Case-first product architecture) are merged. The
 repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are public. D6 is
-in progress; D6-A defines contracts and does not complete the governed runtime.
+in progress; D6-A defines contracts and D6-B adds deterministic authority
+resolution, but the governed runtime and Decision Packet are not connected.
 
 ## Implemented
 
@@ -130,16 +131,29 @@ in progress; D6-A defines contracts and does not complete the governed runtime.
 - Synthetic D6-A vectors for the $15K/$10K authority threshold, recorded Finance
   approval with Executive Sponsor authority still required, expired and stale
   delegations, same-rank conflict, stale Case state, and agent self-approval denial.
+- Pure, provider-neutral deterministic authority resolution over an exact Case,
+  Authority Request, consequence hash, approved rank-one threshold policy,
+  authority records, scoped delegations, and prior Authority Decisions.
+- Threshold, named-principal, delegated, and multi-approver evaluation with
+  machine-readable satisfied and outstanding requirements plus exact policy,
+  authority, delegation, and approval evidence references.
+- Explicit fail-closed authority outcomes for missing or malformed policy,
+  contradictory policy, missing or ambiguous authority, expired or revoked
+  delegation, stale Case state, cross-tenant records, hash drift, and invalid
+  self-approval.
 
 ## Verified
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- `pnpm release:check` passes across 135 current files, complete reachable Git
+- `pnpm release:check` passes across 140 current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 152 tests pass, including 16 D6-A identity, delegation, responsibility,
+- 182 tests pass, including 16 D6-A identity, delegation, responsibility,
   immutable authority-binding, lifecycle, conflict, and agent-authority tests;
+  30 D6-B threshold, multi-approval, prior-decision, delegation, ambiguity,
+  policy-selection, tenant, agent, evidence-lineage, immutability, and input-order
+  tests;
   the canonical Case fixture; all 30 evaluation schemas;
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
@@ -181,11 +195,11 @@ in progress; D6-A defines contracts and does not complete the governed runtime.
 - Importing or mapping an existing external Case while preserving its upstream
   system of record is not implemented.
 - Operational Legibility evaluation is not implemented.
-- The deterministic authority resolution engine is not implemented; D6-B must
-  consume the D6-A contracts and fail closed when no unique authority is proven.
-- The Decision Packet is not backed by authoritative D6 authority evaluation.
+- The Decision Packet is not backed by authoritative runtime D6 authority
+  evaluation; D6-B currently resolves only over explicitly supplied state.
 - The action gateway is not implemented.
 - The independent runtime verifier is not implemented.
+- No external writes are implemented.
 - Declared action payload hashes are not independently recomputed; every claimed
   executed action therefore fails closed in this milestone.
 - No general worker runtime or provider adapter implementation.
@@ -211,9 +225,10 @@ in progress; D6-A defines contracts and does not complete the governed runtime.
 
 ## Next
 
-D6-B — Deterministic Authority Resolution is next: consume the D6-A contracts to
-resolve explicit policy, delegation, and registry evidence without silently
-choosing authority. Runtime-backed Decision Packet work follows within D6.
+D6-C — Runtime-backed Governed Case Session / Decision Packet integration is next:
+connect deterministic resolution to authoritative runtime Case state and expose
+its exact satisfied and outstanding requirements without changing the simulated
+Workbench or adding D7 execution. D6 remains incomplete.
 
 The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
 This roadmap alignment does not displace the trusted-kernel priority, add live

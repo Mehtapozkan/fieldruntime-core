@@ -469,6 +469,61 @@
       "proposed_consequence_hash": "sha256:473b8fa62dd6eab4cc42a1630aff473f357db0de4b761287440617780fd6086f",
       "outcome": "approval_required",
       "required_authority_classes": ["executive_sponsor"],
+      "authority_requirements": [
+        {
+          "requirement_id": "requirement_finance_approval",
+          "authority_class": "finance_approver",
+          "required_approval_count": 1,
+          "status": "satisfied",
+          "satisfied_approval_ids": ["authority_decision_finance_approval"],
+          "remaining_approval_count": 0,
+          "eligible_approvers": [
+            {
+              "identity": {
+                "schema_version": "identity-reference.v0",
+                "identity_id": "identity_finance_approver",
+                "tenant_id": "tenant_acme",
+                "identity_kind": "human",
+                "status": "active"
+              },
+              "authority_rank": 1,
+              "evidence_refs": ["fixture://authority/finance"]
+            }
+          ],
+          "policy_rule_ref": "fixture://policy/finance-limit-10000#above-10000",
+          "evidence_refs": [
+            "fixture://authority/finance",
+            "fixture://approval/finance",
+            "fixture://policy/finance-limit-10000#above-10000"
+          ]
+        },
+        {
+          "requirement_id": "requirement_executive_approval",
+          "authority_class": "executive_sponsor",
+          "required_approval_count": 1,
+          "status": "outstanding",
+          "satisfied_approval_ids": [],
+          "remaining_approval_count": 1,
+          "eligible_approvers": [
+            {
+              "identity": {
+                "schema_version": "identity-reference.v0",
+                "identity_id": "identity_executive_sponsor",
+                "tenant_id": "tenant_acme",
+                "identity_kind": "human",
+                "status": "active"
+              },
+              "authority_rank": 1,
+              "evidence_refs": ["fixture://authority/executive-a"]
+            }
+          ],
+          "policy_rule_ref": "fixture://policy/finance-limit-10000#above-10000",
+          "evidence_refs": [
+            "fixture://authority/executive-a",
+            "fixture://policy/finance-limit-10000#above-10000"
+          ]
+        }
+      ],
       "authority_decision_ids": ["authority_decision_finance_approval"],
       "delegation_ids": ["delegation_case_acme_active"],
       "policy_reference": {

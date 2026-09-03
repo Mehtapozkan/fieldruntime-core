@@ -20,8 +20,17 @@ Versioned workflow assets for the first Field Runtime Core evaluation pack.
   vectors for a $15K credit above a $10K Finance limit, recorded Finance approval,
   required Executive Sponsor authority, expired and superseded delegations,
   same-rank authority conflict, stale Case version, and agent-prepared work that
-  cannot self-authorize. These are inputs for later D6-B resolution; they do not
-  change the 30-case Production Test or claim that an authority engine exists.
+  cannot self-authorize.
+- `fixtures/d6b-authority-resolution.v0.json` supplies synthetic threshold-policy,
+  authority-registry, delegation, request, and prior-decision inputs for the
+  deterministic resolver. It covers $4K Business, $7K Finance, and $15K
+  Finance-plus-Executive requirements without putting those product-specific
+  names or credit semantics in the generic engine.
+
+The D6 fixtures do not change the 30-case Production Test. D6-B resolves
+authority over supplied fixture state only; it does not connect the Guided
+Workbench, mutate a Case, execute an action, or claim a production authority
+service.
 
 All actions are simulated. No file in this pack contains live credentials.
 
