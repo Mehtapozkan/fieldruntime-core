@@ -4,6 +4,8 @@ import Ajv2020Module, {
 } from "ajv/dist/2020.js";
 import addFormatsModule from "ajv-formats";
 import authorityDecisionSchema from "../schemas/authority-decision.v0.schema.json" with { type: "json" };
+import authorityPolicySchema from "../schemas/authority-policy.v0.schema.json" with { type: "json" };
+import authorityRecordSchema from "../schemas/authority-record.v0.schema.json" with { type: "json" };
 import authorityRequestSchema from "../schemas/authority-request.v0.schema.json" with { type: "json" };
 import authorityResolutionResultSchema from "../schemas/authority-resolution-result.v0.schema.json" with { type: "json" };
 import caseSchema from "../schemas/case.v0.schema.json" with { type: "json" };
@@ -15,6 +17,8 @@ import journalEntrySchema from "../schemas/case-journal-entry.v0.schema.json" wi
 import {
   type AuthorityContractViolation,
   validateAuthorityDecisionInvariants,
+  validateAuthorityPolicyInvariants,
+  validateAuthorityRecordInvariants,
   validateAuthorityRequestInvariants,
   validateAuthorityResolutionResultInvariants,
   validateCaseResponsibilityInvariants,
@@ -35,6 +39,8 @@ addFormats(ajv);
 
 const validateIdentityReference = ajv.compile(identityReferenceSchema);
 const validateAuthorityDecision = ajv.compile(authorityDecisionSchema);
+const validateAuthorityPolicy = ajv.compile(authorityPolicySchema);
+const validateAuthorityRecord = ajv.compile(authorityRecordSchema);
 const validateAuthorityRequest = ajv.compile(authorityRequestSchema);
 const validateAuthorityResolutionResult = ajv.compile(
   authorityResolutionResultSchema,
@@ -139,6 +145,28 @@ export function assertValidAuthorityRequest(
     value,
     "authority-request.v0",
     validateAuthorityRequestInvariants,
+  );
+}
+
+export function assertValidAuthorityPolicy(
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContractWithInvariants(
+    validateAuthorityPolicy,
+    value,
+    "authority-policy.v0",
+    validateAuthorityPolicyInvariants,
+  );
+}
+
+export function assertValidAuthorityRecord(
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContractWithInvariants(
+    validateAuthorityRecord,
+    value,
+    "authority-record.v0",
+    validateAuthorityRecordInvariants,
   );
 }
 

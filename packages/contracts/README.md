@@ -53,10 +53,24 @@ The D6-A authority boundary adds six provider-neutral contracts:
 - `authority-resolution-result.v0.schema.json` represents success or explicit
   fail-closed outcomes without silently selecting authority.
 
+The D6-B resolver adds two provider-neutral input contracts:
+
+- `authority-policy.v0.schema.json` represents a small deterministic threshold
+  policy with explicit authority requirements, policy identity/version, rank,
+  lifecycle, effective window, and evidence source.
+- `authority-record.v0.schema.json` binds one human principal to an authority
+  class, rank, explicit scope, lifecycle, effective window, and authoritative
+  source.
+
+`authority-resolution-result.v0.schema.json` now carries structured satisfied and
+outstanding authority requirements so downstream D6-C work can render the exact
+policy, eligible principals, decisions, delegations, and source evidence used.
+
 `src/authority-contracts.ts` adds cross-tenant, independent-verifier,
-delegation-window, agent-authority, same-rank-conflict, and immutable-binding
-checks that JSON Schema alone cannot express. It deliberately does not choose an
-approver or evaluate policy. Deterministic authority resolution remains D6-B.
+delegation-window, agent-authority, same-rank-conflict, policy-window, authority-
+record, requirement-count, and immutable-binding checks that JSON Schema alone
+cannot express. Policy and authority contracts deliberately stay smaller than a
+general policy language.
 
 All public validators and invariants first canonicalize untrusted input without
 invoking accessors or proxy traps. Claimed `executed` actions fail closed in PR2:

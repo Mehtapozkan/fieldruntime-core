@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/authority-policy.v0.schema.json",
+  "title": "Field Runtime Authority Policy v0",
+  "description": "A deliberately small, authoritative policy contract for deterministic consequence thresholds and approval requirements.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy_id",
+    "policy_version",
+    "tenant_id",
+    "authority_class",
+    "action_class",
+    "consequence_class",
+    "status",
+    "authority_rank",
+    "effective_from",
+    "effective_from_source_timezone",
+    "source_ref",
+    "rules"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "authority-policy.v0"
+    },
+    "policy_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "policy_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "tenant_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "authority_class": {
+      "$ref": "#/$defs/Class"
+    },
+    "action_class": {
+      "$ref": "#/$defs/Class"
+    },
+    "consequence_class": {
+      "$ref": "#/$defs/Class"
+    },
+    "status": {
+      "enum": ["draft", "approved", "retired", "revoked"]
+    },
+    "authority_rank": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "effective_from": {
+      "$ref": "#/$defs/CanonicalUtcInstant"
+    },
+    "effective_from_source_timezone": {
+      "$ref": "#/$defs/SourceTimezone"
+    },
+    "effective_until": {
+      "$ref": "#/$defs/CanonicalUtcInstant"
+    },
+    "effective_until_source_timezone": {
+      "$ref": "#/$defs/SourceTimezone"
+    },
+    "source_ref": {
+      "$ref": "#/$defs/SourceRef"
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/AuthorityRule"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "effective_until": {}
+        },
+        "required": ["effective_until"]
+      },
+      "then": {
+        "properties": {
+          "effective_until_source_timezone": {
+            "$ref": "#/$defs/SourceTimezone"
+          }
+        },
+        "required": ["effective_until_source_timezone"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effective_until_source_timezone": {}
+        },
+        "required": ["effective_until_source_timezone"]
+      },
+      "then": {
+        "properties": {
+          "effective_until": {
+            "$ref": "#/$defs/CanonicalUtcInstant"
+          }
+        },
+        "required": ["effective_until"]
+      }
+    }
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "Class": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{2,127}$"
+    },
+    "SourceRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "CanonicalUtcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "SourceTimezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?:UTC(?:[+-](?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9])?|[A-Za-z][A-Za-z0-9._+-]*(?:/[A-Za-z0-9._+-]+)+)$"
+    },
+    "AuthorityRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "priority", "condition", "requirements"],
+      "properties": {
+        "rule_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "condition": {
+          "$ref": "#/$defs/ConsequenceCondition"
+        },
+        "requirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ApprovalRequirement"
+          }
+        }
+      }
+    },
+    "ConsequenceCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "always": {
+          "const": true
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "minimum_amount_minor": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximum_amount_minor": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "ApprovalRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement_id",
+        "authority_class",
+        "required_approval_count",
+        "allow_delegation",
+        "allow_preparer_approval"
+      ],
+      "properties": {
+        "requirement_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "authority_class": {
+          "$ref": "#/$defs/Class"
+        },
+        "required_approval_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "named_approver_identity_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "allow_delegation": {
+          "type": "boolean"
+        },
+        "allow_preparer_approval": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

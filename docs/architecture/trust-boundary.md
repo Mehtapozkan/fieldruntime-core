@@ -47,6 +47,12 @@ fresh evaluation. Agent or model capability, task assignment, tool access,
 credentials, and historical behavior cannot manufacture business authority.
 
 These contracts represent ambiguity, conflict, missing authority, expiry, stale
-Case state, and unavailable policy as explicit fail-closed outcomes. They do not
-resolve which identity holds authority. D6-B must implement that deterministic
-choice without changing the contracts into a policy engine.
+Case state, and unavailable policy as explicit fail-closed outcomes. D6-B adds a
+pure resolver over exact Case/request bindings, approved rank-one threshold
+policies, authority records, scoped delegations, and prior decisions. It exposes
+both satisfied and outstanding multi-approver requirements with their evidence
+lineage and never silently selects among equal authority candidates.
+
+The resolver does not yet consume authoritative runtime Case state or drive a
+Decision Packet. That D6-C integration must preserve the same deterministic
+boundary before any D7 action path can depend on it.

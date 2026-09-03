@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fieldruntime.ai/schemas/authority-resolution-result.v0.schema.json",
   "title": "Field Runtime Authority Resolution Result v0",
-  "description": "The explicit, attributable result shape a later deterministic authority resolver will produce. This contract does not choose an authority owner.",
+  "description": "The explicit, attributable result of deterministic business-authority resolution, including satisfied and outstanding requirements without silently choosing among ambiguous evidence.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -67,6 +67,23 @@
       "minItems": 2,
       "items": {
         "$ref": "#/$defs/AuthorityCandidate"
+      }
+    },
+    "authority_requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/AuthorityRequirement"
+      }
+    },
+    "conflicting_source_refs": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024
       }
     },
     "required_authority_classes": {
@@ -137,8 +154,12 @@
       },
       "then": {
         "properties": {
-          "authority_owner": {
-            "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+          "authority_requirements": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/AuthorityRequirement"
+            }
           },
           "authority_decision_ids": {
             "type": "array",
@@ -153,7 +174,7 @@
           }
         },
         "required": [
-          "authority_owner",
+          "authority_requirements",
           "authority_decision_ids",
           "policy_reference"
         ]
@@ -177,9 +198,23 @@
             "items": {
               "$ref": "#/$defs/Id"
             }
+          },
+          "authority_requirements": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/AuthorityRequirement"
+            }
+          },
+          "policy_reference": {
+            "$ref": "#/$defs/PolicyReference"
           }
         },
-        "required": ["required_authority_classes"]
+        "required": [
+          "required_authority_classes",
+          "authority_requirements",
+          "policy_reference"
+        ]
       }
     },
     {
@@ -187,7 +222,7 @@
         "required": ["outcome"],
         "properties": {
           "outcome": {
-            "enum": ["ambiguous_authority", "conflicting_authority"]
+            "const": "ambiguous_authority"
           }
         }
       },
@@ -202,6 +237,51 @@
           }
         },
         "required": ["authority_candidates"]
+      }
+    },
+    {
+      "if": {
+        "required": ["outcome"],
+        "properties": {
+          "outcome": {
+            "const": "conflicting_authority"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authority_candidates": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/AuthorityCandidate"
+            }
+          },
+          "conflicting_source_refs": {
+            "type": "array",
+            "minItems": 2,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          }
+        },
+        "anyOf": [
+          {
+            "properties": {
+              "authority_candidates": {}
+            },
+            "required": ["authority_candidates"]
+          },
+          {
+            "properties": {
+              "conflicting_source_refs": {}
+            },
+            "required": ["conflicting_source_refs"]
+          }
+        ]
       }
     },
     {
@@ -302,6 +382,86 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 1024
+          }
+        },
+        "delegation_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      }
+    },
+    "AuthorityRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement_id",
+        "authority_class",
+        "required_approval_count",
+        "status",
+        "satisfied_approval_ids",
+        "remaining_approval_count",
+        "eligible_approvers",
+        "policy_rule_ref",
+        "evidence_refs"
+      ],
+      "properties": {
+        "requirement_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "authority_class": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]{2,127}$"
+        },
+        "required_approval_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": ["satisfied", "outstanding"]
+        },
+        "satisfied_approval_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "remaining_approval_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "eligible_approvers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/AuthorityCandidate"
+          }
+        },
+        "policy_rule_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "delegation_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Id"
           }
         }
       }

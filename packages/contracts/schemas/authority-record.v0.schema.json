@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/authority-record.v0.schema.json",
+  "title": "Field Runtime Authority Record v0",
+  "description": "An attributable registry or named-confirmation record proving a principal's scoped authority class.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority_record_id",
+    "tenant_id",
+    "identity",
+    "authority_class",
+    "authority_rank",
+    "status",
+    "scope",
+    "effective_from",
+    "effective_from_source_timezone",
+    "source_type",
+    "source_ref"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "authority-record.v0"
+    },
+    "authority_record_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "tenant_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "identity": {
+      "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+    },
+    "authority_class": {
+      "$ref": "#/$defs/Class"
+    },
+    "authority_rank": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "status": {
+      "enum": ["active", "revoked", "superseded"]
+    },
+    "scope": {
+      "$ref": "#/$defs/AuthorityScope"
+    },
+    "effective_from": {
+      "$ref": "#/$defs/CanonicalUtcInstant"
+    },
+    "effective_from_source_timezone": {
+      "$ref": "#/$defs/SourceTimezone"
+    },
+    "effective_until": {
+      "$ref": "#/$defs/CanonicalUtcInstant"
+    },
+    "effective_until_source_timezone": {
+      "$ref": "#/$defs/SourceTimezone"
+    },
+    "source_type": {
+      "enum": [
+        "authoritative_registry",
+        "approved_policy",
+        "named_human_confirmation"
+      ]
+    },
+    "source_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "effective_until": {}
+        },
+        "required": ["effective_until"]
+      },
+      "then": {
+        "properties": {
+          "effective_until_source_timezone": {
+            "$ref": "#/$defs/SourceTimezone"
+          }
+        },
+        "required": ["effective_until_source_timezone"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effective_until_source_timezone": {}
+        },
+        "required": ["effective_until_source_timezone"]
+      },
+      "then": {
+        "properties": {
+          "effective_until": {
+            "$ref": "#/$defs/CanonicalUtcInstant"
+          }
+        },
+        "required": ["effective_until"]
+      }
+    }
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "Class": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{2,127}$"
+    },
+    "CanonicalUtcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "SourceTimezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?:UTC(?:[+-](?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9])?|[A-Za-z][A-Za-z0-9._+-]*(?:/[A-Za-z0-9._+-]+)+)$"
+    },
+    "IdScope": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Id"
+      }
+    },
+    "ClassScope": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Class"
+      }
+    },
+    "AuthorityScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "tenant_wide": {
+          "const": true
+        },
+        "case_ids": {
+          "$ref": "#/$defs/IdScope"
+        },
+        "workflow_version_ids": {
+          "$ref": "#/$defs/IdScope"
+        },
+        "case_class_ids": {
+          "$ref": "#/$defs/IdScope"
+        },
+        "authority_classes": {
+          "$ref": "#/$defs/ClassScope"
+        },
+        "action_classes": {
+          "$ref": "#/$defs/ClassScope"
+        },
+        "business_domains": {
+          "$ref": "#/$defs/ClassScope"
+        },
+        "consequence_classes": {
+          "$ref": "#/$defs/ClassScope"
+        },
+        "organization_scope_ids": {
+          "$ref": "#/$defs/IdScope"
+        }
+      }
+    }
+  }
+}

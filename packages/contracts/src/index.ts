@@ -9,6 +9,8 @@ export type { JsonPrimitive, JsonValue } from "./canonical-json.js";
 export {
   validateAuthorityDecisionBinding,
   validateAuthorityDecisionInvariants,
+  validateAuthorityPolicyInvariants,
+  validateAuthorityRecordInvariants,
   validateAuthorityRequestInvariants,
   validateAuthorityResolutionBinding,
   validateAuthorityResolutionResultInvariants,
@@ -20,6 +22,8 @@ export { validateCrossRecordInvariants } from "./invariants.js";
 export type { InvariantViolation } from "./invariants.js";
 export {
   assertValidAuthorityDecision,
+  assertValidAuthorityPolicy,
+  assertValidAuthorityRecord,
   assertValidAuthorityRequest,
   assertValidAuthorityResolutionResult,
   assertValidCaseDocument,

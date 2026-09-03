@@ -57,6 +57,14 @@ function recordsField(
   return value.filter(isRecord);
 }
 
+function stringsField(record: UnknownRecord, key: string): readonly string[] {
+  const value = ownValue(record, key);
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter((item): item is string => typeof item === "string");
+}
+
 function normalizedRecord(
   value: unknown,
   contract: string,
@@ -327,6 +335,141 @@ export function validateAuthorityRequestInvariants(
   return violations;
 }
 
+export function validateAuthorityPolicyInvariants(
+  value: unknown,
+): AuthorityContractViolation[] {
+  const normalized = normalizedRecord(value, "Authority Policy");
+  if (normalized.record === undefined) {
+    return normalized.violations;
+  }
+  const root = normalized.record;
+  const violations = [...normalized.violations];
+  const effectiveFrom = stringField(root, "effective_from");
+  const effectiveUntil = stringField(root, "effective_until");
+  if (
+    effectiveFrom !== undefined &&
+    effectiveUntil !== undefined &&
+    effectiveUntil <= effectiveFrom
+  ) {
+    violations.push({
+      code: "policy.invalid_effective_window",
+      message: "Policy expiry must be later than its effective start.",
+      path: "/effective_until",
+    });
+  }
+
+  const seenRuleIds = new Set<string>();
+  const rules = recordsField(root, "rules");
+  for (let ruleIndex = 0; ruleIndex < rules.length; ruleIndex += 1) {
+    const rule = rules[ruleIndex] ?? {};
+    const ruleId = stringField(rule, "rule_id");
+    if (ruleId !== undefined) {
+      if (seenRuleIds.has(ruleId)) {
+        violations.push({
+          code: "policy.duplicate_rule_id",
+          message: "Policy rule identifiers must be unique.",
+          path: `/rules/${String(ruleIndex)}/rule_id`,
+        });
+      }
+      seenRuleIds.add(ruleId);
+    }
+
+    const condition = recordField(rule, "condition");
+    const minimum = integerField(condition ?? {}, "minimum_amount_minor");
+    const maximum = integerField(condition ?? {}, "maximum_amount_minor");
+    if (minimum !== undefined && maximum !== undefined && maximum < minimum) {
+      violations.push({
+        code: "policy.invalid_amount_range",
+        message: "A policy maximum amount cannot be below its minimum amount.",
+        path: `/rules/${String(ruleIndex)}/condition/maximum_amount_minor`,
+      });
+    }
+
+    const requirements = recordsField(rule, "requirements");
+    const seenRequirementIds = new Set<string>();
+    for (
+      let requirementIndex = 0;
+      requirementIndex < requirements.length;
+      requirementIndex += 1
+    ) {
+      const requirement = requirements[requirementIndex] ?? {};
+      const requirementId = stringField(requirement, "requirement_id");
+      if (requirementId !== undefined) {
+        if (seenRequirementIds.has(requirementId)) {
+          violations.push({
+            code: "policy.duplicate_requirement_id",
+            message: "Policy requirement identifiers must be unique.",
+            path: `/rules/${String(ruleIndex)}/requirements/${String(requirementIndex)}/requirement_id`,
+          });
+        }
+        seenRequirementIds.add(requirementId);
+      }
+
+      const namedApprovers = stringsField(
+        requirement,
+        "named_approver_identity_ids",
+      );
+      const requiredCount = integerField(
+        requirement,
+        "required_approval_count",
+      );
+      if (
+        namedApprovers.length > 0 &&
+        requiredCount !== undefined &&
+        namedApprovers.length !== requiredCount
+      ) {
+        violations.push({
+          code: "policy.named_approver_count_mismatch",
+          message:
+            "Named approvers must identify every required accountable approval.",
+          path: `/rules/${String(ruleIndex)}/requirements/${String(requirementIndex)}/named_approver_identity_ids`,
+        });
+      }
+    }
+  }
+  return violations;
+}
+
+export function validateAuthorityRecordInvariants(
+  value: unknown,
+): AuthorityContractViolation[] {
+  const normalized = normalizedRecord(value, "Authority Record");
+  if (normalized.record === undefined) {
+    return normalized.violations;
+  }
+  const root = normalized.record;
+  const violations = [...normalized.violations];
+  const identity = recordField(root, "identity");
+  checkIdentityTenant(
+    identity,
+    stringField(root, "tenant_id"),
+    "/identity",
+    violations,
+  );
+  if (stringField(identity ?? {}, "identity_kind") === "agent") {
+    violations.push({
+      code: "authority.agent_cannot_own_authority",
+      message: "An agent cannot be the business authority owner.",
+      path: "/identity/identity_kind",
+    });
+  }
+
+  const effectiveFrom = stringField(root, "effective_from");
+  const effectiveUntil = stringField(root, "effective_until");
+  if (
+    effectiveFrom !== undefined &&
+    effectiveUntil !== undefined &&
+    effectiveUntil <= effectiveFrom
+  ) {
+    violations.push({
+      code: "authority_record.invalid_effective_window",
+      message: "Authority expiry must be later than its effective start.",
+      path: "/effective_until",
+    });
+  }
+  return violations;
+}
+
 export function validateAuthorityDecisionInvariants(
   value: unknown,
 ): AuthorityContractViolation[] {
@@ -391,7 +534,86 @@ export function validateAuthorityResolutionResultInvariants(
     });
   }
 
-  if (stringField(root, "outcome") === "conflicting_authority") {
+  const requirements = recordsField(root, "authority_requirements");
+  const outstandingClasses = new Set<string>();
+  for (let index = 0; index < requirements.length; index += 1) {
+    const requirement = requirements[index] ?? {};
+    const requiredCount = integerField(requirement, "required_approval_count");
+    const satisfiedIds = stringsField(requirement, "satisfied_approval_ids");
+    const remainingCount = integerField(
+      requirement,
+      "remaining_approval_count",
+    );
+    const status = stringField(requirement, "status");
+    const authorityClass = stringField(requirement, "authority_class");
+    if (
+      requiredCount !== undefined &&
+      remainingCount !== undefined &&
+      satisfiedIds.length + remainingCount !== requiredCount
+    ) {
+      violations.push({
+        code: "authority.requirement_count_mismatch",
+        message:
+          "Satisfied and remaining approval counts must equal the required count.",
+        path: `/authority_requirements/${String(index)}/remaining_approval_count`,
+      });
+    }
+    if (
+      (status === "satisfied" && remainingCount !== 0) ||
+      (status === "outstanding" && remainingCount === 0)
+    ) {
+      violations.push({
+        code: "authority.requirement_status_mismatch",
+        message:
+          "Requirement status must agree with its remaining approval count.",
+        path: `/authority_requirements/${String(index)}/status`,
+      });
+    }
+    if (status === "outstanding" && authorityClass !== undefined) {
+      outstandingClasses.add(authorityClass);
+    }
+    for (const candidate of recordsField(requirement, "eligible_approvers")) {
+      checkIdentityTenant(
+        recordField(candidate, "identity"),
+        tenantId,
+        `/authority_requirements/${String(index)}/eligible_approvers/identity`,
+        violations,
+      );
+    }
+  }
+
+  const outcome = stringField(root, "outcome");
+  if (
+    outcome === "authorized" &&
+    requirements.some(
+      (requirement) => stringField(requirement, "status") !== "satisfied",
+    )
+  ) {
+    violations.push({
+      code: "authority.authorized_with_outstanding_requirement",
+      message: "Authorized results cannot contain outstanding requirements.",
+      path: "/authority_requirements",
+    });
+  }
+  if (outcome === "approval_required") {
+    const declaredClasses = new Set(
+      stringsField(root, "required_authority_classes"),
+    );
+    if (
+      outstandingClasses.size === 0 ||
+      declaredClasses.size !== outstandingClasses.size ||
+      [...outstandingClasses].some((item) => !declaredClasses.has(item))
+    ) {
+      violations.push({
+        code: "authority.outstanding_class_mismatch",
+        message:
+          "Approval-required results must identify every outstanding authority class.",
+        path: "/required_authority_classes",
+      });
+    }
+  }
+
+  if (outcome === "conflicting_authority" && candidates.length > 0) {
     const ranks = candidates
       .map((candidate) => integerField(candidate, "authority_rank"))
       .filter((rank): rank is number => rank !== undefined);
