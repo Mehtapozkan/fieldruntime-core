@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json",
+  "title": "Field Runtime Identity Reference v0",
+  "description": "A stable, attributable, tenant-scoped identity reference. Display and role metadata are descriptive only and never grant business authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "identity_id",
+    "tenant_id",
+    "identity_kind",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "identity-reference.v0"
+    },
+    "identity_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "tenant_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "identity_kind": {
+      "enum": ["human", "agent", "service"]
+    },
+    "status": {
+      "enum": ["active", "inactive", "revoked"]
+    },
+    "display_metadata": {
+      "description": "Optional human-readable metadata. It is non-authoritative and cannot substitute for identity or authority evidence.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "organization_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "role_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "organization_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Id"
+      }
+    },
+    "role_refs": {
+      "description": "Descriptive or directory role references. A role reference alone does not grant authority.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Id"
+      }
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    }
+  }
+}

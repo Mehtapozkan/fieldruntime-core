@@ -1,0 +1,628 @@
+{
+  "fixture_version": "d6a-authority-contracts.v0",
+  "description": "Synthetic D6-A contract vectors only. They do not grant authority or change the ECC evaluation outcome.",
+  "synthetic_consequence": {
+    "account_ref": "account_acme",
+    "amount_minor": 1500000,
+    "currency": "USD",
+    "remedy_type": "service_credit"
+  },
+  "finance_limit_minor": 1000000,
+  "identities": {
+    "case_owner": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_nora",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "human",
+      "status": "active",
+      "display_metadata": {
+        "display_name": "Nora",
+        "role_label": "Case Owner"
+      },
+      "organization_refs": ["organization_acme"]
+    },
+    "worker": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_ecc_worker",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "agent",
+      "status": "active",
+      "display_metadata": {
+        "display_name": "ECC preparation worker"
+      },
+      "role_refs": ["role_work_preparer"]
+    },
+    "finance_approver": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_finance_approver",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "human",
+      "status": "active",
+      "display_metadata": {
+        "display_name": "Finance Approver",
+        "role_label": "Finance / Commercial Approver"
+      },
+      "role_refs": ["role_finance_approver"]
+    },
+    "executive_sponsor": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_executive_sponsor",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "human",
+      "status": "active",
+      "display_metadata": {
+        "display_name": "Executive Sponsor A"
+      },
+      "role_refs": ["role_executive_sponsor"]
+    },
+    "conflicting_executive_sponsor": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_executive_sponsor_b",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "human",
+      "status": "active",
+      "display_metadata": {
+        "display_name": "Executive Sponsor B"
+      },
+      "role_refs": ["role_executive_sponsor"]
+    },
+    "executor": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_action_service",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "service",
+      "status": "active",
+      "display_metadata": {
+        "display_name": "Simulated Action Service"
+      }
+    },
+    "verifier": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_verifier_service",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "service",
+      "status": "active",
+      "display_metadata": {
+        "display_name": "Independent Read Service"
+      }
+    },
+    "policy_evaluator": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_policy_evaluator",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "service",
+      "status": "active",
+      "display_metadata": {
+        "display_name": "Deterministic Policy Evaluator"
+      }
+    }
+  },
+  "case_responsibility": {
+    "schema_version": "case-responsibility.v0",
+    "responsibility_id": "responsibility_acme_credit_v7",
+    "tenant_id": "tenant_acme",
+    "case_id": "case_acme_sso_001",
+    "case_version": 7,
+    "responsibilities": {
+      "case_owner": {
+        "identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_nora",
+          "tenant_id": "tenant_acme",
+          "identity_kind": "human",
+          "status": "active"
+        },
+        "provenance_refs": ["fixture://case-owner-assignment"]
+      },
+      "delegated_worker": {
+        "identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_ecc_worker",
+          "tenant_id": "tenant_acme",
+          "identity_kind": "agent",
+          "status": "active"
+        },
+        "delegation_id": "delegation_case_acme_active"
+      },
+      "authority_owner": {
+        "identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_executive_sponsor",
+          "tenant_id": "tenant_acme",
+          "identity_kind": "human",
+          "status": "active"
+        },
+        "authority_request_id": "authority_request_credit_15000"
+      },
+      "executor": {
+        "identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_action_service",
+          "tenant_id": "tenant_acme",
+          "identity_kind": "service",
+          "status": "active"
+        }
+      },
+      "verifier": {
+        "identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_verifier_service",
+          "tenant_id": "tenant_acme",
+          "identity_kind": "service",
+          "status": "active"
+        }
+      }
+    },
+    "related_authority_decision_ids": ["authority_decision_finance_approval"],
+    "recorded_by_identity": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_nora",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "human",
+      "status": "active"
+    },
+    "recorded_at": "2026-08-26T16:04:00.000Z",
+    "recorded_at_source_timezone": "America/Los_Angeles"
+  },
+  "delegation_grants": {
+    "active_scoped": {
+      "schema_version": "delegation-grant.v0",
+      "delegation_id": "delegation_case_acme_active",
+      "tenant_id": "tenant_acme",
+      "delegator_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_nora",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "delegate_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_ecc_worker",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "agent",
+        "status": "active"
+      },
+      "scope": {
+        "case_ids": ["case_acme_sso_001"],
+        "workflow_version_ids": ["workflow_ecc_v0_1_0"],
+        "action_classes": ["prepare_financial_remedy"],
+        "consequence_classes": ["customer_credit"],
+        "organization_scope_ids": ["organization_acme"]
+      },
+      "effective_from": "2026-08-26T16:00:00.000Z",
+      "effective_from_source_timezone": "America/Los_Angeles",
+      "effective_until": "2026-08-27T16:00:00.000Z",
+      "effective_until_source_timezone": "America/Los_Angeles",
+      "status": "active",
+      "policy_reference": {
+        "policy_id": "policy_ecc_delegation",
+        "policy_version": "0.1.0"
+      },
+      "provenance": {
+        "source_type": "named_human_confirmation",
+        "source_ref": "fixture://delegation/active",
+        "recorded_by_identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_nora",
+          "tenant_id": "tenant_acme",
+          "identity_kind": "human",
+          "status": "active"
+        },
+        "recorded_at": "2026-08-26T16:00:00.000Z",
+        "recorded_at_source_timezone": "America/Los_Angeles"
+      },
+      "created_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_nora",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "approved_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_nora",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "created_at": "2026-08-26T16:00:00.000Z",
+      "created_at_source_timezone": "America/Los_Angeles"
+    },
+    "expired": {
+      "schema_version": "delegation-grant.v0",
+      "delegation_id": "delegation_case_acme_expired",
+      "tenant_id": "tenant_acme",
+      "delegator_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_nora",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "delegate_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_ecc_worker",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "agent",
+        "status": "active"
+      },
+      "scope": {
+        "case_ids": ["case_acme_sso_001"],
+        "action_classes": ["prepare_financial_remedy"]
+      },
+      "effective_from": "2026-08-24T16:00:00.000Z",
+      "effective_from_source_timezone": "America/Los_Angeles",
+      "effective_until": "2026-08-25T16:00:00.000Z",
+      "effective_until_source_timezone": "America/Los_Angeles",
+      "status": "expired",
+      "provenance": {
+        "source_type": "approved_delegation",
+        "source_ref": "fixture://delegation/expired",
+        "recorded_by_identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_nora",
+          "tenant_id": "tenant_acme",
+          "identity_kind": "human",
+          "status": "active"
+        },
+        "recorded_at": "2026-08-24T16:00:00.000Z",
+        "recorded_at_source_timezone": "America/Los_Angeles"
+      },
+      "created_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_nora",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "created_at": "2026-08-24T16:00:00.000Z",
+      "created_at_source_timezone": "America/Los_Angeles"
+    },
+    "superseded": {
+      "schema_version": "delegation-grant.v0",
+      "delegation_id": "delegation_case_acme_superseded",
+      "tenant_id": "tenant_acme",
+      "delegator_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_nora",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "delegate_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_ecc_worker",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "agent",
+        "status": "active"
+      },
+      "scope": {
+        "case_ids": ["case_acme_sso_001"],
+        "action_classes": ["prepare_financial_remedy"]
+      },
+      "effective_from": "2026-08-20T16:00:00.000Z",
+      "effective_from_source_timezone": "America/Los_Angeles",
+      "effective_until": "2026-08-26T16:00:00.000Z",
+      "effective_until_source_timezone": "America/Los_Angeles",
+      "status": "superseded",
+      "superseded_by_delegation_id": "delegation_case_acme_active",
+      "provenance": {
+        "source_type": "approved_delegation",
+        "source_ref": "fixture://delegation/superseded",
+        "recorded_by_identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_nora",
+          "tenant_id": "tenant_acme",
+          "identity_kind": "human",
+          "status": "active"
+        },
+        "recorded_at": "2026-08-20T16:00:00.000Z",
+        "recorded_at_source_timezone": "America/Los_Angeles"
+      },
+      "created_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_nora",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "created_at": "2026-08-20T16:00:00.000Z",
+      "created_at_source_timezone": "America/Los_Angeles"
+    },
+    "revoked": {
+      "schema_version": "delegation-grant.v0",
+      "delegation_id": "delegation_case_acme_revoked",
+      "tenant_id": "tenant_acme",
+      "delegator_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_nora",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "delegate_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_ecc_worker",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "agent",
+        "status": "active"
+      },
+      "scope": {
+        "case_ids": ["case_acme_sso_001"],
+        "action_classes": ["prepare_financial_remedy"]
+      },
+      "effective_from": "2026-08-25T16:00:00.000Z",
+      "effective_from_source_timezone": "America/Los_Angeles",
+      "effective_until": "2026-08-27T16:00:00.000Z",
+      "effective_until_source_timezone": "America/Los_Angeles",
+      "status": "revoked",
+      "revocation": {
+        "revoked_by_identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_nora",
+          "tenant_id": "tenant_acme",
+          "identity_kind": "human",
+          "status": "active"
+        },
+        "revoked_at": "2026-08-26T15:30:00.000Z",
+        "revoked_at_source_timezone": "America/Los_Angeles",
+        "reason": "Delegation withdrawn before the Case changed.",
+        "source_ref": "fixture://delegation/revocation"
+      },
+      "provenance": {
+        "source_type": "named_human_confirmation",
+        "source_ref": "fixture://delegation/revoked",
+        "recorded_by_identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_nora",
+          "tenant_id": "tenant_acme",
+          "identity_kind": "human",
+          "status": "active"
+        },
+        "recorded_at": "2026-08-25T16:00:00.000Z",
+        "recorded_at_source_timezone": "America/Los_Angeles"
+      },
+      "created_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_nora",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "created_at": "2026-08-25T16:00:00.000Z",
+      "created_at_source_timezone": "America/Los_Angeles"
+    }
+  },
+  "authority_request": {
+    "schema_version": "authority-request.v0",
+    "authority_request_id": "authority_request_credit_15000",
+    "tenant_id": "tenant_acme",
+    "case_id": "case_acme_sso_001",
+    "case_version": 7,
+    "prepared_by_identity": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_ecc_worker",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "agent",
+      "status": "active"
+    },
+    "requested_authority_class": "financial_remedy",
+    "requested_action_class": "customer_credit",
+    "proposed_consequence_hash": "sha256:473b8fa62dd6eab4cc42a1630aff473f357db0de4b761287440617780fd6086f",
+    "policy_reference": {
+      "policy_id": "policy_financial_remedy",
+      "policy_version": "0.1.0"
+    },
+    "evidence_refs": ["fixture://policy/finance-limit-10000"],
+    "requested_at": "2026-08-26T16:05:00.000Z",
+    "requested_at_source_timezone": "America/Los_Angeles",
+    "correlation_id": "correlation_acme_credit_15000",
+    "causation_event_id": "event_acme_credit_requested"
+  },
+  "finance_approval": {
+    "schema_version": "authority-decision.v0",
+    "authority_decision_id": "authority_decision_finance_approval",
+    "authority_request_id": "authority_request_credit_15000",
+    "tenant_id": "tenant_acme",
+    "approver_identity": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_finance_approver",
+      "tenant_id": "tenant_acme",
+      "identity_kind": "human",
+      "status": "active"
+    },
+    "case_id": "case_acme_sso_001",
+    "case_version": 7,
+    "proposed_consequence_hash": "sha256:473b8fa62dd6eab4cc42a1630aff473f357db0de4b761287440617780fd6086f",
+    "policy_reference": {
+      "policy_id": "policy_financial_remedy",
+      "policy_version": "0.1.0"
+    },
+    "decision": "approve",
+    "reason": "Finance review recorded; the proposed credit exceeds the Finance limit and still requires Executive Sponsor authority.",
+    "decided_at": "2026-08-26T16:06:00.000Z",
+    "decided_at_source_timezone": "America/Los_Angeles",
+    "correlation_id": "correlation_acme_credit_15000",
+    "causation_event_id": "event_acme_credit_requested",
+    "lineage": {
+      "recorded_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_finance_approver",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "recorded_at": "2026-08-26T16:06:00.000Z",
+      "recorded_at_source_timezone": "America/Los_Angeles",
+      "source_refs": ["fixture://approval/finance"]
+    }
+  },
+  "resolution_results": {
+    "threshold_crossing": {
+      "schema_version": "authority-resolution-result.v0",
+      "authority_resolution_id": "authority_resolution_executive_required",
+      "authority_request_id": "authority_request_credit_15000",
+      "tenant_id": "tenant_acme",
+      "case_id": "case_acme_sso_001",
+      "case_version": 7,
+      "proposed_consequence_hash": "sha256:473b8fa62dd6eab4cc42a1630aff473f357db0de4b761287440617780fd6086f",
+      "outcome": "approval_required",
+      "required_authority_classes": ["executive_sponsor"],
+      "authority_decision_ids": ["authority_decision_finance_approval"],
+      "delegation_ids": ["delegation_case_acme_active"],
+      "policy_reference": {
+        "policy_id": "policy_financial_remedy",
+        "policy_version": "0.1.0"
+      },
+      "reason_codes": ["financial.threshold_exceeded"],
+      "evaluated_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_policy_evaluator",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "service",
+        "status": "active"
+      },
+      "evaluated_at": "2026-08-26T16:07:00.000Z",
+      "evaluated_at_source_timezone": "America/Los_Angeles",
+      "correlation_id": "correlation_acme_credit_15000",
+      "causation_event_id": "event_acme_credit_requested"
+    },
+    "expired_delegation": {
+      "schema_version": "authority-resolution-result.v0",
+      "authority_resolution_id": "authority_resolution_expired_delegation",
+      "authority_request_id": "authority_request_credit_15000",
+      "tenant_id": "tenant_acme",
+      "case_id": "case_acme_sso_001",
+      "case_version": 7,
+      "proposed_consequence_hash": "sha256:473b8fa62dd6eab4cc42a1630aff473f357db0de4b761287440617780fd6086f",
+      "outcome": "expired_delegation",
+      "delegation_ids": ["delegation_case_acme_expired"],
+      "reason_codes": ["delegation.expired"],
+      "evaluated_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_policy_evaluator",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "service",
+        "status": "active"
+      },
+      "evaluated_at": "2026-08-26T16:07:00.000Z",
+      "evaluated_at_source_timezone": "America/Los_Angeles",
+      "correlation_id": "correlation_acme_credit_15000"
+    },
+    "stale_delegation": {
+      "schema_version": "authority-resolution-result.v0",
+      "authority_resolution_id": "authority_resolution_stale_delegation",
+      "authority_request_id": "authority_request_credit_15000",
+      "tenant_id": "tenant_acme",
+      "case_id": "case_acme_sso_001",
+      "case_version": 7,
+      "proposed_consequence_hash": "sha256:473b8fa62dd6eab4cc42a1630aff473f357db0de4b761287440617780fd6086f",
+      "outcome": "no_authority",
+      "delegation_ids": ["delegation_case_acme_superseded"],
+      "reason_codes": ["delegation.superseded"],
+      "evaluated_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_policy_evaluator",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "service",
+        "status": "active"
+      },
+      "evaluated_at": "2026-08-26T16:07:00.000Z",
+      "evaluated_at_source_timezone": "America/Los_Angeles",
+      "correlation_id": "correlation_acme_credit_15000"
+    },
+    "conflicting_authority": {
+      "schema_version": "authority-resolution-result.v0",
+      "authority_resolution_id": "authority_resolution_conflicting_sponsors",
+      "authority_request_id": "authority_request_credit_15000",
+      "tenant_id": "tenant_acme",
+      "case_id": "case_acme_sso_001",
+      "case_version": 7,
+      "proposed_consequence_hash": "sha256:473b8fa62dd6eab4cc42a1630aff473f357db0de4b761287440617780fd6086f",
+      "outcome": "conflicting_authority",
+      "authority_candidates": [
+        {
+          "identity": {
+            "schema_version": "identity-reference.v0",
+            "identity_id": "identity_executive_sponsor",
+            "tenant_id": "tenant_acme",
+            "identity_kind": "human",
+            "status": "active"
+          },
+          "authority_rank": 1,
+          "evidence_refs": ["fixture://authority/executive-a"]
+        },
+        {
+          "identity": {
+            "schema_version": "identity-reference.v0",
+            "identity_id": "identity_executive_sponsor_b",
+            "tenant_id": "tenant_acme",
+            "identity_kind": "human",
+            "status": "active"
+          },
+          "authority_rank": 1,
+          "evidence_refs": ["fixture://authority/executive-b"]
+        }
+      ],
+      "policy_reference": {
+        "policy_id": "policy_financial_remedy",
+        "policy_version": "0.1.0"
+      },
+      "reason_codes": ["authority.same_rank_conflict"],
+      "evaluated_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_policy_evaluator",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "service",
+        "status": "active"
+      },
+      "evaluated_at": "2026-08-26T16:07:00.000Z",
+      "evaluated_at_source_timezone": "America/Los_Angeles",
+      "correlation_id": "correlation_acme_credit_15000"
+    },
+    "stale_case_version": {
+      "schema_version": "authority-resolution-result.v0",
+      "authority_resolution_id": "authority_resolution_stale_case",
+      "authority_request_id": "authority_request_credit_15000",
+      "tenant_id": "tenant_acme",
+      "case_id": "case_acme_sso_001",
+      "case_version": 7,
+      "current_case_version": 8,
+      "proposed_consequence_hash": "sha256:473b8fa62dd6eab4cc42a1630aff473f357db0de4b761287440617780fd6086f",
+      "outcome": "stale_case_version",
+      "reason_codes": ["case.version_changed"],
+      "evaluated_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_policy_evaluator",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "service",
+        "status": "active"
+      },
+      "evaluated_at": "2026-08-26T16:07:00.000Z",
+      "evaluated_at_source_timezone": "America/Los_Angeles",
+      "correlation_id": "correlation_acme_credit_15000"
+    },
+    "agent_cannot_self_approve": {
+      "schema_version": "authority-resolution-result.v0",
+      "authority_resolution_id": "authority_resolution_agent_no_authority",
+      "authority_request_id": "authority_request_credit_15000",
+      "tenant_id": "tenant_acme",
+      "case_id": "case_acme_sso_001",
+      "case_version": 7,
+      "proposed_consequence_hash": "sha256:473b8fa62dd6eab4cc42a1630aff473f357db0de4b761287440617780fd6086f",
+      "outcome": "no_authority",
+      "reason_codes": ["authority.agent_cannot_self_authorize"],
+      "evaluated_by_identity": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_policy_evaluator",
+        "tenant_id": "tenant_acme",
+        "identity_kind": "service",
+        "status": "active"
+      },
+      "evaluated_at": "2026-08-26T16:07:00.000Z",
+      "evaluated_at_source_timezone": "America/Los_Angeles",
+      "correlation_id": "correlation_acme_credit_15000"
+    }
+  }
+}

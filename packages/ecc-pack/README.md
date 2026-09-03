@@ -16,6 +16,12 @@ Versioned workflow assets for the first Field Runtime Core evaluation pack.
   presentation trace used by the PR5 workbench. It demonstrates a silent simulated
   connector failure and independent read-back without creating an authoritative
   case mutation or production receipt.
+- `fixtures/d6a-authority-contracts.v0.json` supplies contract-only synthetic
+  vectors for a $15K credit above a $10K Finance limit, recorded Finance approval,
+  required Executive Sponsor authority, expired and superseded delegations,
+  same-rank authority conflict, stale Case version, and agent-prepared work that
+  cannot self-authorize. These are inputs for later D6-B resolution; they do not
+  change the 30-case Production Test or claim that an authority engine exists.
 
 All actions are simulated. No file in this pack contains live credentials.
 
