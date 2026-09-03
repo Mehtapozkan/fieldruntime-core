@@ -3,9 +3,10 @@
 Current milestone: v0.1.0 Evaluation Preview release candidate
 
 Release position: GitHub PRs #6 (Public Evaluation Preview Readiness), #12
-(Public Launch Finalization), and #14 (Automate the Evaluation Prerelease) are
-merged. The repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are
-public.
+(Public Launch Finalization), #14 (Automate the Evaluation Prerelease), and #15
+(Align public roadmap to Case-first product architecture) are merged. The
+repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are public. D6 is
+in progress; D6-A defines contracts and does not complete the governed runtime.
 
 ## Implemented
 
@@ -117,15 +118,29 @@ public.
 - PostgreSQL 17.11 Alpine and Node.js 24 Bookworm Slim images pinned to their
   multi-platform OCI digests.
 - Dependabot coverage for pnpm, Docker, and GitHub Actions dependencies.
+- Provider-neutral, tenant-scoped identity references for attributable human,
+  agent, and service identities; display and role metadata remain
+  non-authoritative.
+- Versioned contracts for exact-Case responsibility, scoped delegation,
+  consequence-bound Authority Requests, approval/decision envelopes, and explicit
+  fail-closed Authority Resolution Results.
+- Contract-level invariants for tenant isolation, independent executor/verifier
+  identities, coherent delegation windows, agent authority denial, same-rank
+  conflict preservation, and immutable request/decision/result bindings.
+- Synthetic D6-A vectors for the $15K/$10K authority threshold, recorded Finance
+  approval with Executive Sponsor authority still required, expired and stale
+  delegations, same-rank conflict, stale Case state, and agent self-approval denial.
 
 ## Verified
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- `pnpm release:check` passes across 126 current files, complete reachable Git
+- `pnpm release:check` passes across 135 current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 136 tests pass, including the canonical Case fixture, all 30 evaluation schemas,
+- 152 tests pass, including 16 D6-A identity, delegation, responsibility,
+  immutable authority-binding, lifecycle, conflict, and agent-authority tests;
+  the canonical Case fixture; all 30 evaluation schemas;
   idempotency and source-event conflicts, journal replay/tamper checks, projection
   drift, seed and WorkEvent time normalization, authority/verification negative
   cases, graph activation blockers, local database exposure checks, gold-boundary
@@ -166,7 +181,11 @@ public.
 - Importing or mapping an existing external Case while preserving its upstream
   system of record is not implemented.
 - Operational Legibility evaluation is not implemented.
-- No real authority engine, action gateway, or independent verifier is implemented.
+- The deterministic authority resolution engine is not implemented; D6-B must
+  consume the D6-A contracts and fail closed when no unique authority is proven.
+- The Decision Packet is not backed by authoritative D6 authority evaluation.
+- The action gateway is not implemented.
+- The independent runtime verifier is not implemented.
 - Declared action payload hashes are not independently recomputed; every claimed
   executed action therefore fails closed in this milestone.
 - No general worker runtime or provider adapter implementation.
@@ -187,12 +206,14 @@ public.
   deterministic authority envelopes, a simulated action gateway, and
   runtime-enforced independent verification before those controls can mutate an
   authoritative case.
+- Authority shown in the Guided Workbench remains simulated until later D6/D7
+  work.
 
 ## Next
 
-D6 — Governed Case Session is the next product capability: authoritative identity,
-delegation, deterministic business authority, exact Case roles, payload-bound
-approval, and a runtime-backed Decision Packet.
+D6-B — Deterministic Authority Resolution is next: consume the D6-A contracts to
+resolve explicit policy, delegation, and registry evidence without silently
+choosing authority. Runtime-backed Decision Packet work follows within D6.
 
 The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
 This roadmap alignment does not displace the trusted-kernel priority, add live

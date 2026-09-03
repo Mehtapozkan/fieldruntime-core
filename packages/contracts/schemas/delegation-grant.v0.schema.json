@@ -1,0 +1,337 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/delegation-grant.v0.schema.json",
+  "title": "Field Runtime Delegation Grant v0",
+  "description": "An explicit, attributable, scoped delegation. Delegation does not create authority outside the recorded scope or consequence boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "delegation_id",
+    "tenant_id",
+    "delegator_identity",
+    "delegate_identity",
+    "scope",
+    "effective_from",
+    "effective_from_source_timezone",
+    "status",
+    "provenance",
+    "created_by_identity",
+    "created_at",
+    "created_at_source_timezone"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "delegation-grant.v0"
+    },
+    "delegation_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "tenant_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "delegator_identity": {
+      "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+    },
+    "delegate_identity": {
+      "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+    },
+    "scope": {
+      "$ref": "#/$defs/DelegationScope"
+    },
+    "effective_from": {
+      "$ref": "#/$defs/CanonicalUtcInstant"
+    },
+    "effective_from_source_timezone": {
+      "$ref": "#/$defs/SourceTimezone"
+    },
+    "effective_until": {
+      "$ref": "#/$defs/CanonicalUtcInstant"
+    },
+    "effective_until_source_timezone": {
+      "$ref": "#/$defs/SourceTimezone"
+    },
+    "status": {
+      "enum": ["pending", "active", "revoked", "expired", "superseded"]
+    },
+    "revocation": {
+      "$ref": "#/$defs/Revocation"
+    },
+    "superseded_by_delegation_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "policy_reference": {
+      "$ref": "#/$defs/PolicyReference"
+    },
+    "provenance": {
+      "$ref": "#/$defs/DelegationProvenance"
+    },
+    "created_by_identity": {
+      "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+    },
+    "approved_by_identity": {
+      "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+    },
+    "created_at": {
+      "$ref": "#/$defs/CanonicalUtcInstant"
+    },
+    "created_at_source_timezone": {
+      "$ref": "#/$defs/SourceTimezone"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "effective_until": {}
+        },
+        "required": ["effective_until"]
+      },
+      "then": {
+        "properties": {
+          "effective_until_source_timezone": {
+            "$ref": "#/$defs/SourceTimezone"
+          }
+        },
+        "required": ["effective_until_source_timezone"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effective_until_source_timezone": {}
+        },
+        "required": ["effective_until_source_timezone"]
+      },
+      "then": {
+        "properties": {
+          "effective_until": {
+            "$ref": "#/$defs/CanonicalUtcInstant"
+          }
+        },
+        "required": ["effective_until"]
+      }
+    },
+    {
+      "if": {
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "const": "revoked"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "revocation": {
+            "$ref": "#/$defs/Revocation"
+          }
+        },
+        "required": ["revocation"]
+      },
+      "else": {
+        "not": {
+          "properties": {
+            "revocation": {}
+          },
+          "required": ["revocation"]
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "const": "expired"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "effective_until": {
+            "$ref": "#/$defs/CanonicalUtcInstant"
+          },
+          "effective_until_source_timezone": {
+            "$ref": "#/$defs/SourceTimezone"
+          }
+        },
+        "required": ["effective_until", "effective_until_source_timezone"]
+      }
+    },
+    {
+      "if": {
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "const": "superseded"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "superseded_by_delegation_id": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "required": ["superseded_by_delegation_id"]
+      },
+      "else": {
+        "not": {
+          "properties": {
+            "superseded_by_delegation_id": {}
+          },
+          "required": ["superseded_by_delegation_id"]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "CanonicalUtcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "SourceTimezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?:UTC(?:[+-](?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9])?|[A-Za-z][A-Za-z0-9._+-]*(?:/[A-Za-z0-9._+-]+)+)$"
+    },
+    "StringScope": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      }
+    },
+    "IdScope": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Id"
+      }
+    },
+    "DelegationScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "tenant_wide": {
+          "const": true
+        },
+        "case_ids": {
+          "$ref": "#/$defs/IdScope"
+        },
+        "workflow_version_ids": {
+          "$ref": "#/$defs/IdScope"
+        },
+        "case_class_ids": {
+          "$ref": "#/$defs/IdScope"
+        },
+        "action_classes": {
+          "$ref": "#/$defs/StringScope"
+        },
+        "business_domains": {
+          "$ref": "#/$defs/StringScope"
+        },
+        "consequence_classes": {
+          "$ref": "#/$defs/StringScope"
+        },
+        "organization_scope_ids": {
+          "$ref": "#/$defs/IdScope"
+        }
+      }
+    },
+    "PolicyReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "policy_version"],
+      "properties": {
+        "policy_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "DelegationProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type",
+        "source_ref",
+        "recorded_by_identity",
+        "recorded_at",
+        "recorded_at_source_timezone"
+      ],
+      "properties": {
+        "source_type": {
+          "enum": [
+            "explicit_policy",
+            "approved_delegation",
+            "authoritative_registry",
+            "named_human_confirmation"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "recorded_by_identity": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "recorded_at": {
+          "$ref": "#/$defs/CanonicalUtcInstant"
+        },
+        "recorded_at_source_timezone": {
+          "$ref": "#/$defs/SourceTimezone"
+        }
+      }
+    },
+    "Revocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revoked_by_identity",
+        "revoked_at",
+        "revoked_at_source_timezone",
+        "reason",
+        "source_ref"
+      ],
+      "properties": {
+        "revoked_by_identity": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "revoked_at": {
+          "$ref": "#/$defs/CanonicalUtcInstant"
+        },
+        "revoked_at_source_timezone": {
+          "$ref": "#/$defs/SourceTimezone"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      }
+    }
+  }
+}

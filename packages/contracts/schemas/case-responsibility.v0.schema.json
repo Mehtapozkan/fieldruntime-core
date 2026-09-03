@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/case-responsibility.v0.schema.json",
+  "title": "Field Runtime Case Responsibility v0",
+  "description": "Distinct attributable responsibilities for one exact version of one Case. Assigned work never implies business authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "responsibility_id",
+    "tenant_id",
+    "case_id",
+    "case_version",
+    "responsibilities",
+    "recorded_by_identity",
+    "recorded_at",
+    "recorded_at_source_timezone"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "case-responsibility.v0"
+    },
+    "responsibility_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "tenant_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "case_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "case_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "responsibilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "case_owner": {
+          "$ref": "#/$defs/ResponsibilityBinding"
+        },
+        "delegated_worker": {
+          "$ref": "#/$defs/ResponsibilityBinding"
+        },
+        "authority_owner": {
+          "$ref": "#/$defs/ResponsibilityBinding"
+        },
+        "executor": {
+          "$ref": "#/$defs/ResponsibilityBinding"
+        },
+        "verifier": {
+          "$ref": "#/$defs/ResponsibilityBinding"
+        }
+      }
+    },
+    "related_authority_decision_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Id"
+      }
+    },
+    "recorded_by_identity": {
+      "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+    },
+    "recorded_at": {
+      "$ref": "#/$defs/CanonicalUtcInstant"
+    },
+    "recorded_at_source_timezone": {
+      "$ref": "#/$defs/SourceTimezone"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "CanonicalUtcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "SourceTimezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?:UTC(?:[+-](?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9])?|[A-Za-z][A-Za-z0-9._+-]*(?:/[A-Za-z0-9._+-]+)+)$"
+    },
+    "ResponsibilityBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity"],
+      "properties": {
+        "identity": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "delegation_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "authority_request_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "authority_decision_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "provenance_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        }
+      }
+    }
+  }
+}

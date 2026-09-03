@@ -37,6 +37,27 @@ optional instant is non-null; adapters validate label/instant coherence.
 `src/invariants.ts` enforces tenant, case, workflow, scope, approval, receipt, and
 resolution relationships that JSON Schema cannot express.
 
+The D6-A authority boundary adds six provider-neutral contracts:
+
+- `identity-reference.v0.schema.json` distinguishes attributable human, agent,
+  and service identities while keeping display and directory metadata
+  non-authoritative.
+- `case-responsibility.v0.schema.json` binds case owner, delegated worker,
+  authority owner, executor, and verifier independently to one exact Case version.
+- `delegation-grant.v0.schema.json` records explicit scope, effective time,
+  lifecycle state, provenance, and creation/approval attribution.
+- `authority-request.v0.schema.json` binds a requested authority class to one
+  tenant, Case, Case version, proposed consequence hash, and correlation lineage.
+- `authority-decision.v0.schema.json` records approve, reject, modify, or escalate
+  decisions against that exact immutable request boundary.
+- `authority-resolution-result.v0.schema.json` represents success or explicit
+  fail-closed outcomes without silently selecting authority.
+
+`src/authority-contracts.ts` adds cross-tenant, independent-verifier,
+delegation-window, agent-authority, same-rank-conflict, and immutable-binding
+checks that JSON Schema alone cannot express. It deliberately does not choose an
+approver or evaluate policy. Deterministic authority resolution remains D6-B.
+
 All public validators and invariants first canonicalize untrusted input without
 invoking accessors or proxy traps. Claimed `executed` actions fail closed in PR2:
 matching caller-declared hashes are not proof until the authority engine planned

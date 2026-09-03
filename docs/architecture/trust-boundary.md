@@ -30,3 +30,23 @@ are replaceable and bounded.
 - Verification rereads resulting source state through a separately identified
   path.
 - A kill switch overrides all external-write permissions in later stages.
+
+## Identity and authority contract boundary
+
+D6-A defines identity, Case responsibility, delegation, Authority Request,
+Authority Decision, and Authority Resolution Result as versioned public contracts.
+Identity is stable, tenant-scoped, and attributable; role and display metadata do
+not grant authority. Case owner, delegated worker, authority owner, executor, and
+verifier remain distinct even when one person legitimately fills multiple roles.
+Executor and verifier must be separate identities.
+
+Delegation must be explicit, scoped, attributable, and time-bounded where an end
+is recorded. Approval binds one exact Case version, consequence hash, policy
+identity/version, and correlation lineage. Payload or Case-version changes require
+fresh evaluation. Agent or model capability, task assignment, tool access,
+credentials, and historical behavior cannot manufacture business authority.
+
+These contracts represent ambiguity, conflict, missing authority, expiry, stale
+Case state, and unavailable policy as explicit fail-closed outcomes. They do not
+resolve which identity holds authority. D6-B must implement that deterministic
+choice without changing the contracts into a policy engine.

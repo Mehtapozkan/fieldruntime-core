@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/authority-resolution-result.v0.schema.json",
+  "title": "Field Runtime Authority Resolution Result v0",
+  "description": "The explicit, attributable result shape a later deterministic authority resolver will produce. This contract does not choose an authority owner.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority_resolution_id",
+    "authority_request_id",
+    "tenant_id",
+    "case_id",
+    "case_version",
+    "proposed_consequence_hash",
+    "outcome",
+    "reason_codes",
+    "evaluated_by_identity",
+    "evaluated_at",
+    "evaluated_at_source_timezone",
+    "correlation_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "authority-resolution-result.v0"
+    },
+    "authority_resolution_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "authority_request_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "tenant_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "case_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "case_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "current_case_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "proposed_consequence_hash": {
+      "$ref": "#/$defs/Sha256"
+    },
+    "outcome": {
+      "enum": [
+        "authorized",
+        "approval_required",
+        "ambiguous_authority",
+        "no_authority",
+        "expired_delegation",
+        "conflicting_authority",
+        "stale_case_version",
+        "policy_unavailable"
+      ]
+    },
+    "authority_owner": {
+      "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+    },
+    "authority_candidates": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/AuthorityCandidate"
+      }
+    },
+    "required_authority_classes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      }
+    },
+    "authority_decision_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Id"
+      }
+    },
+    "delegation_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Id"
+      }
+    },
+    "policy_reference": {
+      "$ref": "#/$defs/PolicyReference"
+    },
+    "reason_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_.-]{2,127}$"
+      }
+    },
+    "evaluated_by_identity": {
+      "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+    },
+    "evaluated_at": {
+      "$ref": "#/$defs/CanonicalUtcInstant"
+    },
+    "evaluated_at_source_timezone": {
+      "$ref": "#/$defs/SourceTimezone"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "causation_event_id": {
+      "$ref": "#/$defs/Id"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["outcome"],
+        "properties": {
+          "outcome": {
+            "const": "authorized"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authority_owner": {
+            "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+          },
+          "authority_decision_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/Id"
+            }
+          },
+          "policy_reference": {
+            "$ref": "#/$defs/PolicyReference"
+          }
+        },
+        "required": [
+          "authority_owner",
+          "authority_decision_ids",
+          "policy_reference"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": ["outcome"],
+        "properties": {
+          "outcome": {
+            "const": "approval_required"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "required_authority_classes": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        },
+        "required": ["required_authority_classes"]
+      }
+    },
+    {
+      "if": {
+        "required": ["outcome"],
+        "properties": {
+          "outcome": {
+            "enum": ["ambiguous_authority", "conflicting_authority"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authority_candidates": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/AuthorityCandidate"
+            }
+          }
+        },
+        "required": ["authority_candidates"]
+      }
+    },
+    {
+      "if": {
+        "required": ["outcome"],
+        "properties": {
+          "outcome": {
+            "const": "expired_delegation"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "delegation_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        },
+        "required": ["delegation_ids"]
+      }
+    },
+    {
+      "if": {
+        "required": ["outcome"],
+        "properties": {
+          "outcome": {
+            "const": "stale_case_version"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "current_case_version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": ["current_case_version"]
+      }
+    }
+  ],
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "CanonicalUtcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "SourceTimezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?:UTC(?:[+-](?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9])?|[A-Za-z][A-Za-z0-9._+-]*(?:/[A-Za-z0-9._+-]+)+)$"
+    },
+    "PolicyReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "policy_version"],
+      "properties": {
+        "policy_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "AuthorityCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "authority_rank", "evidence_refs"],
+      "properties": {
+        "identity": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "authority_rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        }
+      }
+    }
+  }
+}
