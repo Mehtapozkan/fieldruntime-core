@@ -1,8 +1,8 @@
 # Field Runtime Core
 
-Field Runtime Core is an Apache-2.0-licensed, self-hosted evaluation preview of an
-**Enterprise Case Runtime**: a governed layer designed to carry consequential work
-from scattered evidence to an authorized, independently verified outcome.
+Field Runtime Core is the open, inspectable **Case + Authority + Outcome runtime**
+for consequential operational work. This Apache-2.0-licensed repository is a
+self-hosted evaluation preview of that **Enterprise Case Runtime**.
 
 Most AI systems stop at an answer or a completed task. Consequential work does not.
 It crosses systems and people, accumulates contradictory evidence and commitments,
@@ -11,12 +11,25 @@ work together as one complete case: evidence, conflicts, participants, commitmen
 decision options, authority, approvals, exact actions, independent verification,
 outcomes, corrections, receipts, and replay lineage.
 
+The Case is the canonical unit of work. Evidence, identity, authority, action,
+verification, outcome, receipts, and correction bind to that Case rather than to a
+worker session. In messy environments, Field Runtime may form a Case candidate from
+fragmented signals while preserving provenance, conflicts, unknowns, and
+uncertainty. If a customer already has a mature case-management, ticket, claims, or
+work system, that system remains the system of record: Field Runtime maps or
+imports its Case contract and enters at the governed execution layer. It does not
+require replatforming or forced rediscovery of already-coherent Case state.
+
+The differentiated kernel is
+`CASE + EVIDENCE + AUTHORITY + ACTION + VERIFICATION + OUTCOME + RECEIPT + CORRECTION`.
+
 The goal is to increase an experienced operator's power without transferring
 control to a model or provider. Models and agents may propose; named people retain
-authority. Canonical case state and deterministic controls stay in the runtime,
-while models, agent harnesses, memory systems, work surfaces, and connectors remain
-replaceable adapters. Organizations can change providers without surrendering the
-case history, operating rules, or learning they created.
+authority. Business authority is not equivalent to tool permission. Canonical Case
+state and deterministic controls stay in the runtime, while models, agents, memory
+systems, work surfaces, and connectors remain replaceable workers and adapters.
+Organizations can change providers without surrendering the Case history,
+operating rules, or learning they created.
 
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external
 > writes. Not production software. Production authority must be earned.
@@ -62,9 +75,17 @@ Implemented in the current evaluation foundation:
 - Contract, fixture, transition, idempotency, journal, persistence, API, CLI, and
   adversarial tests.
 
-Planned, not implemented yet: automatic ECC case matching, authoritative approval
-evaluation, controlled action execution, runtime-enforced independent read-back,
-live connectors, identity federation, high availability, and production operations.
+Planned, not implemented yet:
+
+- automatic Case candidate formation and matching;
+- existing external Case import and mapping;
+- Operational Legibility;
+- an authoritative approval engine;
+- a deny-by-default action gateway;
+- an independent verifier;
+- a general worker runtime and provider adapters;
+- live connectors; and
+- production identity, control, high availability, and operations.
 
 ## Target product boundary
 
@@ -79,13 +100,18 @@ Field Runtime is not another agent. Its product contract is the governed runtime
 around agents and systems of record that retains the case through uncertainty,
 handoffs, approval, action, independent verification, and correction.
 
+There are two valid entry modes: form a Case candidate when operational work
+arrives as fragmented signals, or preserve and map a coherent Case from a trusted
+upstream system. In both modes, the Case remains canonical outside any worker
+session and the upstream system remains the system of record for the data it owns.
+
 Models and agents may extract, synthesize, and recommend. They cannot authorize,
 execute, verify their own work, or promote learning inside the trusted core.
 
 The current preview makes that contract inspectable with synthetic fixtures and a
 guided simulation. The deterministic authority, action, and verification controls
-needed to enforce the complete contract at runtime are planned for Delivery PR6;
-they are not implemented in this release candidate.
+needed to enforce the complete contract at runtime are planned for D6–D7; they are
+not implemented in this release candidate.
 
 ## Quick start
 
@@ -144,20 +170,32 @@ behavior. Architecture decisions live in `DECISIONS.md`.
 
 ## Public roadmap
 
-GitHub PR #6 delivered release readiness, and GitHub PR #12 finalized the public
-launch. Automated dependency updates can consume GitHub numbers, so the future
-capability sequence uses stable **Delivery PR** labels. Each roadmap item will link
-its actual GitHub pull request when work begins.
+GitHub PRs #6, #12, and #14 delivered release readiness, public launch
+finalization, and prerelease automation. The future capability sequence uses
+stable **Delivery labels D6–D20**. Delivery labels are not GitHub pull request
+numbers; the actual GitHub number may differ and will be linked when work begins.
 
-| Delivery item                             | Status  | Scope                                                                                                                                                     |
-| ----------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GitHub #6 — Preview Readiness             | Merged  | Apache 2.0 boundary, governance and security files, pinned infrastructure, release checks, preview image, and first-run guide                             |
-| GitHub #12 — Public Launch Finalization   | Merged  | Final public copy, release-state reconciliation, repository metadata and protection checks, anonymous-clone verification, and prerelease publication gate |
-| Delivery PR6 — Authority and Verification | Planned | Deterministic authority matrix, payload-bound approvals, simulated action gateway, and runtime-enforced independent read-back                             |
-| Delivery PR7 — Provider Adapters          | Planned | Bounded model, memory, agent-harness, and connector interfaces, beginning with mocks and contract tests                                                   |
-| Delivery PR8 — Receipts and Economics     | Planned | Full receipt chain plus resolution-time, handoff, intervention, commitment, and verified-result measures                                                  |
-| Delivery PR9 — Correction and Replay      | Planned | Append-only correction, branching, changed-fact replay, and governed learning-candidate review                                                            |
-| Delivery PR10 — Packaged Evaluation       | Planned | Installer, signed artifacts, SBOM, provenance, and documented upgrade and uninstall paths                                                                 |
+| Delivery item                                        | Status  | Scope                                                                                                                                                                                                                                                 |
+| ---------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D6 — Governed Case Session                           | Planned | Authoritative identity, delegation, business authority, exact Case roles, payload-bound approvals, deterministic authority resolution, and a runtime-backed Decision Packet                                                                           |
+| D7 — Controlled Action + Independent Verification    | Planned | Staged, deny-by-default action with idempotency and preconditions; a separate verifier identity/read path; no self-verification; simulated effects only                                                                                               |
+| D8 — Receipts + Economics + Failure Theater          | Planned | Reconstructable authority/action/verifier/outcome lineage, interventions, wait/handoff time, cost per accepted outcome, and visible failure of unsafe paths                                                                                           |
+| D9 — Intake + Case Formation                         | Planned | Provenance-preserving intake, related-signal linking, uncertainty-preserving Case candidates, and safe mapping/import of Cases from existing customer systems                                                                                         |
+| D10 — Case Discovery + Operational Legibility        | Planned | Reconstruct representative work, separate authoritative fact/policy/memory/extraction/inference, expose gaps/conflicts, and classify operational work without inventing authority                                                                     |
+| D11 — Runtime Builder                                | Planned | Human confirmation of discovered or imported operating structure and compilation of a reviewed, versioned Organization Runtime Pack                                                                                                                   |
+| D12 — Work Agent Runtime                             | Planned | Bounded Worker Adapter Contract and Broker, one reference worker, BYO-agent/harness compatibility, Worker Packs, optional adapters, and no worker-owned canonical Case state                                                                          |
+| D13 — 25-Case Challenge                              | Planned | A 3–5 day entry product measuring Case reconstructability, agent-workable and judgment-required work, authority/evidence gaps, human effort, cycle-time opportunity, and economics, with commercial credit toward a Production Test where appropriate |
+| D14 — One-Command / Self-Serve Distribution          | Planned | Zero-install or one-command try path and a polished `/try` experience for Case Formation and the Challenge                                                                                                                                            |
+| D15 — Worker / Model Routing + Intelligence Receipts | Planned | Replaceable provider/model routing by task, risk, authority, cost, capability, warm state, and verified outcomes                                                                                                                                      |
+| D16 — Correction + Branch + Replay / Operational CI  | Planned | Correction lineage, changed-fact replay, evaluated learning candidates, approval before promotion, and rollback                                                                                                                                       |
+| D17 — Read-Only Real-World Connectors                | Planned | Read-only email, CRM, and ERP/accounting or equivalent connectors with preserved provenance and no unrestricted worker credentials                                                                                                                    |
+| D18 — Shadow-Mode Production Test                    | Planned | One real recurring workflow without production writes, compared with the human process across accepted completion, interventions, authority gaps, cycle time, and economics                                                                           |
+| D19 — Multiplayer Enterprise Coordination + Control  | Planned | Human/agent/service identities, delegation, team coordination, policy/control views, cost, audit, and fleet health after trusted runtime and shadow evidence                                                                                          |
+| D20 — Progressive Governed Action                    | Planned | Narrow production writes, explicit authority, reversible or preconditioned actions where possible, kill switch, independent verification, and evidence-based authority expansion                                                                      |
+
+Operational Legibility is an explicit gate: D12 is not product-ready until D9–D10
+demonstrate trustworthy Case formation or import, provenance, conflict and
+uncertainty handling, no invented authority, and a human-review path for ambiguity.
 
 Planned means planned, not present in this evaluation preview. See [`PLAN.md`](PLAN.md)
 for exit criteria and [`STATUS.md`](STATUS.md) for the implemented boundary.

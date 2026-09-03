@@ -40,7 +40,7 @@ resolution relationships that JSON Schema cannot express.
 All public validators and invariants first canonicalize untrusted input without
 invoking accessors or proxy traps. Claimed `executed` actions fail closed in PR2:
 matching caller-declared hashes are not proof until the authority engine planned
-for Delivery PR6 defines and recomputes the versioned authorization envelope.
+for D6 defines and recomputes the versioned authorization envelope.
 
 Canonical strings also reject the null character and unpaired Unicode surrogates.
 Those values are representable in JavaScript but not losslessly accepted by the
