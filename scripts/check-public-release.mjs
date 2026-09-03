@@ -60,7 +60,9 @@ requireText("README.md", [
   "Synthetic cases. Simulated authority. No external writes.",
   "complete case",
   "Public roadmap",
-  "Delivery PR6 — Authority and Verification",
+  "D6 — Governed Case Session",
+  "Operational Legibility",
+  "Delivery labels are not GitHub pull request numbers",
   "docs/guides/5-minute-evaluation.md",
   "Apache License 2.0",
   "fieldruntime.ai",
@@ -70,16 +72,22 @@ requireText("SECURITY.md", [
   "security/advisories/new",
   "not a production service",
 ]);
-requireText("OPEN_CORE.md", ["not lock-in", "Apache License 2.0"]);
+requireText("OPEN_CORE.md", [
+  "not lock-in",
+  "Apache License 2.0",
+  "Intake and Case Formation contracts",
+]);
 requireText("PLAN.md", [
   "GitHub #12 — Public Launch Finalization",
-  "Delivery PR6 — Authority and Verification",
-  "Delivery PR10 — Packaged Evaluation",
+  "GitHub #14 — Automated Evaluation Prerelease",
+  "D6 — Governed Case Session",
+  "D20 — Progressive Governed Action",
+  "Operational Legibility Gate",
 ]);
 requireText("docs/releases/v0.1.0-evaluation-preview.md", [
   "v0.1.0-evaluation-preview.0",
-  "GitHub PRs #6 and #12 are merged",
-  "Delivery PR6–PR10 are planned",
+  "GitHub PRs #6, #12, and #14 are merged",
+  "D6–D20 are planned",
 ]);
 requireText(".github/workflows/ci.yml", [
   "publish-evaluation-preview:",

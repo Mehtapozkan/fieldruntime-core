@@ -2,9 +2,10 @@
 
 Current milestone: v0.1.0 Evaluation Preview release candidate
 
-Release position: GitHub PRs #6 (Public Evaluation Preview Readiness) and #12
-(Public Launch Finalization) are merged. The repository and
-`v0.1.0-evaluation-preview.0` GitHub prerelease are public.
+Release position: GitHub PRs #6 (Public Evaluation Preview Readiness), #12
+(Public Launch Finalization), and #14 (Automate the Evaluation Prerelease) are
+merged. The repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are
+public.
 
 ## Implemented
 
@@ -159,32 +160,40 @@ Release position: GitHub PRs #6 (Public Evaluation Preview Readiness) and #12
   Production identity federation, authorization, tenancy administration, and
   network deployment are not implemented.
 - `fr up` intentionally runs only from a cloned Field Runtime Core repository root;
-  a standalone installer and signed distributable remain Delivery PR10 scope.
-- Event attachment requires an explicitly selected case. Automatic ECC candidate
-  matching and ambiguous-merge handling are not implemented yet.
-- No authority engine, action gateway, or independent verifier yet.
+  a standalone installer and signed distributable remain D14 scope.
+- Event attachment currently requires an explicitly selected Case. Automatic Case
+  formation, candidate matching, and ambiguous-merge handling are not implemented.
+- Importing or mapping an existing external Case while preserving its upstream
+  system of record is not implemented.
+- Operational Legibility evaluation is not implemented.
+- No real authority engine, action gateway, or independent verifier is implemented.
 - Declared action payload hashes are not independently recomputed; every claimed
   executed action therefore fails closed in this milestone.
-- No provider or live connector implementation.
+- No general worker runtime or provider adapter implementation.
+- No live connector implementation.
 - The drifted upstream normalized PostgreSQL SQL remains reference-only. PR4 uses
   its own lossless event-store migration; a normalized model still requires
   explicit parity reconciliation and conformance tests.
 - ECC v0.1.0 is shadow/evaluation-only; activation is deliberately blocked.
 - The preview is source-clone distribution only. Signed artifacts, installers,
-  SBOM, provenance, upgrade, and uninstall flows remain Delivery PR10 scope.
+  SBOM, provenance, upgrade, and uninstall flows remain D14 scope.
 - Evaluation inputs and gold currently share the Core repository. The adapter
   cannot receive gold at runtime, but held-out and externally authored cases do not
   exist yet.
 - The current result is synthetic and deterministic; it does not measure live
   providers, human usefulness, resolution economics, or production performance.
 - The guided authority, connector response, read-back, recovery, receipt, and
-  learning trace is presentation-only. Delivery PR6 must replace it with
+  learning trace is presentation-only. D6–D8 must replace it with
   deterministic authority envelopes, a simulated action gateway, and
   runtime-enforced independent verification before those controls can mutate an
   authoritative case.
 
 ## Next
 
-Delivery PR6 is the next product capability: deterministic authority,
-payload-bound approval, a simulated action gateway, and independent verification
-without live connectors or external writes.
+D6 — Governed Case Session is the next product capability: authoritative identity,
+delegation, deterministic business authority, exact Case roles, payload-bound
+approval, and a runtime-backed Decision Packet.
+
+The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
+This roadmap alignment does not displace the trusted-kernel priority, add live
+connectors or external writes, or implement any of those planned capabilities.

@@ -61,8 +61,9 @@ Open <http://127.0.0.1:3210/>.
 
 The preview does not provide production identity, live connectors, human approval,
 external writes, high availability, or compliance certification. Deterministic
-runtime authority and verification controls are planned for Delivery PR6, not
-included in this preview. GitHub PR #6 was the completed public
+runtime authority, controlled action, independent verification, and receipt
+controls are planned for D6–D8, not included in this preview. These Delivery labels
+are not GitHub pull request numbers. GitHub PR #6 was the completed public
 evaluation-preview readiness change.
 
 ## Stop and clean up
