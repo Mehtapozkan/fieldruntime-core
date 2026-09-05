@@ -1083,3 +1083,52 @@ test("D7 requires two distinct human reviewers even when one principal holds bot
   );
   assert.equal((await h.request(view)).source, null);
 });
+
+test("D7 envelopes expose only the bound Case while replay preserves the runtime clock floor", async (t) => {
+  const h = await fixture(t),
+    id = await h.approved();
+  h.advance(1000);
+  await h.case(caseCommand("unrelated_orchid_case"));
+  h.advance(1000);
+  const privateCase = caseCommand("private_clock_case");
+  privateCase.tenant_id = "tenant_private";
+  privateCase.case_seed.tenant.id = "tenant_private";
+  privateCase.case_seed.case.tenant_id = "tenant_private";
+  privateCase.trigger_event.tenant_id = "tenant_private";
+  await h.request("/v0/tenants/tenant_private/case-commands", privateCase);
+  const privateAt = h.now().toISOString();
+  h.advance(1000);
+  const receipt = (await h.request(action, await h.command(id))).receipt;
+  assert.deepEqual(
+    receipt.envelope.case_heads.map(({ tenant_id, case_id }) => ({
+      tenant_id,
+      case_id,
+    })),
+    [{ tenant_id: TENANT, case_id: CASE }],
+  );
+  assert.equal(receipt.envelope.clock_floor, privateAt);
+  assert.ok(!JSON.stringify(receipt).includes("tenant_private"));
+  assert.ok(!JSON.stringify(receipt).includes("case_private_clock_case"));
+  assert.ok(!JSON.stringify(receipt).includes("case_unrelated_orchid_case"));
+  await h.restart();
+  const history = await h.request(view);
+  assert.deepEqual(history.attempts, [receipt]);
+  assert.ok(!JSON.stringify(history).includes("tenant_private"));
+  const forged = structuredClone(receipt);
+  forged.envelope.clock_floor = "2026-09-06T16:00:00.123Z";
+  forged.envelope_hash = sha256Json(forged.envelope);
+  const unsigned = structuredClone(forged);
+  delete unsigned.event_hash;
+  forged.event_hash = sha256Json(unsigned);
+  await h.sql(
+    "ALTER TABLE simulated_action_journal DISABLE TRIGGER simulated_action_append_only",
+  );
+  await h.sql(
+    "UPDATE simulated_action_journal SET entry=$1,event_hash=$2,envelope_hash=$3 WHERE id=$4",
+    [forged, forged.event_hash, forged.envelope_hash, forged.id],
+  );
+  await h.sql(
+    "ALTER TABLE simulated_action_journal ENABLE TRIGGER simulated_action_append_only",
+  );
+  await h.request(view, undefined, 500);
+});

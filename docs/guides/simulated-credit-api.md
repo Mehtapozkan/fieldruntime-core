@@ -84,9 +84,11 @@ checks exact bindings/current policy, two distinct human reviewers and scoped
 evaluator/executor grants, samples
 UTC at issuance, and checks the stable credit slot. A read or historical receipt
 never grants permission. The retained `authorization-envelope.v1` contains the
-profile, exact Case heads, request/material/review history, catalog, evaluated
+profile, only the bound Orchid Case head, request/material/review history, catalog, evaluated
 result, service evidence, time and implementation versions. Replay reconstructs
-these inputs from canonical history and never calls the adapter.
+these inputs from canonical history and never calls the adapter. The retained runtime
+clock floor is a scalar control snapshot checked against canonical timestamps; no
+unrelated Case identifiers or head hashes are exposed.
 
 | Result              | Meaning                                                                                                                               |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |

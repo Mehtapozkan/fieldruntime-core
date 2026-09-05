@@ -390,18 +390,14 @@ export function evaluateCredit(
     packet,
     catalog: catalog.content,
     case_document: aggregate.document,
-    case_heads: context.cases.cases
-      .map((c) => ({
-        tenant_id: c.tenant_id,
-        case_id: c.case_id,
-        version: c.journal.length,
-        event_hash: c.journal.at(-1)?.event_hash,
-      }))
-      .sort((a, b) =>
-        `${a.tenant_id}/${a.case_id}`.localeCompare(
-          `${b.tenant_id}/${b.case_id}`,
-        ),
-      ),
+    case_heads: [
+      {
+        tenant_id: aggregate.tenant_id,
+        case_id: aggregate.case_id,
+        version: aggregate.journal.length,
+        event_hash: aggregate.journal.at(-1)?.event_hash,
+      },
+    ],
     authority_position: context.authority.entries.length,
     clock_floor: creditFloor(context, head),
     evaluated_at: at,
@@ -548,6 +544,22 @@ export function assertCreditIntegrity(context: CreditContext): void {
     ]
       .map((e) => string(e.recorded_at))
       .reduce((a, b) => (a > b ? a : b), string(catalog.content.recorded_at));
+    // The existing runtime clock floor is a trusted scalar control input. Its
+    // canonical timestamp can come from another Case; retain no cross-scope Case
+    // identifiers or hashes in this operation's consent/evaluation envelope.
+    const retainedFloor = string(envelope.clock_floor);
+    const boundFloor = cases
+      .flatMap((c) => c.journal.map((e) => e.recorded_at))
+      .reduce((a, b) => (a > b ? a : b), floor);
+    creditAssert(
+      retainedFloor >= boundFloor &&
+        retainedFloor <= string(entry.recorded_at) &&
+        (retainedFloor === floor ||
+          context.cases.cases.some((c) =>
+            c.journal.some((e) => e.recorded_at === retainedFloor),
+          )),
+      "retained runtime clock floor is not supported by canonical history",
+    );
     const past: CreditContext = {
       cases: { cases, idempotency_records: [], source_event_records: [] },
       authority: { ...context.authority, entries: reviewEntries },
@@ -556,7 +568,7 @@ export function assertCreditIntegrity(context: CreditContext): void {
           tenant_id: "tenant_orchid",
           revision: integer(entry.authority_state_revision),
           snapshot_hash: catalog.hash,
-          last_recorded_at: floor,
+          last_recorded_at: retainedFloor,
         },
       ],
       credit: {

@@ -287,12 +287,10 @@
       ],
       "properties": {
         "tenant_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+          "const": "tenant_orchid"
         },
         "case_id": {
-          "type": "string",
-          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+          "const": "case_d6_workbench"
         },
         "version": {
           "type": "integer",
@@ -366,7 +364,9 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/case_head"
-          }
+          },
+          "minItems": 1,
+          "maxItems": 1
         },
         "authority_position": {
           "type": "integer",
