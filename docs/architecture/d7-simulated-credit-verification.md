@@ -398,8 +398,9 @@ completion, accepted outcome, full closure proof or a resolved Case.
 
 ## Implementation sequence and acceptance
 
-D-033 is accepted and PR #21 is merged. Implementation is gated on the protected
-merge of PR #22, updated from that main with all D6-D coverage retained:
+D-033 is accepted and PRs #21 and #22 are merged, with all D6-D coverage retained.
+D7-B is implemented on the subsequent review branch; D7-C and D7-D remain next.
+The accepted implementation sequence and acceptance requirements are:
 
 1. **D7-B — bound operation and atomic simulated source.** Add the strict new
    contracts/pure envelope checks, the two-table checksum migration, scoped synthetic

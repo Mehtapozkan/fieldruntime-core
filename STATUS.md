@@ -5,8 +5,8 @@ Current milestone: v0.1.0 Evaluation Preview release candidate
 Release position: GitHub PRs #6 (Public Evaluation Preview Readiness), #12
 (Public Launch Finalization), #14 (Automate the Evaluation Prerelease), and #15
 (Align public roadmap to Case-first product architecture) are merged. The
-repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are public. D6 is
-in progress; D6-A defines contracts and D6-B adds deterministic authority
+repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are public.
+D6-A defines contracts and D6-B adds deterministic authority
 resolution. PR #18 repaired the authority correctness defects. PR #19 is merged
 at `76c9b472eabaff4e66ee4d5dd4ade6c144f95f7e`, including Accepted D-032 and its
 explicit human approval. **D6-C [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)
@@ -23,7 +23,7 @@ The human operator accepted the supplied desktop/390px visual review for
 `1561329858d8340291dda505fdfe12291cece1c9` on 2026-09-05: “Accept the current
 presentation for this milestone; no further UI redesign is required before merge.”
 This records D6-D presentation acceptance, not a GitHub approving review or approval
-of D-033. No additional visual checks or UI changes are claimed by this docs pass.
+of D-033. No additional visual checks or UI changes are claimed by D7-B.
 
 Two nonblocking UI follow-ups remain for the existing Workbench:
 
