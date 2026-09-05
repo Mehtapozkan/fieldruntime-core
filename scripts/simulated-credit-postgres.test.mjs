@@ -1,5 +1,18 @@
 import { PostgresCreditVerificationStore } from "../dist/packages/runtime/src/postgres-credit-verification-store.js";
 import { TransactionalCreditVerificationWorker } from "../dist/apps/worker/src/credit-verification-service.js";
+import {
+  createReviewClient,
+  PENDING_PREFIX,
+} from "../apps/admin/public/authority-client.js";
+import {
+  CREDIT_ROOT,
+  canExecuteCredit,
+  latestInvocation,
+  latestCheck,
+  validateCredit,
+} from "../apps/admin/public/credit-client.js";
+import { memoryStorage } from "../tests/helpers/authority-browser-api.mjs";
+import { reviewProgress } from "../apps/admin/public/authority-workbench.js";
 // Real PostgreSQL and HTTP; no skipped or in-memory substitute acceptance tests.
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -7,6 +20,7 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { Pool } from "pg";
 import { createApiServer } from "../dist/apps/api/src/server.js";
+import { loadWorkbenchAssets } from "../dist/apps/api/src/workbench-assets.js";
 import { TransactionalCaseWorker } from "../dist/apps/worker/src/command-service.js";
 import { TransactionalAuthorityWorker } from "../dist/apps/worker/src/authority-service.js";
 import { TransactionalCreditWorker } from "../dist/apps/worker/src/simulated-credit-service.js";
@@ -211,29 +225,32 @@ async function fixture(
       verifier,
       () => ({ now, nextId: () => `verification_${++ids}` }),
     );
-    server = createApiServer({
-      isReady: async () => {
-        await credit.assertReady();
-        return true;
+    server = createApiServer(
+      {
+        isReady: async () => {
+          await credit.assertReady();
+          return true;
+        },
+        executeCaseCommand: (_, c) => worker.execute(c),
+        listCases: (t) => cases.listCases(t),
+        getCase: (t, id) => cases.getCase(t, id),
+        getJournal: (t, id) => cases.getJournal(t, id),
+        getEvaluationFixture: async () => undefined,
+        getGuidedWalkthrough: async () => undefined,
+        authority: {
+          create: (c) => review.create(c),
+          decide: (c, s) => review.decide(c, s),
+          read: (t, id) => authority.readRequest(t, id, now),
+          catalogRevision: (t) => authority.readCatalogRevision(t),
+        },
+        credit: {
+          verify: (c) => verificationWorker.verify(c),
+          execute: (c) => effect.execute(c),
+          read: (t, id) => credit.read(t, id, now),
+        },
       },
-      executeCaseCommand: (_, c) => worker.execute(c),
-      listCases: (t) => cases.listCases(t),
-      getCase: (t, id) => cases.getCase(t, id),
-      getJournal: (t, id) => cases.getJournal(t, id),
-      getEvaluationFixture: async () => undefined,
-      getGuidedWalkthrough: async () => undefined,
-      authority: {
-        create: (c) => review.create(c),
-        decide: (c, s) => review.decide(c, s),
-        read: (t, id) => authority.readRequest(t, id, now),
-        catalogRevision: (t) => authority.readCatalogRevision(t),
-      },
-      credit: {
-        verify: (c) => verificationWorker.verify(c),
-        execute: (c) => effect.execute(c),
-        read: (t, id) => credit.read(t, id, now),
-      },
-    });
+      await loadWorkbenchAssets(),
+    );
     await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
     base = `http://127.0.0.1:${server.address().port}`;
   };
@@ -295,6 +312,10 @@ async function fixture(
   );
   await start();
   const api = {
+    get base() {
+      return base;
+    },
+    fetcher: (path, options) => globalThis.fetch(base + path, options),
     trace,
     discarded,
     get verifier() {
@@ -2156,3 +2177,335 @@ test("D7-C a read overlapping an uncommitted catalog write retains inconclusive 
   await h.restart();
   assert.deepEqual((await h.verify(command)).receipt, proof);
 });
+
+function workbench(h, options = {}) {
+  return createReviewClient({
+    fetcher: h.fetcher,
+    storage: memoryStorage(),
+    creditEnabled: true,
+    nextKey: randomUUID,
+    ...options,
+  });
+}
+async function readyWorkbench(t, fixtureOptions = {}, clientOptions = {}) {
+  const h = await fixture(t, { verification: true, ...fixtureOptions });
+  await h.enroll();
+  const client = workbench(h, clientOptions);
+  await client.start();
+  await client.initialize();
+  for (let i = 0; i < 3; i++) await client.prepareCase();
+  assert.equal(client.state.caseRecord.document.case.state, "needs_review");
+  await client.freshRequest();
+  await client.decide("finance", "approve");
+  await client.decide("executive", "approve");
+  assert.equal(client.state.error, null);
+  assert.equal(client.state.creditError, null);
+  assert.equal(canExecuteCredit(client.state), true);
+  return { h, client };
+}
+
+test("D7-D Workbench: explicit preparation, review, credit, independent check and restart reconstruction", async (t) => {
+  const { h, client } = await readyWorkbench(t);
+  const c = client.state.packet.case_version,
+    r = client.state.packet.review_revision;
+  const before = await h.dump();
+  await client.refresh();
+  await client.refresh();
+  assert.deepEqual(
+    await h.dump(),
+    before,
+    "page reads have no durable effects",
+  );
+  await Promise.all([client.executeCredit(), client.executeCredit()]);
+  assert.equal(client.state.pending, null);
+  assert.equal(client.state.credit.attempts.length, 1);
+  assert.equal(latestCheck(client.state.credit), null);
+  assert.equal(canExecuteCredit(client.state), false);
+  await client.verifyCredit();
+  assert.equal(client.state.error, null);
+  assert.equal(client.state.creditError, null);
+  assert.equal(
+    latestCheck(client.state.credit).comparison.outcome,
+    "verified_simulated_effect",
+  );
+  assert.equal(client.state.packet.case_version, c);
+  assert.equal(client.state.packet.review_revision, r);
+  await h.restart();
+  const reopened = workbench(h);
+  await reopened.start(client.state.requestId);
+  assert.deepEqual(
+    reopened.state.credit.attempts,
+    client.state.credit.attempts,
+  );
+  assert.deepEqual(
+    reopened.state.credit.verifications,
+    client.state.credit.verifications,
+  );
+  assert.equal(reopened.state.credit.closure_permission, false);
+  const durable = await h.dump();
+  const newViewer = workbench(h);
+  await newViewer.start();
+  await newViewer.initialize();
+  assert.equal(newViewer.state.requestId, client.state.requestId);
+  assert.deepEqual(
+    await h.dump(),
+    durable,
+    "explicit reopen does not create a second request",
+  );
+});
+
+for (const kind of ["execute", "verify"])
+  test(`D7-D ${kind}: saved exact command survives lost response, reopening and restart`, async (t) => {
+    const storage = memoryStorage();
+    const { h, client } = await readyWorkbench(t, {}, { storage });
+    if (kind === "verify") await client.executeCredit();
+    let dropped = false;
+    const calls = [];
+    const uncertain = workbench(h, {
+      storage,
+      fetcher: async (path, options) => {
+        const result = await h.fetcher(path, options);
+        if (options.method === "POST") {
+          calls.push(options.body);
+          assert.ok(
+            storage
+              .keys()
+              .some(
+                (key) =>
+                  key.startsWith(PENDING_PREFIX) &&
+                  JSON.parse(storage.getItem(key)).body === options.body,
+              ),
+            "saved before response",
+          );
+          if (!dropped) {
+            dropped = true;
+            throw Error("lost response");
+          }
+        }
+        return result;
+      },
+    });
+    await uncertain.start();
+    await (kind === "execute"
+      ? uncertain.executeCredit()
+      : uncertain.verifyCredit());
+    const original = uncertain.state.pending.body;
+    assert.match(uncertain.state.error, /unconfirmed/);
+    assert.equal(uncertain.state.creditReceipt, null);
+    await h.restart();
+    const retry = workbench(h, {
+      storage,
+      fetcher: async (path, options) => {
+        if (options.method === "POST") assert.equal(options.body, original);
+        return h.fetcher(path, options);
+      },
+    });
+    await retry.start();
+    assert.equal(retry.state.pending.body, original);
+    await retry.retry();
+    assert.equal(retry.state.pending, null);
+    assert.equal(retry.state.error, null);
+    assert.equal(retry.state.creditError, null);
+    assert.equal(
+      storage.keys().filter((key) => key.startsWith(PENDING_PREFIX)).length,
+      0,
+    );
+    assert.equal(retry.state.credit.attempts.length, 1);
+    if (kind === "verify")
+      assert.equal(retry.state.credit.verifications.length, 1);
+  });
+
+test("D7-D confirmed verification survives failed refresh; unavailable read is never success or absence", async (t) => {
+  const { h, client } = await readyWorkbench(t, {
+    adapter: async () => "uncertain",
+  });
+  await client.executeCredit();
+  h.setReaderHook((sql) => {
+    if (sql.includes("verification-read-source"))
+      throw Error("read unavailable");
+  });
+  let failRead = false;
+  const c = workbench(h, {
+    fetcher: async (path, options) => {
+      if (failRead && path === CREDIT_ROOT && options.method === "GET")
+        throw Error("refresh unavailable");
+      const result = await h.fetcher(path, options);
+      if (options.method === "POST") failRead = true;
+      return result;
+    },
+  });
+  await c.start(client.state.requestId);
+  await c.verifyCredit();
+  assert.equal(c.state.pending, null);
+  assert.equal(c.state.creditReceipt.comparison.outcome, "inconclusive");
+  assert.equal(c.state.creditReceipt.comparison.absence_proven, false);
+  assert.equal(c.state.creditNeedsRefresh, true);
+  assert.match(c.state.creditError, /confirmed receipt remains recorded/);
+  assert.equal(canExecuteCredit(c.state), false);
+  h.setReaderHook(undefined);
+  failRead = false;
+  await c.refresh();
+  assert.equal(latestCheck(c.state.credit).comparison.outcome, "inconclusive");
+  const oldKey = c.state.creditReceipt.command.idempotency_key;
+  await c.verifyCredit();
+  assert.notEqual(c.state.creditReceipt.command.idempotency_key, oldKey);
+  assert.equal(c.state.creditReceipt.comparison.outcome, "mismatch");
+});
+
+test("D7-D latest independent absence permits only an explicit fresh attempt; occupied slot blocks duplicates", async (t) => {
+  let insert = false;
+  const { h, client } = await readyWorkbench(t, {
+    adapter: async (write) => {
+      if (insert) await write();
+      return "success";
+    },
+  });
+  await client.executeCredit();
+  assert.equal(canExecuteCredit(client.state), false);
+  await client.verifyCredit();
+  assert.equal(latestCheck(client.state.credit).comparison.outcome, "mismatch");
+  assert.equal(
+    latestCheck(client.state.credit).comparison.absence_proven,
+    true,
+  );
+  assert.equal(canExecuteCredit(client.state), true);
+  assert.equal(
+    client.state.credit.attempts.length,
+    1,
+    "check did not automatically retry financial effect",
+  );
+  insert = true;
+  await client.executeCredit();
+  assert.equal(client.state.credit.attempts.length, 2);
+  assert.equal(canExecuteCredit(client.state), false);
+  await client.verifyCredit();
+  assert.equal(
+    latestCheck(client.state.credit).comparison.outcome,
+    "verified_simulated_effect",
+  );
+  const reversed = structuredClone(client.state.credit);
+  reversed.attempts.reverse();
+  reversed.verifications.reverse();
+  assert.equal(
+    latestInvocation(reversed).id,
+    client.state.credit.source.origin_attempt_id,
+  );
+  assert.equal(
+    latestCheck(reversed).comparison.outcome,
+    "verified_simulated_effect",
+  );
+  await h.restart();
+  await client.refresh();
+  assert.equal(canExecuteCredit(client.state), false);
+});
+
+for (const change of ["evidence", "reject", "modify", "escalate"])
+  test(`D7-D ${change}: stale execution cannot stop independent historical verification`, async (t) => {
+    const { h, client } = await readyWorkbench(t);
+    await client.executeCredit();
+    if (change === "evidence") await client.attachEvidence();
+    else
+      await client.decide(
+        "executive",
+        change,
+        "Intervene after the effect",
+        "credit_12000",
+      );
+    assert.equal(client.state.packet.current.authorized, false);
+    assert.equal(canExecuteCredit(client.state), false);
+    await client.verifyCredit();
+    assert.equal(client.state.error, null);
+    assert.equal(
+      latestCheck(client.state.credit).comparison.outcome,
+      "verified_simulated_effect",
+    );
+    if (change === "modify") {
+      const id = client.state.receipt.replacement_authority_request_id;
+      assert.equal((await h.read(id)).review_revision, 0);
+      assert.equal((await h.read(id)).current.authorized, false);
+    }
+  });
+
+test("D7-D stale displayed bindings are submitted unchanged, denied and require explicit refresh", async (t) => {
+  const { h, client } = await readyWorkbench(t);
+  const c = client.state.packet.case_version;
+  await h.case({
+    type: "case.attach_work_event",
+    tenant_id: TENANT,
+    case_id: CASE,
+    expected_case_version: c,
+    actor_identity_id: "identity_d6_operator",
+    idempotency_key: "outside-browser",
+    correlation_id: "test",
+    work_event: workEvent("update", "update"),
+  });
+  await client.executeCredit();
+  assert.equal(client.state.pending, null);
+  assert.equal(client.state.creditReceipt.command.expected_case_version, c);
+  assert.equal(client.state.creditReceipt.outcome, "denied");
+  assert.equal(client.state.credit.source, null);
+  assert.equal(canExecuteCredit(client.state), false);
+});
+
+test("D7-D altered presentation cannot turn adapter success or an inconclusive check into verification", async (t) => {
+  const { client } = await readyWorkbench(t);
+  await client.executeCredit();
+  await client.verifyCredit();
+  const valid = client.state.credit;
+  for (const edit of [
+    (v) => {
+      v.verifications[0].comparison.outcome = "inconclusive";
+    },
+    (v) => {
+      v.verifications[0].authority.verifier_identity.identity_id =
+        "identity_d7_credit_executor";
+    },
+    (v) => {
+      v.verifications[0].observation.raw.rows[0].source_row.payload.amount_minor = 999;
+    },
+    (v) => {
+      v.verifications[0].action_entry_hash = "sha256:" + "0".repeat(64);
+    },
+    (v) => {
+      const proof = v.verifications[0];
+      proof.observation.raw.rows[0].case_id = "case_other";
+      proof.observation.raw.hash = sha256Json(proof.observation.raw.rows);
+      proof.recording_source = structuredClone(proof.observation.raw);
+      delete proof.event_hash;
+      proof.event_hash = sha256Json(proof);
+    },
+  ]) {
+    const changed = structuredClone(valid);
+    edit(changed);
+    assert.throws(() => validateCredit(changed), /invalid/);
+  }
+});
+
+test("D7-D reordered history cannot hide a later inconclusive check behind an earlier match", async (t) => {
+  const { h, client } = await readyWorkbench(t);
+  await client.executeCredit();
+  await client.verifyCredit();
+  h.setReaderHook((sql) => {
+    if (sql.includes("verification-read-source"))
+      throw Error("unavailable read");
+  });
+  await client.verifyCredit();
+  assert.equal(
+    latestCheck(client.state.credit).comparison.outcome,
+    "inconclusive",
+  );
+  const reordered = structuredClone(client.state.credit);
+  reordered.attempts.reverse();
+  reordered.verifications.reverse();
+  validateCredit(reordered);
+  assert.equal(
+    reviewProgress({ ...client.state, credit: reordered }).heading,
+    "Check inconclusive",
+  );
+});
+
+if (process.env.D7_WORKBENCH_BROWSER === "1") {
+  const { registerCreditBrowserTests } =
+    await import("../tests/helpers/credit-workbench-browser.mjs");
+  registerCreditBrowserTests(fixture);
+}

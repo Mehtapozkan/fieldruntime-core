@@ -11,7 +11,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -36,7 +36,7 @@ jobs:
           pnpm fr init ecc --demo
           pnpm fr up
           D6_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/authority-postgres.test.mjs
-          D7_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/simulated-credit-postgres.test.mjs
+          D7_WORKBENCH_BROWSER=1 D7_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/simulated-credit-postgres.test.mjs
           node scripts/smoke-local-appliance.mjs applied
           node scripts/smoke-authority-api.mjs applied
           docker compose restart postgres

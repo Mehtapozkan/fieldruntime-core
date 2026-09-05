@@ -1,8 +1,10 @@
 # Status
 
-Current milestone: D7-C independent simulated-credit verification, implemented in
-open [PR #24](https://github.com/Mehtapozkan/fieldruntime-core/pull/24).
-D6 persistent review/Workbench and D7-B action are merged; D7-D controls are next.
+Current milestone: D7-D Workbench action and independent-check controls, implemented
+on `feat/d7d-credit-workbench` for review. D6 review and D7-B/C APIs are merged.
+PR #24 merged normally at `3936843fba4126bdb852e2ee5681de0f7162525a` from reviewed
+head `f72a02566c3198d53f4f53e1154112eff5a12ebb`, with passing required checks and no
+unresolved review threads. Normal protections were preserved without bypass.
 The published `v0.1.0-evaluation-preview.0` remains the September 1 snapshot at
 `3db1b4bf0304e67e1ef51be785d1f81b906016b3`, before D6/D7. Current source and this
 review branch are not a new release. [Operator functionality table](README.md#what-works-today).
@@ -30,7 +32,7 @@ presentation for this milestone; no further UI redesign is required before merge
 This records D6-D presentation acceptance, not a GitHub approving review or approval
 of D-033. No additional visual checks or UI changes are claimed by D7-B/C.
 
-Two nonblocking UI follow-ups remain for the existing Workbench:
+The two retained D6-D UI follow-ups are implemented on this D7-D branch:
 
 - Acknowledge an already-recorded approval using validated server history while
   preserving permitted reject/modify/escalate interventions. An old receipt must
@@ -41,7 +43,7 @@ Two nonblocking UI follow-ups remain for the existing Workbench:
 
 Neither follow-up blocked D6-D's merge or expands the D7 trust boundary.
 
-## D7-C independent verification implemented for review
+## D7-C merged baseline
 
 [D7-B PR #23](https://github.com/Mehtapozkan/fieldruntime-core/pull/23) merged normally
 at `6766d9d99569fbff0e95e8b8b91748c1c0646b7a`, from reviewed head
@@ -50,7 +52,7 @@ scope review was resolved, and no blocking review finding remained. Required PRs
 up-to-date checks and force-push/deletion protections were preserved without bypass.
 The supplied obsolete-Case reproducer was rerun successfully before merge.
 
-[PR #24](https://github.com/Mehtapozkan/fieldruntime-core/pull/24), left open for review,
+[PR #24](https://github.com/Mehtapozkan/fieldruntime-core/pull/24), now merged,
 implements only Accepted D-033's D7-C:
 
 - Strict attempt/hash/key-bound verification POST; fixed server-selected verifier
@@ -75,8 +77,8 @@ implements only Accepted D-033's D7-C:
 
 [The executable API guide](docs/guides/simulated-credit-api.md) demonstrates
 Finance/Executive review → simulated action → independent source check → restart
-and exact retries. D7-D Workbench action/check controls remain unimplemented; the
-accepted D6-D review experience is unchanged. Verification establishes only the
+and exact retries. D7-D below connects these existing APIs without changing their
+contracts, persistence or accepted authority boundaries. Verification establishes only the
 simulated credit effect, never customer impact, recovered revenue, acceptance,
 commitment completion or Case closure. Legacy execution/closure guards remain.
 
@@ -106,7 +108,7 @@ hydration; ordinary execution/GET/startup/readiness still fail on that corruptio
 Positive proof and reusable absence must also agree with immutable source/action
 history. Whole-history replay is for the bounded preview. Equal timestamps still
 cannot order separate Case/action journals, and no external signature anchors a
-complete privileged rewrite. D7-D and D8 economics remain future work; no release,
+complete privileged rewrite. D8 economics remain future work; no release,
 deployment, production authentication, connector or external write is included.
 
 ## D7-B merged baseline
@@ -141,8 +143,8 @@ The merged D7-B baseline supplied:
 
 [The API guide](docs/guides/simulated-credit-api.md) includes the explicit preparation,
 Finance/Executive review, action, verification and restart demonstration. D7-C is
-implemented for review above; D7-D Workbench action controls remain unimplemented.
-The existing Workbench remains the accepted D6 review experience. Adapter success
+merged above; D7-D Workbench controls are implemented on this review branch.
+The Workbench preserves the accepted D6 review semantics. Adapter success
 is never verification; repetition requires independent absence and current authority. Customer impact, Case resolution and recovered
 revenue remain unproven. Legacy execution and incomplete-proof closure guards remain.
 
@@ -208,7 +210,7 @@ identity-history system, external writes, connectors or generic workflow is adde
   replacement. No client authority calculation or transferred approvals exist.
 - Conflicts require explicit refresh and deliberate resubmission. An uncertain
   write retains its exact command/seat/key before transmission; reload and retry
-  recover the historical receipt. Local session storage holds navigation and retry
+  recover the historical receipt. Local storage now holds navigation and retry
   information only. No unconfirmed success is displayed as a recorded decision.
 - Retained operations evidence can be attached via Case commands to advance C,
   invalidate prior approvals visibly and offer an explicit fresh request requiring
@@ -506,13 +508,13 @@ identity-history system, external writes, connectors or generic workflow is adde
 ## Known gaps
 
 - D6-D is a bounded synthetic credit review, not production authentication or a
-  general review application. Retry information uses tab session storage; closing
-  the tab can lose an unconfirmed command's local key. Committed history remains
+  general review application. D7-D retains pending commands in browser local storage
+  across reopening; clearing site data loses those local keys. Committed history remains
   canonical and inspectable by request URL. Reads/decisions can take longer as
   whole-history integrity replay grows; requests time out visibly and fail closed.
 - Strict v0 contracts, frozen ECC and Accepted D-032 remain intact. D7-B adds
-  migration 0003; this D7-C branch adds 0004. Complete closure proof and Workbench
-  action/check controls remain unimplemented.
+  migration 0003; merged D7-C adds 0004. Complete closure proof remains
+  unimplemented; D7-D connects the existing action/check APIs without a migration.
 
 - The appliance is single-node and evaluation-only. Its singleton writer lock and
   whole-state integrity hydration favor auditability over throughput; it does not
@@ -543,7 +545,7 @@ identity-history system, external writes, connectors or generic workflow is adde
   status; this repair does not infer retroactive revocation from current status
   or add live identity verification.
 - A general Action Gateway is not implemented. The merged D7-B API supports only
-  the enrolled Orchid credit; this branch's D7-C verifier checks only its simulated
+  the enrolled Orchid credit; the merged D7-C verifier checks only its simulated
   source. No external writes are implemented.
 - Legacy caller-declared executed Case actions still fail closed. The separate
   simulated operation recomputes exact payload/authority bindings server-side;
@@ -563,14 +565,14 @@ identity-history system, external writes, connectors or generic workflow is adde
   providers, human usefulness, resolution economics, or production performance.
 - The legacy guided authority, connector response, read-back, recovery, receipt,
   outcome and learning trace remains presentation-only and isolated from runtime
-  history. D7-D must connect separate action/check controls to the implemented
+  history. D7-D connects separate action/check controls to the implemented
   APIs; D8 outcome/economics receipts remain future work.
 - Workbench review history is persistent but all actors, policy and evidence remain
   synthetic. Production identity and execution are outside D6-D.
 
 ## Public documentation and maintenance reconciliation
 
-README distinguishes merged source, this D7-C review branch, the historical
+The D7-C documentation pass distinguished merged source, that review branch, the historical
 published prerelease and future work. Its functionality table separates Workbench
 review from the action/verification APIs and the legacy fixture screens. Quick-start
 and operations links describe explicit initialization, enrollment and fresh review;
@@ -592,15 +594,84 @@ Final combined-commit validation and PostgreSQL/API, restart, Compose and Workbe
 CI evidence are recorded in PR #24. Docker is unavailable locally; no local Compose
 pass or new visual inspection is claimed by this documentation pass.
 
+## D7-D implemented for review
+
+The existing white/cream Workbench now connects review → simulated action →
+independent source check. Server history supplies progress; verified effect,
+mismatch and inconclusive states remain distinct. The proposal, uncertainty and
+reviewers stay visible; identifiers and authority evidence are expandable.
+Already-recorded approval is acknowledged without suppressing permitted terminal
+interventions, and mobile controls use a compact two-column reviewer/decision row.
+
+Enrollment stays the explicit existing CLI command. Case preparation uses deliberate
+existing transitions only along the original unchanged preparation sequence, then
+requires a fresh request and fresh review. No new API, contract or migration is
+introduced. C/R/S, terminal rules, immutable material and closure denial are unchanged.
+Execution submits the exact displayed binding. Verification independently targets a
+committed attempt and remains available after stale approval or terminal review.
+A confirmed receipt survives a failed refresh; neither adapter success nor a committed
+mismatch/inconclusive result is displayed as successful verification.
+
+Review correction: a reproduced second-attempt/failed-refresh sequence previously
+showed the first attempt's absence mismatch after the newer action was confirmed.
+The page and verifier command now select the newest confirmed attempt and only its
+matching proof. Accepted action context remains in memory across subsequent checks;
+reopening reconstructs server history. Exact retries keep confirmed receipts visible
+even when the packet read fails. Additional regressions reject contradictory source
+attribution and prevent reordered history from hiding a later inconclusive check.
+No current permission is derived from these retained historical receipts.
+
+Operator-clarity pass from `d74deb4`: three browser assertions reproduced the
+expanded completed form and refresh errors displacing confirmed mismatch/inconclusive
+headings. Confirmed results now lead the page, with check time and expected/observed
+values. Refresh failure and current eligibility appear separately. A later
+inconclusive check cannot inherit an earlier match, and a newer attempt cannot use
+an older attempt's proof. Completed review collapses behind keyboard-accessible
+“Review or intervene” without switching seats or removing permitted interventions.
+Duplicate result/uncertainty copy is removed; retry mechanics, verifier selection
+and receipt internals are expandable. Retained material and citations are unchanged.
+Only duplicate refresh notices are suppressed: a later reviewer denial remains
+visible alongside an earlier credit-refresh failure, covered through PostgreSQL/API
+and the browser.
+This pass changes presentation, browser tests and documentation only; Accepted
+D-033, command/retry logic, runtime contracts, migrations and dependencies are unchanged.
+
+Local storage contains navigation and exact pending commands, never authority or
+accepted history. Separate per-command retry records survive reload/reopening;
+confirmed writes are followed only by read-only refresh. Financial retries remain
+explicit, require latest independent absence and current authority, and cannot
+bypass an occupied slot. Clearing browser site data loses retry information; durable
+server history remains. Synthetic seats are not production authentication.
+
+Local validation passes: `pnpm validate` **262 tests**; real PostgreSQL/API
+**63 D6 tests and 113 D7 tests** (the latter includes 12 new client/API regressions
+and eight new Chromium scenarios). The retained eight D6-D browser scenarios pass.
+ECC passes **620/620**; its negative control exits **1 at 152/620** from intended
+assertion failures. The local action/check smoke passes before and after API
+restart, reconstructing the same credit and independent proof. `git diff --check`
+passes. Scope, obsolete-Case replay, current eligibility, observation races,
+rollback, retry and closure regressions remain covered.
+
+Desktop/390px captures and the executable walkthrough are in the
+[visual handoff](docs/guides/d7-workbench-handoff.md). Actual Chromium interaction
+checks cover focus/order, visible uncertainty, reviewer acknowledgment and preserved
+interventions, reload/reopening, stale evidence, exact pending retries, mismatch,
+unavailable reads and a confirmed write with failed refresh. The primary walkthrough
+has no horizontal overflow at 390px. Screenshots show synthetic retained test data;
+they do not demonstrate external effects or customer-impact proof.
+
+Docker is unavailable locally (`docker compose config --quiet` exits 127); no local
+Compose pass is claimed. Required CI runs PostgreSQL/API, eight D7-D browser scenarios,
+all retained D6-D browser groups, Compose configuration and container appliance/
+restart smokes. Its timeout allows the added browser coverage; no check is removed.
+Final commit and CI evidence are recorded in the open implementation PR. No release
+or deployment is included.
+
 ## Next
 
-Review D7-C in PR #24 with final validation evidence; leave it open and unmerged.
-After review, D7-D connects the existing Workbench to simulated action and independent
-check APIs, with current/historical labels and explicit uncertainty/retry guidance.
-Retain the two nonblocking D6-D UI follow-ups above. D8 then addresses accepted
-outcome/economics receipts; neither a credit nor verification proves customer impact,
-accepted outcome or recovered revenue. Incomplete proof continues to block closure.
-
-Case formation/import and Operational Legibility (D9–D10) precede a general worker
-runtime. No live connectors, production authentication, external actions, release
-or deployment are supplied by this milestone.
+Review D7-D with final API/browser/CI evidence; leave its PR open and unmerged.
+D8 then addresses accepted outcome/economics receipts. Neither a credit nor a source
+check proves customer impact, accepted outcome or recovered revenue. Incomplete
+proof continues to block closure. Case formation/import and Operational Legibility
+(D9–D10) precede general workers. No live connectors, production authentication,
+external actions, release or deployment are supplied by this milestone.

@@ -1,129 +1,149 @@
 # Guided Workbench
 
-D6-D connects the existing layout to the persistent synthetic authority API in
-[Accepted D-032](../../docs/architecture/d6-authority-request-lifecycle.md).
-Start the local appliance with `pnpm fr init ecc --demo` and `pnpm fr up`, then
-open <http://127.0.0.1:3210/>. Opening the page creates nothing.
+The existing white/cream Workbench connects persistent review to the bounded
+simulated credit and independent-check APIs. D6 and D7-B/C are merged; **D7-D's
+controls are implemented on this review branch**. Accepted [D-032](../../docs/architecture/d6-authority-request-lifecycle.md)
+and [D-033](../../docs/architecture/d7-simulated-credit-verification.md) are unchanged.
+Opening, refreshing or revisiting creates no durable records.
 
 ## Primary walkthrough
 
-1. Choose **Start or reopen $15,000 review**. This explicit action idempotently
-   creates `case_d6_workbench` through Case commands, then its authority request.
-   It uses retained Orchid intake evidence, separate from the frozen Acme fixture.
-2. The primary view leads with **Orchid / $15,000 proposed credit**, the retained
-   issue and uncertainty, prepared evidence and policy-selected reviewers. The
-   policy explanation identifies the tier above $10,000 and named Finance plus
-   Executive. This is a proposed amount, not an evidenced entitlement or recovered
-   value. Human-readable source links stay visible; C/R/S, hashes, raw references
-   and replay inputs are in expandable technical details.
-3. Choose **Finance · synthetic seat** and **Approve**, then record the decision.
-   After the server confirms the write, a read-only refresh shows **Finance
-   approved — Executive needed**. The selected seat does not change automatically.
-4. Inspect the refreshed material/history, explicitly select **Executive · synthetic
-   seat** and approve. The next read shows **Approvals complete — execution
-   unavailable**. C remains unchanged and R advances from 0 to 1 to 2. Reject,
-   modify and escalate remain available to an independently eligible reviewer.
-5. Reload the browser and open **Review history**. The same request, decisions,
-   immutable consent material and retained evaluation evidence reconstruct from
-   PostgreSQL. The request URL is also a read-only revisit link.
+From the selected source, with Node 24, pnpm 11.24.0 and Docker Compose:
 
-Synthetic seats select server-enrolled identities; this is not authentication.
-The default large-credit policy requires named Finance plus Executive. Selecting
-Business or Finance delegate does not make that seat eligible for this request.
-Execution and Case closure remain unavailable even after both approvals.
+```sh
+pnpm install --frozen-lockfile
+pnpm fr init ecc --demo
+pnpm fr up
+pnpm fr d7 enroll --demo
+```
+
+Enrollment is explicit and idempotent. It installs the fixed synthetic operation
+and verifier grants; it is not a catalog editor or production authentication.
+For existing databases, read the [API migration and backup notes](../../docs/guides/simulated-credit-api.md).
+Do not discard existing history to reset this demo.
+
+1. Open <http://127.0.0.1:3210/> and choose **Start or reopen $15,000 review**.
+   This idempotently creates the Orchid Case/request through the existing API.
+2. For the original unprepared Case, use the three explicit **Prepare Case**
+   steps (qualification, enrichment, review readiness). These change C and make
+   older requests stale. Then **Create fresh $15,000 request**. A changed Case is
+   never silently moved and no approvals transfer. If enrollment happened after
+   review began, refresh and create a fresh request for the changed catalog too.
+3. Inspect **Orchid / $15,000 proposed credit**, the customer report, retained
+   conflicts and unknowns. The report does not independently establish customer
+   impact or justify the amount. The bound policy requires named Finance plus
+   Executive for credits above $10,000; Business and Finance delegate cannot fill
+   those seats in this demo. Technical bindings and source URIs are expandable.
+4. Record **Finance · synthetic seat / Approve**. The confirmed response triggers
+   a read-only refresh: **Finance approved — Executive needed**. Finance's recorded
+   approval is acknowledged; reject/modify/escalate remain available when permitted.
+   Inspect the refreshed packet, explicitly select **Executive** and approve.
+   The browser never switches reviewer automatically. R advances, C does not.
+   Completed review collapses behind **Review or intervene**. Open it to inspect
+   the recorded approval or choose a permitted reject, modify or escalate decision;
+   the selected seat remains unchanged.
+5. **Approvals complete; credit not recorded** is distinct from an effect. Choose
+   **Record simulated credit**. The server recomputes authority against the exact
+   displayed request and C/R/S; a previous read never grants execution permission.
+6. **Simulated credit recorded; independent check needed** is not verification.
+   Choose **Check simulated source**. A separate server-selected verifier reads the
+   source independently of the adapter acknowledgment. Only an exact match becomes
+   **Simulated credit independently checked**. The visible result still says that
+   customer impact is unconfirmed and the Case remains unresolved.
+7. Reload or reopen the request URL, then inspect **History**. Decisions, action
+   and checks reconstruct from PostgreSQL, including after appliance restart.
+   Technical action/check evidence and confirmed historical receipts are expandable.
+
+A modified proposal starts without approvals. The fixed operation supports only
+Orchid's $15,000 credit; another proposal is reviewable but cannot execute through
+this operation. A source slot already containing a credit prevents another credit.
 
 ## Decisions and interruptions
 
-- **Reject**, **Modify** and **Escalate** require a reason. Modify also selects a
-  different server-defined credit proposal. Its receipt/history links to an atomic
-  replacement at R0, with no transferred approvals. Terminal history never revives.
-- An open request's whole-route `current.eligible` does not gate every reviewer.
-  The server independently decides whether the chosen seat may intervene, including
-  when another authority requirement is unresolved.
-- A submission binds the exact displayed request hash, C/R/S and request correlation
-  ID. Conflicts explain the changed Case, review or catalog revision. Refresh and
-  deliberate resubmission are required; no approval is silently rebased.
-- A timeout, lost response, 5xx or malformed success is **unconfirmed**. The original
-  command bytes, seat and idempotency key are saved before sending. Reload then
-  **Retry exact command** recovers the historical receipt without another vote.
-  Do not clear the tab's session storage while a command is unconfirmed. Closing
-  the tab may lose retry information; the server's committed history remains.
-- If a write is confirmed but its follow-up GET fails, retain the accepted historical
-  receipt and show current progress as unverified. Offer refresh, not another write
-  retry. No conflict or uncertain write triggers an automatic resubmission.
-- Packet reads may fail or become stale after evaluation. The prior view is labeled
-  unconfirmed and cannot submit until a successful refresh. The server rechecks
-  current eligibility at submission regardless of any previous read.
+- **Reject**, **Modify** and **Escalate** require reasons; Modify also selects a
+  different server-defined proposal. Terminal requests never revive. Whole-request
+  eligibility does not suppress independently eligible terminal interventions.
+- An execution conflict retains the submitted binding and explains the server's
+  rejection. Refresh, inspect changes and explicitly consent again. No automatic
+  rebase, resubmission, changed-Case transition or approval transfer occurs.
+- An action/check timeout, lost response, 5xx or malformed acknowledgment is
+  **unconfirmed**. Exact bytes and keys are saved **before** sending. Reload or
+  reopen in the same browser profile, then **Retry exact command**. A duplicate
+  returns its original receipt rather than recording another effect or check.
+  Do not clear site storage while a response is uncertain. Separate pending-command
+  records prevent another tab from overwriting an outstanding retry.
+- A confirmed write followed by a failed GET retains its receipt and reports that
+  current state could not be refreshed. It is not retried as an uncertain write.
+  A newer confirmed attempt is shown with its own check; an older absence result
+  cannot replace it when refresh fails. No receipt alone becomes current execution
+  permission.
+- **Last confirmed check: credit mismatch** leads with the check time and expected
+  versus observed values, even when the following refresh fails. Refresh failure
+  and unconfirmed current eligibility appear separately; historical evidence never
+  grants permission. A later inconclusive check supersedes an earlier match.
+  Retry-key mechanics, verifier selection and full receipts remain available under
+  **Technical action and verification evidence**. Authoritative
+  absence is distinct from an unavailable read. **Check inconclusive** explains
+  unreadable, unavailable or changing evidence; it is never successful verification.
+  **Check simulated source again** is a deliberate new check with a new key.
+- Historical effects can be checked after approvals go stale or the request is
+  rejected. The server checks current verifier eligibility separately from execution.
+- **Record fresh simulated attempt** is offered only after the latest independent
+  absence evidence for the latest invocation and current execution eligibility.
+  A check never automatically retries a financial action. An occupied slot blocks
+  another credit regardless of a previous absence result.
 
 ## Demonstrate changed evidence
 
-After both approvals, open **Changed evidence** and choose **Attach evidence ·
-invalidate prior approvals**. This submits the retained synthetic operations
-update through the existing Case-command API. A confirmed write fetches the current
-packet automatically: C advances, the old request reports `stale_case`, and its historical approvals are no longer effective. Choose
-**Create fresh $15,000 request**, inspect both cited sources and collect both
-approvals again. The update is attached once; the demonstration never rewrites or
-deletes Case history. Retrying initialization also preserves existing history.
+After approval, open **Changed evidence** and choose **Attach evidence · invalidate
+prior approvals**. This uses the retained operations update through Case commands.
+The read-only refresh shows **Case changed — fresh review needed**; historical
+approvals are no longer effective. Create a fresh request, inspect both retained
+sources and collect fresh approvals. The update is attached once. If a credit
+already exists, new review still cannot create a second credit; independent
+verification of the earlier effect remains available.
 
-## Boundary and implementation
+## Implementation and boundary
 
-`authority-client.js` manages API calls, presentation checks, navigation and exact
-retries. `authority-workbench.js` renders server packets using the existing vanilla
-HTML/CSS layout. No browser reducer grants authority. Session storage contains only
-request navigation and a pending command, never a packet, accepted receipt or
-authorization flag. Reads use only existing GET endpoints; they do not initialize
-the demo, persist previews, reserve IDs, update clocks or acquire the writer lock.
+`authority-client.js` handles the existing API, navigation and exact retries;
+`credit-client.js` checks operation evidence and explicit command bindings;
+`authority-workbench.js` renders them in the existing vanilla HTML/CSS layout.
+Browser checks protect presentation; only the runtime authorizes and replays.
+Local storage contains navigation/pending commands, not packets, authority flags
+or accepted history. Reads have no writer locks, IDs, clock updates or previews.
+All assets/requests remain same-origin under the existing no-inline CSP. There are
+no new runtime contracts, endpoints, migrations, production browser dependencies,
+external effects or authentication. Retained consent does not prove screen reading.
 
-The server validates v1 contracts and reconstructs canonical evidence. Browser
-response checks protect presentation; they are not cryptographic verification or a
-replacement for server authorization. All assets and requests stay same-origin
-under the existing no-inline CSP. There are no production browser dependencies,
-new endpoints, contracts, migrations, catalog editor or external effects.
+The **Legacy action simulation** link opens `/?view=legacy`, the separate Acme
+fixture illustration. Its action/verification/outcome screens never enter Orchid's
+runtime history. Simulated credit does not prove customer impact, acceptance,
+recovered revenue or Case resolution. D8 economics and complete closure remain
+unimplemented; legacy execution and incomplete-proof closure guards remain intact.
 
-Packet acceptance checks that lifecycle, C/S/time, authorization/eligibility flags,
-resolver outcome/reasons, requirement counts and recorded effective approvals agree.
-Contradictory projections fail closed instead of displaying completed approvals.
+## Validation
 
-**Last response · historical receipt** is separate from current eligibility.
-Retaining consent bindings does not prove that a human read the screen.
-
-## Legacy simulation
-
-**Legacy action simulation** opens `/?view=legacy`: the original Acme Case →
-Decision → Act & Verify → Receipt walkthrough. It retains its immutable fixtures,
-six local presentation actions and explicit non-authoritative labels. It records
-no approval and its simulated effects/receipts never enter persistent review.
-The home link returns to the persistent experience.
-
-## Verification
-
-`pnpm validate` includes client/API regressions for initialization, exact binding,
-refresh, reload, terminal decisions, eligibility and uncertain retries. The explicit
-PostgreSQL suite additionally executes the client against real HTTP transactions,
-compares every durable table and emitted-ID count around reads, and verifies
-restart/retry after a lost commit acknowledgement.
-
-Run Chromium against a **separate disposable appliance** after build/start:
+`pnpm validate` retains the review/client and frozen ECC regressions. Real PostgreSQL
+acceptance additionally runs the Workbench client through HTTP, checks read-only
+snapshots, exact retries after restart, stale bindings and terminal historical checks.
+The D7-D Chromium scenarios use the same API/assets and isolated PostgreSQL schemas;
+fault injection exists only in the test host:
 
 ```sh
+pnpm build
 pnpm exec playwright install chromium
-pnpm test:workbench
+D7_WORKBENCH_BROWSER=1 \
+D7_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime \
+node --test scripts/simulated-credit-postgres.test.mjs
 ```
 
-The eight browser tests run once against a database that has not run this Workbench
-demo; they intentionally retain its Case/history. They cover the primary flow,
-reload, concurrent reviewers, uncertain responses, terminal interventions,
-replacement, changed evidence, ineligible seats, unsafe responses and a confirmed
-write followed by a failed read. They also check keyboard focus/order, unchanged
-seat selection, visible uncertainty, hidden technical bindings and 390px overflow. Use a separate
-instance for another full run; do not delete existing data to reset it. CI installs
-the browser driver and runs independent scenario groups against fresh CI-owned
-Compose volumes, with the primary approval/reload/evidence-change story kept
-together. This prevents unrelated fixtures from accumulating whole-history replay
-cost; it does not assert scalability. All eight browser scenarios, existing
-appliance checks and frozen ECC checks remain required. Playwright is a development
-dependency.
+The database must be a local disposable test instance; tests create/drop only their
+own randomly named schemas. To run only the new browser group, add
+`--test-name-pattern='D7-D browser:'` before the filename. Optional
+`D7_SCREENSHOT_DIR=/absolute/output/path` saves desktop/390px screenshots.
 
-D6-D claims review progress only. D7 supplies simulated execution and independent
-verification; D8 supplies outcome/economics receipts. No time savings, recovered
-revenue, action outcome or resolution is measured by this review surface.
+The existing eight D6-D Playwright scenarios remain required via
+`pnpm test:workbench`, against their own disposable appliance. CI installs Chromium,
+runs real PostgreSQL/API and D7-D browser tests, then the retained Compose/appliance,
+restart and D6-D browser groups. See [STATUS](../../STATUS.md) and the implementation
+PR for final commit evidence and local limitations. [Desktop/390px visual handoff](../../docs/guides/d7-workbench-handoff.md).

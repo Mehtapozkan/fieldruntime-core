@@ -412,7 +412,10 @@ test("confirmed receipt survives a failed follow-up read without offering a writ
   assert.equal(client.state.pending, null);
   assert.equal(client.state.needsRefresh, true);
   assert.equal(client.state.packet.review_revision, 0);
-  assert.match(client.state.error, /recorded.*current packet/i);
+  assert.match(
+    client.state.error,
+    /recorded.*current review could not be refreshed/i,
+  );
   const count = h.calls.filter((call) => call.method === "POST").length;
   failRead = false;
   await client.refresh();
@@ -483,7 +486,7 @@ test("operator progress follows current server requirements in either reviewer o
     await client.decide(second, "approve");
     assert.equal(
       reviewProgress(client.state).heading,
-      "Approvals complete — execution unavailable",
+      "Approvals complete; credit not recorded",
     );
     await client.attachEvidence();
     assert.equal(
