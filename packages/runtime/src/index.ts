@@ -60,3 +60,5 @@ export {
   CREDIT_TARGET,
   CREDIT_PAYLOAD,
 } from "./simulated-credit.js";
+
+export { compareCreditObservation } from "./credit-verification.js";

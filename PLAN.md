@@ -8,9 +8,9 @@ in PR #20 at `940462ec`; D6-D merged in PR #21 at
 `ba340cc5135343e12820992cf4a7542cf7cc9c29` with passing required checks. The human
 operator accepted [D-033](docs/architecture/d7-simulated-credit-verification.md)
 at `527cfb6f`. D7-A PR #22 merged normally at
-`f6dcddc03da8ee7c86cce76979aca751b2b0266d` with full D6-D coverage. D7-B is implemented
-on this review branch; its PR remains open. Independent verification (D7-C) and
-Workbench action controls (D7-D) remain next. No release or deployment is included.
+`f6dcddc03da8ee7c86cce76979aca751b2b0266d` with full D6-D coverage. D7-B PR #23 merged normally at `6766d9d99569fbff0e95e8b8b91748c1c0646b7a`
+from reviewed head `56490f9a` after required checks. D7-C is implemented on this
+review branch; its implementation PR remains open. D7-D Workbench controls are next. No release or deployment is included.
 
 ## Delivery labels and GitHub pull requests
 
@@ -81,8 +81,8 @@ PR #21 passed repository validation, real PostgreSQL/API, Compose and
 appliance/browser acceptance checks before normal merge. It introduced no
 runtime contracts or migrations. Production authentication, identity history,
 external catalog sources and general workflows remain outside this synthetic step.
-D7-B below supplies the bounded action API; independent verification and complete
-closure proof remain unimplemented.
+D7-B/C below supply the bounded action and independent verification APIs. Complete
+closure proof and Workbench action/check controls remain unimplemented.
 
 The human operator accepted the desktop/390px presentation at `1561329858` on
 2026-09-05; no further UI redesign is a D6-D merge prerequisite. Keep two
@@ -98,16 +98,19 @@ accepted by the human operator.
 PR #22 merged after the restored repository, PostgreSQL/API, Compose and Workbench
 checks passed, preserving the effective solo-maintainer protections without bypass.
 
-1. **D7-B — implemented for review:** strict operation/envelope contracts, fixed
+1. **D7-B — merged in PR #23:** strict operation/envelope contracts, fixed
    synthetic enrollment, migration 0003, read-only action views, current bound
    action API, atomic source/action evidence, duplicate prevention and replay.
    [API examples and migration notes](docs/guides/simulated-credit-api.md).
-   Require passing real PostgreSQL, appliance restart/retry and preserved Workbench
-   CI on the final commit. Leave this implementation PR open.
-2. **D7-C — next:** separate verifier identity/read path, retained observations,
-   mismatch/unavailable/uncertain behavior and comparison/replay proof. Adapter
-   success cannot replace this check. An unverified no-source invocation cannot
-   justify a fresh invocation in D7-B.
+   Reviewed replay/scope repairs, PostgreSQL, appliance and Workbench CI passed.
+2. **D7-C — implemented for review:** strict verification POST, dedicated read-only
+   source connection, current scoped verifier checks, immutable observations and
+   deterministic proof replay. Migration 0004 extends the existing journal without
+   changing prior checksums/history. Exact retries, observation races and failed
+   persistence remain fail closed. Only latest retained independent absence plus
+   current authority permits explicit fresh execution; occupied slots always block.
+   Require passing repository, PostgreSQL/API, restart and preserved Workbench CI
+   on the final commit; leave this implementation PR open.
 3. **D7-D — later:** existing Workbench action/check controls with explicit
    conflict/retry and historical/current labels, verified through the appliance.
 

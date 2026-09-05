@@ -45,6 +45,7 @@ export interface GuidedWalkthroughRecord {
 
 export interface ApiDependencies {
   readonly credit?: {
+    readonly verify?: (command: unknown) => Promise<JsonObject>;
     readonly execute: (command: unknown) => Promise<JsonObject>;
     readonly read: (
       tenant: string,
@@ -243,14 +244,18 @@ export async function handleApiRequest(
     segments[0] === "v1" &&
     segments[1] === "tenants" &&
     segments[3] === "cases" &&
-    segments.length === 6 &&
+    (segments.length === 6 || segments.length === 8) &&
     dependencies.credit !== undefined
   ) {
     const tenant = segments[2] ?? "",
       caseId = segments[4] ?? "";
     if (!CANONICAL_ID.test(tenant) || !CANONICAL_ID.test(caseId))
       return response(404, { error: "not_found" });
-    if (method === "GET" && segments[5] === "simulated-credit") {
+    if (
+      method === "GET" &&
+      segments.length === 6 &&
+      segments[5] === "simulated-credit"
+    ) {
       try {
         const value = await dependencies.credit.read(tenant, caseId);
         return value === undefined
@@ -260,16 +265,28 @@ export async function handleApiRequest(
         return response(500, { error: "internal_error" });
       }
     }
-    if (method === "POST" && segments[5] === "simulated-credit-attempts") {
+    const verifying =
+      segments.length === 8 &&
+      segments[7] === "verifications" &&
+      CANONICAL_ID.test(segments[6] ?? "") &&
+      dependencies.credit.verify !== undefined;
+    if (
+      method === "POST" &&
+      segments[5] === "simulated-credit-attempts" &&
+      (segments.length === 6 || verifying)
+    ) {
       const parsed = parseCommand(request);
       if ("error" in parsed) return parsed.error;
       if (
         parsed.command.tenant_id !== tenant ||
-        parsed.command.case_id !== caseId
+        parsed.command.case_id !== caseId ||
+        (verifying && parsed.command.attempt_id !== segments[6])
       )
         return response(400, { error: "scope_mismatch" });
       try {
-        const result = await dependencies.credit.execute(parsed.command);
+        const result = verifying
+          ? await dependencies.credit.verify(parsed.command)
+          : await dependencies.credit.execute(parsed.command);
         return response(
           result.status === "conflict" || result.status === "denied"
             ? 409

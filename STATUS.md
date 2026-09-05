@@ -23,7 +23,7 @@ The human operator accepted the supplied desktop/390px visual review for
 `1561329858d8340291dda505fdfe12291cece1c9` on 2026-09-05: “Accept the current
 presentation for this milestone; no further UI redesign is required before merge.”
 This records D6-D presentation acceptance, not a GitHub approving review or approval
-of D-033. No additional visual checks or UI changes are claimed by D7-B.
+of D-033. No additional visual checks or UI changes are claimed by D7-B/C.
 
 Two nonblocking UI follow-ups remain for the existing Workbench:
 
@@ -36,7 +36,63 @@ Two nonblocking UI follow-ups remain for the existing Workbench:
 
 Neither follow-up blocked D6-D's merge or expands the D7 trust boundary.
 
-## D7-B implemented; independent verification remains next
+## D7-C independent verification implemented for review
+
+[D7-B PR #23](https://github.com/Mehtapozkan/fieldruntime-core/pull/23) merged normally
+at `6766d9d99569fbff0e95e8b8b91748c1c0646b7a`, from reviewed head
+`56490f9ac0cebbd244d2f77a92bf798a9d2ec5c0`. Required `validate` passed, the addressed
+scope review was resolved, and no blocking review finding remained. Required PRs,
+up-to-date checks and force-push/deletion protections were preserved without bypass.
+The supplied obsolete-Case reproducer was rerun successfully before merge.
+
+This branch implements only Accepted D-033's D7-C:
+
+- Strict attempt/hash/key-bound verification POST; fixed server-selected verifier
+  with current canonical identity, profile-bound scope, grant and time checks.
+  Caller identities/success claims and executor self-verification are rejected.
+- A separate read-only source connection followed by a writer-locked authority,
+  time and source/head consistency check. Exact source match is verified; absence
+  or different values mismatch; failed/malformed/changing reads are inconclusive. A catalog change between
+  observation and recording also requires a fresh check, including overlapping
+  transactions and restoration of old catalog bytes at a newer S.
+  Adapter acknowledgment supplies no verification evidence.
+- Immutable observation, action/envelope bindings, verifier evidence, comparison
+  and versions in the existing action journal. Atomic clock guard/idempotency,
+  lost-response recovery and deterministic restart replay advance neither C/R/S.
+  GET remains free of writer locks, IDs, clock changes or observations.
+- Checksum migration 0004 extends that journal without a new table or rewriting
+  prior history/checksums. Strict v1 action history stays replayable/verifiable;
+  current v2 envelopes bind any retained absence evidence used for explicit retry.
+- Only the latest verification's independent absence for the latest invocation
+  can permit explicit re-invocation, subject to current authority. Errors, older
+  absence, historical approval flags and occupied slots cannot permit another credit.
+
+[The executable API guide](docs/guides/simulated-credit-api.md) demonstrates
+Finance/Executive review → simulated action → independent source check → restart
+and exact retries. D7-D Workbench action/check controls remain unimplemented; the
+accepted D6-D review experience is unchanged. Verification establishes only the
+simulated credit effect, never customer impact, recovered revenue, acceptance,
+commitment completion or Case closure. Legacy execution/closure guards remain.
+
+Validation is recorded against the implementation PR's final head. Local repository
+validation currently passes 262 tests. Real PostgreSQL/API tests include fresh and
+v1-action migration, verifier eligibility, mismatches, observation races, explicit
+absence retries, failed persistence, backend termination, lost responses, restart,
+coherently altered proof and the preserved obsolete-Case/scope regressions. Final
+suite counts and hosted Compose/appliance/Workbench evidence are linked in the PR.
+Docker is unavailable locally; no local Compose pass is claimed.
+
+Limits: this is logical verifier/connection separation in one credential-free
+synthetic appliance, not isolation from its privileged database/application owner.
+Negative verification can retain physical source drift through history-only
+hydration; ordinary execution/GET/startup/readiness still fail on that corruption.
+Positive proof and reusable absence must also agree with immutable source/action
+history. Whole-history replay is for the bounded preview. Equal timestamps still
+cannot order separate Case/action journals, and no external signature anchors a
+complete privileged rewrite. D7-D and D8 economics remain future work; no release,
+deployment, production authentication, connector or external write is included.
+
+## D7-B merged baseline
 
 D7-A [PR #22](https://github.com/Mehtapozkan/fieldruntime-core/pull/22) merged normally
 at `f6dcddc03da8ee7c86cce76979aca751b2b0266d`, preserving all merged D6-D code,
@@ -49,7 +105,7 @@ required approving reviews are zero. Neither merge used bypass. The combined
 passed 250 repository tests, 63 PostgreSQL/API tests, eight Workbench scenarios,
 Compose and appliance/restart checks before merge.
 
-This implementation branch adds D7-B only:
+The merged D7-B baseline supplied:
 
 - Strict versioned command, authorization envelope, action journal, source and
   read-response contracts. Existing v0/D6 v1 semantics and frozen ECC are unchanged.
@@ -67,16 +123,15 @@ This implementation branch adds D7-B only:
   receipts remain distinct from current eligibility.
 
 [The API guide](docs/guides/simulated-credit-api.md) includes the explicit preparation,
-Finance/Executive review, action and restart demonstration. **D7-C independent
-verification and D7-D Workbench action controls are not implemented.** The existing
-Workbench remains the accepted D6 review experience. Adapter success is never
-verification; an invocation without source evidence cannot be repeated without
-D7-C's independent absence proof. Customer impact, Case resolution and recovered
+Finance/Executive review, action, verification and restart demonstration. D7-C is
+implemented for review above; D7-D Workbench action controls remain unimplemented.
+The existing Workbench remains the accepted D6 review experience. Adapter success
+is never verification; repetition requires independent absence and current authority. Customer impact, Case resolution and recovered
 revenue remain unproven. Legacy execution and incomplete-proof closure guards remain.
 
-Local repository validation passes **258 tests**, including preserved authority
-repairs and Workbench coverage. The real local PostgreSQL D6 suite passes **63**.
-The D7 suite passes **56 real PostgreSQL/API tests** covering fresh/upgrade
+At PR #23's reviewed head, local repository validation passed **258 tests**, including preserved authority
+repairs and Workbench coverage. The real local PostgreSQL D6 suite passed **63**.
+The D7 suite passed **56 real PostgreSQL/API tests** covering fresh/upgrade
 enrollment, atomic action/replacement boundaries,
 current eligibility (including exact workflow identity/version and two distinct
 human reviewers), terminal/concurrent
@@ -104,8 +159,8 @@ implementation PR. Docker is
 unavailable locally; no local Compose pass is claimed. The accepted D6-D desktop
 and 390px review is retained; D7-B makes no UI changes or new visual-check claims.
 
-Known limits: synthetic service context, whole-history replay suited to this bounded
-preview, no independent source verifier yet, and no cryptographic external anchor
+Known baseline limits: synthetic service context, whole-history replay suited to this bounded
+preview, and no cryptographic external anchor
 against a complete privileged rewrite of all canonical history. No production
 identity-history system, external writes, connectors or generic workflow is added.
 

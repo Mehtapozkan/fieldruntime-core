@@ -96,6 +96,7 @@ function journalColumns(entry: ObjectValue, state: AuthorityState): Row {
 export async function loadAuthorityStore(
   client: SqlClient,
   requireCreditMigration = false,
+  historyOnlyForVerification = false,
 ): Promise<StoredState> {
   const cases = await loadTrustedEngineState(client);
   const catalogs = await client.query<Row>(
@@ -130,7 +131,11 @@ export async function loadAuthorityStore(
       };
     }),
   });
-  const credit = await loadCreditEvidence(client, requireCreditMigration);
+  const credit = await loadCreditEvidence(
+    client,
+    requireCreditMigration,
+    historyOnlyForVerification,
+  );
   try {
     assertAuthorityStateIntegrity(authority, cases, heads, credit.entries);
     assertCreditIntegrity({ cases, authority, heads, credit });

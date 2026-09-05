@@ -39,6 +39,7 @@ const NUMBERS = new Set([
 export async function loadCreditEvidence(
   client: SqlClient,
   required = false,
+  historyOnly = false,
 ): Promise<CreditState> {
   const tables = await client.query<Record<string, unknown>>(
     "/* fr:credit-tables */ SELECT to_regclass('simulated_action_journal') AS journal, to_regclass('simulated_credit_source') AS source",
@@ -56,9 +57,11 @@ export async function loadCreditEvidence(
   const journal = await client.query<Record<string, unknown>>(
     "/* fr:credit-load-journal */ SELECT * FROM simulated_action_journal ORDER BY sequence",
   );
-  const source = await client.query<Record<string, unknown>>(
-    "/* fr:credit-load-source */ SELECT * FROM simulated_credit_source ORDER BY origin_attempt_id",
-  );
+  const source = historyOnly
+    ? { rows: [] }
+    : await client.query<Record<string, unknown>>(
+        "/* fr:credit-load-source */ SELECT * FROM simulated_credit_source ORDER BY origin_attempt_id",
+      );
   for (const row of journal.rows) {
     const entry = object(row.entry);
     for (const key of CREDIT_COLUMNS)
@@ -67,7 +70,7 @@ export async function loadCreditEvidence(
         `credit indexed ${key} drift`,
       );
   }
-  for (const row of source.rows) {
+  for (const row of historyOnly ? [] : source.rows) {
     const value = object(row.source_row),
       target = object(value.target);
     for (const key of ["tenant_id", "case_id", "slot"])
@@ -78,8 +81,17 @@ export async function loadCreditEvidence(
       "credit source index drift",
     );
   }
+  const installed = await client.query(
+    "SELECT version FROM fieldruntime_schema_migrations WHERE version = '0004_credit_verification'",
+  );
   return {
+    ...(installed.rows.length ? { version: 2 as const } : {}),
     entries: journal.rows.map((r) => json(r.entry)),
-    sources: source.rows.map((r) => json(r.source_row)),
+    sources: historyOnly
+      ? journal.rows
+          .map((r) => json(r.entry))
+          .filter((e) => e.source !== null)
+          .map((e) => object(e.source))
+      : source.rows.map((r) => json(r.source_row)),
   };
 }

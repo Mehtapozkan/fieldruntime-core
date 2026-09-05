@@ -1,10 +1,10 @@
-# D7-B: one bound simulated Orchid credit
+# D7-B/C: simulated Orchid credit and independent verification
 
-D7-B implements the action half of Accepted [D-033](../architecture/d7-simulated-credit-verification.md).
+D7-B/C implement the action and independent read-back portions of Accepted [D-033](../architecture/d7-simulated-credit-verification.md).
 It can record one **simulated $15,000 credit** for `tenant_orchid` /
 `case_d6_workbench` / `synthetic://accounts/orchid`. The Workbench remains the D6
-review experience. D7-C independent verification and D7-D action/check controls
-are not implemented. A recorded credit does not verify the customer's impact
+review experience; D7-D action/check controls are not implemented. A recorded or
+independently verified simulated credit does not verify the customer's impact
 claim, establish recovered revenue, resolve the Case or permit closure.
 
 ## Explicit enrollment and preparation
@@ -32,7 +32,8 @@ advance C. Prior requests become stale when C or S changes. Do not silently move
 an already-changed Case or transfer approvals from a replacement.
 
 For a reproducible fresh-operation demonstration, the checked-in script performs
-those commands, reads back the authoritative packet, and submits the bound action:
+those commands, reads back the authoritative packet, submits the bound action,
+and records an independent verification:
 
 ```sh
 node scripts/smoke-simulated-credit-api.mjs applied
@@ -46,14 +47,14 @@ node scripts/smoke-simulated-credit-api.mjs durable
 
 The script deliberately requires an unused Orchid operation; it does not clear
 history or rebase a changed Case. Its `durable` mode reconstructs the action/source
-and retries the original command exactly. CI runs it after the existing D6 smokes
+and independent proof, then retries both original commands exactly. CI runs it after the existing D6 smokes
 and separately runs the fresh/upgrade PostgreSQL tests.
 
 ## Read and submit
 
 `GET /v1/tenants/tenant_orchid/cases/case_d6_workbench/simulated-credit` returns the
-strict `simulated-credit-read-response.v1`: compiled profile and action binding,
-immutable attempts, source row if any, and current **informational** eligibility
+strict `simulated-credit-read-response.v2`: compiled profile and action binding,
+immutable `attempts` and `verifications`, source row if any, and current **informational** eligibility
 for the latest request. The current section is null before a request exists.
 `current.bindings` supplies the exact C/R/S, request and action assertions for
 explicit submission. Reads use one repeatable read-only snapshot and create no
@@ -83,7 +84,7 @@ recomputes authority using validated D6 v1→v0 adaptation, folds terminal decis
 checks exact bindings/current policy, two distinct human reviewers and scoped
 evaluator/executor grants, samples
 UTC at issuance, and checks the stable credit slot. A read or historical receipt
-never grants permission. The retained `authorization-envelope.v1` contains the
+never grants permission. The retained `authorization-envelope.v2` contains the
 profile, only the bound Orchid Case head, request/material/review history, catalog, evaluated
 result, service evidence, time and implementation versions. Replay reconstructs
 these inputs from canonical history and never calls the adapter. The retained runtime
@@ -113,11 +114,96 @@ action. If the action commits first, later permitted human intervention remains
 available; the historical credit is not undone. A replacement starts unapproved.
 A new key or replacement cannot create another credit for the same business slot.
 
-`verification: "not_implemented"` and `closure_permission: false` are explicit.
-The adapter acknowledgment is only a claim. Even a success report without a source
-row is retained as unverified; it cannot justify another invocation without the
-independent absence check reserved for D7-C. No verifier submission endpoint exists
-in D7-B. Legacy execution and incomplete-proof closure guards remain intact.
+## Explicit independent verification
+
+An action receipt is `verification: "unverified"`. The adapter acknowledgment is
+only a claim. POST to
+`/v1/tenants/tenant_orchid/cases/case_d6_workbench/simulated-credit-attempts/{attempt_id}/verifications`.
+This executable example requires a committed invocation from the preceding steps:
+
+```sh
+node --input-type=module <<'JS'
+const base = 'http://127.0.0.1:3210';
+const path = '/v1/tenants/tenant_orchid/cases/case_d6_workbench/simulated-credit';
+const viewResponse = await fetch(base + path);
+if (!viewResponse.ok) throw new Error('Read failed; no trusted operation view');
+const view = await viewResponse.json();
+const attempt = view.attempts.filter(e => e.outcome === 'simulated_action_recorded').at(-1);
+if (!attempt) throw new Error('A committed invocation is required');
+const command = {
+  schema_version: 'simulated-credit-verification-command.v1',
+  type: 'simulated-credit.verify',
+  tenant_id: 'tenant_orchid', case_id: 'case_d6_workbench',
+  attempt_id: attempt.id, expected_action_entry_hash: attempt.event_hash,
+  idempotency_key: 'orchid-explicit-check-001', correlation_id: 'orchid-d7'
+};
+console.log('Preserve this command for exact retry:', JSON.stringify(command));
+const response = await fetch(base + path + '-attempts/' + attempt.id + '/verifications', {
+  method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(command)
+});
+console.log(response.status, await response.json());
+JS
+```
+
+The command is strict: no actor, identity records, policy, source data, evaluation
+time or success claim. The runtime selects `identity_d7_credit_verifier`, checks its
+current canonical status and unambiguous profile-bound scoped grant, and rejects
+executor self-verification. It may inspect an older effect after human rejection,
+Case changes or catalog changes; that does not restore current execution permission.
+
+A dedicated pool opens a separate read-only repeatable transaction. It checks read
+eligibility and queries the actual source by tenant/Case/slot; it deliberately does
+not filter away an incorrectly attributed account. The observation retains the full
+source tuple, indexed attribution, row hash, reader/query versions, catalog and
+operation frontier, identity and UTC time. No receipt join or adapter acknowledgment
+supplies the observed row. A failed read retains an unavailable observation, with
+no rows/hash; its timestamp is the start of the failed read attempt. Non-JSON data
+is recorded as malformed, never converted to authoritative absence.
+
+Under the writer lock the runtime checks the key again, rechecks current verifier
+eligibility/time, rereads source for consistency, then atomically appends proof and
+advances the existing clock/writer guard. Verification advances neither C, R nor S.
+Catalog changes between observation and recording conservatively make the result
+inconclusive, even if the current verifier remains eligible. A read can overlap an
+uncommitted catalog write with an earlier issuance timestamp; replay does not invent
+commit ordering from those timestamps. An older catalog/read-position claim can
+never produce positive proof across that change. A fresh explicit check is required.
+Its `action_entry_hash` and `envelope_hash` bind the exact original action; the
+verification entry hash binds its complete observation, authority and comparison.
+
+| Retained comparison         | Meaning and next step                                                                                                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verified_simulated_effect` | Exactly one matching account/Case/slot/amount/currency/origin exists and agrees with retained action history. The simulated credit effect was checked.                                               |
+| `mismatch`                  | An authoritative read found absence or different values/attribution. Inspect the discrepancy. An occupied slot always blocks another credit.                                                         |
+| `inconclusive`              | Read unavailable/malformed, source, operation head or catalog changed, or positive observation contradicts immutable source history. An explicit fresh verification key is needed for another check. |
+
+HTTP 200 `applied` means the comparison was committed, including mismatches and
+inconclusive results. It does not itself mean verification succeeded. `duplicate`
+returns the original historical proof with no new read, clock sample, ID or write.
+409 denies ineligible verification or an unknown/uninvoked/altered attempt binding,
+or conflicts on changed command bytes. 400 rejects malformed input. A 500 or lost
+response is unconfirmed: retry the **same bytes/key**. Do not infer source absence.
+
+Only `absence_proven: true` from the latest verification of the latest committed
+invocation can enable an **explicit fresh execution command**, still subject to all
+current C/R/S, policy, identity, scope and expiry checks. That fact must agree with
+both independent and writer-side reads and retained source history. A subsequent
+inconclusive check supersedes earlier absence; an old invocation's absence cannot
+permit repetition of a newer one. The new envelope binds the retained proof hash.
+No automatic financial retries or compensation are implemented.
+
+A source-corruption diagnostic can append negative/inconclusive evidence using a
+narrow history-only hydration path: it still validates all canonical Case, review,
+catalog, action and verification history, but observes physical source separately.
+Ordinary GET, execution, startup and readiness continue to fail on physical
+source/action drift. This can make a corrupted appliance unready even though the
+verification POST retained its discrepancy; the POST receipt/exact retry and database
+history retain the evidence. This path cannot grant execution or manufacture absence
+when immutable history says the slot was occupied.
+
+Historical proof never establishes customer impact, acceptance, recovered revenue,
+commitment completion or a resolved Case. `closure_permission: false`, legacy
+execution guards and incomplete-proof closure denial remain intact.
 
 ## Migration, integrity and validation
 
@@ -125,8 +211,14 @@ Migration `0003_simulated_credit` adds only `simulated_action_journal` and
 `simulated_credit_source`, with append-only triggers, same-tenant Case/review/catalog
 references, indexed JSON agreement, a journal hash chain and the unique
 `(tenant_id, case_id, slot)` business key. Source/action evidence has deferred
-transactional pairing checks. 0001/0002 checksums, Case history, D6 schemas and the
-frozen ECC corpus are unchanged. Migration does not grant permissions.
+transactional pairing checks. New checksum-bound `0004_credit_verification` extends
+that journal's allowed versions/ID prefixes and adds a generated action-hash foreign
+key; it creates no table and rewrites no Case, review or action evidence. v1 contracts
+and v1 action replay semantics remain strict; migrated execution writes v2 envelopes
+and entries with the explicit absence-proof binding. Historical v1 actions remain
+verifiable. All 0001/0002/0003 checksums and frozen ECC fixtures are unchanged.
+Neither migration grants permissions. Back up the local preview volume before an
+upgrade; rollback to a binary that only knows 0003 is not supported after new entries.
 
 The API readiness check requires the new tables and successful semantic replay.
 A privileged partial rewrite with recalculated hashes still fails when inconsistent
@@ -142,6 +234,6 @@ D7_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/f
 ```
 
 These suites do not silently skip missing PostgreSQL. CI additionally runs Compose,
-source/action restart/retry smokes and all eight existing Workbench browser scenarios.
+source/action/verification PostgreSQL and API restart/retry smokes and all eight existing Workbench browser scenarios.
 No production authentication, connectors, external writes, generic worker runtime
 or economics are introduced.

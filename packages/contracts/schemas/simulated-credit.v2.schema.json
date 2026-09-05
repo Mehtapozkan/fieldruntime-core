@@ -1,0 +1,848 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/simulated-credit.v2.schema.json",
+  "title": "D-033 independent simulated credit verification and absence-bound retries",
+  "$defs": {
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine",
+        "resolver",
+        "adapter",
+        "canonicalization",
+        "gateway"
+      ],
+      "properties": {
+        "engine": {
+          "const": "simulated-credit-engine.v2"
+        },
+        "resolver": {
+          "const": "authority-resolution.d6c.v2"
+        },
+        "adapter": {
+          "const": "simulated-credit-adapter.v1"
+        },
+        "canonicalization": {
+          "const": "canonical-json.v1"
+        },
+        "gateway": {
+          "const": "simulated-credit-gateway.v2"
+        }
+      }
+    },
+    "envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "command",
+        "profile",
+        "profile_hash",
+        "action_binding_hash",
+        "target",
+        "payload",
+        "packet",
+        "catalog",
+        "case_document",
+        "case_heads",
+        "authority_position",
+        "clock_floor",
+        "evaluated_at",
+        "authorized",
+        "reason_codes",
+        "service_grants",
+        "implementation_versions",
+        "evaluated_at_source_timezone",
+        "absence_verification_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "authorization-envelope.v2"
+        },
+        "command": {
+          "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/command"
+        },
+        "profile": {
+          "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/profile"
+        },
+        "profile_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "action_binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "target": {
+          "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/target"
+        },
+        "payload": {
+          "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/payload"
+        },
+        "packet": {
+          "$ref": "https://fieldruntime.ai/schemas/authority-request-read-response.v1.schema.json"
+        },
+        "catalog": {
+          "$ref": "https://fieldruntime.ai/schemas/authority-review-support.v1.schema.json#/$defs/catalog"
+        },
+        "case_document": {
+          "$ref": "https://fieldruntime.ai/schemas/ecc-canonical-data-model-v0.schema.json"
+        },
+        "case_heads": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/case_head"
+          },
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "authority_position": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "clock_floor": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "authorized": {
+          "type": "boolean"
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "service_grants": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.ai/schemas/authority-record.v0.schema.json"
+          }
+        },
+        "implementation_versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "evaluated_at_source_timezone": {
+          "const": "UTC"
+        },
+        "absence_verification_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "journal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "id",
+        "sequence",
+        "tenant_id",
+        "case_id",
+        "slot",
+        "authority_request_id",
+        "review_revision",
+        "review_head_hash",
+        "case_version",
+        "case_head_hash",
+        "catalog_hash",
+        "authority_state_revision",
+        "authority_position",
+        "recorded_at",
+        "previous_event_hash",
+        "event_hash",
+        "command",
+        "command_fingerprint",
+        "idempotency_key",
+        "envelope",
+        "envelope_hash",
+        "outcome",
+        "adapter_report",
+        "source",
+        "simulation",
+        "verification",
+        "closure_permission",
+        "implementation_versions",
+        "recorded_at_source_timezone"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "simulated-action-journal-entry.v2"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^attempt_[A-Za-z0-9_-]{1,119}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "tenant_id": {
+          "const": "tenant_orchid"
+        },
+        "case_id": {
+          "const": "case_d6_workbench"
+        },
+        "slot": {
+          "const": "service_remedy"
+        },
+        "authority_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "review_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "review_head_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "case_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "case_head_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "catalog_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "authority_state_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "authority_position": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "previous_event_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "command": {
+          "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/command"
+        },
+        "command_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "envelope": {
+          "$ref": "#/$defs/envelope"
+        },
+        "envelope_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "outcome": {
+          "enum": [
+            "denied",
+            "simulated_action_recorded"
+          ]
+        },
+        "adapter_report": {
+          "enum": [
+            "not_invoked",
+            "success",
+            "uncertain"
+          ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "simulation": {
+          "const": true
+        },
+        "verification": {
+          "const": "unverified"
+        },
+        "closure_permission": {
+          "const": false
+        },
+        "implementation_versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "recorded_at_source_timezone": {
+          "const": "UTC"
+        }
+      }
+    },
+    "read": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "profile",
+        "profile_hash",
+        "action_binding_hash",
+        "attempts",
+        "source",
+        "simulation",
+        "verification",
+        "closure_permission",
+        "current",
+        "verifications"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "simulated-credit-read-response.v2"
+        },
+        "profile": {
+          "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/profile"
+        },
+        "profile_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "action_binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "attempts": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/journal"
+              },
+              {
+                "$ref": "#/$defs/journal"
+              }
+            ]
+          }
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "simulation": {
+          "const": true
+        },
+        "verification": {
+          "const": "available"
+        },
+        "closure_permission": {
+          "const": false
+        },
+        "current": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "bindings",
+                "eligible",
+                "reason_codes",
+                "evaluated_at",
+                "informational_only"
+              ],
+              "properties": {
+                "bindings": {
+                  "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/bindings"
+                },
+                "eligible": {
+                  "type": "boolean"
+                },
+                "reason_codes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "evaluated_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                },
+                "informational_only": {
+                  "const": true
+                }
+              }
+            }
+          ]
+        },
+        "verifications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/verification"
+          }
+        }
+      }
+    },
+    "verify_command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "type",
+        "tenant_id",
+        "case_id",
+        "attempt_id",
+        "expected_action_entry_hash",
+        "idempotency_key",
+        "correlation_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "simulated-credit-verification-command.v1"
+        },
+        "type": {
+          "const": "simulated-credit.verify"
+        },
+        "tenant_id": {
+          "const": "tenant_orchid"
+        },
+        "case_id": {
+          "const": "case_d6_workbench"
+        },
+        "attempt_id": {
+          "type": "string",
+          "pattern": "^attempt_[A-Za-z0-9_-]{1,119}$"
+        },
+        "expected_action_entry_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "correlation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      }
+    },
+    "raw": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "rows",
+        "hash"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "read",
+            "unavailable",
+            "malformed"
+          ]
+        },
+        "rows": {
+          "anyOf": [
+            {
+              "type": "array",
+              "maxItems": 2,
+              "items": {}
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "raw",
+        "observed_at",
+        "observed_at_source_timezone",
+        "reader_identity_id",
+        "reader_version",
+        "query_version",
+        "target",
+        "action_sequence",
+        "action_head_hash",
+        "authority_position",
+        "catalog_hash",
+        "catalog_revision"
+      ],
+      "properties": {
+        "raw": {
+          "$ref": "#/$defs/raw"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "observed_at_source_timezone": {
+          "const": "UTC"
+        },
+        "reader_identity_id": {
+          "const": "identity_d7_credit_verifier"
+        },
+        "reader_version": {
+          "const": "simulated-credit-source-reader.v1"
+        },
+        "query_version": {
+          "const": "orchid-credit-slot-query.v1"
+        },
+        "target": {
+          "$ref": "https://fieldruntime.ai/schemas/simulated-credit.v1.schema.json#/$defs/target"
+        },
+        "action_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "action_head_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "authority_position": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "catalog_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "catalog_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "reason_codes",
+        "absence_proven"
+      ],
+      "properties": {
+        "outcome": {
+          "enum": [
+            "verified_simulated_effect",
+            "mismatch",
+            "inconclusive"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "source_absent",
+              "multiple_rows",
+              "wrong_target",
+              "wrong_payload",
+              "wrong_origin",
+              "read_unavailable",
+              "malformed_observation",
+              "source_changed",
+              "operation_changed",
+              "source_history_conflict",
+              "catalog_changed"
+            ]
+          }
+        },
+        "absence_proven": {
+          "type": "boolean"
+        }
+      }
+    },
+    "verification_authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verifier_identity",
+        "read_grant",
+        "recording_grant",
+        "read_catalog_hash",
+        "recording_catalog_hash"
+      ],
+      "properties": {
+        "verifier_identity": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "read_grant": {
+          "$ref": "https://fieldruntime.ai/schemas/authority-record.v0.schema.json"
+        },
+        "recording_grant": {
+          "$ref": "https://fieldruntime.ai/schemas/authority-record.v0.schema.json"
+        },
+        "read_catalog_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "recording_catalog_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sequence",
+        "tenant_id",
+        "case_id",
+        "slot",
+        "authority_request_id",
+        "review_revision",
+        "review_head_hash",
+        "case_version",
+        "case_head_hash",
+        "catalog_hash",
+        "authority_state_revision",
+        "authority_position",
+        "recorded_at",
+        "previous_event_hash",
+        "event_hash",
+        "command_fingerprint",
+        "idempotency_key",
+        "envelope_hash",
+        "source",
+        "simulation",
+        "closure_permission",
+        "recorded_at_source_timezone",
+        "schema_version",
+        "command",
+        "action_entry_hash",
+        "observation",
+        "recording_source",
+        "comparison",
+        "authority",
+        "clock_floor",
+        "implementation_versions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^verification_[A-Za-z0-9_-]{1,115}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "tenant_id": {
+          "const": "tenant_orchid"
+        },
+        "case_id": {
+          "const": "case_d6_workbench"
+        },
+        "slot": {
+          "const": "service_remedy"
+        },
+        "authority_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "review_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "review_head_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "case_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "case_head_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "catalog_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "authority_state_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "authority_position": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "previous_event_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "command_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "envelope_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source": {
+          "const": null
+        },
+        "simulation": {
+          "const": true
+        },
+        "closure_permission": {
+          "const": false
+        },
+        "recorded_at_source_timezone": {
+          "const": "UTC"
+        },
+        "schema_version": {
+          "const": "simulated-credit-verification-entry.v1"
+        },
+        "command": {
+          "$ref": "#/$defs/verify_command"
+        },
+        "action_entry_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "observation": {
+          "$ref": "#/$defs/observation"
+        },
+        "recording_source": {
+          "$ref": "#/$defs/raw"
+        },
+        "comparison": {
+          "$ref": "#/$defs/comparison"
+        },
+        "authority": {
+          "$ref": "#/$defs/verification_authority"
+        },
+        "clock_floor": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "implementation_versions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "engine",
+            "reader",
+            "comparison",
+            "canonicalization"
+          ],
+          "properties": {
+            "engine": {
+              "const": "simulated-credit-verifier.v1"
+            },
+            "reader": {
+              "const": "simulated-credit-source-reader.v1"
+            },
+            "comparison": {
+              "const": "simulated-credit-comparison.v1"
+            },
+            "canonicalization": {
+              "const": "canonical-json.v1"
+            }
+          }
+        }
+      }
+    }
+  }
+}

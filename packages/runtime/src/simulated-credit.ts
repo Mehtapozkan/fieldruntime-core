@@ -1,5 +1,11 @@
 import {
+  assertVerificationIntegrity,
+  isVerification,
+  retryAbsence,
+} from "./credit-verification.js";
+import {
   assertValidSimulatedCreditContract,
+  assertValidSimulatedCreditV2Contract,
   canonicalJson,
   sha256Json,
 } from "../../contracts/src/index.js";
@@ -190,6 +196,7 @@ export function enrollCreditCatalog(
   );
 }
 export interface CreditState {
+  readonly version?: 1 | 2;
   readonly entries: readonly ObjectValue[];
   readonly sources: readonly ObjectValue[];
 }
@@ -211,6 +218,7 @@ export function evaluateCredit(
   context: CreditContext,
   command: ObjectValue,
   at: string,
+  version: 1 | 2 = 1,
 ): ObjectValue {
   assertValidSimulatedCreditContract("command", command);
   creditAssert(
@@ -343,44 +351,29 @@ export function evaluateCredit(
     "distinct_reviewers_required",
   );
   const serviceGrants: ObjectValue[] = [];
-  for (const [key, id, authority] of serviceSpecs.filter(
-    ([key]) => key !== "verifier",
-  )) {
-    const person = objects(data.identities).find((p) => p.identity_id === id);
-    check(
-      person !== undefined && creditSame(person, identity(id)),
-      `${key}_identity_ineligible`,
-    );
-    const candidates = objects(data.authority_records).filter(
-      (g) => g.authority_class === authority && g.authority_rank === 1,
-    );
-    const grant = candidates[0];
-    const expected = grants().find((g) => g.authority_class === authority);
-    const valid =
-      candidates.length === 1 &&
-      grant !== undefined &&
-      grant.status === "active" &&
-      grant.authority_record_id === expected?.authority_record_id &&
-      grant.tenant_id === head.tenant_id &&
-      creditSame(grant.identity, identity(id)) &&
-      creditSame(grant.scope, expected?.scope) &&
-      grant.source_type === "authoritative_registry" &&
-      grant.source_ref === SOURCE &&
-      string(grant.effective_from) <= at &&
-      (grant.effective_until === undefined ||
-        at < string(grant.effective_until));
-    check(valid, `${key}_authority_ineligible`);
-    if (grant) serviceGrants.push(grant);
+  for (const key of ["executor", "evaluator"] as const) {
+    const result = creditServiceEligibility(data, key, at);
+    reasons.push(...result.reasons);
+    if (result.grant) serviceGrants.push(result.grant);
   }
   check(!context.credit.sources.length, "credit_already_recorded");
+  const absence = version === 2 ? retryAbsence(context.credit.entries) : null;
+  const latestInvocation = context.credit.entries
+    .filter((e) => e.outcome === "simulated_action_recorded")
+    .at(-1);
   check(
-    !context.credit.entries.some(
-      (e) => e.outcome === "simulated_action_recorded" && e.source === null,
-    ),
+    version === 1
+      ? !context.credit.entries.some(
+          (e) => e.outcome === "simulated_action_recorded" && e.source === null,
+        )
+      : !latestInvocation ||
+          latestInvocation.source !== null ||
+          absence !== null,
     "independent_absence_check_required",
   );
   const envelope = json({
-    schema_version: "authorization-envelope.v1",
+    schema_version: `authorization-envelope.v${String(version)}`,
+    ...(version === 2 ? { absence_verification_hash: absence } : {}),
     command,
     profile: CREDIT_PROFILE,
     profile_hash: CREDIT_PROFILE_HASH,
@@ -405,9 +398,9 @@ export function evaluateCredit(
     authorized: reasons.length === 0,
     reason_codes: [...new Set(reasons)].sort(),
     service_grants: serviceGrants,
-    implementation_versions: CREDIT_VERSIONS,
+    implementation_versions: creditVersions(version),
   });
-  assertValidSimulatedCreditContract("envelope", envelope);
+  creditContract(version, "envelope", envelope);
   return envelope;
 }
 export function creditSource(id: string, at: string): ObjectValue {
@@ -428,6 +421,8 @@ export function creditEntry(
   report: string,
   source: ObjectValue | null,
 ): ObjectValue {
+  const version =
+    envelope.schema_version === "authorization-envelope.v2" ? 2 : 1;
   const packet = object(envelope.packet),
     command = object(envelope.command);
   const aggregate = getCase(
@@ -436,7 +431,7 @@ export function creditEntry(
     "case_d6_workbench",
   );
   const entry = json({
-    schema_version: "simulated-action-journal-entry.v1",
+    schema_version: `simulated-action-journal-entry.v${String(version)}`,
     id,
     sequence: context.credit.entries.length + 1,
     tenant_id: command.tenant_id,
@@ -462,12 +457,12 @@ export function creditEntry(
     adapter_report: report,
     source,
     simulation: true,
-    verification: "not_implemented",
+    verification: version === 2 ? "unverified" : "not_implemented",
     closure_permission: false,
-    implementation_versions: CREDIT_VERSIONS,
+    implementation_versions: creditVersions(version),
   });
   const result = json({ ...entry, event_hash: sha256Json(entry) });
-  assertValidSimulatedCreditContract("journal", result);
+  creditContract(version, "journal", result);
   return result;
 }
 // Recreate canonical state at each attempt's retained frontiers, then recompute
@@ -477,7 +472,18 @@ export function assertCreditIntegrity(context: CreditContext): void {
   for (let index = 0; index < context.credit.entries.length; index++) {
     const entry = context.credit.entries[index];
     creditAssert(entry, "missing credit entry");
-    assertValidSimulatedCreditContract("journal", entry);
+    creditAssert(
+      !seen.has(string(entry.idempotency_key)),
+      "duplicate credit command",
+    );
+    seen.add(string(entry.idempotency_key));
+    if (isVerification(entry)) {
+      assertVerificationIntegrity(context, index);
+      continue;
+    }
+    const version =
+      entry.schema_version === "simulated-action-journal-entry.v2" ? 2 : 1;
+    creditContract(version, "journal", entry);
     const envelope = object(entry.envelope);
     const cases = objects(envelope.case_heads).map((anchor) => {
       const current = getCase(
@@ -535,11 +541,6 @@ export function assertCreditIntegrity(context: CreditContext): void {
     );
     const priorEntries = context.credit.entries.slice(0, index);
     creditAssert(
-      !seen.has(string(entry.idempotency_key)),
-      "duplicate credit command",
-    );
-    seen.add(string(entry.idempotency_key));
-    creditAssert(
       index === 0 ||
         (integer(priorEntries.at(-1)?.authority_position) <= position &&
           integer(priorEntries.at(-1)?.authority_state_revision) <=
@@ -591,6 +592,7 @@ export function assertCreditIntegrity(context: CreditContext): void {
       past,
       object(entry.command),
       string(entry.recorded_at),
+      version,
     );
     creditAssert(
       creditSame(expected, envelope) &&
@@ -640,7 +642,11 @@ export function assertCreditIntegrity(context: CreditContext): void {
   creditAssert(context.credit.sources.length <= 1, "duplicate business credit");
 }
 
-export function readCredit(context: CreditContext, now: Date): ObjectValue {
+export function readCredit(
+  context: CreditContext,
+  now: Date,
+  version: 1 | 2 = 1,
+): ObjectValue {
   const latest = context.authority.entries
     .filter(
       (e) =>
@@ -684,6 +690,7 @@ export function readCredit(context: CreditContext, now: Date): ObjectValue {
         correlation_id: "read-only-evaluation",
       }),
       now.toISOString(),
+      version,
     );
     current = json({
       bindings,
@@ -694,17 +701,77 @@ export function readCredit(context: CreditContext, now: Date): ObjectValue {
     });
   }
   const result = json({
-    schema_version: "simulated-credit-read-response.v1",
+    schema_version: `simulated-credit-read-response.v${String(version)}`,
     profile: CREDIT_PROFILE,
     profile_hash: CREDIT_PROFILE_HASH,
     action_binding_hash: CREDIT_ACTION_HASH,
     current,
-    attempts: context.credit.entries,
+    attempts: context.credit.entries.filter((e) => !isVerification(e)),
+    ...(version === 2
+      ? { verifications: context.credit.entries.filter(isVerification) }
+      : {}),
     source: context.credit.sources[0] ?? null,
     simulation: true,
-    verification: "not_implemented",
+    verification: version === 2 ? "available" : "not_implemented",
     closure_permission: false,
   });
-  assertValidSimulatedCreditContract("read", result);
+  creditContract(version, "read", result);
   return result;
+}
+
+function creditVersions(version: 1 | 2): ObjectValue {
+  return version === 1
+    ? CREDIT_VERSIONS
+    : json({
+        ...CREDIT_VERSIONS,
+        engine: "simulated-credit-engine.v2",
+        gateway: "simulated-credit-gateway.v2",
+      });
+}
+function creditContract(
+  version: 1 | 2,
+  kind: "envelope" | "journal" | "read",
+  value: unknown,
+): void {
+  if (version === 1) assertValidSimulatedCreditContract(kind, value);
+  else assertValidSimulatedCreditV2Contract(kind, value);
+}
+// One canonical grant check shared by execution and independent verification.
+export function creditServiceEligibility(
+  data: ObjectValue,
+  key: "executor" | "evaluator" | "verifier",
+  at: string,
+): {
+  identity: ObjectValue | undefined;
+  grant: ObjectValue | undefined;
+  reasons: string[];
+} {
+  const spec = serviceSpecs.find((s) => s[0] === key);
+  creditAssert(spec, "service profile missing");
+  const [, id, authority] = spec;
+  const people = objects(data.identities).filter((p) => p.identity_id === id);
+  const person = people[0];
+  const candidates = objects(data.authority_records).filter(
+    (g) => g.authority_class === authority && g.authority_rank === 1,
+  );
+  const grant = candidates[0],
+    expected = grants().find((g) => g.authority_class === authority);
+  const reasons: string[] = [];
+  if (people.length !== 1 || !person || !creditSame(person, identity(id)))
+    reasons.push(`${key}_identity_ineligible`);
+  if (!(
+    candidates.length === 1 &&
+    grant &&
+    grant.status === "active" &&
+    grant.authority_record_id === expected?.authority_record_id &&
+    grant.tenant_id === "tenant_orchid" &&
+    creditSame(grant.identity, identity(id)) &&
+    creditSame(grant.scope, expected?.scope) &&
+    grant.source_type === "authoritative_registry" &&
+    grant.source_ref === SOURCE &&
+    string(grant.effective_from) <= at &&
+    (grant.effective_until === undefined || at < string(grant.effective_until))
+  ))
+    reasons.push(`${key}_authority_ineligible`);
+  return { identity: person, grant, reasons };
 }

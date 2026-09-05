@@ -79,7 +79,12 @@ export class PostgresSimulatedCreditStore {
       if (!creation)
         return json({ status: "conflict", code: "request_not_found" });
       const initial = dependencies.now().toISOString();
-      const preliminary = evaluateCredit(before, command, initial);
+      const preliminary = evaluateCredit(
+        before,
+        command,
+        initial,
+        before.credit.version,
+      );
       // Sample after the writer lock and expensive eligibility work, immediately
       // before issuing the transaction-scoped invocation. No async gap follows.
       const at = dependencies.now().toISOString();
@@ -89,7 +94,9 @@ export class PostgresSimulatedCreditStore {
           "simulated action clock regressed",
         );
       const envelope =
-        at === initial ? preliminary : evaluateCredit(before, command, at);
+        at === initial
+          ? preliminary
+          : evaluateCredit(before, command, at, before.credit.version);
       const id = dependencies.nextId();
       let source: ObjectValue | null = null;
       let report: "not_invoked" | "success" | "uncertain" = "not_invoked";
@@ -165,7 +172,7 @@ export class PostgresSimulatedCreditStore {
       return undefined;
     return authorityTransaction(this.pool, true, async (client) => {
       const state = await loadAuthorityStore(client, true);
-      return readCredit(state, now());
+      return readCredit(state, now(), state.credit.version);
     });
   }
   async assertReady(): Promise<void> {
