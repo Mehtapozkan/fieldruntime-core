@@ -1,7 +1,10 @@
 # Status
 
-Current milestone: D8-A Case progress and evidence receipt, implemented for review
-on `feat/d8a-case-progress-receipt`. D7 is merged, including the Workbench controls.
+Current milestone: D8-B reproducible failure walkthrough and measurement readiness,
+implemented for review on `feat/d8b-failure-walkthrough`. D8-A merged normally in
+PR #26 at `4ce7175556b2a0ecf954ec5a57677a591050db2c`, preserving reviewed head
+`e1caeb28f74fb66f0f5e6ebb69c370e476e50e40`, passing required checks and no unresolved
+findings. D7 is merged, including the Workbench controls.
 PR #25 merged normally at `f49dd71e3d1d8a393729690437d6f568b7473238` from reviewed
 head `2f3434fee20690dc19a4091409ee13f429551e89`, with passing required checks and no
 unresolved findings. Required PRs, up-to-date `validate`, force-push and deletion
@@ -668,7 +671,7 @@ restart smokes. Its timeout allows the added browser coverage; no check is remov
 Final reviewed head `2f3434fe` and passing CI are recorded in merged PR #25. No release
 or deployment is included.
 
-## D8-A implemented for review
+## D8-A merged baseline
 
 History is now **Case progress & evidence**, a compact read-only receipt of the
 proposed Orchid credit and its uncertainty, attributed human review, simulated
@@ -723,11 +726,47 @@ Compose pass is claimed. Required final-head CI includes all PostgreSQL/API,
 Workbench, Compose and container appliance/restart checks. Earlier D7 validation
 above is historical and distinguished from this D8-A evidence.
 
+## D8-B implemented for review
+
+The [failure walkthrough and measurement-readiness note](docs/guides/d8-failure-walkthrough.md)
+select five existing real PostgreSQL/API tests: a legitimate independent match,
+evidence invalidating approved consent, adapter success with no source effect,
+unavailable source read, and lost execution response followed by exact restart retry.
+Existing assertions remain; added checks require no adapter invocation for stale
+consent, actual absence observations, one credit before/after retry, the same
+receipt, HTTP `duplicate` and no durable changes on that retry. Verification-response
+loss retains the same strengthened coverage in the full suite.
+
+One diagnostic formatter prints actual command/binding/time, synthetic identity,
+source, observation and comparison excerpts after assertions pass. It is not a new
+receipt ledger or test runner. Fault hooks remain in the existing disposable-schema
+fixture and loopback test host, with no normal-appliance controls. No runtime, API,
+contract, migration, dependency, authority, frozen ECC or UI changes are included.
+
+The documented five-test selection passes locally against real PostgreSQL/API.
+It reports denied stale consent with zero source rows; committed mismatch/independent
+absence; committed inconclusive with no absence proof; and one unchanged credit
+and identical receipt after response-loss/restart retry. The legitimate control
+matches the independent source. A negative runtime outcome is a passing test only
+when its expected assertion holds; unexpected acceptance or duplicate effects fail.
+
+Validation remains `pnpm validate` (272 tests), 63 authority PostgreSQL tests and
+115 D7/D8 PostgreSQL/API tests including eight Chromium scenarios, plus all eight
+retained D6 Workbench browser cases. ECC and its intended negative control, Compose
+and appliance/restart remain required. Actual final-run results and CI evidence
+will be recorded in the implementation PR. Docker is unavailable locally; the
+optional disposable-container provisioning snippet is not claimed as locally run.
+No new visual inspection is claimed; the D8-A screenshots remain historical evidence.
+
+The measurement table distinguishes available recorded events from missing active
+human effort, comparable baseline, actual operating costs, customer acceptance and
+real impact. Missing values are unknown, not zero. Fixture times and runner durations
+measure neither labor nor savings; a simulated credit is not recovered revenue.
+
 ## Next
 
-Review D8-A and leave its implementation PR unmerged. Remaining D8 accepted-outcome,
-economics and failure-demonstration work stays planned; it requires actual evidence
-and measurements. No credit or source check proves customer impact, acceptance or
+Review D8-B and leave its implementation PR unmerged. Remaining D8 accepted-outcome
+and measured-economics work stays planned; it requires actual evidence and measurements. No credit or source check proves customer impact, acceptance or
 recovered revenue. Incomplete proof continues to block closure. Case formation/import
 and Operational Legibility (D9–D10) precede general workers. No live connectors,
-production authentication, external actions, release or deployment accompany D8-A.
+production authentication, external actions, release or deployment accompany D8-B.

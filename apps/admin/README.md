@@ -1,8 +1,10 @@
 # Guided Workbench
 
 The existing white/cream Workbench connects persistent review to the bounded
-simulated credit and independent-check APIs. D6 and D7 are merged; **D8-A’s
-read-only Case progress and evidence receipt is implemented on this review branch**. Accepted [D-032](../../docs/architecture/d6-authority-request-lifecycle.md)
+simulated credit and independent-check APIs. D6, D7 and D8-A's read-only Case
+progress and evidence receipt are merged. This D8-B review branch adds only the
+[test-fixture failure walkthrough](../../docs/guides/d8-failure-walkthrough.md).
+Accepted [D-032](../../docs/architecture/d6-authority-request-lifecycle.md)
 and [D-033](../../docs/architecture/d7-simulated-credit-verification.md) are unchanged.
 Opening, refreshing or revisiting creates no durable records.
 
