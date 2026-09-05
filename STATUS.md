@@ -225,7 +225,7 @@ writes or D7 execution is included.
 
 ## Verified
 
-- D6-D adds 12 focused client/API regressions and a real PostgreSQL/HTTP client
+- D6-D adds 13 focused client/API regressions and a real PostgreSQL/HTTP client
   scenario. The PostgreSQL suite passes 63 tests locally, including no durable
   changes around repeated client reads, two-person approval, restart, lost commit
   acknowledgement and exact retry, evidence invalidation and unapproved renewal.
@@ -234,13 +234,25 @@ writes or D7 execution is included.
   changed evidence, ineligible reviewers and unsafe packet responses. CI runs
   `pnpm test:workbench` after PostgreSQL/API and restart appliance smokes. Final
   commit CI evidence is linked from the D6-D PR checks.
+- Automated review identified an incoherent-response presentation defect: before
+  repair, all 11 contradictory packet variants were accepted by browser validation.
+  The client now rejects authorization flags that disagree with request C/S/time,
+  terminal history, resolver outcome/reasons, requirement counts or recorded
+  effective approval IDs. Valid and reordered packets still work. Chromium also
+  tests a false completion flag while `action_permission` remains false.
+- CI confirmed PostgreSQL/API and restart-smoke coverage but accumulated browser
+  scenarios exceeded the preview's whole-history replay timeout. Independent
+  browser scenarios now use fresh CI-owned disposable volumes; the primary
+  approval/reload/evidence-change story runs together without resetting its history.
+  All seven scenarios remain required. This is not a scalability claim or a runtime
+  replay optimization.
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
 - `pnpm release:check` passes across current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 246 tests pass, including 12 D6-D client/API regressions, 40 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
+- 247 tests pass, including 13 D6-D client/API regressions, 40 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
   immutable authority-binding, lifecycle, conflict, and agent-authority tests;
   42 D6-B threshold, multi-approval, prior-decision, delegation, ambiguity,
   policy-selection, tenant, agent, evidence-lineage, immutability, and input-order

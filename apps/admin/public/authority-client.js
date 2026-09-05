@@ -134,6 +134,7 @@ export function validatePacket(
       HASH.test(request.proposed_consequence_hash) &&
       HASH.test(request.review_material_hash) &&
       instant(request.expires_at) &&
+      instant(request.requested_at) &&
       instant(packet.evaluated_at) &&
       typeof request.policy_reference?.policy_id === "string" &&
       typeof request.policy_reference.policy_version === "string" &&
@@ -223,7 +224,99 @@ export function validatePacket(
             ))),
     );
   }
+  validateCurrent(packet);
   return packet;
+}
+
+function validateCurrent(packet) {
+  // Check that the server's projections agree; never recompute reviewer authority
+  // in the browser or turn a historical evaluation into current eligibility.
+  const { current, request, history } = packet;
+  const resolution = current.resolution;
+  const votes = history.flatMap((entry) =>
+    entry.decision ? [entry.decision] : [],
+  );
+  const terminal = votes.find((vote) => vote.decision !== "approve");
+  const lifecycle =
+    { reject: "rejected", modify: "superseded", escalate: "escalated" }[
+      terminal?.decision
+    ] ?? "open";
+  requireValue(current.lifecycle === lifecycle);
+  const bound =
+    lifecycle === "open" &&
+    packet.case_version === request.case_version &&
+    packet.authority_state_revision === request.authority_state_revision &&
+    Date.parse(packet.evaluated_at) >= Date.parse(request.requested_at) &&
+    Date.parse(packet.evaluated_at) < Date.parse(request.expires_at);
+  const sameIds = (a, b) =>
+    JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
+  const route =
+    resolution !== null &&
+    ["authorized", "approval_required"].includes(resolution?.outcome);
+  requireValue(
+    current.eligible === (bound && route) &&
+      current.authorized ===
+        (current.eligible && resolution?.outcome === "authorized"),
+  );
+  if (!bound) requireValue(resolution === null);
+  if (resolution !== null) {
+    requireValue(
+      resolution?.authority_request_id === request.authority_request_id &&
+        resolution.case_id === packet.case_id &&
+        resolution.case_version === packet.case_version &&
+        resolution.tenant_id === packet.tenant_id &&
+        resolution.evaluated_at === packet.evaluated_at &&
+        resolution.proposed_consequence_hash ===
+          request.proposed_consequence_hash &&
+        strings(resolution.reason_codes) &&
+        sameIds(current.reason_codes, resolution.reason_codes),
+    );
+  }
+  const effective = current.eligible
+    ? (resolution.authority_decision_ids ?? [])
+    : [];
+  requireValue(
+    strings(effective) &&
+      new Set(effective).size === effective.length &&
+      sameIds(current.effective_approval_ids, effective),
+  );
+  if (!current.eligible) return;
+  const requirements = resolution.authority_requirements;
+  requireValue(Array.isArray(requirements) && requirements.length > 0);
+  for (const requirement of requirements) {
+    const remaining =
+      requirement.required_approval_count -
+      requirement.satisfied_approval_ids.length;
+    requireValue(
+      remaining >= 0 &&
+        requirement.remaining_approval_count === remaining &&
+        requirement.status === (remaining === 0 ? "satisfied" : "outstanding"),
+    );
+  }
+  requireValue(
+    current.authorized ===
+      requirements.every((item) => item.status === "satisfied"),
+  );
+  const selected = [
+    ...new Set(requirements.flatMap((item) => item.satisfied_approval_ids)),
+  ];
+  requireValue(
+    sameIds(selected, effective) &&
+      effective.every((id) =>
+        votes.some(
+          (vote) =>
+            vote.authority_decision_id === id &&
+            vote.decision === "approve" &&
+            vote.authority_request_id === request.authority_request_id &&
+            vote.request_binding_hash === packet.request_binding_hash &&
+            vote.case_version === request.case_version,
+        ),
+      ),
+  );
+  if (current.authorized)
+    requireValue(
+      sameIds(current.reason_codes, ["authority.all_requirements_satisfied"]),
+    );
 }
 
 export function decisionCommand(

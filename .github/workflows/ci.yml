@@ -47,11 +47,18 @@ jobs:
           docker compose up --detach --wait
           node scripts/smoke-local-appliance.mjs durable
           node scripts/smoke-authority-api.mjs durable
-          pnpm test:workbench
           if docker compose exec -T postgres psql -v ON_ERROR_STOP=1 --username=fieldruntime --dbname=fieldruntime --command "UPDATE case_journal SET recorded_at = recorded_at;"; then
             echo "append-only journal update unexpectedly succeeded"
             exit 1
           fi
+          # Each independent browser scenario owns a disposable fixture volume.
+          # Keep the primary approval/reload/evidence story together. Whole-history
+          # replay is intentionally not a throughput benchmark in this preview.
+          for scenario in 'explicit init|retained evidence' 'concurrent review' 'reject removes' 'modify removes' 'escalate removes' 'ineligible seats'; do
+            docker compose down --volumes
+            docker compose up --detach --wait
+            pnpm test:workbench --grep "$scenario"
+          done
 
   publish-evaluation-preview:
     name: publish evaluation preview

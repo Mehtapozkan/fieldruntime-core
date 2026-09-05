@@ -52,11 +52,126 @@ import {
   STORAGE_KEY,
   decisionCommand,
   requestBlocked,
+  validatePacket,
 } from "../apps/admin/public/authority-client.js";
 import {
   SYNTHETIC_EVIDENCE,
   sha256Json,
 } from "../dist/packages/runtime/src/index.js";
+
+test("packet authorization flags must agree with bindings, lifecycle, resolver, requirements and recorded approvals", async () => {
+  const client = browserApiHarness().client();
+  await client.initialize();
+  const initial = client.state.packet;
+  await client.decide("finance", "approve");
+  await client.refresh();
+  await client.decide("executive", "approve");
+  await client.refresh();
+  const approved = client.state.packet;
+  assert.equal(validatePacket(approved).current.authorized, true);
+  const reordered = structuredClone(approved);
+  reordered.current.effective_approval_ids.reverse();
+  reordered.current.resolution.authority_requirements.reverse();
+  assert.doesNotThrow(() => validatePacket(reordered));
+  const variants = [
+    [
+      "unapproved flag",
+      initial,
+      (p) => {
+        p.current.authorized = true;
+      },
+    ],
+    [
+      "ineligible",
+      approved,
+      (p) => {
+        p.current.eligible = false;
+      },
+    ],
+    [
+      "terminal",
+      approved,
+      (p) => {
+        p.current.lifecycle = "rejected";
+      },
+    ],
+    [
+      "stale reason",
+      approved,
+      (p) => {
+        p.current.reason_codes = ["stale_case"];
+      },
+    ],
+    [
+      "no effective approvals",
+      approved,
+      (p) => {
+        p.current.effective_approval_ids = [];
+      },
+    ],
+    [
+      "resolver outcome",
+      approved,
+      (p) => {
+        p.current.resolution.outcome = "approval_required";
+      },
+    ],
+    [
+      "outstanding requirement",
+      approved,
+      (p) => {
+        p.current.resolution.authority_requirements[0].status = "outstanding";
+      },
+    ],
+    [
+      "changed Case",
+      approved,
+      (p) => {
+        p.case_version++;
+      },
+    ],
+    [
+      "changed catalog",
+      approved,
+      (p) => {
+        p.authority_state_revision++;
+      },
+    ],
+    [
+      "expired",
+      approved,
+      (p) => {
+        p.evaluated_at = p.request.expires_at;
+      },
+    ],
+    [
+      "unrecorded approval",
+      approved,
+      (p) => {
+        p.current.effective_approval_ids[0] = "decision_invented";
+        p.current.resolution.authority_decision_ids[0] = "decision_invented";
+        p.current.resolution.authority_requirements[0].satisfied_approval_ids[0] =
+          "decision_invented";
+      },
+    ],
+  ];
+  const accepted = [];
+  for (const [name, source, alter] of variants) {
+    const packet = structuredClone(source);
+    alter(packet);
+    try {
+      validatePacket(packet);
+      accepted.push(name);
+    } catch {
+      /* fail closed */
+    }
+  }
+  assert.deepEqual(
+    accepted,
+    [],
+    "incoherent packets must be rejected before rendering authorization",
+  );
+});
 
 test("demo commands cite retained runtime evidence and initialize explicitly and idempotently", async () => {
   for (const event of [DEMO_CASE.trigger_event, DEMO_UPDATE])

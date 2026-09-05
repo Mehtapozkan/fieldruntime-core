@@ -72,6 +72,10 @@ replacement for server authorization. All assets and requests stay same-origin
 under the existing no-inline CSP. There are no production browser dependencies,
 new endpoints, contracts, migrations, catalog editor or external effects.
 
+Packet acceptance checks that lifecycle, C/S/time, authorization/eligibility flags,
+resolver outcome/reasons, requirement counts and recorded effective approvals agree.
+Contradictory projections fail closed instead of displaying completed approvals.
+
 **Last response · historical receipt** is separate from current eligibility.
 Retaining consent bindings does not prove that a human read the screen.
 
@@ -103,5 +107,9 @@ demo; they intentionally retain its Case/history. They cover the primary flow,
 reload, concurrent reviewers, uncertain responses, terminal interventions,
 replacement, changed evidence, ineligible seats and unsafe responses. Use a separate
 instance for another full run; do not delete existing data to reset it. CI installs
-the browser driver, runs these tests against Compose/PostgreSQL, and retains all
-existing appliance and frozen ECC checks. Playwright is a development dependency.
+the browser driver and runs independent scenario groups against fresh CI-owned
+Compose volumes, with the primary approval/reload/evidence-change story kept
+together. This prevents unrelated fixtures from accumulating whole-history replay
+cost; it does not assert scalability. All seven browser scenarios, existing
+appliance checks and frozen ECC checks remain required. Playwright is a development
+dependency.

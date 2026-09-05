@@ -8,6 +8,7 @@ import {
   REVIEW_ROOT,
   TENANT,
   STORAGE_KEY,
+  DEMO_CASE,
 } from "../../apps/admin/public/authority-client.js";
 
 test.describe.configure({ mode: "serial" });
@@ -21,11 +22,21 @@ async function packet(api, id) {
   return response.json();
 }
 async function fresh(api) {
-  const record = await (await api.get(`${CASE_ROOT}/cases/${CASE_ID}`)).json();
+  let response = await api.get(`${CASE_ROOT}/cases/${CASE_ID}`);
+  if (response.status() === 404) {
+    // Explicit test setup via the same command API; production reads never seed.
+    const created = await api.post(`${CASE_ROOT}/case-commands`, {
+      data: DEMO_CASE,
+    });
+    expect(created.status()).toBe(200);
+    response = await api.get(`${CASE_ROOT}/cases/${CASE_ID}`);
+  }
+  expect(response.status()).toBe(200);
+  const record = await response.json();
   const catalog = await (
     await api.get(`/v1/tenants/${TENANT}/authority-catalog`)
   ).json();
-  const response = await api.post(REVIEW_ROOT, {
+  const created = await api.post(REVIEW_ROOT, {
     data: {
       type: "authority.request.create",
       tenant_id: TENANT,
@@ -37,8 +48,8 @@ async function fresh(api) {
       correlation_id: "browser-test",
     },
   });
-  expect(response.status()).toBe(200);
-  return (await response.json()).receipt.authority_request_id;
+  expect(created.status()).toBe(200);
+  return (await created.json()).receipt.authority_request_id;
 }
 async function open(page, id) {
   await page.goto(`/?request=${id}`);
@@ -346,30 +357,32 @@ test("ineligible seats and unsafe packet responses never become accepted decisio
   await expect(
     page.getByText("Last response · historical receipt", { exact: true }),
   ).toHaveCount(0);
-  await page.route(
-    `**/${id}/packet`,
-    async (route) => {
-      const response = await route.fetch();
-      const body = await response.json();
-      body.action_permission = true;
-      body.current.authorized = true;
-      await route.fulfill({ response, json: body });
-    },
-    { times: 1 },
-  );
-  await page
-    .getByRole("button", { name: "Refresh packet", exact: true })
-    .click();
-  await expect(
-    page
-      .getByText("The API returned an invalid review response.", {
-        exact: true,
-      })
-      .first(),
-  ).toBeVisible();
-  await expect(current(page)).toContainText("unconfirmed");
-  await expect(submit(page, "reject")).toBeDisabled();
-  expect((await packet(request, id)).current.authorized).toBe(false);
-  await refresh(page);
-  await expect(submit(page, "reject")).toBeEnabled();
+  for (const unsafePermission of [true, false]) {
+    await page.route(
+      `**/${id}/packet`,
+      async (route) => {
+        const response = await route.fetch();
+        const body = await response.json();
+        body.action_permission = unsafePermission;
+        body.current.authorized = true;
+        await route.fulfill({ response, json: body });
+      },
+      { times: 1 },
+    );
+    await page
+      .getByRole("button", { name: "Refresh packet", exact: true })
+      .click();
+    await expect(
+      page
+        .getByText("The API returned an invalid review response.", {
+          exact: true,
+        })
+        .first(),
+    ).toBeVisible();
+    await expect(current(page)).toContainText("unconfirmed");
+    await expect(submit(page, "reject")).toBeDisabled();
+    expect((await packet(request, id)).current.authorized).toBe(false);
+    await refresh(page);
+    await expect(submit(page, "reject")).toBeEnabled();
+  }
 });
