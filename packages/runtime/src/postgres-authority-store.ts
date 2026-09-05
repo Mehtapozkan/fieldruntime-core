@@ -1,3 +1,9 @@
+import { loadCreditEvidence } from "./postgres-credit-evidence.js";
+import {
+  assertCreditIntegrity,
+  enrollCreditCatalog,
+  type CreditState,
+} from "./simulated-credit.js";
 import {
   assertValidAuthorityReviewContract,
   canonicalJson,
@@ -32,7 +38,8 @@ import {
 } from "./authority-review-types.js";
 import type { CaseEngineState } from "./case-engine.js";
 
-interface StoredState {
+export interface StoredState {
+  readonly credit: CreditState;
   readonly cases: CaseEngineState;
   readonly authority: AuthorityState;
   readonly heads: readonly AuthorityCatalogHead[];
@@ -86,7 +93,10 @@ function journalColumns(entry: ObjectValue, state: AuthorityState): Row {
   };
 }
 
-async function load(client: SqlClient): Promise<StoredState> {
+export async function loadAuthorityStore(
+  client: SqlClient,
+  requireCreditMigration = false,
+): Promise<StoredState> {
   const cases = await loadTrustedEngineState(client);
   const catalogs = await client.query<Row>(
     "/* fr:authority-load-catalog */ SELECT * FROM authority_catalog ORDER BY tenant_id",
@@ -120,8 +130,10 @@ async function load(client: SqlClient): Promise<StoredState> {
       };
     }),
   });
+  const credit = await loadCreditEvidence(client, requireCreditMigration);
   try {
-    assertAuthorityStateIntegrity(authority, cases, heads);
+    assertAuthorityStateIntegrity(authority, cases, heads, credit.entries);
+    assertCreditIntegrity({ cases, authority, heads, credit });
     for (const row of journal.rows) {
       const columns = journalColumns(json(row.entry), authority);
       for (const [key, expected] of Object.entries(columns)) {
@@ -141,9 +153,9 @@ async function load(client: SqlClient): Promise<StoredState> {
       { cause: error },
     );
   }
-  return { cases, authority, heads };
+  return { cases, authority, heads, credit };
 }
-async function write(
+export async function writeAuthorityRow(
   client: SqlClient,
   statement: string,
   values: readonly unknown[],
@@ -159,20 +171,20 @@ async function persistSnapshot(
   client: SqlClient,
   snapshot: ReviewSnapshot,
 ): Promise<void> {
-  await write(
+  await writeAuthorityRow(
     client,
     `/* fr:authority-insert-snapshot */ INSERT INTO authority_snapshots (tenant_id, snapshot_hash, kind, content) VALUES ($1, $2, $3, $4)`,
     [snapshot.tenant_id, snapshot.hash, snapshot.kind, snapshot.content],
   );
 }
-async function writerRevision(client: SqlClient): Promise<void> {
-  await write(
+export async function writerRevision(client: SqlClient): Promise<void> {
+  await writeAuthorityRow(
     client,
     "/* fr:authority-increment-writer */ UPDATE runtime_writer_lock SET revision = revision + 1 WHERE singleton_id = 1",
     [],
   );
 }
-async function transaction<T>(
+export async function authorityTransaction<T>(
   pool: SqlPool,
   readOnly: boolean,
   operation: (client: SqlClient) => Promise<T>,
@@ -227,8 +239,8 @@ export class PostgresAuthorityStore {
     dependencies: ReviewDependencies,
   ): Promise<AuthorityCommandResult> {
     assertValidAuthorityReviewContract("command", command);
-    return transaction(this.pool, false, async (client) => {
-      const before = await load(client);
+    return authorityTransaction(this.pool, false, async (client) => {
+      const before = await loadAuthorityStore(client);
       const head = before.heads.find(
         (item) => item.tenant_id === command.tenant_id,
       );
@@ -262,20 +274,20 @@ export class PostgresAuthorityStore {
       for (const entry of result.entries) {
         const columns = { ...journalColumns(entry, result.state), entry };
         const names = Object.keys(columns);
-        await write(
+        await writeAuthorityRow(
           client,
           `/* fr:authority-insert-journal */ INSERT INTO authority_request_journal (${names.join(", ")}) VALUES (${names.map((_, i) => `$${String(i + 1)}`).join(", ")})`,
           Object.values(columns),
         );
       }
       const last = result.entries.at(-1);
-      await write(
+      await writeAuthorityRow(
         client,
         `/* fr:authority-clock */ UPDATE authority_catalog SET last_recorded_at = $2 WHERE tenant_id = $1 AND revision = $3 AND snapshot_hash = $4`,
         [head.tenant_id, last?.recorded_at, head.revision, head.snapshot_hash],
       );
       await writerRevision(client);
-      const persisted = await load(client);
+      const persisted = await loadAuthorityStore(client);
       assertStored(
         same(persisted.authority.entries, result.state.entries) &&
           same(persisted.cases, before.cases),
@@ -301,8 +313,8 @@ export class PostgresAuthorityStore {
     requestId: string,
     now: () => Date,
   ): Promise<ObjectValue | undefined> {
-    return transaction(this.pool, true, async (client) => {
-      const stored = await load(client);
+    return authorityTransaction(this.pool, true, async (client) => {
+      const stored = await loadAuthorityStore(client);
       const head = stored.heads.find((item) => item.tenant_id === tenantId);
       return head === undefined
         ? undefined
@@ -317,18 +329,19 @@ export class PostgresAuthorityStore {
   }
 
   async readCatalogRevision(tenantId: string): Promise<number | undefined> {
-    return transaction(
+    return authorityTransaction(
       this.pool,
       true,
       async (client) =>
-        (await load(client)).heads.find((head) => head.tenant_id === tenantId)
-          ?.revision,
+        (await loadAuthorityStore(client)).heads.find(
+          (head) => head.tenant_id === tenantId,
+        )?.revision,
     );
   }
 
   async assertReady(tenantId: string): Promise<void> {
-    return transaction(this.pool, true, async (client) => {
-      const stored = await load(client);
+    return authorityTransaction(this.pool, true, async (client) => {
+      const stored = await loadAuthorityStore(client);
       assertStored(
         stored.heads.some((head) => head.tenant_id === tenantId),
         "synthetic authority catalog missing",
@@ -353,19 +366,55 @@ export class PostgresAuthorityStore {
   ): Promise<void> {
     await this.changeCatalog(tenantId, data, expectedRevision, now, false);
   }
+  async enrollSimulatedCredit(
+    now: () => Date,
+  ): Promise<"enrolled" | "already_enrolled"> {
+    const changed = await this.changeCatalog(
+      "tenant_orchid",
+      (before: StoredState) => {
+        const head = before.heads.find((h) => h.tenant_id === "tenant_orchid");
+        if (!head)
+          throw new AuthorityReviewError(
+            "CREDIT_INTEGRITY",
+            "D6 bootstrap required before enrollment",
+          );
+        const catalogs = before.authority.snapshots.filter(
+          (s) => s.kind === "catalog" && s.tenant_id === head.tenant_id,
+        );
+        const current = catalogs.find((s) => s.hash === head.snapshot_hash);
+        return enrollCreditCatalog(
+          object(current?.content.data),
+          catalogs.map((s) => object(s.content.data)),
+        );
+      },
+      undefined,
+      now,
+      false,
+    );
+    return changed ? "enrolled" : "already_enrolled";
+  }
   private async changeCatalog(
     tenantId: string,
     data: unknown,
-    expectedRevision: number,
+    expectedRevision: number | undefined,
     now: () => Date,
     initialize: boolean,
-  ): Promise<void> {
-    const normalized = normalizeAuthorityCatalogData(data, tenantId);
-    await transaction(this.pool, false, async (client) => {
-      const before = await load(client);
+  ): Promise<boolean> {
+    return authorityTransaction(this.pool, false, async (client) => {
+      const before = await loadAuthorityStore(
+        client,
+        typeof data === "function",
+      );
       const prior = before.heads.find((head) => head.tenant_id === tenantId);
-      if (initialize && prior !== undefined) return;
-      if ((prior?.revision ?? 0) !== expectedRevision)
+      if (initialize && prior !== undefined) return false;
+      const normalized = normalizeAuthorityCatalogData(
+        typeof data === "function"
+          ? (data as (state: StoredState) => unknown)(before)
+          : data,
+        tenantId,
+      );
+      const revision = expectedRevision ?? prior?.revision ?? 0;
+      if ((prior?.revision ?? 0) !== revision)
         throw new AuthorityReviewError(
           "CATALOG_REVISION_CONFLICT",
           "catalog revision changed",
@@ -374,7 +423,8 @@ export class PostgresAuthorityStore {
         const old = before.authority.snapshots.find(
           (item) => item.hash === prior.snapshot_hash,
         );
-        if (old !== undefined && same(old.content.data, normalized)) return;
+        if (old !== undefined && same(old.content.data, normalized))
+          return false;
       }
       const at = now().toISOString();
       const floor = before.cases.cases
@@ -393,7 +443,7 @@ export class PostgresAuthorityStore {
         json({
           schema_version: "authority-catalog.v1",
           tenant_id: tenantId,
-          revision: expectedRevision + 1,
+          revision: revision + 1,
           previous_catalog_hash: prior?.snapshot_hash ?? null,
           after_review_position: before.authority.entries.length,
           recorded_at: at,
@@ -402,24 +452,25 @@ export class PostgresAuthorityStore {
       );
       await persistSnapshot(client, snapshot);
       if (prior === undefined)
-        await write(
+        await writeAuthorityRow(
           client,
           `/* fr:authority-insert-catalog */ INSERT INTO authority_catalog (tenant_id, revision, snapshot_hash, last_recorded_at) VALUES ($1, $2, $3, $4)`,
-          [tenantId, expectedRevision + 1, snapshot.hash, at],
+          [tenantId, revision + 1, snapshot.hash, at],
         );
       else
-        await write(
+        await writeAuthorityRow(
           client,
           `/* fr:authority-update-catalog */ UPDATE authority_catalog SET revision = $2, snapshot_hash = $3, last_recorded_at = $4 WHERE tenant_id = $1 AND revision = $5`,
-          [tenantId, expectedRevision + 1, snapshot.hash, at, expectedRevision],
+          [tenantId, revision + 1, snapshot.hash, at, revision],
         );
       await writerRevision(client);
-      const persisted = await load(client);
+      const persisted = await loadAuthorityStore(client);
       assertStored(
         same(persisted.cases, before.cases) &&
           same(persisted.authority.entries, before.authority.entries),
         "catalog update changed Case or review history",
       );
+      return true;
     });
   }
 }

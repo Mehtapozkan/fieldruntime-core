@@ -16,7 +16,8 @@ reviewer-eligibility thread is resolved. **D6-D merged in PR #21 at
 `ba340cc5135343e12820992cf4a7542cf7cc9c29`**, preserving reviewed head
 `1561329858d8340291dda505fdfe12291cece1c9` and its passing CI. The Guided Workbench
 now uses persistent synthetic request review and the runtime Decision Packet API.
-No release, deployment, external writes or D7 execution is included.
+No release or deployment accompanies this work. D7-B below supports only bounded
+local simulated source writes; external writes remain disabled.
 
 The human operator accepted the supplied desktop/390px visual review for
 `1561329858d8340291dda505fdfe12291cece1c9` on 2026-09-05: “Accept the current
@@ -35,55 +36,60 @@ Two nonblocking UI follow-ups remain for the existing Workbench:
 
 Neither follow-up blocked D6-D's merge or expands the D7 trust boundary.
 
-## D7-A accepted design; implementation pending
+## D7-B implemented; independent verification remains next
 
-[D-033](docs/architecture/d7-simulated-credit-verification.md) is **Accepted** by
-explicit human approval on 2026-09-05 of PR #22 at
-`527cfb6f44dac61e495f45559d170d0bbb50e8f2`; the verbatim approval is retained in
-the decision record. **D7-B, D7-C and D7-D are not implemented.** The accepted
-design describes one Orchid $15,000 simulated credit, with
-server-recomputed exact authority/payload/state bindings, an atomic local source
-write and action receipt, business-key duplicate prevention, and a separately
-identified read-only verifier. It specifies two supporting tables in the existing
-PostgreSQL database; it does not change runtime contracts or migrations here.
+D7-A [PR #22](https://github.com/Mehtapozkan/fieldruntime-core/pull/22) merged normally
+at `f6dcddc03da8ee7c86cce76979aca751b2b0266d`, preserving all merged D6-D code,
+tests and documentation. [D-033](docs/architecture/d7-simulated-credit-verification.md)
+remains **Accepted**, with the human approval of `527cfb6f` retained verbatim.
+The operator's effective solo-maintainer rules were verified: required PRs,
+`validate`, strict up-to-date branches, and force-push/deletion protections remain;
+required approving reviews are zero. Neither merge used bypass. The combined
+[PR #22 CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33956468801)
+passed 250 repository tests, 63 PostgreSQL/API tests, eight Workbench scenarios,
+Compose and appliance/restart checks before merge.
 
-The design reuses D6 request/decision/catalog contracts and preserves C/R/S,
-terminal review decisions and immutable consent. Explicit D7 catalog enrollment
-and Case preparation require a fresh request and fresh approvals. Verification
-checks the simulated credit effect, not the customer's original impact claim;
-execution, verification and Case closure are still unavailable on main. D7-A is
-updated from that merged main with all D6-D implementation, tests and documentation
-preserved.
+This implementation branch adds D7-B only:
 
-The D6-D desktop/390px handoff is associated with full head `1561329858` above.
-Manual desktop/390px readability, keyboard/focus, evidence and error states were
-inspected against the local appliance. The downloadable task handoff contains nine
-screenshots, an offline gallery, walkthrough and file-hash manifest. No cross-browser
-or assistive-technology certification is claimed. [D6-D final CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33949784838)
-passes 250 repository tests, 63 PostgreSQL/API tests, eight browser scenarios,
-Compose and appliance/restart smokes. The same Workbench coverage is retained in
-this updated docs branch and must pass again before its merge.
+- Strict versioned command, authorization envelope, action journal, source and
+  read-response contracts. Existing v0/D6 v1 semantics and frozen ECC are unchanged.
+- Checksum-bound migration 0003 for two append-only supporting tables. Existing
+  Case/review history and 0001/0002 checksums are preserved on upgrade.
+- Explicit idempotent `fr d7 enroll --demo`, preserving named-Finance policy and
+  synthetic seats while installing narrowly scoped executor/verifier/evaluator
+  records. One S increment invalidates old requests; startup never reenrolls.
+- A bound $15,000 Orchid action API with current server-recomputed C/R/S, consent,
+  policy, identity, scope and issuance-time checks. Atomic source/action persistence,
+  one credit per Case, terminal interventions, exact retries and deterministic
+  restart replay preserve Case/review revisions and closure denial.
+- Consistent read-only operation views with informational eligibility and immutable
+  history. No previews, IDs, writer locks or clock mutations on reads. Historical
+  receipts remain distinct from current eligibility.
 
-D7-A adds documentation only. The operator's updated solo-maintainer rules were
-verified through GitHub's effective main-branch rules on 2026-09-05: PRs and a
-passing `validate` check remain required, branches must be up to date, force pushes
-and deletion remain blocked, and required approving reviews are zero. PR #21
-merged through the normal endpoint without bypass. PR #22 is updated from that
-main and must pass its own required checks before normal merge. Only then begin
-D7-B; no D7 runtime behavior, release or deployment is included here.
+[The API guide](docs/guides/simulated-credit-api.md) includes the explicit preparation,
+Finance/Executive review, action and restart demonstration. **D7-C independent
+verification and D7-D Workbench action controls are not implemented.** The existing
+Workbench remains the accepted D6 review experience. Adapter success is never
+verification; an invocation without source evidence cannot be repeated without
+D7-C's independent absence proof. Customer impact, Case resolution and recovered
+revenue remain unproven. Legacy execution and incomplete-proof closure guards remain.
 
-The docs clarify three PR #22 review findings: explicit idempotent enrollment on
-upgrades through a fixed local command, the scoped evaluator grant already required
-by the execution gate, and atomic verification clock updates. These mechanisms
-are documented acceptance criteria, not implemented features. D7-C remains the
-independent verifier step; D7-D remains the Workbench connection.
+Local repository validation passes **254 tests**, including preserved authority
+repairs and Workbench coverage. The real local PostgreSQL D6 suite passes **63**.
+The D7 suite passes **50 real PostgreSQL/API tests** covering fresh/upgrade
+enrollment, atomic action/replacement boundaries,
+current eligibility, terminal/concurrent commands, duplicates, clock guards,
+tampering, source/action rollback and restart retries. The local appliance action → PostgreSQL/API restart → exact retry smoke also passes.
+ECC passes 620/620; its intended negative control exits 1 with 152/620 and a full
+assertion receipt. Hosted PostgreSQL/Compose/browser evidence is linked in the
+implementation PR. Docker is
+unavailable locally; no local Compose pass is claimed. The accepted D6-D desktop
+and 390px review is retained; D7-B makes no UI changes or new visual-check claims.
 
-D7-A validation is rerun on the combined branch: `pnpm validate`, frozen ECC and
-its intended-failure negative control, `git diff --check`, and CI's PostgreSQL/API,
-Compose, appliance/restart and eight Workbench browser scenarios. Docker is
-unavailable locally (exit 127); the PR description links actual final-commit CI
-evidence. Earlier D6-C-only counts are not substituted for restored D6-D coverage.
-No new D7 runtime tests or behavior are claimed by these existing-suite results.
+Known limits: synthetic service context, whole-history replay suited to this bounded
+preview, no independent source verifier yet, and no cryptographic external anchor
+against a complete privileged rewrite of all canonical history. No production
+identity-history system, external writes, connectors or generic workflow is added.
 
 ## D6-D implementation
 
@@ -475,14 +481,12 @@ No new D7 runtime tests or behavior are claimed by these existing-suite results.
 
 ## Next
 
-Merge updated PR #22 only after its required checks pass under the verified
-solo-maintainer rules. D-033 is Accepted and D6-D is merged. Then implement D7-B
-only (bound operation, scoped enrollment, strict contracts, minimal migration and
-atomic simulated source/action evidence), leaving its implementation PR open.
-D7-C supplies independent verification; D7-D supplies Workbench action/check
-controls. Incomplete proof continues to block closure, and neither a credit nor
-its verification proves the original impact claim, accepted outcome or recovered
-revenue. D8 remains separate.
+Review the D7-B implementation PR and its final CI evidence; leave it open and
+unmerged in this task. D7-C supplies independent verification using a separate
+identity/read path and immutable observations; D7-D then connects Workbench controls.
+Incomplete proof continues to block closure. Neither a credit nor its verification
+proves the original impact claim, accepted outcome or recovered revenue. D8 remains
+separate. Keep both recorded nonblocking D6-D UI follow-ups outside D7-B.
 
 The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
 This roadmap alignment does not displace the trusted-kernel priority, add live

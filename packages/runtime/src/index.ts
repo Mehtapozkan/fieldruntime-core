@@ -52,3 +52,11 @@ export {
   SYNTHETIC_AUTHORITY_TENANT,
 } from "./synthetic-authority.js";
 export { PostgresAuthorityStore } from "./postgres-authority-store.js";
+
+export {
+  enrollCreditCatalog,
+  CREDIT_ACTION_HASH,
+  CREDIT_PROFILE,
+  CREDIT_TARGET,
+  CREDIT_PAYLOAD,
+} from "./simulated-credit.js";

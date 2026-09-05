@@ -2,13 +2,16 @@
 
 Status: **Accepted** by explicit human approval of the reviewed design at
 [527cfb6f44dac61e495f45559d170d0bbb50e8f2](https://github.com/Mehtapozkan/fieldruntime-core/blob/527cfb6f44dac61e495f45559d170d0bbb50e8f2/docs/architecture/d7-simulated-credit-verification.md).
-D7-A remains documentation only. D7-B, D7-C and D7-D are not implemented.
+D7-A was documentation only. D7-B is implemented on the subsequent review branch;
+D7-C independent verification and D7-D Workbench controls remain unimplemented.
 
 Base: main `ba340cc5135343e12820992cf4a7542cf7cc9c29` includes the normal merge of
 [D6-D PR #21](https://github.com/Mehtapozkan/fieldruntime-core/pull/21), reviewed at
 `1561329858d8340291dda505fdfe12291cece1c9`. PR #22 is updated from that main with
-all D6-D code, tests and documentation retained. It must pass the required checks,
-including Workbench coverage, before normal merge. D7-B begins after that merge.
+all D6-D code, tests and documentation retained. PR #22 passed the required checks,
+including Workbench coverage, and merged at `f6dcddc03da8ee7c86cce76979aca751b2b0266d`.
+The subsequent D7-B implementation follows this accepted boundary; see the
+[operation API guide](../guides/simulated-credit-api.md).
 
 The human operator accepted D6-D's supplied desktop/390px presentation at that head
 on 2026-09-05. The two nonblocking Workbench follow-ups in STATUS/PLAN do not change

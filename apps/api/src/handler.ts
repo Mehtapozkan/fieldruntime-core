@@ -1,3 +1,4 @@
+import { CreditCommandInputError } from "../../worker/src/simulated-credit-service.js";
 import type {
   CaseAggregate,
   CaseCommandResult,
@@ -43,6 +44,13 @@ export interface GuidedWalkthroughRecord {
 }
 
 export interface ApiDependencies {
+  readonly credit?: {
+    readonly execute: (command: unknown) => Promise<JsonObject>;
+    readonly read: (
+      tenant: string,
+      caseId: string,
+    ) => Promise<JsonObject | undefined>;
+  };
   readonly authority?: {
     readonly create: (command: unknown) => Promise<AuthorityCommandResult>;
     readonly decide: (
@@ -229,6 +237,51 @@ export async function handleApiRequest(
           replayable: false,
           production_receipt: false,
         });
+  }
+
+  if (
+    segments[0] === "v1" &&
+    segments[1] === "tenants" &&
+    segments[3] === "cases" &&
+    segments.length === 6 &&
+    dependencies.credit !== undefined
+  ) {
+    const tenant = segments[2] ?? "",
+      caseId = segments[4] ?? "";
+    if (!CANONICAL_ID.test(tenant) || !CANONICAL_ID.test(caseId))
+      return response(404, { error: "not_found" });
+    if (method === "GET" && segments[5] === "simulated-credit") {
+      try {
+        const value = await dependencies.credit.read(tenant, caseId);
+        return value === undefined
+          ? response(404, { error: "not_found" })
+          : response(200, value);
+      } catch {
+        return response(500, { error: "internal_error" });
+      }
+    }
+    if (method === "POST" && segments[5] === "simulated-credit-attempts") {
+      const parsed = parseCommand(request);
+      if ("error" in parsed) return parsed.error;
+      if (
+        parsed.command.tenant_id !== tenant ||
+        parsed.command.case_id !== caseId
+      )
+        return response(400, { error: "scope_mismatch" });
+      try {
+        const result = await dependencies.credit.execute(parsed.command);
+        return response(
+          result.status === "conflict" || result.status === "denied"
+            ? 409
+            : 200,
+          result,
+        );
+      } catch (error) {
+        return error instanceof CreditCommandInputError
+          ? response(400, { error: "invalid_credit_command" })
+          : response(500, { error: "internal_error" });
+      }
+    }
   }
 
   if (
