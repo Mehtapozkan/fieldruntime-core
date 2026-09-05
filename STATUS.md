@@ -9,7 +9,7 @@ repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are public. D6 is
 in progress; D6-A defines contracts and D6-B adds deterministic authority
 resolution. PR #18 repaired the authority correctness defects. PR #19 is merged
 at `76c9b472eabaff4e66ee4d5dd4ade6c144f95f7e`, including Accepted D-032 and its
-explicit human approval. **D6-C is implemented in this review branch**: persistent
+explicit human approval. **D6-C is implemented in [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)**: persistent
 synthetic authority-request review and a runtime-backed Decision Packet API.
 The Guided Workbench remains simulated; its UI connection is the next D6 step.
 No merge, release, deployment, external writes or D7 execution is included.

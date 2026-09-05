@@ -6,7 +6,8 @@ a passing state.
 Delivery position: GitHub PRs #1–#6, #12, and #14 are merged. The public source
 preview and `v0.1.0-evaluation-preview.0` prerelease are published. PR #19 merged
 Accepted D-032. D6-C now implements the synthetic persistent review/API boundary
-in this review branch; connecting the Guided Workbench is the next D6 step.
+in [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20); connecting
+the Guided Workbench is the next D6 step.
 
 ## Delivery labels and GitHub pull requests
 
