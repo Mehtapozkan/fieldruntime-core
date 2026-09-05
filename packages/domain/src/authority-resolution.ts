@@ -44,6 +44,7 @@ interface InternalCandidate {
 interface RequirementResolution {
   readonly output: JsonObject;
   readonly satisfiedDecisionIds: readonly string[];
+  readonly validDecisionIds: readonly string[];
   readonly delegationIds: readonly string[];
 }
 
@@ -689,6 +690,7 @@ function resolveRequirement(
   policyRuleRef: string,
   asOf: string,
 ): RequirementResolution {
+  const validDecisionIds: string[] = [];
   const validDecisionsByApprover = new Map<string, JsonObject>();
   for (const decision of decisions) {
     if (
@@ -703,6 +705,7 @@ function resolveRequirement(
     ) {
       continue;
     }
+    validDecisionIds.push(requireString(decision, "authority_decision_id"));
     const approver = requireObject(decision, "approver_identity");
     const id = identityId(approver);
     const prior = validDecisionsByApprover.get(id);
@@ -755,6 +758,7 @@ function resolveRequirement(
   return {
     output,
     satisfiedDecisionIds: stringArrayField(output, "satisfied_approval_ids"),
+    validDecisionIds: uniqueSorted(validDecisionIds),
     delegationIds,
   };
 }
@@ -872,6 +876,55 @@ function resolutionIdentifier(
 
 export function resolveAuthority(
   input: ResolveAuthorityInput,
+): AuthorityResolutionResult {
+  return resolveAuthorityInternal(input);
+}
+
+/** Eligibility to veto/modify/escalate one applicable policy requirement.
+ * This is never a whole-request authorization result. All original input,
+ * policy selection, candidate, identity, scope and path checks still run.
+ */
+export function resolveReviewerEligibility(
+  input: ResolveAuthorityInput,
+  probeDecisionId: string,
+  // Only retained v1 evaluation evidence uses the old selected-approval proof.
+  version:
+    | "authority-resolution.d6c.v1"
+    | "authority-resolution.d6c.v2" = "authority-resolution.d6c.v2",
+): Readonly<{ eligible: boolean; requirement_ids: readonly string[] }> {
+  const normalized = canonicalizeJson(input);
+  if (!isObject(normalized))
+    throw new AuthorityResolutionInputError("root must be an object");
+  const ids = uniqueSorted(
+    requireArray(normalized, "policies")
+      .filter(isObject)
+      .flatMap((policy) =>
+        objectArrayField(policy, "rules").flatMap((rule) =>
+          objectArrayField(rule, "requirements").map((requirement) =>
+            requireString(requirement, "requirement_id"),
+          ),
+        ),
+      ),
+  );
+  const eligible = ids.filter((id) => {
+    const validDecisionIds = new Set<string>();
+    const result = resolveAuthorityInternal(input, id, validDecisionIds);
+    return version === "authority-resolution.d6c.v1"
+      ? stringArrayField(result, "authority_decision_ids").includes(
+          probeDecisionId,
+        )
+      : validDecisionIds.has(probeDecisionId);
+  });
+  return immutableJson({
+    eligible: eligible.length > 0,
+    requirement_ids: eligible,
+  });
+}
+
+function resolveAuthorityInternal(
+  input: ResolveAuthorityInput,
+  reviewerRequirementId?: string,
+  validReviewerDecisionIds?: Set<string>,
 ): AuthorityResolutionResult {
   const normalized = canonicalizeJson(input);
   if (!isObject(normalized)) {
@@ -1176,9 +1229,20 @@ export function resolveAuthority(
   };
   const businessDomain = stringField(consequence, "business_domain");
   const requirementOutputs: RequirementResolution[] = [];
-  for (const requirement of [
-    ...objectArrayField(selectedRule, "requirements"),
-  ].sort((left, right) =>
+  const selectedRequirements = objectArrayField(
+    selectedRule,
+    "requirements",
+  ).filter(
+    (requirement) =>
+      reviewerRequirementId === undefined ||
+      stringField(requirement, "requirement_id") === reviewerRequirementId,
+  );
+  if (selectedRequirements.length === 0)
+    return finalize(base, {
+      outcome: "no_authority",
+      reason_codes: ["authority.no_applicable_review_requirement"],
+    });
+  for (const requirement of [...selectedRequirements].sort((left, right) =>
     requireString(left, "requirement_id").localeCompare(
       requireString(right, "requirement_id"),
     ),
@@ -1258,6 +1322,11 @@ export function resolveAuthority(
       policyRuleRef,
       asOf,
     );
+    // Eligibility is validity of this reviewer's complete approval path, not
+    // membership in the deduplicated, quota-limited set counted for authorization.
+    // Input, policy, candidate and unresolved direct-conflict checks ran above.
+    for (const id of partial.validDecisionIds)
+      validReviewerDecisionIds?.add(id);
     const satisfiedCount = partial.satisfiedDecisionIds.length;
     if (satisfiedCount < requiredCount) {
       if (candidateResolution.candidates.length > requiredCount) {

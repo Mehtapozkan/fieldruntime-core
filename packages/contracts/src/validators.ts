@@ -14,6 +14,12 @@ import delegationGrantSchema from "../schemas/delegation-grant.v0.schema.json" w
 import guidedWalkthroughSchema from "../schemas/guided-walkthrough.v0.schema.json" with { type: "json" };
 import identityReferenceSchema from "../schemas/identity-reference.v0.schema.json" with { type: "json" };
 import journalEntrySchema from "../schemas/case-journal-entry.v0.schema.json" with { type: "json" };
+import requestV1Schema from "../schemas/authority-request.v1.schema.json" with { type: "json" };
+import decisionV1Schema from "../schemas/authority-decision.v1.schema.json" with { type: "json" };
+import reviewSupportSchema from "../schemas/authority-review-support.v1.schema.json" with { type: "json" };
+import reviewCommandSchema from "../schemas/authority-command.v1.schema.json" with { type: "json" };
+import reviewJournalSchema from "../schemas/authority-request-journal-entry.v1.schema.json" with { type: "json" };
+import reviewReadSchema from "../schemas/authority-request-read-response.v1.schema.json" with { type: "json" };
 import {
   type AuthorityContractViolation,
   validateAuthorityDecisionInvariants,
@@ -50,6 +56,26 @@ const validateCaseResponsibility = ajv.compile(caseResponsibilitySchema);
 const validateDelegationGrant = ajv.compile(delegationGrantSchema);
 const validateGuidedWalkthrough = ajv.compile(guidedWalkthroughSchema);
 const validateJournalEntry = ajv.compile(journalEntrySchema);
+ajv.addSchema(reviewSupportSchema);
+const reviewValidators = {
+  request: ajv.compile(requestV1Schema),
+  decision: ajv.compile(decisionV1Schema),
+  command: ajv.compile(reviewCommandSchema),
+  journal: ajv.compile(reviewJournalSchema),
+  read: ajv.compile(reviewReadSchema),
+  catalog: ajv.compile({ $ref: `${reviewSupportSchema.$id}#/$defs/catalog` }),
+  material: ajv.compile({ $ref: `${reviewSupportSchema.$id}#/$defs/material` }),
+  evaluation: ajv.compile({
+    $ref: `${reviewSupportSchema.$id}#/$defs/evaluation_snapshot`,
+  }),
+};
+
+export function assertValidAuthorityReviewContract(
+  kind: keyof typeof reviewValidators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(reviewValidators[kind], value, `authority-review.v1/${kind}`);
+}
 
 export class ContractValidationError extends Error {
   readonly code = "CONTRACT_VALIDATION_FAILED";

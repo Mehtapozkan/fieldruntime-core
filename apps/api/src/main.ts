@@ -2,6 +2,9 @@ import { readFile } from "node:fs/promises";
 import { Pool, type PoolClient, type QueryResultRow } from "pg";
 import {
   PostgresCaseStore,
+  PostgresAuthorityStore,
+  syntheticAuthorityCatalog,
+  SYNTHETIC_AUTHORITY_TENANT,
   type SqlClient,
   type SqlPool,
   type SqlQueryResult,
@@ -12,6 +15,7 @@ import {
   createMigrationSource,
 } from "../../worker/src/bootstrap.js";
 import { TransactionalCaseWorker } from "../../worker/src/command-service.js";
+import { TransactionalAuthorityWorker } from "../../worker/src/authority-service.js";
 import {
   createEvaluationFixtureRecord,
   getEvaluationFixture,
@@ -132,31 +136,48 @@ class PgPoolAdapter implements SqlPool {
 
 async function start(): Promise<void> {
   const configuration = assertSafeConfiguration(process.env);
-  const [migrationSql, fixtureDocument, walkthroughDocument] =
-    await Promise.all([
-      readFile(
-        new URL(
-          "../../../packages/runtime/migrations/0001_local_appliance.sql",
-          import.meta.url,
-        ),
-        "utf8",
+  const [
+    migrationSql,
+    authorityMigrationSql,
+    fixtureDocument,
+    walkthroughDocument,
+  ] = await Promise.all([
+    readFile(
+      new URL(
+        "../../../packages/runtime/migrations/0001_local_appliance.sql",
+        import.meta.url,
       ),
-      readFile(
-        new URL(
-          "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
-          import.meta.url,
-        ),
-        "utf8",
-      ).then((value) => JSON.parse(value) as unknown),
-      readFile(
-        new URL(
-          "../../../packages/ecc-pack/fixtures/acme-sso-guided-walkthrough.v0.json",
-          import.meta.url,
-        ),
-        "utf8",
-      ).then((value) => JSON.parse(value) as unknown),
-    ]);
-  const migration = createMigrationSource("0001_local_appliance", migrationSql);
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../../../packages/runtime/migrations/0002_authority_request_review.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ).then((value) => JSON.parse(value) as unknown),
+    readFile(
+      new URL(
+        "../../../packages/ecc-pack/fixtures/acme-sso-guided-walkthrough.v0.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ).then((value) => JSON.parse(value) as unknown),
+  ]);
+  const migrations = [
+    createMigrationSource("0001_local_appliance", migrationSql),
+    createMigrationSource(
+      "0002_authority_request_review",
+      authorityMigrationSql,
+    ),
+  ];
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
   const walkthrough = createGuidedWalkthroughRecord(
     walkthroughDocument,
@@ -164,17 +185,33 @@ async function start(): Promise<void> {
   );
   const pgPool = new Pool({ connectionString: configuration.databaseUrl });
   const pool = new PgPoolAdapter(pgPool);
-  await bootstrapAppliance(pool, migration, fixture);
+  await bootstrapAppliance(pool, migrations, fixture);
 
   const store = new PostgresCaseStore(pool);
   const worker = new TransactionalCaseWorker(store);
+  const authorityStore = new PostgresAuthorityStore(pool);
+  await authorityStore.initializeCatalog(
+    SYNTHETIC_AUTHORITY_TENANT,
+    syntheticAuthorityCatalog(),
+    () => new Date(),
+  );
+  const authorityWorker = new TransactionalAuthorityWorker(authorityStore);
   const workbenchAssets = await loadWorkbenchAssets();
   const server = createApiServer(
     {
       isReady: async () => {
-        if (!(await applianceIsReady(pool, migration, fixture))) return false;
+        if (!(await applianceIsReady(pool, migrations, fixture))) return false;
         await store.assertReady();
+        await authorityStore.assertReady(SYNTHETIC_AUTHORITY_TENANT);
         return true;
+      },
+      authority: {
+        create: (command) => authorityWorker.create(command),
+        decide: (command, seat) => authorityWorker.decide(command, seat),
+        read: (tenantId, requestId) =>
+          authorityStore.readRequest(tenantId, requestId, () => new Date()),
+        catalogRevision: (tenantId) =>
+          authorityStore.readCatalogRevision(tenantId),
       },
       executeCaseCommand: async (_tenantId, command) =>
         await worker.execute(command),

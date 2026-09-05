@@ -463,7 +463,7 @@ async function loadEngineState(client: SqlClient): Promise<CaseEngineState> {
   );
 }
 
-async function loadTrustedEngineState(
+export async function loadTrustedEngineState(
   client: SqlClient,
 ): Promise<CaseEngineState> {
   try {

@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/authority-request.v1.schema.json",
+  "title": "Field Runtime authority-request v1",
+  "description": "A request for authority over one exact proposed consequence for one exact version of one Case. It is not a generic approval of a Case.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority_request_id",
+    "tenant_id",
+    "case_id",
+    "case_version",
+    "prepared_by_identity",
+    "requested_authority_class",
+    "requested_action_class",
+    "proposed_consequence_hash",
+    "requested_at",
+    "requested_at_source_timezone",
+    "correlation_id",
+    "policy_reference",
+    "policy_content_hash",
+    "case_journal_head_hash",
+    "review_material_hash",
+    "authority_state_revision",
+    "authority_snapshot_hash",
+    "expires_at",
+    "expires_at_source_timezone"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "authority-request.v1"
+    },
+    "authority_request_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "tenant_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "case_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "case_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "prepared_by_identity": {
+      "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+    },
+    "requested_authority_class": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "requested_action_class": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "proposed_consequence_hash": {
+      "$ref": "#/$defs/Sha256"
+    },
+    "policy_reference": {
+      "$ref": "#/$defs/PolicyReference"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024
+      }
+    },
+    "requested_at": {
+      "$ref": "#/$defs/CanonicalUtcInstant"
+    },
+    "requested_at_source_timezone": {
+      "$ref": "#/$defs/SourceTimezone"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "causation_event_id": {
+      "$ref": "#/$defs/Id"
+    },
+    "policy_content_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "case_journal_head_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "review_material_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "authority_state_revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "authority_snapshot_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "expires_at_source_timezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?:UTC(?:[+-](?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9])?|[A-Za-z][A-Za-z0-9._+-]*(?:/[A-Za-z0-9._+-]+)+)$"
+    },
+    "predecessor_authority_request_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "CanonicalUtcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "SourceTimezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^(?:UTC(?:[+-](?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9])?|[A-Za-z][A-Za-z0-9._+-]*(?:/[A-Za-z0-9._+-]+)+)$"
+    },
+    "PolicyReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "policy_version"
+      ],
+      "properties": {
+        "policy_id": {
+          "$ref": "#/$defs/Id"
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    }
+  }
+}

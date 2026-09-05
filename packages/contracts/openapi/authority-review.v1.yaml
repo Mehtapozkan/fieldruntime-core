@@ -1,0 +1,143 @@
+openapi: 3.1.0
+info:
+  title: Field Runtime synthetic authority review
+  version: 1.0.0
+  description: Local simulation only. Server-owned synthetic seats; no production authentication or action permission. See docs/guides/d6-authority-review.md.
+servers:
+  - url: http://127.0.0.1:3210
+paths:
+  /v1/tenants/{tenant_id}/authority-catalog:
+    parameters:
+      - $ref: "#/components/parameters/Tenant"
+    get:
+      summary: Read the current runtime-controlled catalog revision without durable changes
+      responses:
+        "200":
+          description: Tenant, authority_state_revision, synthetic_review_seats, simulation=true and action_permission=false
+        "404":
+          description: Tenant is not enrolled
+  /v1/tenants/{tenant_id}/authority-requests:
+    parameters:
+      - $ref: "#/components/parameters/Tenant"
+    post:
+      summary: Bind an immutable request to exact C and S, with review revision zero
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/authority-command.v1.schema.json#/oneOf/0"
+      responses:
+        "200":
+          $ref: "#/components/responses/Receipt"
+        "400":
+          description: Invalid command; no append
+        "409":
+          description: Case/catalog/idempotency/eligibility conflict; no append
+        "500":
+          description: Sanitized persistence or integrity failure
+  /v1/tenants/{tenant_id}/authority-requests/{request_id}:
+    parameters:
+      - $ref: "#/components/parameters/Tenant"
+      - $ref: "#/components/parameters/Request"
+    get:
+      summary: Read request, consent material, history, historical evaluations and current eligibility
+      responses:
+        "200":
+          $ref: "#/components/responses/Packet"
+        "404":
+          description: Request not found for tenant
+        "500":
+          description: Sanitized integrity failure
+  /v1/tenants/{tenant_id}/authority-requests/{request_id}/packet:
+    parameters:
+      - $ref: "#/components/parameters/Tenant"
+      - $ref: "#/components/parameters/Request"
+    get:
+      summary: Derive the same response from one read-only snapshot without writer lock, IDs or clock writes
+      responses:
+        "200":
+          $ref: "#/components/responses/Packet"
+        "404":
+          description: Request not found for tenant
+        "500":
+          description: Sanitized integrity failure
+  /v1/tenants/{tenant_id}/authority-requests/{request_id}/decisions/{seat}:
+    parameters:
+      - $ref: "#/components/parameters/Tenant"
+      - $ref: "#/components/parameters/Request"
+      - name: seat
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [business, finance, executive, finance_delegate]
+    post:
+      summary: Recheck exact C/R/S, binding, lifecycle, time and current authority; atomically append decision and replay evidence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/authority-command.v1.schema.json#/oneOf/1"
+      responses:
+        "200":
+          $ref: "#/components/responses/Receipt"
+        "400":
+          description: Invalid command or synthetic seat; no append
+        "409":
+          description: Stale binding/revision, terminal/ineligible request, duplicate principal or conflicting idempotency key; no append
+        "500":
+          description: Sanitized persistence or integrity failure; retry original bytes/key after uncertain commit
+components:
+  parameters:
+    Tenant:
+      name: tenant_id
+      in: path
+      required: true
+      schema:
+        type: string
+        example: tenant_orchid
+    Request:
+      name: request_id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    Packet:
+      description: Informational current eligibility alongside immutable historical evidence; never action permission
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/authority-request-read-response.v1.schema.json"
+    Receipt:
+      description: Applied or exact duplicate historical receipt; never current permission
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [status, receipt]
+            properties:
+              status:
+                enum: [applied, duplicate]
+              receipt:
+                type: object
+                required:
+                  [
+                    authority_request_id,
+                    journal_entry_id,
+                    review_revision,
+                    case_version,
+                    request_binding_hash,
+                    recorded_at,
+                    result,
+                    historical,
+                    action_permission,
+                  ]
+                properties:
+                  historical:
+                    const: true
+                  action_permission:
+                    const: false

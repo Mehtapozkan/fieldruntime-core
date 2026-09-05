@@ -7,29 +7,46 @@ Release position: GitHub PRs #6 (Public Evaluation Preview Readiness), #12
 (Align public roadmap to Case-first product architecture) are merged. The
 repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are public. D6 is
 in progress; D6-A defines contracts and D6-B adds deterministic authority
-resolution, but the governed runtime and Decision Packet are not connected. PR #18
-is merged at `29fd0a7`, repairing the audited authority correctness defects.
-D-032 is accepted by explicit human approval of reviewed commit
-`e7f781dcee9639189cba8115042ea3ba62489eb8`, including ordinary reads without durable
-side effects. **D6-C not implemented.**
+resolution. PR #18 repaired the authority correctness defects. PR #19 is merged
+at `76c9b472eabaff4e66ee4d5dd4ade6c144f95f7e`, including Accepted D-032 and its
+explicit human approval. **D6-C is implemented in [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)**: persistent
+synthetic authority-request review and a runtime-backed Decision Packet API.
+The Guided Workbench remains simulated; its UI connection is the next D6 step.
+No merge, release, deployment, external writes or D7 execution is included.
 
-## Accepted design — not implemented
+## D6-C implementation
 
-- [D-032 — Authority Request review history and exact-version lifecycle](docs/architecture/d6-authority-request-lifecycle.md)
-  keeps Case versions and D-014 unchanged, gives immutable requests an append-only
-  review revision, and derives the Decision Packet from retained inputs/history.
-- The accepted design uses a consistent database snapshot for request/packet reads
-  with no durable side effects. Request creation preserves consent material;
-  decision acceptance rechecks current eligibility and atomically retains exact
-  bindings, review revision and replay inputs/result/versions. No issued-view
-  registry or proof of human screen inspection is required or claimed.
-- The accepted design defines current eligibility, terminal decisions, atomic
-  replacement, concurrency, idempotency, PostgreSQL integrity/replay and concrete
-  two-person review examples. It recommends fresh requests after any synthetic
-  authority catalog change instead of selective approval carry-forward.
-- The decision record quotes the human approval and its scope limits. This step
-  records acceptance in documentation only: no runtime behavior, schema,
-  migrations, identity history, providers, external writes or D6-C integration.
+- Strict request/decision/command/journal/read v1 contracts and explicit validated
+  projection into the repaired v0 resolver. Existing v0 schemas, Case arrays,
+  D-014 and frozen ECC corpus/gold remain unchanged.
+- Additive checksum-bound migration `0002_authority_request_review` retains
+  immutable review/evaluation snapshots, a separate request journal and the
+  runtime-controlled catalog. `0001_local_appliance` and Case history are intact.
+- Create, approve, reject, modify and escalate through the existing worker/HTTP
+  boundary. Decisions advance R, never C; C or S changes invalidate old requests.
+  Rejection and escalation terminate; modification atomically supersedes the old
+  request and creates a fresh R=0 binding with no inherited approvals.
+- Server-selected synthetic actors, policy, authority, delegations and evidence;
+  strict commands reject client-supplied authority inputs. Current identity, scope,
+  policy, complete delegation paths, expiry and clock guards are rechecked under
+  the existing writer transaction. Duplicate receipts remain historical evidence.
+- Request/packet reads use one read-only repeatable snapshot: no writer lock,
+  preview persistence, ID reservation, revision increment or clock update. Consent
+  material and accepted evaluation evidence survive restart without claiming that
+  a human inspected a screen.
+- SQL constraints, immutable hash bindings and deterministic replay check journal,
+  catalog, snapshots, replacement pairs and JSONB/index agreement. Failed writes
+  roll back; failed rollback discards the client.
+- Reviewer eligibility validates the reviewer's complete authority path before
+  per-principal approval deduplication or quota selection. Finance and its delegate
+  can independently reject, modify or escalate after the other fills a permitted
+  approval slot. The default named-Finance restriction is unchanged; unresolved
+  conflicts still block approval and invalid reviewers gain no intervention rights.
+- New evaluations record `authority-resolution.d6c.v2`; retained v1 evaluations
+  replay with their original eligibility calculation. Both supported versions are
+  explicit in the v1 evidence contracts. No tables, migrations, endpoints or
+  client-controlled version selection were added for this repair.
+- [API examples, reproducible demo and migration notes](docs/guides/d6-authority-review.md).
 
 ## Implemented
 
@@ -179,10 +196,10 @@ side effects. **D6-C not implemented.**
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- `pnpm release:check` passes across 141 current files, complete reachable Git
+- `pnpm release:check` passes across current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 194 tests pass, including 16 D6-A identity, delegation, responsibility,
+- 234 tests pass, including 40 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
   immutable authority-binding, lifecycle, conflict, and agent-authority tests;
   42 D6-B threshold, multi-approval, prior-decision, delegation, ambiguity,
   policy-selection, tenant, agent, evidence-lineage, immutability, and input-order
@@ -215,9 +232,31 @@ side effects. **D6-C not implemented.**
   tests require loopback access outside the sandbox; the sandbox-only attempt
   failed with `listen EPERM`, then the complete run passed with that access.
 - `git diff --check` passes.
-- The D-032 acceptance documentation, including its read-side-effect simplification,
-  is checked with the unchanged runtime suite; passing checks do not establish
-  that its accepted lifecycle design is implemented.
+- The reviewer defect was reproduced before implementation changes at PR #20
+  head `cf8088dd`: in each of the runtime and PostgreSQL/API suites, 6/18 new
+  cases failed with `reviewer_ineligible`. All three terminal decisions failed
+  after the other eligible reviewer approved, in both reviewer orderings. All
+  before-approval cases and the alternate decision-ID ordering passed. After the
+  correction, all 18 cases pass in each suite, with terminal authorization removal,
+  unapproved replacements, restart reconstruction and duplicate-retry checks.
+- New negative cases preserve named-Finance policy and reject unrelated, revoked,
+  expired and out-of-scope reviewers after the slot is filled. Eligibility also
+  remains independent of same-principal decision deduplication, input ordering and
+  outstanding quorum. A pre-fix mixed-requirement history and the existing local
+  PostgreSQL request's three v1 journal entries reconstruct under the corrected
+  runtime without changing recorded evidence.
+- 62 explicit API/PostgreSQL integration tests pass locally against an isolated
+  PostgreSQL 18.4 instance: fresh installation, preview migration without Case
+  loss, two-person review/restart, strict inputs, C/R/S races, expiry, terminal
+  states, immutable read snapshots, rollback at each persistence step, uncertain
+  commit retry, failed-rollback eviction and tampering/SQL constraints.
+- CI runs the same suite on pinned PostgreSQL 17 and the actual Compose
+  create → Finance → Executive → PostgreSQL/API restart → reconstruction demo.
+  [CI run 33943965085](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33943965085)
+  passed all 37 initial PostgreSQL scenarios, Compose config and both appliance
+  smoke phases at `841adfe6`. CI runs the complete 62-scenario suite on the corrected
+  PR head; final-commit PostgreSQL/API, Compose and appliance-smoke evidence is
+  linked from the PR checks and reviewer thread.
 - The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
@@ -244,13 +283,16 @@ side effects. **D6-C not implemented.**
 - Importing or mapping an existing external Case while preserving its upstream
   system of record is not implemented.
 - Operational Legibility evaluation is not implemented.
-- The Decision Packet is not backed by authoritative runtime D6 authority
-  evaluation; D6-B currently resolves only over explicitly supplied state.
-- Persistent Authority Request history, review revisions, terminal decision
-  enforcement, trusted evaluation snapshots and the D-032 catalog revision are
-  accepted design only, not implemented. The current resolver ignores non-approval
-  dispositions; runtime consumers must not mistake its result for a persistent
-  request lifecycle gate.
+- The runtime-backed packet uses one compiled synthetic catalog/profile. There is
+  no public catalog editor, live identity verification, production authentication
+  or automatic import of legacy approvals. Unsupported evidence references or
+  content hashes fail closed rather than fetching external content.
+- Catalog authoring remains internal. The v0 conflict-result contract requires
+  distinct source citations; conflicting records sharing only one source reference
+  fail closed with a validation error rather than a reviewable conflict packet.
+- Historical evaluations pin engine/resolver/projection versions; future semantic
+  upgrades must retain their implementation or fail closed. No general version
+  dispatch/history framework is introduced in this step.
 - Identity references have no effective-dated status history. Historical
   delegation approval attribution verifies stable identity and its recorded
   status; this repair does not infer retroactive revocation from current status
@@ -283,12 +325,12 @@ side effects. **D6-C not implemented.**
 
 ## Next
 
-D6-C — Runtime-backed Governed Case Session / Decision Packet remains the next
-implementation milestone under accepted D-032. A separate implementation PR can
-connect deterministic resolution to authoritative Case state and durable request
-review history within that approved boundary. **D6-C not implemented**; D6 is
-incomplete and D7 execution is not included. PR #19 records the accepted design
-only and remains open for the user's merge.
+After PR #20 and its reviewer-eligibility correction are reviewed and merged,
+connect the Guided Workbench to the D6-C runtime/API in a separate D6 UI step,
+keeping its simulation labels and refresh/resubmission behavior explicit. D6 is
+not yet a completed governed user experience. D7 remains the subsequent controlled
+simulated Action Gateway and independent verification milestone; incomplete proof
+still cannot close a Case. No later capability is enabled by a review approval.
 
 The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
 This roadmap alignment does not displace the trusted-kernel priority, add live

@@ -114,10 +114,13 @@ export async function applyMigration(
 
 export async function bootstrapAppliance(
   pool: SqlPool,
-  migration: MigrationSource,
+  migration: MigrationSource | readonly MigrationSource[],
   fixture: EvaluationFixtureRecord,
 ): Promise<void> {
-  await applyMigration(pool, migration);
+  const migrations: readonly MigrationSource[] = Array.isArray(migration)
+    ? (migration as readonly MigrationSource[])
+    : [migration as MigrationSource];
+  for (const source of migrations) await applyMigration(pool, source);
   const client = await pool.connect();
   let transactionOpen = false;
   const releaseState = { discarded: false };
@@ -139,20 +142,25 @@ export async function bootstrapAppliance(
 
 export async function applianceIsReady(
   pool: SqlPool,
-  migration: MigrationSource,
+  migration: MigrationSource | readonly MigrationSource[],
   fixture: EvaluationFixtureRecord,
 ): Promise<boolean> {
   const client = await pool.connect();
   try {
-    const migrationResult = await client.query<{
-      readonly checksum: unknown;
-    }>(
-      `SELECT checksum
+    const migrations: readonly MigrationSource[] = Array.isArray(migration)
+      ? (migration as readonly MigrationSource[])
+      : [migration as MigrationSource];
+    for (const source of migrations) {
+      const migrationResult = await client.query<{
+        readonly checksum: unknown;
+      }>(
+        `SELECT checksum
          FROM fieldruntime_schema_migrations
         WHERE version = $1`,
-      [migration.version],
-    );
-    if (migrationResult.rows[0]?.checksum !== migration.checksum) return false;
+        [source.version],
+      );
+      if (migrationResult.rows[0]?.checksum !== source.checksum) return false;
+    }
     const fixtureResult = await client.query<{
       readonly fixture_hash: unknown;
     }>(
