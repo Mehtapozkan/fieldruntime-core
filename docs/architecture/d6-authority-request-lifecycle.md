@@ -1,12 +1,24 @@
 # D-032 — Authority Request review history and exact-version lifecycle
 
-Status: **Proposed**. Documentation only; requires explicit human approval before
-contract, runtime, or migration implementation. Inspected main: `29fd0a7`, including
-merged PR #18. D6-C remains unimplemented.
+Status: **Accepted** by explicit human approval of the reviewed design at
+[e7f781dcee9639189cba8115042ea3ba62489eb8](https://github.com/Mehtapozkan/fieldruntime-core/blob/e7f781dcee9639189cba8115042ea3ba62489eb8/docs/architecture/d6-authority-request-lifecycle.md),
+including the amendment making ordinary reads free of durable side effects.
+Documentation only; **D6-C not implemented**. Inspected main: `29fd0a7`, including
+merged PR #18. Contract, runtime and migration implementation requires a separate
+reviewable PR.
 
-## Decision requested
+## Human approval
 
-Approve an immutable Authority Request with its own append-only review history in
+Approval source: the user's explicit instruction in this task, recorded verbatim:
+
+> I approve D-032 as reviewed at commit e7f781dcee9639189cba8115042ea3ba62489eb8, including the amendment making ordinary reads free of durable side effects.
+> This approves the separate request review history, exact Case bindings, conservative catalog-change invalidation, terminal decision rules and retained consent/replay evidence for synthetic D6.
+> Update existing PR #19 to mark D-032 Accepted in its decision record and DECISIONS.md, and record this instruction as the human approval. Update STATUS while clearly retaining “D6-C not implemented.”
+> Run the required checks and leave PR #19 open for my merge. Do not implement runtime changes, merge, release or deploy in this task.
+
+## Accepted decision
+
+Use an immutable Authority Request with its own append-only review history in
 canonical PostgreSQL. A recorded decision advances **request review revision R**,
 never **Case version C**. A Decision Packet is a derived read model with no durable
 read side effects. Approvals become effective only after folding the entire request
@@ -18,7 +30,7 @@ revision **S**. Any catalog change requires a new request and fresh approvals.
 This deliberately conservative choice avoids selective approval carry-forward,
 per-record dependency tracking, and identity status history. An unrelated catalog
 change can require unnecessary review; that is a deliberate tradeoff of this
-proposal. S is distinct from `runtime_writer_lock.revision`: Case and
+design. S is distinct from `runtime_writer_lock.revision`: Case and
 review writes must not change S. Restoring old catalog content advances S again.
 
 ## Existing behavior and compatibility
@@ -57,8 +69,8 @@ review writes must not change S. Restoring old catalog content advances S again.
 There is no required amendment to an accepted decision under this design. Putting
 review entries in `case_journal` while keeping C unchanged would contradict D-014,
 the Case journal contract and its SQL/replay invariants. Amending those is broader
-than necessary; approve the separate request stream instead. D-032 is the explicit
-new persistence/lifecycle boundary requiring human approval, including its catalog
+than necessary; use the separate request stream instead. The human approval above
+accepts D-032's new persistence/lifecycle boundary, including its catalog
 invalidation rule and terminal decision meanings below.
 
 ## State and lifecycle rules
@@ -101,7 +113,7 @@ At submission, compare current evaluation time with the durable clock guard from
 prior committed writes. Ordinary reads and historical replay never update that
 guard; a read's eligibility result is informational, not permission to submit.
 
-## Minimal contract and API additions (proposed, not schema files)
+## Minimal contract and API additions (accepted design, not schema files)
 
 Introduce explicit **Authority Request v1**, **Authority Decision v1**, and a
 versioned request-journal/read-response envelope in a later implementation. Keep
@@ -130,7 +142,7 @@ retains its trusted evaluation inputs and result with its journal entry. These
 snapshots are immutable evidence, not a separately editable Decision Basis or
 review-session aggregate; previews need no durable snapshot.
 
-Propose three bounded operations through the existing worker/API surface:
+Use three bounded operations through the existing worker/API surface:
 `authority.request.create`, `authority.request.decide`, and a request/packet read.
 Create checks expected C and S. Decide supplies expected C, expected R, expected S,
 request binding hash, disposition, reason/replacement input, and a tenant-scoped
@@ -211,7 +223,7 @@ The catalog contains synthetic identity, policy, authority and delegation record
 Its durable revision is monotonic and increments only on a controlled catalog
 update, under the same lock. Preserve snapshots bound at creation and decision
 acceptance; no identity-status timeline, backfill, provider, public catalog-edit API
-or production authentication is proposed. A snapshot records what the runtime
+or production authentication is included. A snapshot records what the runtime
 trusted then, not when an identity was actually revoked. Preserve PR #18's
 historical delegation-approver semantics; current evaluator, reviewer, delegator
 and delegate eligibility remains explicit.
@@ -287,7 +299,7 @@ from runtime Case history, not imported from the non-replayable legacy fixture.
 | Finance and Executive simultaneously submit expected R=0                                   | 7         | Q: 0 → 1            | Singleton lock gives one applied decision; loser gets `review_revision_conflict` and no append. After refresh/new key at expected R=1, loser may append R=2; both then count. No predetermined winner.                                                                            |
 | Double-click or retry after commit and restart                                             | 7         | Q: 0 → 1 → 1        | Same key/bytes returns original receipt once; no extra vote. Changed bytes with that key conflict. If rollback happened before commit, retry applies once at R=1. If C or S changed after commit, duplicate still returns history but current eligibility is false.               |
 
-## Implementation acceptance criteria, after approval
+## Implementation acceptance criteria (not yet implemented)
 
 1. Add versioned contract tests for complete snapshot/material/policy binding,
    absent v1 fields, v0 non-promotion, terminal dispositions and replacement lineage.

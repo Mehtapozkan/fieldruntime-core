@@ -9,25 +9,26 @@ repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are public. D6 is
 in progress; D6-A defines contracts and D6-B adds deterministic authority
 resolution, but the governed runtime and Decision Packet are not connected. PR #18
 is merged at `29fd0a7`, repairing the audited authority correctness defects.
-D-032 proposes the next authority-request lifecycle/version contract; it is not
-accepted or implemented.
+D-032 is accepted by explicit human approval of reviewed commit
+`e7f781dcee9639189cba8115042ea3ba62489eb8`, including ordinary reads without durable
+side effects. **D6-C not implemented.**
 
-## Proposed for review
+## Accepted design — not implemented
 
 - [D-032 — Authority Request review history and exact-version lifecycle](docs/architecture/d6-authority-request-lifecycle.md)
   keeps Case versions and D-014 unchanged, gives immutable requests an append-only
   review revision, and derives the Decision Packet from retained inputs/history.
-- Ordinary request/packet reads are proposed to use a consistent database snapshot
+- The accepted design uses a consistent database snapshot for request/packet reads
   with no durable side effects. Request creation preserves consent material;
   decision acceptance rechecks current eligibility and atomically retains exact
   bindings, review revision and replay inputs/result/versions. No issued-view
   registry or proof of human screen inspection is required or claimed.
-- The proposal defines current eligibility, terminal decisions, atomic replacement,
-  concurrency, idempotency, PostgreSQL integrity/replay and concrete two-person
-  review examples. It recommends fresh requests after any synthetic authority
-  catalog change instead of selective approval carry-forward.
-- Human approval is required before introducing this request persistence/lifecycle
-  boundary. This step changes documentation only: no runtime behavior, schema,
+- The accepted design defines current eligibility, terminal decisions, atomic
+  replacement, concurrency, idempotency, PostgreSQL integrity/replay and concrete
+  two-person review examples. It recommends fresh requests after any synthetic
+  authority catalog change instead of selective approval carry-forward.
+- The decision record quotes the human approval and its scope limits. This step
+  records acceptance in documentation only: no runtime behavior, schema,
   migrations, identity history, providers, external writes or D6-C integration.
 
 ## Implemented
@@ -214,9 +215,9 @@ accepted or implemented.
   tests require loopback access outside the sandbox; the sandbox-only attempt
   failed with `listen EPERM`, then the complete run passed with that access.
 - `git diff --check` passes.
-- The D-032 documentation proposal, including its read-side-effect simplification,
+- The D-032 acceptance documentation, including its read-side-effect simplification,
   is checked with the unchanged runtime suite; passing checks do not establish
-  that its proposed lifecycle is implemented.
+  that its accepted lifecycle design is implemented.
 - The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
@@ -247,8 +248,9 @@ accepted or implemented.
   evaluation; D6-B currently resolves only over explicitly supplied state.
 - Persistent Authority Request history, review revisions, terminal decision
   enforcement, trusted evaluation snapshots and the D-032 catalog revision are
-  proposed only. The current resolver ignores non-approval dispositions; runtime
-  consumers must not mistake its result for a persistent request lifecycle gate.
+  accepted design only, not implemented. The current resolver ignores non-approval
+  dispositions; runtime consumers must not mistake its result for a persistent
+  request lifecycle gate.
 - Identity references have no effective-dated status history. Historical
   delegation approval attribution verifies stable identity and its recorded
   status; this repair does not infer retroactive revocation from current status
@@ -281,12 +283,12 @@ accepted or implemented.
 
 ## Next
 
-Review Proposed D-032 and obtain explicit human approval of the request
-persistence/lifecycle boundary. After approval, a separate D6-C — Runtime-backed
-Governed Case Session / Decision Packet implementation can connect deterministic
-resolution to authoritative Case state and durable request review history. D6-C
-remains the next implementation milestone; D6 is incomplete and D7 execution is
-not included.
+D6-C — Runtime-backed Governed Case Session / Decision Packet remains the next
+implementation milestone under accepted D-032. A separate implementation PR can
+connect deterministic resolution to authoritative Case state and durable request
+review history within that approved boundary. **D6-C not implemented**; D6 is
+incomplete and D7 execution is not included. PR #19 records the accepted design
+only and remains open for the user's merge.
 
 The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
 This roadmap alignment does not displace the trusted-kernel priority, add live
