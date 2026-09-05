@@ -7,7 +7,23 @@ Release position: GitHub PRs #6 (Public Evaluation Preview Readiness), #12
 (Align public roadmap to Case-first product architecture) are merged. The
 repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are public. D6 is
 in progress; D6-A defines contracts and D6-B adds deterministic authority
-resolution, but the governed runtime and Decision Packet are not connected.
+resolution, but the governed runtime and Decision Packet are not connected. PR #18
+is merged at `29fd0a7`, repairing the audited authority correctness defects.
+D-032 proposes the next authority-request lifecycle/version contract; it is not
+accepted or implemented.
+
+## Proposed for review
+
+- [D-032 — Authority Request review history and exact-version lifecycle](docs/architecture/d6-authority-request-lifecycle.md)
+  keeps Case versions and D-014 unchanged, gives immutable requests an append-only
+  review revision, and derives the Decision Packet from retained inputs/history.
+- The proposal defines current eligibility, terminal decisions, atomic replacement,
+  concurrency, idempotency, PostgreSQL integrity/replay and concrete two-person
+  review examples. It recommends fresh requests after any synthetic authority
+  catalog change instead of selective approval carry-forward.
+- Human approval is required before introducing this request persistence/lifecycle
+  boundary. This step changes documentation only: no runtime behavior, schema,
+  migrations, identity history, providers, external writes or D6-C integration.
 
 ## Implemented
 
@@ -157,7 +173,7 @@ resolution, but the governed runtime and Decision Packet are not connected.
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
-- `pnpm release:check` passes across 140 current files, complete reachable Git
+- `pnpm release:check` passes across 141 current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
 - 194 tests pass, including 16 D6-A identity, delegation, responsibility,
@@ -193,6 +209,8 @@ resolution, but the governed runtime and Decision Packet are not connected.
   tests require loopback access outside the sandbox; the sandbox-only attempt
   failed with `listen EPERM`, then the complete run passed with that access.
 - `git diff --check` passes.
+- The D-032 documentation proposal is checked with the unchanged runtime suite;
+  passing checks do not establish that its proposed lifecycle is implemented.
 - The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
@@ -221,6 +239,10 @@ resolution, but the governed runtime and Decision Packet are not connected.
 - Operational Legibility evaluation is not implemented.
 - The Decision Packet is not backed by authoritative runtime D6 authority
   evaluation; D6-B currently resolves only over explicitly supplied state.
+- Persistent Authority Request history, review revisions, terminal decision
+  enforcement, trusted evaluation snapshots and the D-032 catalog revision are
+  proposed only. The current resolver ignores non-approval dispositions; runtime
+  consumers must not mistake its result for a persistent request lifecycle gate.
 - Identity references have no effective-dated status history. Historical
   delegation approval attribution verifies stable identity and its recorded
   status; this repair does not infer retroactive revocation from current status
@@ -253,11 +275,12 @@ resolution, but the governed runtime and Decision Packet are not connected.
 
 ## Next
 
-D6-B authority correctness repairs are ready for review; D6-C — Runtime-backed
-Governed Case Session / Decision Packet integration remains the next milestone:
-connect deterministic resolution to authoritative runtime Case state and expose
-its exact satisfied and outstanding requirements without changing the simulated
-Workbench or adding D7 execution. D6 remains incomplete.
+Review Proposed D-032 and obtain explicit human approval of the request
+persistence/lifecycle boundary. After approval, a separate D6-C — Runtime-backed
+Governed Case Session / Decision Packet implementation can connect deterministic
+resolution to authoritative Case state and durable request review history. D6-C
+remains the next implementation milestone; D6 is incomplete and D7 execution is
+not included.
 
 The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
 This roadmap alignment does not displace the trusted-kernel priority, add live
