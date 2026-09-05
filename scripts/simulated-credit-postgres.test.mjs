@@ -2,6 +2,7 @@ import { PostgresCreditVerificationStore } from "../dist/packages/runtime/src/po
 import { TransactionalCreditVerificationWorker } from "../dist/apps/worker/src/credit-verification-service.js";
 import {
   createReviewClient,
+  caseReceiptEvidence,
   PENDING_PREFIX,
 } from "../apps/admin/public/authority-client.js";
 import {
@@ -2230,6 +2231,26 @@ test("D7-D Workbench: explicit preparation, review, credit, independent check an
   );
   assert.equal(client.state.packet.case_version, c);
   assert.equal(client.state.packet.review_revision, r);
+  const receipt = caseReceiptEvidence(client.state);
+  assert.equal(receipt.reconciled, true, receipt.issues.join("; "));
+  assert.equal(receipt.decisions.filter((d) => d.applies).length, 2);
+  assert.equal(receipt.attempts.length, 1);
+  assert.equal(receipt.checks.length, 1);
+  assert.equal(
+    receipt.identities.get(receipt.latestAttempt.id).identity_id,
+    "identity_d7_credit_executor",
+  );
+  assert.equal(
+    receipt.identities.get(receipt.latestCheck.id).identity_id,
+    "identity_d7_credit_verifier",
+  );
+  const unchanged = await h.dump();
+  // The in-memory confirmed receipt and the same API entry count only once.
+  for (let n = 0; n < 2; n++) {
+    await client.refresh();
+    assert.deepEqual(caseReceiptEvidence(client.state), receipt);
+  }
+  assert.deepEqual(await h.dump(), unchanged, "receipt reads write nothing");
   await h.restart();
   const reopened = workbench(h);
   await reopened.start(client.state.requestId);
@@ -2242,6 +2263,11 @@ test("D7-D Workbench: explicit preparation, review, credit, independent check an
     client.state.credit.verifications,
   );
   assert.equal(reopened.state.credit.closure_permission, false);
+  assert.deepEqual(
+    caseReceiptEvidence(reopened.state),
+    receipt,
+    "the same evidence receipt reconstructs after restart without browser storage",
+  );
   const durable = await h.dump();
   const newViewer = workbench(h);
   await newViewer.start();
@@ -2251,6 +2277,28 @@ test("D7-D Workbench: explicit preparation, review, credit, independent check an
     await h.dump(),
     durable,
     "explicit reopen does not create a second request",
+  );
+  const denied = (
+    await h.request(
+      action,
+      await h.command(client.state.requestId, "receipt:occupied-slot"),
+      409,
+    )
+  ).receipt;
+  assert.equal(denied.outcome, "denied");
+  await newViewer.refresh();
+  const afterDenial = caseReceiptEvidence(newViewer.state);
+  assert.equal(afterDenial.reconciled, true, afterDenial.issues.join("; "));
+  assert.equal(afterDenial.latestAttempt.id, denied.id);
+  assert.equal(
+    afterDenial.latestCheck,
+    null,
+    "a newer denied attempt cannot inherit an older successful check",
+  );
+  assert.equal(
+    afterDenial.checks[0].comparison.outcome,
+    "verified_simulated_effect",
+    "the earlier successful check remains historical evidence",
   );
 });
 
@@ -2313,6 +2361,14 @@ for (const kind of ["execute", "verify"])
     assert.equal(retry.state.credit.attempts.length, 1);
     if (kind === "verify")
       assert.equal(retry.state.credit.verifications.length, 1);
+    const receipt = caseReceiptEvidence(retry.state);
+    assert.equal(receipt.reconciled, true, receipt.issues.join("; "));
+    assert.equal(
+      receipt.attempts.length,
+      1,
+      "exact retries never double count",
+    );
+    assert.equal(receipt.checks.length, kind === "verify" ? 1 : 0);
   });
 
 test("D7-D confirmed verification survives failed refresh; unavailable read is never success or absence", async (t) => {
@@ -2341,6 +2397,10 @@ test("D7-D confirmed verification survives failed refresh; unavailable read is n
   assert.equal(c.state.creditReceipt.comparison.absence_proven, false);
   assert.equal(c.state.creditNeedsRefresh, true);
   assert.match(c.state.creditError, /confirmed receipt remains recorded/);
+  const retained = caseReceiptEvidence(c.state);
+  assert.equal(retained.reconciled, false);
+  assert.equal(retained.latestCheck.comparison.outcome, "inconclusive");
+  assert.ok(retained.decisions.every((d) => d.applies === null));
   assert.equal(canExecuteCredit(c.state), false);
   h.setReaderHook(undefined);
   failRead = false;
@@ -2377,6 +2437,16 @@ test("D7-D latest independent absence permits only an explicit fresh attempt; oc
   insert = true;
   await client.executeCredit();
   assert.equal(client.state.credit.attempts.length, 2);
+  assert.equal(
+    caseReceiptEvidence(client.state).latestCheck,
+    null,
+    "newer attempt cannot inherit the previous attempt's absence check",
+  );
+  assert.equal(
+    caseReceiptEvidence(client.state).checks.length,
+    1,
+    "earlier proof remains inspectable history",
+  );
   assert.equal(canExecuteCredit(client.state), false);
   await client.verifyCredit();
   assert.equal(
@@ -2419,8 +2489,32 @@ for (const change of ["evidence", "reject", "modify", "escalate"])
       latestCheck(client.state.credit).comparison.outcome,
       "verified_simulated_effect",
     );
+    const receipt = caseReceiptEvidence(client.state);
+    assert.ok(
+      receipt.decisions.every((d) => d.applies !== true),
+      "changed or terminal approvals cannot count as current",
+    );
+    assert.equal(
+      receipt.latestCheck.comparison.outcome,
+      "verified_simulated_effect",
+      "historical effect evidence survives loss of execution eligibility",
+    );
     if (change === "modify") {
       const id = client.state.receipt.replacement_authority_request_id;
+      assert.ok(receipt.relatedRequests.includes(id));
+      await client.refresh(id);
+      const replacement = caseReceiptEvidence(client.state);
+      assert.equal(replacement.decisions.length, 0);
+      assert.ok(
+        replacement.relatedRequests.includes(
+          receipt.reviews[0].entry.authority_request_id,
+        ),
+      );
+      assert.equal(
+        replacement.attempts.length,
+        1,
+        "earlier request's action remains history",
+      );
       assert.equal((await h.read(id)).review_revision, 0);
       assert.equal((await h.read(id)).current.authorized, false);
     }
@@ -2498,10 +2592,112 @@ test("D7-D reordered history cannot hide a later inconclusive check behind an ea
   reordered.attempts.reverse();
   reordered.verifications.reverse();
   validateCredit(reordered);
+  const receipt = caseReceiptEvidence({ ...client.state, credit: reordered });
+  assert.equal(receipt.reconciled, true, receipt.issues.join("; "));
+  assert.equal(receipt.latestCheck.comparison.outcome, "inconclusive");
+  assert.deepEqual(
+    receipt.operations.map((entry) => entry.sequence),
+    [1, 2, 3],
+  );
+  assert.equal(
+    new Set(receipt.operations.map((entry) => entry.recorded_at)).size,
+    1,
+    "equal timestamps retain journal order without inventing cross-journal order",
+  );
   assert.equal(
     reviewProgress({ ...client.state, credit: reordered }).heading,
     "Check inconclusive",
   );
+});
+
+test("D8-A independently loaded Case and review projections remain incomplete until refreshed", async (t) => {
+  const { h, client } = await readyWorkbench(t);
+  let change = true;
+  const reader = workbench(h, {
+    fetcher: async (path, options) => {
+      const response = await h.fetcher(path, options);
+      if (change && path.endsWith("/packet")) {
+        change = false;
+        await client.attachEvidence();
+      }
+      return response;
+    },
+  });
+  await reader.start(client.state.requestId);
+  const mixed = caseReceiptEvidence(reader.state);
+  assert.equal(mixed.reconciled, false);
+  assert.ok(mixed.decisions.every((d) => d.applies === null));
+  assert.ok(mixed.issues.some((s) => /Case or catalog/.test(s)));
+  const before = await h.dump();
+  await reader.refresh();
+  const fresh = caseReceiptEvidence(reader.state);
+  assert.equal(fresh.reconciled, true, fresh.issues.join("; "));
+  assert.ok(fresh.decisions.every((d) => d.applies === false));
+  assert.deepEqual(await h.dump(), before);
+});
+
+test("D8-A full Case read integrity rejects altered journal and projection bytes while preserving D-014 and restart", async (t) => {
+  const { h, client } = await readyWorkbench(t);
+  const originalVersion = client.state.packet.case_version;
+  assert.equal(
+    (await h.case(transition(originalVersion, "resolved"))).status,
+    "rejected",
+  );
+  await client.refresh();
+  assert.equal(
+    client.state.caseRecord.document.case.version,
+    originalVersion + 1,
+  );
+  assert.equal(client.state.caseRecord.document.case.state, "needs_review");
+  await client.attachEvidence();
+  const clean = client.state.caseRecord;
+  assert.equal(clean.journal.at(-1).event_type, "case.work_event_attached");
+  assert.equal(caseReceiptEvidence(client.state).reconciled, true);
+  const before = await h.dump();
+  for (const alter of [
+    (r) => (r.journal[1].event_type = "case.created"),
+    (r) =>
+      (r.journal.at(-1).payload.work_event.content_hash =
+        `sha256:${"a".repeat(64)}`),
+    (r) => (r.journal.at(-1).recorded_at = "not-time"),
+    (r) =>
+      (r.journal.at(-1).payload.audit_entry.actor_identity_id =
+        "identity_someone_else"),
+    (r) => (r.document.case.state = "resolved"),
+    (r) => r.document.events.reverse(),
+  ]) {
+    const reader = workbench(h, {
+      fetcher: async (path, options) => {
+        const response = await h.fetcher(path, options);
+        if (!path.endsWith("/cases/case_d6_workbench")) return response;
+        const record = await response.json();
+        alter(record);
+        return new globalThis.Response(JSON.stringify(record), {
+          status: response.status,
+          headers: response.headers,
+        });
+      },
+    });
+    await reader.start(client.state.requestId);
+    assert.equal(
+      reader.state.packet,
+      null,
+      "do not publish a mixed packet with invalid Case evidence",
+    );
+    assert.equal(reader.state.needsRefresh, true);
+    assert.match(reader.state.error, /Case evidence failed/);
+    assert.equal(caseReceiptEvidence(reader.state).reconciled, false);
+  }
+  assert.deepEqual(
+    await h.dump(),
+    before,
+    "failed content verification creates no durable changes",
+  );
+  await h.restart();
+  const reopened = workbench(h);
+  await reopened.start(client.state.requestId);
+  assert.deepEqual(reopened.state.caseRecord, clean);
+  assert.equal(caseReceiptEvidence(reopened.state).reconciled, true);
 });
 
 if (process.env.D7_WORKBENCH_BROWSER === "1") {

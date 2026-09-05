@@ -1,10 +1,11 @@
 # Status
 
-Current milestone: D7-D Workbench action and independent-check controls, implemented
-on `feat/d7d-credit-workbench` for review. D6 review and D7-B/C APIs are merged.
-PR #24 merged normally at `3936843fba4126bdb852e2ee5681de0f7162525a` from reviewed
-head `f72a02566c3198d53f4f53e1154112eff5a12ebb`, with passing required checks and no
-unresolved review threads. Normal protections were preserved without bypass.
+Current milestone: D8-A Case progress and evidence receipt, implemented for review
+on `feat/d8a-case-progress-receipt`. D7 is merged, including the Workbench controls.
+PR #25 merged normally at `f49dd71e3d1d8a393729690437d6f568b7473238` from reviewed
+head `2f3434fee20690dc19a4091409ee13f429551e89`, with passing required checks and no
+unresolved findings. Required PRs, up-to-date `validate`, force-push and deletion
+protections were preserved without bypass.
 The published `v0.1.0-evaluation-preview.0` remains the September 1 snapshot at
 `3db1b4bf0304e67e1ef51be785d1f81b906016b3`, before D6/D7. Current source and this
 review branch are not a new release. [Operator functionality table](README.md#what-works-today).
@@ -32,7 +33,7 @@ presentation for this milestone; no further UI redesign is required before merge
 This records D6-D presentation acceptance, not a GitHub approving review or approval
 of D-033. No additional visual checks or UI changes are claimed by D7-B/C.
 
-The two retained D6-D UI follow-ups are implemented on this D7-D branch:
+The two retained D6-D UI follow-ups are merged with D7-D in PR #25:
 
 - Acknowledge an already-recorded approval using validated server history while
   preserving permitted reject/modify/escalate interventions. An old receipt must
@@ -143,7 +144,7 @@ The merged D7-B baseline supplied:
 
 [The API guide](docs/guides/simulated-credit-api.md) includes the explicit preparation,
 Finance/Executive review, action, verification and restart demonstration. D7-C is
-merged above; D7-D Workbench controls are implemented on this review branch.
+merged above; D7-D Workbench controls are merged in PR #25.
 The Workbench preserves the accepted D6 review semantics. Adapter success
 is never verification; repetition requires independent absence and current authority. Customer impact, Case resolution and recovered
 revenue remain unproven. Legacy execution and incomplete-proof closure guards remain.
@@ -594,7 +595,7 @@ Final combined-commit validation and PostgreSQL/API, restart, Compose and Workbe
 CI evidence are recorded in PR #24. Docker is unavailable locally; no local Compose
 pass or new visual inspection is claimed by this documentation pass.
 
-## D7-D implemented for review
+## D7-D merged baseline
 
 The existing white/cream Workbench now connects review → simulated action →
 independent source check. Server history supplies progress; verified effect,
@@ -664,14 +665,69 @@ Docker is unavailable locally (`docker compose config --quiet` exits 127); no lo
 Compose pass is claimed. Required CI runs PostgreSQL/API, eight D7-D browser scenarios,
 all retained D6-D browser groups, Compose configuration and container appliance/
 restart smokes. Its timeout allows the added browser coverage; no check is removed.
-Final commit and CI evidence are recorded in the open implementation PR. No release
+Final reviewed head `2f3434fe` and passing CI are recorded in merged PR #25. No release
 or deployment is included.
+
+## D8-A implemented for review
+
+History is now **Case progress & evidence**, a compact read-only receipt of the
+proposed Orchid credit and its uncertainty, attributed human review, simulated
+action, independent observation and unresolved impact/acceptance gaps. Expanding
+stages shows retained citations, canonical synthetic identities, exact request and
+attempt bindings, recorded times and complete supporting evaluation evidence.
+Earlier requests remain linked; earlier attempts and checks remain inspectable.
+It replaces duplicate History lists rather than introducing another component or
+ledger. Existing review/action/check controls and their trust boundaries remain.
+
+A presentation-only projection reconciles existing validated reads using C/R/S,
+request bindings and Case/review journal anchors. Independently loaded views that
+disagree are explicitly incomplete; approval applicability is unconfirmed until a
+read-only refresh reconciles them. Current authority is always rechecked by the
+server on submission. Equal timestamps do not establish cross-journal order.
+A confirmed receipt is deduplicated against its canonical entry; the newest attempt
+gets only its own latest check, and a later inconclusive result replaces a positive
+result label. Failed refresh retains recorded evidence without granting permission.
+
+Review found that unchanged hash strings could conceal altered Case GET contents.
+Five regressions reproduced the false reconciled label before the repair. Case
+reads now recompute native SHA-256 journal hashes, check audit/sequence/time bindings
+and reconstruct the returned document from recorded events before reconciliation.
+This checks recorded facts, not transition permission. Altered payloads, timestamps,
+projections and rehashed conflicting anchors/attribution are rejected; a failed read
+retains earlier validated evidence and leaves current applicability unconfirmed.
+Real PostgreSQL/API and browser regressions cover this boundary, read-only behavior,
+D-014 rejected transitions, attached evidence and restart.
+
+No runtime contract, authority rule, persistence, migration, worker or dependency is
+added. Receipt opening, expansion and refresh create no durable records. Browser
+storage remains navigation/exact pending retries only; history reloads from the API.
+No percentage, ROI, saved time or economic value is inferred. The $15,000 is a proposed
+simulated credit, not recovered revenue. Customer impact, acceptance and complete
+Case closure remain unproven; external effects stay disabled.
+
+Local validation: `pnpm validate` passes **272 tests**; real PostgreSQL/API passes
+**63 D6 tests and 115 D7/D8 tests**, including eight Chromium scenarios extended
+for the receipt. The separate eight D6-D browser scenarios pass. Focused final
+receipt/restart/retry/read-interleaving checks pass; the newer-denial regression
+also preserves the earlier match as history without inheriting its positive label.
+ECC passes **620/620**; its negative control exits **1 at 152/620** from intended
+assertion failures. `git diff --check` passes. Frozen fixtures and runtime behavior
+are unchanged.
+
+Twenty desktop/390px captures and the executable walkthrough are in the
+[receipt handoff](docs/guides/d8-case-receipt-handoff.md). Chromium checks include
+keyboard expansion and refresh focus, reload, read-only durable snapshots and no
+horizontal overflow. The PR records final commit and hosted validation evidence.
+Docker is unavailable locally (`docker compose config --quiet` exits 127); no local
+Compose pass is claimed. Required final-head CI includes all PostgreSQL/API,
+Workbench, Compose and container appliance/restart checks. Earlier D7 validation
+above is historical and distinguished from this D8-A evidence.
 
 ## Next
 
-Review D7-D with final API/browser/CI evidence; leave its PR open and unmerged.
-D8 then addresses accepted outcome/economics receipts. Neither a credit nor a source
-check proves customer impact, accepted outcome or recovered revenue. Incomplete
-proof continues to block closure. Case formation/import and Operational Legibility
-(D9–D10) precede general workers. No live connectors, production authentication,
-external actions, release or deployment are supplied by this milestone.
+Review D8-A and leave its implementation PR unmerged. Remaining D8 accepted-outcome,
+economics and failure-demonstration work stays planned; it requires actual evidence
+and measurements. No credit or source check proves customer impact, acceptance or
+recovered revenue. Incomplete proof continues to block closure. Case formation/import
+and Operational Legibility (D9–D10) precede general workers. No live connectors,
+production authentication, external actions, release or deployment accompany D8-A.

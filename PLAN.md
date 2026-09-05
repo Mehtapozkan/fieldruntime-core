@@ -10,8 +10,10 @@ operator accepted [D-033](docs/architecture/d7-simulated-credit-verification.md)
 at `527cfb6f`. D7-A PR #22 merged normally at
 `f6dcddc03da8ee7c86cce76979aca751b2b0266d` with full D6-D coverage. D7-B PR #23 merged normally at `6766d9d99569fbff0e95e8b8b91748c1c0646b7a`
 from reviewed head `56490f9a` after required checks. D7-C PR #24 merged at `3936843fba4126bdb852e2ee5681de0f7162525a`
-from reviewed head `f72a0256` with passing required checks. D7-D Workbench controls
-are implemented on this review branch and remain open for review. No release or deployment is included.
+from reviewed head `f72a0256` with passing required checks. D7-D PR #25 merged normally
+at `f49dd71e3d1d8a393729690437d6f568b7473238`, preserving reviewed head `2f3434fe`
+and passing checks. D8-A’s read-only Case receipt is implemented for review on this
+branch. No release or deployment is included.
 
 The published `v0.1.0-evaluation-preview.0` is a historical snapshot at `3db1b4bf`,
 before D6/D7; merges do not update it. This plan describes current source and future
@@ -46,8 +48,8 @@ historical behavior alone never establishes business authority.
 | GitHub #12 — Public Launch Finalization              | Merged      | Final public copy, release-state reconciliation, repository metadata and protection checks, anonymous-clone verification, and prerelease publication gate                                                                                                                   | Final `main` passes hosted CI and `pnpm release:check`; every checklist stop condition is clear before visibility changes                                  |
 | GitHub #14 — Automated Evaluation Prerelease         | Merged      | Automate the evaluation prerelease while retaining the repository's explicit preview boundary                                                                                                                                                                               | The published prerelease remains tied to validated source and release checks                                                                               |
 | D6 — Governed Case Session                           | Merged      | Authoritative identity, delegation, and business authority; exact Case owner, delegated worker, authority owner, and verifier; payload-bound approvals; deterministic authority resolution                                                                                  | The Decision Packet is runtime-backed, approvals bind the exact payload, and authority resolution fails closed                                             |
-| D7 — Controlled Action + Independent Verification    | In progress | Bounded Orchid simulated-credit API merged; independent verification merged in PR #24; Workbench action/check controls implemented for review                                                                                                                               | Bypass, self-verification, unbound-payload, precondition, and duplicate-effect negative tests pass                                                         |
-| D8 — Receipts + Economics + Failure Theater          | Planned     | Reconstructable authority, action, verifier, and outcome lineage plus human intervention, wait/handoff time, and cost per accepted outcome; unsafe paths fail visibly                                                                                                       | A Case is reconstructable, economics derive from receipts, and unsafe authority/action/verification demonstrations fail closed                             |
+| D7 — Controlled Action + Independent Verification    | Merged      | Bounded Orchid credit, independent verification and Workbench action/check controls merged in PRs #23–#25                                                                                                                                                                   | Bypass, self-verification, unbound-payload, precondition, and duplicate-effect negative tests pass                                                         |
+| D8 — Receipts + Economics + Failure Theater          | In progress | D8-A read-only Case progress/evidence receipt implemented for review; accepted-outcome, measured economics and remaining failure demonstrations planned                                                                                                                     | A Case is reconstructable, economics derive from receipts, and unsafe authority/action/verification demonstrations fail closed                             |
 | D9 — Intake + Case Formation                         | Planned     | Canonical intake for email, file, form, event, queue row, and human submission; provenance-preserving evidence links; related-signal linking; uncertainty-preserving Case candidates and existing-Case import                                                               | Repeatable candidate formation and safe mapping of upstream Cases both preserve provenance, ambiguity, conflicts, unknowns, and system-of-record ownership |
 | D10 — Case Discovery + Operational Legibility        | Planned     | Reconstruct representative historical work; distinguish authoritative fact, approved policy, cited memory, extraction, and inference; expose missing evidence/conflicts and classify operability                                                                            | Evaluation reports agent-workable, human-judgment-required, authority-blocked, evidence-blocked, and unclear-outcome work without inferring authority      |
 | D11 — Runtime Builder                                | Planned     | Human review of discovered or imported actors, systems, evidence sources, Case classes, authority references, commitments, actions, and outcome contracts; compile a versioned Organization Runtime Pack                                                                    | A reviewed Runtime Pack is reproducible without turning implementation into bespoke BPMN consulting                                                        |
@@ -116,18 +118,38 @@ checks passed, preserving the effective solo-maintainer protections without bypa
    persistence remain fail closed. Only latest retained independent absence plus
    current authority permits explicit fresh execution; occupied slots always block.
    Required repository, PostgreSQL/API, restart, Compose and Workbench CI passed.
-3. **D7-D — implemented for review:** existing Workbench action/check controls,
+3. **D7-D — merged in PR #25:** existing Workbench action/check controls,
    deliberate preparation and enrollment, exact persistent retries, separate
    execution/verification eligibility and visible historical receipts. Review →
    action → source check uses the existing API; mismatch, inconclusive and changed
-   evidence paths remain explicit. Require final repository, PostgreSQL/API,
-   desktop/390px browser, restart, Compose and appliance evidence before merge.
+   evidence paths remain explicit. Required repository, PostgreSQL/API,
+   desktop/390px browser, restart, Compose and appliance checks passed before merge.
    No runtime contract or migration changes; closure and external effects stay blocked.
 
 Each step carries D-033's applicable acceptance tests. Action supporting history
 advances neither C, R nor S. External writes, production identity, connectors,
 generic worker infrastructure and D8 economics remain out of scope. A simulated
 credit does not prove customer impact or permit Case closure.
+
+## D8-A delivery boundary
+
+Implemented for review: replace the existing History lists with one compact Case
+progress and evidence receipt. Reuse the existing validated Case, request, action
+and verification reads. Expand each stage for its retained material, canonical
+synthetic identity, exact bindings and recorded time. No new ledger, contract,
+migration, authority calculation or worker is introduced.
+
+Acceptance covers read-only open/refresh/expansion, reload and restart, exact retry
+without double counting, changed approvals, unapproved replacements, earlier
+request/attempt history, later inconclusive checks and failed refresh with retained
+evidence. Reconcile explicit revisions and anchors; if independent views disagree,
+show incomplete information. Preserve journal ordering without inferring order
+across equal timestamps. Historical evidence never grants current permission.
+
+Next: review this presentation and its desktop/390px evidence. Remaining D8 work
+must separately establish accepted-outcome evidence and any real measurements
+before claiming economics. Customer impact, acceptance and complete Case closure
+remain unproven; elapsed timestamps do not measure processing time or time saved.
 
 ## Operational Legibility Gate
 

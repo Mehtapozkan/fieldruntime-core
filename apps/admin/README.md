@@ -1,8 +1,8 @@
 # Guided Workbench
 
 The existing white/cream Workbench connects persistent review to the bounded
-simulated credit and independent-check APIs. D6 and D7-B/C are merged; **D7-D's
-controls are implemented on this review branch**. Accepted [D-032](../../docs/architecture/d6-authority-request-lifecycle.md)
+simulated credit and independent-check APIs. D6 and D7 are merged; **D8-A’s
+read-only Case progress and evidence receipt is implemented on this review branch**. Accepted [D-032](../../docs/architecture/d6-authority-request-lifecycle.md)
 and [D-033](../../docs/architecture/d7-simulated-credit-verification.md) are unchanged.
 Opening, refreshing or revisiting creates no durable records.
 
@@ -50,9 +50,16 @@ Do not discard existing history to reset this demo.
    source independently of the adapter acknowledgment. Only an exact match becomes
    **Simulated credit independently checked**. The visible result still says that
    customer impact is unconfirmed and the Case remains unresolved.
-7. Reload or reopen the request URL, then inspect **History**. Decisions, action
-   and checks reconstruct from PostgreSQL, including after appliance restart.
-   Technical action/check evidence and confirmed historical receipts are expandable.
+7. Open **History → Case progress and evidence**. The five stages summarize proposal and
+   uncertainty, attributed decisions, action, independent observation and remaining
+   gaps. Expand any stage for retained evidence, canonical synthetic identity,
+   bindings and recorded time. **Open review and action controls** returns to the
+   existing controls without changing the selected reviewer.
+8. Reload or reopen the receipt URL. The selected view is navigation only; decisions,
+   action and checks reconstruct from PostgreSQL, including after appliance restart.
+   Earlier requests are linked, and earlier attempts/checks remain historical.
+   **Incomplete or stale view** means separate reads did not reconcile: refresh to
+   inspect current state, without resubmitting or granting permission.
 
 A modified proposal starts without approvals. The fixed operation supports only
 Orchid's $15,000 credit; another proposal is reviewable but cannot execute through
@@ -140,10 +147,15 @@ node --test scripts/simulated-credit-postgres.test.mjs
 The database must be a local disposable test instance; tests create/drop only their
 own randomly named schemas. To run only the new browser group, add
 `--test-name-pattern='D7-D browser:'` before the filename. Optional
-`D7_SCREENSHOT_DIR=/absolute/output/path` saves desktop/390px screenshots.
+`D7_SCREENSHOT_DIR=/absolute/output/path` saves the action/control screenshots;
+`D8_SCREENSHOT_DIR=/absolute/output/path` saves desktop/390px receipt screenshots.
 
 The existing eight D6-D Playwright scenarios remain required via
 `pnpm test:workbench`, against their own disposable appliance. CI installs Chromium,
 runs real PostgreSQL/API and D7-D browser tests, then the retained Compose/appliance,
 restart and D6-D browser groups. See [STATUS](../../STATUS.md) and the implementation
 PR for final commit evidence and local limitations. [Desktop/390px visual handoff](../../docs/guides/d7-workbench-handoff.md).
+
+[Case receipt walkthrough, screenshots and limits](../../docs/guides/d8-case-receipt-handoff.md)
+covers the D8-A read-only presentation. Recorded elapsed intervals are not processing
+time or savings; no economics or accepted-outcome proof is supplied.
