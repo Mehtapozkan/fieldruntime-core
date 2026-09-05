@@ -36,7 +36,11 @@ operating rules, or learning they created.
 
 ![Field Runtime Guided Workbench](docs/assets/guided-workbench-preview.svg)
 
-The first-run story is direct-to-case: four synthetic sources disagree, the model
+The current source Workbench opens the [persistent synthetic credit review](apps/admin/README.md):
+explicit initialization, Finance approval, refresh, Executive approval and reload.
+Approvals remain separate from execution, which is unavailable.
+
+The pictured legacy story is available at `/?view=legacy`: four synthetic sources disagree, the model
 proposes, named people retain authority, a fixture connector reports success, and
 a simulated independent read-back finds no matching update. The walkthrough shows
 why the effect must be rejected and the case kept open.

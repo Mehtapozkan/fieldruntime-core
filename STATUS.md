@@ -9,16 +9,14 @@ repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are public. D6 is
 in progress; D6-A defines contracts and D6-B adds deterministic authority
 resolution. PR #18 repaired the authority correctness defects. PR #19 is merged
 at `76c9b472eabaff4e66ee4d5dd4ade6c144f95f7e`, including Accepted D-032 and its
-explicit human approval. **D6-C is merged in [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)**
-at `940462ec0a666975e3530763349bad89986cf457`: persistent synthetic authority-request
-review and a runtime-backed Decision Packet API.
-
-**D6-D is implemented in [PR #21](https://github.com/Mehtapozkan/fieldruntime-core/pull/21)**
-at `1561329858d8340291dda505fdfe12291cece1c9`, including the operator-experience
-correction. Its final CI passes and its authorization-coherence thread is resolved.
-GitHub requires at least one approving review and none is recorded at this check;
-PR #21 remains unmerged. Current main therefore still has the legacy simulated
-Workbench. No protection was bypassed and main remains `940462ec`.
+explicit human approval. **D6-C [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)
+is merged at `940462ec0a666975e3530763349bad89986cf457`**, from reviewed head
+`21298695ed47f3239105cb832ae80bbb72699325` with passing required CI. Its addressed
+reviewer-eligibility thread is resolved. **D6-D merged in PR #21 at
+`ba340cc5135343e12820992cf4a7542cf7cc9c29`**, preserving reviewed head
+`1561329858d8340291dda505fdfe12291cece1c9` and its passing CI. The Guided Workbench
+now uses persistent synthetic request review and the runtime Decision Packet API.
+No release, deployment, external writes or D7 execution is included.
 
 The human operator accepted the supplied desktop/390px visual review for
 `1561329858d8340291dda505fdfe12291cece1c9` on 2026-09-05: “Accept the current
@@ -35,7 +33,7 @@ Two nonblocking UI follow-ups remain for the existing Workbench:
   consequence, uncertainty and reviewer progress readable. Preserve explicit
   consent, refresh and exact uncertain-response retries.
 
-Neither follow-up blocks D6-D's merge or expands the D7 trust boundary.
+Neither follow-up blocked D6-D's merge or expands the D7 trust boundary.
 
 ## D7-A accepted design; implementation pending
 
@@ -54,7 +52,8 @@ terminal review decisions and immutable consent. Explicit D7 catalog enrollment
 and Case preparation require a fresh request and fresh approvals. Verification
 checks the simulated credit effect, not the customer's original impact claim;
 execution, verification and Case closure are still unavailable on main. D7-A is
-reviewable from current main while PR #21 awaits its normal approval gate.
+updated from that merged main with all D6-D implementation, tests and documentation
+preserved.
 
 The D6-D desktop/390px handoff is associated with full head `1561329858` above.
 Manual desktop/390px readability, keyboard/focus, evidence and error states were
@@ -62,15 +61,16 @@ inspected against the local appliance. The downloadable task handoff contains ni
 screenshots, an offline gallery, walkthrough and file-hash manifest. No cross-browser
 or assistive-technology certification is claimed. [D6-D final CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33949784838)
 passes 250 repository tests, 63 PostgreSQL/API tests, eight browser scenarios,
-Compose and appliance/restart smokes. Those counts describe PR #21, not this
-D6-C-based docs branch.
+Compose and appliance/restart smokes. The same Workbench coverage is retained in
+this updated docs branch and must pass again before its merge.
 
-D7-A adds documentation only. No new boundary is enabled, no runtime implementation
-is claimed, and no release or deployment is included. Architectural approval does
-not replace GitHub review requirements: PR #21 still lacks an eligible approving
-review, and PR #22 also has none. After #21 merges, update #22 from that main,
-preserve all D6-D implementation/tests/docs, rerun the restored Workbench coverage
-and satisfy #22's own review gates before merging it. Only then begin D7-B.
+D7-A adds documentation only. The operator's updated solo-maintainer rules were
+verified through GitHub's effective main-branch rules on 2026-09-05: PRs and a
+passing `validate` check remain required, branches must be up to date, force pushes
+and deletion remain blocked, and required approving reviews are zero. PR #21
+merged through the normal endpoint without bypass. PR #22 is updated from that
+main and must pass its own required checks before normal merge. Only then begin
+D7-B; no D7 runtime behavior, release or deployment is included here.
 
 The docs clarify three PR #22 review findings: explicit idempotent enrollment on
 upgrades through a fixed local command, the scoped evaluator grant already required
@@ -78,16 +78,51 @@ by the execution gate, and atomic verification clock updates. These mechanisms
 are documented acceptance criteria, not implemented features. D7-C remains the
 independent verifier step; D7-D remains the Workbench connection.
 
-D7-A local validation: `pnpm validate` passes all 234 current-main tests plus
-formatting/lint/typecheck/release checks. ECC passes 30/30 cases and 620/620 checks;
-its negative control exits 1 for the intended hard-gate/assertion failures with a
-complete receipt (152/620 checks). Docker is unavailable locally (exit 127), so
-Compose and PostgreSQL/appliance evidence comes from this docs PR's CI.
-[D7-A baseline CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33951098585)
-passes 234 repository tests, 62 PostgreSQL/API scenarios, Compose and appliance/
-restart smokes at `d6e2142e4d584237b864b5252b5ed8692b10e572`. The PR description
-records validation for the final docs head separately.
+D7-A validation is rerun on the combined branch: `pnpm validate`, frozen ECC and
+its intended-failure negative control, `git diff --check`, and CI's PostgreSQL/API,
+Compose, appliance/restart and eight Workbench browser scenarios. Docker is
+unavailable locally (exit 127); the PR description links actual final-commit CI
+evidence. Earlier D6-C-only counts are not substituted for restored D6-D coverage.
 No new D7 runtime tests or behavior are claimed by these existing-suite results.
+
+## D6-D implementation
+
+- Explicit, idempotent demo initialization creates one synthetic Orchid credit
+  Case through Case commands. Packet opening, refresh and revisit use only reads;
+  they never initialize a demo or change durable history, IDs, C/R/S or clocks.
+- The existing Workbench layout displays the exact $15K proposal/customer, retained
+  evidence/provenance, conflicts, unknowns, recommendation, required approvals and
+  recorded review history from API responses. Confirmed writes fetch the current
+  packet by GET: Finance → verified progress → explicit Executive decision →
+  verified completion → browser reload reconstructs the same request and decisions.
+- The decision-first view leads with Orchid, the proposed credit, retained issue
+  and material uncertainty. Review controls sit beside the concise summary;
+  human-readable evidence and the bound policy explanation stay visible. Technical
+  C/R/S, identifiers, hashes, source URIs and policy references are expandable.
+  Awaiting review, the remaining reviewer, completion, terminal decisions and a
+  changed Case requiring fresh review come from validated server results.
+- A confirmed write followed by a failed read retains its historical receipt and
+  requires refresh without offering another write retry. Conflicts still require
+  explicit review/resubmission; uncertain writes retain exact commands. Seats are
+  never switched automatically and their selection is not authentication.
+- Server-enrolled synthetic seats remain labeled. Decisions send the reviewed
+  request hash, C/R/S and correlation ID. Terminal interventions use independent
+  server reviewer eligibility, not the whole-request `current.eligible` flag.
+  Reject/modify/escalate collect reasons; modification opens an unapproved R0
+  replacement. No client authority calculation or transferred approvals exist.
+- Conflicts require explicit refresh and deliberate resubmission. An uncertain
+  write retains its exact command/seat/key before transmission; reload and retry
+  recover the historical receipt. Local session storage holds navigation and retry
+  information only. No unconfirmed success is displayed as a recorded decision.
+- Retained operations evidence can be attached via Case commands to advance C,
+  invalidate prior approvals visibly and offer an explicit fresh request requiring
+  fresh review. Historical receipts stay distinct from current eligibility.
+- Approval completion says **Approvals complete — execution unavailable**. Case
+  closure remains blocked. The Acme action/receipt simulation is isolated at
+  `/?view=legacy`; frozen fixtures and its presentation reducer are unchanged.
+- No runtime/schema/migration changes. Two fixed browser modules reuse existing
+  API routes and CSP. Playwright is a pinned development-only test dependency.
+- [Walkthrough, retry behavior and browser checks](apps/admin/README.md).
 
 ## D6-C implementation
 
@@ -202,9 +237,9 @@ No new D7 runtime tests or behavior are claimed by these existing-suite results.
   case/journal reads, and append-only trigger enforcement.
 - Canonical JSON rejection of PostgreSQL-incompatible null characters and unpaired
   Unicode surrogates before identity, hashing, or dependency consumption.
-- Direct-to-case browser workbench served from the existing loopback appliance with
+- Browser workbench served from the existing loopback appliance with
   no signup, API key, blank dashboard, third-party asset, or external request.
-- Six-action Case, Decision, Act & Verify, and Receipt walkthrough that makes the
+- Separate legacy six-action Case, Decision, Act & Verify, and Receipt walkthrough that makes the
   Acme evidence conflict, multiplayer authority route, exact payload boundary,
   silent connector failure, independent read-back, effect rejection, safe recovery,
   correction, and learning preview visible without typing or JSON knowledge.
@@ -212,7 +247,7 @@ No new D7 runtime tests or behavior are claimed by these existing-suite results.
   canonical Acme fixture hash, evidence, decision options, authority roles, action
   IDs, payload hashes, idempotency key, attempt lineage, verifier identities, and
   reconstructable nine-step trace.
-- Presentation boundary fixed to synthetic simulation, zero external effects, no
+- Legacy presentation boundary fixed to synthetic simulation, zero external effects, no
   authority grant, no authoritative case mutation, no replay claim, and no
   production receipt. Missing, unsafe, or drifted walkthrough data fails closed.
 - Exact static-route allowlist with raw MIME-correct responses, strict no-inline
@@ -269,12 +304,41 @@ No new D7 runtime tests or behavior are claimed by these existing-suite results.
 
 ## Verified
 
+- D6-D adds 16 focused client/API regressions and a real PostgreSQL/HTTP client
+  scenario. The PostgreSQL suite passes 63 tests locally, including no durable
+  changes around repeated client reads, two-person approval, restart, lost commit
+  acknowledgement and exact retry, evidence invalidation and unapproved renewal.
+- Chromium exercises the actual appliance for initialization, approvals/reload,
+  concurrent submissions, lost-response retries, all terminal decisions, replacement,
+  changed evidence, ineligible reviewers and unsafe packet responses. CI runs
+  `pnpm test:workbench` after PostgreSQL/API and restart appliance smokes. Final
+  commit CI evidence is linked from the D6-D PR checks.
+- Automated review identified an incoherent-response presentation defect: before
+  repair, all 11 contradictory packet variants were accepted by browser validation.
+  The client now rejects authorization flags that disagree with request C/S/time,
+  terminal history, resolver outcome/reasons, requirement counts or recorded
+  effective approval IDs. Valid and reordered packets still work. Chromium also
+  tests a false completion flag while `action_permission` remains false.
+- CI confirmed PostgreSQL/API and restart-smoke coverage but accumulated browser
+  scenarios exceeded the preview's whole-history replay timeout. Independent
+  browser scenarios now use fresh CI-owned disposable volumes; the primary
+  approval/reload/evidence-change story runs together without resetting its history.
+  All eight scenarios remain required. This is not a scalability claim or a runtime
+  replay optimization.
+- The operator correction reproduced three failing client/API regressions before
+  implementation: confirmed-write progress, follow-up read failure, and a Case
+  change between the accepted write and its read. These now pass, along with both
+  reviewer orderings, unchanged exact retries and authorization-coherence negatives.
+  Browser coverage checks readable consent, hidden technical identifiers, unchanged
+  synthetic seat, keyboard focus/order and confirmed-write read failure. Final
+  desktop/390px inspection and CI evidence are recorded in PR #21.
+
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
 - `pnpm release:check` passes across current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 234 tests pass, including 40 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
+- 250 tests pass, including 16 D6-D client/API regressions, 40 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
   immutable authority-binding, lifecycle, conflict, and agent-authority tests;
   42 D6-B threshold, multi-approval, prior-decision, delegation, ambiguity,
   policy-selection, tenant, agent, evidence-lineage, immutability, and input-order
@@ -320,7 +384,7 @@ No new D7 runtime tests or behavior are claimed by these existing-suite results.
   outstanding quorum. A pre-fix mixed-requirement history and the existing local
   PostgreSQL request's three v1 journal entries reconstruct under the corrected
   runtime without changing recorded evidence.
-- 62 explicit API/PostgreSQL integration tests pass locally against an isolated
+- 63 explicit API/PostgreSQL integration tests pass locally against an isolated
   PostgreSQL 18.4 instance: fresh installation, preview migration without Case
   loss, two-person review/restart, strict inputs, C/R/S races, expiry, terminal
   states, immutable read snapshots, rollback at each persistence step, uncertain
@@ -330,8 +394,9 @@ No new D7 runtime tests or behavior are claimed by these existing-suite results.
   [CI run 33943965085](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33943965085)
   passed all 37 initial PostgreSQL scenarios, Compose config and both appliance
   smoke phases at `841adfe6`. CI runs the complete 62-scenario suite on the corrected
-  PR head; final-commit PostgreSQL/API, Compose and appliance-smoke evidence is
-  linked from the PR checks and reviewer thread.
+  PR #20 head: [CI run 33945510666](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33945510666)
+  passed at `21298695`. D6-D extends this coverage with the Workbench path and
+  browser checks on its own final commit.
 - The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
@@ -343,6 +408,16 @@ No new D7 runtime tests or behavior are claimed by these existing-suite results.
   build environment, so the live Compose evidence is produced by the CI runner.
 
 ## Known gaps
+
+- D6-D is a bounded synthetic credit review, not production authentication or a
+  general review application. Retry information uses tab session storage; closing
+  the tab can lose an unconfirmed command's local key. Committed history remains
+  canonical and inspectable by request URL. Reads/decisions can take longer as
+  whole-history integrity replay grows; requests time out visibly and fail closed.
+- D6-D adds no migration. Existing preview history, strict v0 contracts, frozen ECC
+  fixtures and Accepted D-032 semantics remain intact. The next milestone is D7:
+  controlled simulated action and independent verification, with a separately
+  reviewed implementation before any execution or complete closure proof.
 
 - The appliance is single-node and evaluation-only. Its singleton writer lock and
   whole-state integrity hydration favor auditability over throughput; it does not
@@ -390,25 +465,24 @@ No new D7 runtime tests or behavior are claimed by these existing-suite results.
   exist yet.
 - The current result is synthetic and deterministic; it does not measure live
   providers, human usefulness, resolution economics, or production performance.
-- The guided authority, connector response, read-back, recovery, receipt, and
-  learning trace is presentation-only. D6–D8 must replace it with
+- The legacy guided authority, connector response, read-back, recovery, receipt, and
+  learning trace is presentation-only. D7–D8 must supply
   deterministic authority envelopes, a simulated action gateway, and
   runtime-enforced independent verification before those controls can mutate an
   authoritative case.
-- Authority shown in the Guided Workbench remains simulated until later D6/D7
-  work.
+- Workbench review history is persistent but all actors, policy and evidence remain
+  synthetic. Production identity and execution are outside D6-D.
 
 ## Next
 
-Obtain the required approving review for PR #21 and merge through repository
-protections; its checked head is `1561329858`. Update PR #22 from the resulting
-main without losing D6-D, rerun repository/PostgreSQL/API/Workbench coverage, and
-merge only after its own review requirements pass. D-033 is Accepted. After both
-merges, implement D7-B only (bound operation and atomic simulated source), leaving
-its PR open. D7-C (independent verification) and D7-D (existing Workbench controls)
-remain later, separate steps. Incomplete proof
-continues to block closure; even a verified simulated credit does not establish
-customer impact, accepted outcome or recovered revenue. D8 remains separate.
+Merge updated PR #22 only after its required checks pass under the verified
+solo-maintainer rules. D-033 is Accepted and D6-D is merged. Then implement D7-B
+only (bound operation, scoped enrollment, strict contracts, minimal migration and
+atomic simulated source/action evidence), leaving its implementation PR open.
+D7-C supplies independent verification; D7-D supplies Workbench action/check
+controls. Incomplete proof continues to block closure, and neither a credit nor
+its verification proves the original impact claim, accepted outcome or recovered
+revenue. D8 remains separate.
 
 The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
 This roadmap alignment does not displace the trusted-kernel priority, add live

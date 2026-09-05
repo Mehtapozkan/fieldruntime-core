@@ -27,6 +27,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm validate
       - run: docker compose config --quiet
+      - name: Install local browser test driver
+        run: pnpm exec playwright install --with-deps chromium
       - name: Smoke-test the documented local appliance
         run: |
           set -euo pipefail
@@ -49,6 +51,14 @@ jobs:
             echo "append-only journal update unexpectedly succeeded"
             exit 1
           fi
+          # Each independent browser scenario owns a disposable fixture volume.
+          # Keep the primary approval/reload/evidence story together. Whole-history
+          # replay is intentionally not a throughput benchmark in this preview.
+          for scenario in 'explicit init|retained evidence' 'concurrent review' 'reject removes' 'modify removes' 'escalate removes' 'ineligible seats' 'confirmed-write read failure'; do
+            docker compose down --volumes
+            docker compose up --detach --wait
+            pnpm test:workbench --grep "$scenario"
+          done
 
   publish-evaluation-preview:
     name: publish evaluation preview

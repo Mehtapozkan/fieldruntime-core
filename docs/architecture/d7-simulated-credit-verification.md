@@ -4,12 +4,11 @@ Status: **Accepted** by explicit human approval of the reviewed design at
 [527cfb6f44dac61e495f45559d170d0bbb50e8f2](https://github.com/Mehtapozkan/fieldruntime-core/blob/527cfb6f44dac61e495f45559d170d0bbb50e8f2/docs/architecture/d7-simulated-credit-verification.md).
 D7-A remains documentation only. D7-B, D7-C and D7-D are not implemented.
 
-Base: main `940462ec0a666975e3530763349bad89986cf457` (D6-C merged).
-[D6-D PR #21](https://github.com/Mehtapozkan/fieldruntime-core/pull/21), head
-`1561329858d8340291dda505fdfe12291cece1c9`, passes CI and its addressed thread is
-resolved, but GitHub still requires an approving review. PR #22 must be updated
-from main after that protected merge, preserving D6-D and rerunning its Workbench
-coverage. D7-B begins only after both PRs merge through their own review gates.
+Base: main `ba340cc5135343e12820992cf4a7542cf7cc9c29` includes the normal merge of
+[D6-D PR #21](https://github.com/Mehtapozkan/fieldruntime-core/pull/21), reviewed at
+`1561329858d8340291dda505fdfe12291cece1c9`. PR #22 is updated from that main with
+all D6-D code, tests and documentation retained. It must pass the required checks,
+including Workbench coverage, before normal merge. D7-B begins after that merge.
 
 The human operator accepted D6-D's supplied desktop/390px presentation at that head
 on 2026-09-05. The two nonblocking Workbench follow-ups in STATUS/PLAN do not change
@@ -28,7 +27,9 @@ The same instruction requires protected merges of PR #21 and then updated PR #22
 before implementing D7-B only, leaving its implementation PR open. D7-C supplies
 independent verification; D7-D supplies Workbench controls. Neither is implemented
 by D7-B. No release or deployment is authorized. This architectural acceptance
-does not substitute for an eligible GitHub approving review on either PR.
+does not bypass repository protections. The operator subsequently changed the
+solo-maintainer policy to zero required approving reviews while retaining required
+PRs, passing `validate`, up-to-date branches, and force-push/deletion protections.
 
 The enrollment and verification-clock details below clarify the existing scoped
 grant, explicit install and atomic clock requirements in response to PR review;
@@ -394,8 +395,8 @@ completion, accepted outcome, full closure proof or a resolved Case.
 
 ## Implementation sequence and acceptance
 
-D-033 is accepted. Implementation is gated on the protected merge of PR #21,
-followed by PR #22 updated from that main with all D6-D coverage retained:
+D-033 is accepted and PR #21 is merged. Implementation is gated on the protected
+merge of PR #22, updated from that main with all D6-D coverage retained:
 
 1. **D7-B — bound operation and atomic simulated source.** Add the strict new
    contracts/pure envelope checks, the two-table checksum migration, scoped synthetic

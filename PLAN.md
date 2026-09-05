@@ -3,15 +3,13 @@
 Each pull request must remain independently reviewable and leave the repository in
 a passing state.
 
-Delivery position: GitHub PRs #1–#6, #12, and #14 are merged. The public source
-preview and `v0.1.0-evaluation-preview.0` prerelease are published. PR #19 merged
-Accepted D-032. D6-C merged in [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)
-at `940462ec`. D6-D is implemented in [PR #21](https://github.com/Mehtapozkan/fieldruntime-core/pull/21)
-at `1561329858`, with passing checks and its addressed thread resolved, but the
-required approving review is not recorded. It remains unmerged. The human operator
-accepted [D-033](docs/architecture/d7-simulated-credit-verification.md) at `527cfb6f`
-on 2026-09-05. D7-A records that acceptance in PR #22; no D7 runtime behavior is
-implemented. D7-B begins only after both PRs merge through repository protections.
+Delivery position: GitHub PRs #1–#6, #12, #14 and #19 are merged. D6-C merged
+in PR #20 at `940462ec`; D6-D merged in PR #21 at
+`ba340cc5135343e12820992cf4a7542cf7cc9c29` with passing required checks. The human
+operator accepted [D-033](docs/architecture/d7-simulated-credit-verification.md)
+at `527cfb6f`. D7-A PR #22 is updated from that main, preserving the full D6-D
+implementation and coverage. No D7 runtime behavior is implemented. D7-B begins
+only after #22 passes its required checks and merges normally.
 
 ## Delivery labels and GitHub pull requests
 
@@ -67,10 +65,23 @@ Case creation, Finance/Executive approval, restart and reconstruction. Real
 PostgreSQL CI exercises upgrade/fresh installation, races, failures, tampering,
 read-only snapshots and idempotent retries.
 
-Remaining D6 work is the normal protected merge of PR #21 after its required
-approving review. The implementation preserves explicit refresh/resubmission and
-exact uncertain retries. Production authentication, identity history, external
-catalog sources and general workflows remain outside this synthetic step.
+## D6-D delivery boundary
+
+The [Guided Workbench](apps/admin/README.md) now provides explicit idempotent demo
+initialization, runtime packet/evidence review, Finance and Executive approval,
+explicit refresh/resubmission and restart/reload reconstruction. Reject, modify
+and escalate use existing contracts; replacements start without approvals. Pending
+command bytes/keys survive reload for exact retries. Retained evidence demonstrates
+Case-version invalidation and explicit fresh review. Reads cause no durable writes;
+local state never grants authority. Legacy simulated action/receipt history stays
+separate, and execution/closure remain blocked.
+
+PR #21 passed repository validation, real PostgreSQL/API, Compose and
+appliance/browser acceptance checks before normal merge. It introduced no
+runtime contracts or migrations. Production authentication, identity history,
+external catalog sources and general workflows remain outside this synthetic step.
+Next is D7 controlled simulated action and independent verification; it and complete
+closure proof remain unimplemented and require a separate scoped implementation.
 
 The human operator accepted the desktop/390px presentation at `1561329858` on
 2026-09-05; no further UI redesign is a D6-D merge prerequisite. Keep two
@@ -86,14 +97,13 @@ accepted by the human operator.
 implementation is pending.
 The smallest operation is Orchid's exact $15,000 simulated credit, with a fresh
 D7-bound approval request, one atomic PostgreSQL effect/receipt commit, and a
-separate verifier read. This docs-only branch is based on current main; no D6-D
-code is copied or prematurely reported as merged.
+separate verifier read. This docs-only branch includes merged D6-D unchanged.
 
-After PR #21 merges, update PR #22 from main while preserving all D6-D code,
-tests and documentation. Rerun repository and PostgreSQL/API validation including
-the restored Workbench/browser coverage. Merge #22 only when its own reviews and
-required checks pass. Then deliver D7-B only in an open implementation PR; D7-C
-and D7-D remain later steps:
+Before PR #22 merges, rerun repository/PostgreSQL/API validation and all restored
+Workbench/browser coverage. Preserve the required PR, passing `validate`, strict
+up-to-date branch, force-push and deletion protections under the operator's revised
+solo-maintainer rules; no bypass. After #22 merges, deliver D7-B only in an open
+implementation PR. D7-C and D7-D remain later steps:
 
 1. D7-B: strict operation/envelope contracts, scoped synthetic catalog enrollment,
    minimal migration, action API and atomic source/receipt persistence.
