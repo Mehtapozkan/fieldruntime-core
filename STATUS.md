@@ -45,7 +45,8 @@ scope review was resolved, and no blocking review finding remained. Required PRs
 up-to-date checks and force-push/deletion protections were preserved without bypass.
 The supplied obsolete-Case reproducer was rerun successfully before merge.
 
-This branch implements only Accepted D-033's D7-C:
+[PR #24](https://github.com/Mehtapozkan/fieldruntime-core/pull/24), left open for review,
+implements only Accepted D-033's D7-C:
 
 - Strict attempt/hash/key-bound verification POST; fixed server-selected verifier
   with current canonical identity, profile-bound scope, grant and time checks.
@@ -74,13 +75,24 @@ accepted D6-D review experience is unchanged. Verification establishes only the
 simulated credit effect, never customer impact, recovered revenue, acceptance,
 commitment completion or Case closure. Legacy execution/closure guards remain.
 
-Validation is recorded against the implementation PR's final head. Local repository
-validation currently passes 262 tests. Real PostgreSQL/API tests include fresh and
-v1-action migration, verifier eligibility, mismatches, observation races, explicit
-absence retries, failed persistence, backend termination, lost responses, restart,
-coherently altered proof and the preserved obsolete-Case/scope regressions. Final
-suite counts and hosted Compose/appliance/Workbench evidence are linked in the PR.
-Docker is unavailable locally; no local Compose pass is claimed.
+Validation: `pnpm validate` passes **262 tests**; real local PostgreSQL/API passes
+**63 D6 tests and 93 D7 tests**; all **eight Workbench browser scenarios** pass.
+The D7 suite covers fresh/v1-action migration, current verifier eligibility,
+mismatches, observation races, explicit absence retries, failed persistence,
+backend termination, lost responses, restart, coherent proof tampering and the
+preserved obsolete-Case/scope regressions. Local PostgreSQL/API restart reconstructs
+both the action and independent proof. ECC passes **620/620**; its intended negative
+control exits **1 at 152/620**, with assertion results rather than a crash. The supplied
+PR23 reproducer and `git diff --check` pass.
+
+The [implementation CI run](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33976520656)
+passed those 262/63/93 tests, all eight browser scenarios, Compose configuration,
+explicit enrollment and the container action/verification/restart smokes on
+`0339ca623505598098490c38fee7dc29d476b975`. Its logs exposed one obsolete enrollment
+message claiming verification was unimplemented; that wording is corrected in the
+follow-up. Final-head CI evidence is recorded in PR #24. Docker is unavailable
+locally; no local Compose pass is claimed. Automated code/security reviews of the
+implementation head completed without posted findings.
 
 Limits: this is logical verifier/connection separation in one credential-free
 synthetic appliance, not isolation from its privileged database/application owner.
