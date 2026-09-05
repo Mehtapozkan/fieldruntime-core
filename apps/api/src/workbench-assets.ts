@@ -9,6 +9,8 @@ export interface WorkbenchAssets {
   readonly css: WorkbenchAsset;
   readonly html: WorkbenchAsset;
   readonly javascript: WorkbenchAsset;
+  readonly authorityClient?: WorkbenchAsset;
+  readonly authorityWorkbench?: WorkbenchAsset;
 }
 
 function asset(body: Buffer, contentType: string): WorkbenchAsset {
@@ -16,20 +18,32 @@ function asset(body: Buffer, contentType: string): WorkbenchAsset {
 }
 
 /**
- * Load the three workbench files copied beside the built API. The filenames are
+ * Load the fixed workbench files copied beside the built API. The filenames are
  * deliberately fixed: request paths never become filesystem paths.
  */
 export async function loadWorkbenchAssets(): Promise<WorkbenchAssets> {
-  const [html, css, javascript] = await Promise.all([
-    readFile(new URL("../../admin/public/index.html", import.meta.url)),
-    readFile(new URL("../../admin/public/workbench.css", import.meta.url)),
-    readFile(new URL("../../admin/public/workbench.js", import.meta.url)),
-  ]);
+  const [html, css, javascript, authorityClient, authorityWorkbench] =
+    await Promise.all([
+      readFile(new URL("../../admin/public/index.html", import.meta.url)),
+      readFile(new URL("../../admin/public/workbench.css", import.meta.url)),
+      readFile(new URL("../../admin/public/workbench.js", import.meta.url)),
+      readFile(
+        new URL("../../admin/public/authority-client.js", import.meta.url),
+      ),
+      readFile(
+        new URL("../../admin/public/authority-workbench.js", import.meta.url),
+      ),
+    ]);
 
   return Object.freeze({
     html: asset(html, "text/html; charset=utf-8"),
     css: asset(css, "text/css; charset=utf-8"),
     javascript: asset(javascript, "text/javascript; charset=utf-8"),
+    authorityClient: asset(authorityClient, "text/javascript; charset=utf-8"),
+    authorityWorkbench: asset(
+      authorityWorkbench,
+      "text/javascript; charset=utf-8",
+    ),
   });
 }
 
@@ -55,6 +69,10 @@ export function getWorkbenchAsset(
       return assets.css;
     case "/workbench.js":
       return assets.javascript;
+    case "/authority-client.js":
+      return assets.authorityClient;
+    case "/authority-workbench.js":
+      return assets.authorityWorkbench;
     default:
       return undefined;
   }

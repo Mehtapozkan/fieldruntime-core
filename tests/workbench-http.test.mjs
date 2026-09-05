@@ -7,12 +7,24 @@ import { createApiServer } from "../dist/apps/api/src/server.js";
 const html = Buffer.from("<!doctype html><title>sentinel workbench</title>\n");
 const css = Buffer.from(".sentinel { color: rebeccapurple; }\n");
 const javascript = Buffer.from('document.title = "sentinel";\n');
+const authorityClient = Buffer.from('export const client = "server-backed";\n');
+const authorityWorkbench = Buffer.from(
+  'export const workbench = "persistent-review";\n',
+);
 
 const workbenchAssets = Object.freeze({
   html: Object.freeze({ body: html, contentType: "text/html; charset=utf-8" }),
   css: Object.freeze({ body: css, contentType: "text/css; charset=utf-8" }),
   javascript: Object.freeze({
     body: javascript,
+    contentType: "text/javascript; charset=utf-8",
+  }),
+  authorityClient: Object.freeze({
+    body: authorityClient,
+    contentType: "text/javascript; charset=utf-8",
+  }),
+  authorityWorkbench: Object.freeze({
+    body: authorityWorkbench,
     contentType: "text/javascript; charset=utf-8",
   }),
 });
@@ -85,7 +97,7 @@ async function httpRequest(port, method, path) {
   });
 }
 
-test("serves only the three same-origin workbench assets with exact MIME types", async () => {
+test("serves only the five same-origin workbench assets with exact MIME types", async () => {
   await withServer(async (port) => {
     for (const expected of [
       { body: html, contentType: "text/html; charset=utf-8", path: "/?demo=1" },
@@ -98,6 +110,16 @@ test("serves only the three same-origin workbench assets with exact MIME types",
         body: javascript,
         contentType: "text/javascript; charset=utf-8",
         path: "/workbench.js",
+      },
+      {
+        body: authorityClient,
+        contentType: "text/javascript; charset=utf-8",
+        path: "/authority-client.js",
+      },
+      {
+        body: authorityWorkbench,
+        contentType: "text/javascript; charset=utf-8",
+        path: "/authority-workbench.js",
       },
     ]) {
       const response = await httpRequest(port, "GET", expected.path);
@@ -151,6 +173,8 @@ test("denies static methods, traversal variants, and unknown files through the J
   await withServer(async (port) => {
     for (const target of [
       { method: "POST", path: "/workbench.js" },
+      { method: "POST", path: "/authority-client.js" },
+      { method: "GET", path: "/authority-client%2ejs" },
       { method: "PUT", path: "/" },
       { method: "GET", path: "/index.html" },
       { method: "GET", path: "/package.json" },

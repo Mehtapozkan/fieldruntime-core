@@ -1531,6 +1531,8 @@ export async function fetchJson(
 }
 
 function bootstrapBrowserWorkbench() {
+  document.querySelector("#experience-mode").textContent =
+    "Legacy simulation · no recorded reviews";
   const nodes = {
     loading: document.querySelector("#loading-state"),
     error: document.querySelector("#error-state"),
@@ -1730,5 +1732,25 @@ function bootstrapBrowserWorkbench() {
 }
 
 if (typeof document !== "undefined") {
-  bootstrapBrowserWorkbench();
+  if (
+    new globalThis.URL(window.location.href).searchParams.get("view") ===
+    "legacy"
+  ) {
+    bootstrapBrowserWorkbench();
+  } else {
+    void import("./authority-workbench.js")
+      .then(({ mountAuthorityWorkbench }) => mountAuthorityWorkbench())
+      .catch(() => {
+        document.querySelector("#loading-state").hidden = true;
+        document.querySelector("#workbench-content").hidden = true;
+        document.querySelector("#error-state").hidden = false;
+        document.querySelector("#error-state h1").textContent =
+          "The persistent review could not be loaded.";
+        document.querySelector("#error-message").textContent =
+          "No decision is assumed. Reload to recover the server state and any saved retry.";
+        const retry = document.querySelector("#retry-button");
+        retry.textContent = "Reload review";
+        retry.addEventListener("click", () => window.location.reload());
+      });
+  }
 }

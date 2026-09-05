@@ -27,6 +27,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm validate
       - run: docker compose config --quiet
+      - name: Install local browser test driver
+        run: pnpm exec playwright install --with-deps chromium
       - name: Smoke-test the documented local appliance
         run: |
           set -euo pipefail
@@ -45,6 +47,7 @@ jobs:
           docker compose up --detach --wait
           node scripts/smoke-local-appliance.mjs durable
           node scripts/smoke-authority-api.mjs durable
+          pnpm test:workbench
           if docker compose exec -T postgres psql -v ON_ERROR_STOP=1 --username=fieldruntime --dbname=fieldruntime --command "UPDATE case_journal SET recorded_at = recorded_at;"; then
             echo "append-only journal update unexpectedly succeeded"
             exit 1
