@@ -79,7 +79,11 @@ async function vote(page, seat, decision = "approve") {
   await expect(
     page.getByText("Last response · historical receipt", { exact: true }),
   ).toBeVisible();
-  await expect(current(page)).toContainText("Refresh required");
+  await expect(page.locator("#stage-content")).toHaveAttribute(
+    "aria-busy",
+    "false",
+  );
+  await expect(current(page)).not.toContainText("unconfirmed");
 }
 
 test("explicit init → Finance → refresh → Executive → reload reconstructs, with no read writes or local authorization", async ({
@@ -117,26 +121,83 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
   const initial = await packet(request, primary);
   expect(initial.review_revision).toBe(0);
   await expect(
+    page.getByRole("heading", { name: "Orchid / $15,000 proposed credit" }),
+  ).toBeVisible();
+  await expect(current(page)).toHaveText("Awaiting review");
+  await expect(
+    page
+      .getByText("Customer requests a service credit after an interruption.")
+      .first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Customer-reported impact has not been independently confirmed.",
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Independent impact verification remains outstanding."),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      /bound policy requires Finance and Executive.*above \$10,000/,
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Finance · Needed", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Executive · Needed", { exact: true }),
+  ).toBeVisible();
+  await expect(
     page.getByText("synthetic://accounts/orchid", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Conflicts retained for consent" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Unknowns", exact: true }),
-  ).toBeVisible();
+  ).toBeHidden();
+  await expect(page.getByText(/Case C1 · Review R0/)).toBeHidden();
+  // Controls are beside the concise summary, before detailed evidence.
+  const form = await page
+    .getByRole("form", { name: "Record synthetic review" })
+    .boundingBox();
+  const evidence = await page
+    .getByRole("heading", { name: "Linked evidence", exact: true })
+    .boundingBox();
+  expect(form.y + form.height).toBeLessThan(evidence.y);
   await page.getByText("Citation and provenance", { exact: true }).click();
   await expect(
     page.getByText("synthetic://d6/intake", { exact: true }),
   ).toBeVisible();
-  await vote(page, "finance");
-  await expect(submit(page)).toBeDisabled();
-  await refresh(page);
+  await page.getByText("Citation and provenance", { exact: true }).click();
+  // Keyboard order and visible focus stay usable after a confirmed write.
+  await page.getByLabel("Reviewer", { exact: true }).focus();
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Decision", { exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(submit(page)).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(current(page)).toHaveText("Finance approved — Executive needed");
+  await expect(current(page)).toBeFocused();
+  await expect(page.getByLabel("Reviewer", { exact: true })).toHaveValue(
+    "finance",
+  );
+  await expect(
+    page.getByText("Finance · Approved", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Executive · Needed", { exact: true }),
+  ).toBeVisible();
   await vote(page, "executive");
-  await refresh(page);
   await expect(current(page)).toHaveText(
     "Approvals complete — execution unavailable",
   );
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(() => globalThis.document.documentElement.scrollWidth),
+  ).toBe(390);
+  await expect(
+    page.getByText(
+      "Customer-reported impact has not been independently confirmed.",
+    ),
+  ).toBeVisible();
+  await expect(page.getByLabel("Reviewer", { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 1440, height: 1000 });
   const approved = await packet(request, primary);
   expect(approved.case_version).toBe(initial.case_version);
   expect(approved.review_revision).toBe(2);
@@ -265,7 +326,13 @@ for (const decision of ["reject", "modify", "escalate"])
     expect(terminal.current.effective_approval_ids).toEqual([]);
     await expect(submit(page, decision)).toBeDisabled();
     await page.reload();
-    await expect(current(page)).toContainText("no effective approvals");
+    await expect(current(page)).toHaveText(
+      {
+        reject: "Request rejected",
+        modify: "Request replaced",
+        escalate: "Request escalated",
+      }[decision],
+    );
     await page.getByRole("button", { name: /Review history/ }).click();
     await expect(
       page.getByRole("heading", {
@@ -280,7 +347,9 @@ for (const decision of ["reject", "modify", "escalate"])
           exact: true,
         })
         .click();
-      await expect(page.getByText("$12,000", { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Orchid / $12,000 proposed credit" }),
+      ).toBeVisible();
       await expect(submit(page)).toBeEnabled();
       const replacement = await packet(
         request,
@@ -307,12 +376,13 @@ test("retained evidence through Case API invalidates prior approvals; fresh requ
       exact: true,
     })
     .click();
-  await expect(current(page)).toContainText("Refresh required");
-  await refresh(page);
-  await expect(current(page)).toContainText("no effective approvals");
-  await expect(
-    page.getByText(/The Case version changed\. Prior approvals/),
-  ).toBeVisible();
+  await expect(page.locator("#stage-content")).toHaveAttribute(
+    "aria-busy",
+    "false",
+  );
+  await expect(current(page)).not.toContainText("unconfirmed");
+  await expect(current(page)).toHaveText("Case changed — fresh review needed");
+  await expect(page.getByText(/Prior approvals no longer apply/)).toBeVisible();
   const old = await packet(request, primary);
   expect(old.case_version).toBe(old.request.case_version + 1);
   expect(old.current.effective_approval_ids).toEqual([]);
@@ -385,4 +455,36 @@ test("ineligible seats and unsafe packet responses never become accepted decisio
     await refresh(page);
     await expect(submit(page, "reject")).toBeEnabled();
   }
+});
+
+test("confirmed-write read failure keeps the receipt, requires refresh and never offers a duplicate decision", async ({
+  page,
+  request,
+}) => {
+  const id = await fresh(request);
+  await open(page, id);
+  let posts = 0;
+  page.on("request", (req) => {
+    if (req.method() === "POST") posts++;
+  });
+  await page.route(`**/${id}/packet`, (route) => route.abort("failed"), {
+    times: 1,
+  });
+  await submit(page).click();
+  await expect(page.getByRole("alert")).toContainText(
+    "The command was recorded, but the current packet could not be verified.",
+  );
+  await expect(page.getByRole("alert")).toBeFocused();
+  await expect(current(page)).toContainText("unconfirmed");
+  await expect(submit(page)).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Retry exact command" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Last response · historical receipt" }),
+  ).toBeVisible();
+  await refresh(page);
+  await expect(current(page)).toHaveText("Finance approved — Executive needed");
+  expect(posts).toBe(1);
+  expect((await packet(request, id)).review_revision).toBe(1);
 });

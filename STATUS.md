@@ -24,8 +24,19 @@ writes or D7 execution is included.
   they never initialize a demo or change durable history, IDs, C/R/S or clocks.
 - The existing Workbench layout displays the exact $15K proposal/customer, retained
   evidence/provenance, conflicts, unknowns, recommendation, required approvals and
-  recorded review history from API responses. Finance → refresh → Executive →
-  refresh → browser reload reconstructs the same request and decisions.
+  recorded review history from API responses. Confirmed writes fetch the current
+  packet by GET: Finance → verified progress → explicit Executive decision →
+  verified completion → browser reload reconstructs the same request and decisions.
+- The decision-first view leads with Orchid, the proposed credit, retained issue
+  and material uncertainty. Review controls sit beside the concise summary;
+  human-readable evidence and the bound policy explanation stay visible. Technical
+  C/R/S, identifiers, hashes, source URIs and policy references are expandable.
+  Awaiting review, the remaining reviewer, completion, terminal decisions and a
+  changed Case requiring fresh review come from validated server results.
+- A confirmed write followed by a failed read retains its historical receipt and
+  requires refresh without offering another write retry. Conflicts still require
+  explicit review/resubmission; uncertain writes retain exact commands. Seats are
+  never switched automatically and their selection is not authentication.
 - Server-enrolled synthetic seats remain labeled. Decisions send the reviewed
   request hash, C/R/S and correlation ID. Terminal interventions use independent
   server reviewer eligibility, not the whole-request `current.eligible` flag.
@@ -225,7 +236,7 @@ writes or D7 execution is included.
 
 ## Verified
 
-- D6-D adds 13 focused client/API regressions and a real PostgreSQL/HTTP client
+- D6-D adds 16 focused client/API regressions and a real PostgreSQL/HTTP client
   scenario. The PostgreSQL suite passes 63 tests locally, including no durable
   changes around repeated client reads, two-person approval, restart, lost commit
   acknowledgement and exact retry, evidence invalidation and unapproved renewal.
@@ -244,15 +255,22 @@ writes or D7 execution is included.
   scenarios exceeded the preview's whole-history replay timeout. Independent
   browser scenarios now use fresh CI-owned disposable volumes; the primary
   approval/reload/evidence-change story runs together without resetting its history.
-  All seven scenarios remain required. This is not a scalability claim or a runtime
+  All eight scenarios remain required. This is not a scalability claim or a runtime
   replay optimization.
+- The operator correction reproduced three failing client/API regressions before
+  implementation: confirmed-write progress, follow-up read failure, and a Case
+  change between the accepted write and its read. These now pass, along with both
+  reviewer orderings, unchanged exact retries and authorization-coherence negatives.
+  Browser coverage checks readable consent, hidden technical identifiers, unchanged
+  synthetic seat, keyboard focus/order and confirmed-write read failure. Final
+  desktop/390px inspection and CI evidence are recorded in PR #21.
 
 - `pnpm install --frozen-lockfile`
 - `pnpm validate`
 - `pnpm release:check` passes across current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 247 tests pass, including 13 D6-D client/API regressions, 40 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
+- 250 tests pass, including 16 D6-D client/API regressions, 40 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
   immutable authority-binding, lifecycle, conflict, and agent-authority tests;
   42 D6-B threshold, multi-approval, prior-decision, delegation, ambiguity,
   policy-selection, tenant, agent, evidence-lineage, immutability, and input-order

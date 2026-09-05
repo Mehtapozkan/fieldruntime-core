@@ -197,28 +197,28 @@ test("demo commands cite retained runtime evidence and initialize explicitly and
   h.assertIntegrity();
 });
 
-test("Finance, explicit refresh, Executive and reload use only server state", async () => {
+test("confirmed decisions refresh progress by GET; further decisions require a new human submission", async () => {
   const h = browserApiHarness(),
     client = h.client();
   await client.initialize();
   const readOnly = h.snapshot();
   await client.refresh();
   assert.equal(h.snapshot(), readOnly);
-  await client.decide("finance", "approve");
-  assert.equal(
-    client.state.packet.review_revision,
-    0,
-    "no optimistic history insertion",
-  );
-  assert.equal(client.state.receipt.review_revision, 1);
-  assert.equal(client.state.needsRefresh, true);
   const before = h.calls.length;
-  await client.decide("executive", "approve");
-  assert.equal(h.calls.length, before, "no silent refresh/rebase");
-  await client.refresh();
+  await client.decide("finance", "approve");
+  assert.equal(client.state.receipt.review_revision, 1);
   assert.equal(client.state.packet.review_revision, 1);
+  assert.equal(client.state.needsRefresh, false);
+  assert.equal(client.state.packet.current.authorized, false);
+  assert.deepEqual(
+    h.calls.slice(before).map((call) => call.method),
+    ["POST", "GET", "GET", "GET"],
+  );
+  const finance = JSON.parse(h.calls[before].body);
+  assert.equal(finance.expected_review_revision, 0);
+  const next = h.calls.length;
   await client.decide("executive", "approve");
-  await client.refresh();
+  assert.equal(JSON.parse(h.calls[next].body).expected_review_revision, 1);
   assert.equal(client.state.packet.current.authorized, true);
   assert.equal(client.state.packet.action_permission, false);
   const saved = JSON.parse(h.storage.getItem(STORAGE_KEY));
@@ -338,8 +338,14 @@ for (const lost of ["network", "malformed success"])
     await reloaded.start();
     assert.deepEqual(reloaded.state.pending, pending);
     await reloaded.retry();
-    assert.equal(h.calls.at(-1).body, pending.body);
-    assert.equal(h.calls.at(-1).path, pending.path);
+    assert.equal(
+      h.calls.filter((call) => call.method === "POST").at(-1).body,
+      pending.body,
+    );
+    assert.equal(
+      h.calls.filter((call) => call.method === "POST").at(-1).path,
+      pending.path,
+    );
     assert.equal(h.entries.length, entries);
     assert.equal(reloaded.state.pending, null);
     assert.equal(reloaded.state.receipt.review_revision, 1);
@@ -384,4 +390,109 @@ test("reasons, replacement proposals, altered responses and saved navigation can
   assert.match(client.state.error, /expired/);
   await client.refresh();
   assert.equal(requestBlocked(client.state.packet), true);
+});
+
+test("confirmed receipt survives a failed follow-up read without offering a write retry", async () => {
+  const { createReviewClient } = await import(clientUrl);
+  const h = browserApiHarness();
+  let failRead = false;
+  const client = createReviewClient({
+    storage: h.storage,
+    nextKey: () => "confirmed-read-failure",
+    fetcher: async (path, options) => {
+      if (failRead && options.method === "GET" && path.endsWith("/packet"))
+        throw new Error("read unavailable");
+      return h.fetcher(path, options);
+    },
+  });
+  await client.initialize();
+  failRead = true;
+  await client.decide("finance", "approve");
+  assert.equal(client.state.receipt.review_revision, 1);
+  assert.equal(client.state.pending, null);
+  assert.equal(client.state.needsRefresh, true);
+  assert.equal(client.state.packet.review_revision, 0);
+  assert.match(client.state.error, /recorded.*current packet/i);
+  const count = h.calls.filter((call) => call.method === "POST").length;
+  failRead = false;
+  await client.refresh();
+  assert.equal(client.state.packet.review_revision, 1);
+  assert.equal(h.calls.filter((call) => call.method === "POST").length, count);
+});
+
+test("post-write refresh exposes an intervening Case change instead of historical authorization", async () => {
+  const { createReviewClient } = await import(clientUrl);
+  const h = browserApiHarness();
+  let change = false;
+  const client = createReviewClient({
+    storage: h.storage,
+    nextKey: (() => {
+      let key = 0;
+      return () => `case-race-${++key}`;
+    })(),
+    fetcher: async (path, options) => {
+      const response = await h.fetcher(path, options);
+      if (change && options.method === "POST") {
+        change = false;
+        h.caseCommand({
+          type: "case.attach_work_event",
+          tenant_id: TENANT,
+          case_id: CASE_ID,
+          expected_case_version: 1,
+          actor_identity_id: "identity_d6_operator",
+          idempotency_key: "other:between",
+          correlation_id: "other",
+          work_event: DEMO_UPDATE,
+        });
+      }
+      return response;
+    },
+  });
+  await client.initialize();
+  await client.decide("finance", "approve");
+  change = true;
+  await client.decide("executive", "approve");
+  assert.equal(client.state.receipt.review_revision, 2);
+  assert.equal(client.state.receipt.result.authorized, true);
+  assert.equal(client.state.packet.case_version, 2);
+  assert.equal(client.state.packet.current.authorized, false);
+  assert.deepEqual(client.state.packet.current.effective_approval_ids, []);
+  assert.ok(client.state.packet.current.reason_codes.includes("stale_case"));
+});
+
+test("operator progress follows current server requirements in either reviewer ordering and hides historical authority", async () => {
+  const { reviewProgress } =
+    await import("../apps/admin/public/authority-workbench.js");
+  for (const [first, second] of [
+    ["finance", "executive"],
+    ["executive", "finance"],
+  ]) {
+    const h = browserApiHarness(),
+      client = h.client();
+    await client.initialize();
+    assert.equal(reviewProgress(client.state).heading, "Awaiting review");
+    await client.decide(first, "approve");
+    assert.match(
+      reviewProgress(client.state).heading,
+      new RegExp(`${first} approved.*${second} needed`, "i"),
+    );
+    assert.match(
+      reviewProgress({ ...client.state, pending: {} }).heading,
+      /unconfirmed/,
+    );
+    await client.decide(second, "approve");
+    assert.equal(
+      reviewProgress(client.state).heading,
+      "Approvals complete — execution unavailable",
+    );
+    await client.attachEvidence();
+    assert.equal(
+      reviewProgress(client.state).heading,
+      "Case changed — fresh review needed",
+    );
+    await client.freshRequest();
+    assert.equal(reviewProgress(client.state).heading, "Awaiting review");
+    await client.decide(first, "reject", "Review is incomplete.");
+    assert.equal(reviewProgress(client.state).heading, "Request rejected");
+  }
 });

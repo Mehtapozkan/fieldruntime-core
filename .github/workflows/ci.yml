@@ -54,7 +54,7 @@ jobs:
           # Each independent browser scenario owns a disposable fixture volume.
           # Keep the primary approval/reload/evidence story together. Whole-history
           # replay is intentionally not a throughput benchmark in this preview.
-          for scenario in 'explicit init|retained evidence' 'concurrent review' 'reject removes' 'modify removes' 'escalate removes' 'ineligible seats'; do
+          for scenario in 'explicit init|retained evidence' 'concurrent review' 'reject removes' 'modify removes' 'escalate removes' 'ineligible seats' 'confirmed-write read failure'; do
             docker compose down --volumes
             docker compose up --detach --wait
             pnpm test:workbench --grep "$scenario"

@@ -455,7 +455,7 @@ export function createReviewClient({
     busy: false,
     error: null,
     message:
-      "Start or reopen the synthetic credit review. This is an explicit database write.",
+      "Start the synthetic review when you are ready. Opening this page creates nothing.",
   };
   function emit(patch) {
     state = { ...state, ...patch };
@@ -529,6 +529,11 @@ export function createReviewClient({
       "The request could not be loaded from the runtime.",
     );
     const packet = clone(validatePacket(response.data, id));
+    if (state.receipt?.historical && state.receipt.authority_request_id === id)
+      requireValue(
+        packet.review_revision >= state.receipt.review_revision,
+        "The current packet does not yet include the recorded decision.",
+      );
     await context();
     save(state.pending, id);
     emit({
@@ -538,7 +543,7 @@ export function createReviewClient({
       error: null,
       message: state.pending
         ? "A command is still unconfirmed. Retry its original bytes and key."
-        : "Packet refreshed from the runtime. Review this binding before submitting.",
+        : "Current review loaded. Inspect the proposal and history before your next decision.",
     });
   }
   async function run(work) {
@@ -607,20 +612,30 @@ export function createReviewClient({
       return;
     }
     const receipt = response.data.receipt ?? response.data;
-    const id =
-      pending.kind === "create"
-        ? receipt.authority_request_id
-        : state.requestId;
+    const id = ["create", "decide"].includes(pending.kind)
+      ? receipt.authority_request_id
+      : state.requestId;
     save(null, id);
     emit({
       pending: null,
       requestId: id,
       receipt: clone(receipt),
       error: null,
-      message:
-        "The server returned a historical receipt. Refresh the packet to see current eligibility.",
+      message: "The command was recorded. Checking the current review…",
     });
-    if (pending.kind === "create") await load(id);
+    // A confirmed write permits a read, never another decision. Conflicts and
+    // uncertain writes return above without changing the reviewed binding.
+    if (id) {
+      try {
+        await load(id);
+      } catch {
+        emit({
+          needsRefresh: true,
+          error:
+            "The command was recorded, but the current packet could not be verified. Refresh to check progress; do not resubmit the recorded decision.",
+        });
+      }
+    }
     return response.data;
   }
   function ensureWritable() {

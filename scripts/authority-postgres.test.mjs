@@ -347,10 +347,10 @@ test("Workbench client through PostgreSQL/HTTP: explicit init, read-only reload,
   assert.equal(browser.state.receipt.review_revision, 1);
   assert.equal(
     browser.state.packet.review_revision,
-    0,
-    "receipt is not a current packet",
+    1,
+    "confirmed write is followed by a read-only current packet",
   );
-  await browser.refresh();
+  assert.equal(browser.state.needsRefresh, false);
   h.inject("COMMIT", { after: true });
   await browser.decide("executive", "approve");
   assert.match(browser.state.error, /unconfirmed/);

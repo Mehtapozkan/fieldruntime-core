@@ -103,6 +103,7 @@ export function browserApiHarness(editCatalog = () => {}) {
   };
   return {
     calls,
+    fetcher,
     storage,
     caseCommand,
     advance(ms) {

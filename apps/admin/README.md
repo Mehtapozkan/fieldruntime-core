@@ -10,14 +10,19 @@ open <http://127.0.0.1:3210/>. Opening the page creates nothing.
 1. Choose **Start or reopen $15,000 review**. This explicit action idempotently
    creates `case_d6_workbench` through Case commands, then its authority request.
    It uses retained Orchid intake evidence, separate from the frozen Acme fixture.
-2. Inspect the exact USD credit and customer reference, cited source content,
-   provenance/hash, conflicts, unknowns and recommendation. Expand **Exact request
-   binding** for the request ID/hash and policy reference. C, R and S are visible.
-3. Select **Finance · synthetic seat** and **Approve**, then record the decision.
-   The historical receipt appears; further decisions require **Refresh packet**.
-4. Refresh and inspect Finance's recorded approval. Select **Executive · synthetic
-   seat**, approve, then refresh. The packet says **Approvals complete — execution
-   unavailable**. C stays unchanged and R advances from 0 to 1 to 2.
+2. The primary view leads with **Orchid / $15,000 proposed credit**, the retained
+   issue and uncertainty, prepared evidence and policy-selected reviewers. The
+   policy explanation identifies the tier above $10,000 and named Finance plus
+   Executive. This is a proposed amount, not an evidenced entitlement or recovered
+   value. Human-readable source links stay visible; C/R/S, hashes, raw references
+   and replay inputs are in expandable technical details.
+3. Choose **Finance · synthetic seat** and **Approve**, then record the decision.
+   After the server confirms the write, a read-only refresh shows **Finance
+   approved — Executive needed**. The selected seat does not change automatically.
+4. Inspect the refreshed material/history, explicitly select **Executive · synthetic
+   seat** and approve. The next read shows **Approvals complete — execution
+   unavailable**. C remains unchanged and R advances from 0 to 1 to 2. Reject,
+   modify and escalate remain available to an independently eligible reviewer.
 5. Reload the browser and open **Review history**. The same request, decisions,
    immutable consent material and retained evaluation evidence reconstruct from
    PostgreSQL. The request URL is also a read-only revisit link.
@@ -43,6 +48,9 @@ Execution and Case closure remain unavailable even after both approvals.
   **Retry exact command** recovers the historical receipt without another vote.
   Do not clear the tab's session storage while a command is unconfirmed. Closing
   the tab may lose retry information; the server's committed history remains.
+- If a write is confirmed but its follow-up GET fails, retain the accepted historical
+  receipt and show current progress as unverified. Offer refresh, not another write
+  retry. No conflict or uncertain write triggers an automatic resubmission.
 - Packet reads may fail or become stale after evaluation. The prior view is labeled
   unconfirmed and cannot submit until a successful refresh. The server rechecks
   current eligibility at submission regardless of any previous read.
@@ -51,8 +59,8 @@ Execution and Case closure remain unavailable even after both approvals.
 
 After both approvals, open **Changed evidence** and choose **Attach evidence ·
 invalidate prior approvals**. This submits the retained synthetic operations
-update through the existing Case-command API. Refresh: C advances, the old request
-reports `stale_case`, and its historical approvals are no longer effective. Choose
+update through the existing Case-command API. A confirmed write fetches the current
+packet automatically: C advances, the old request reports `stale_case`, and its historical approvals are no longer effective. Choose
 **Create fresh $15,000 request**, inspect both cited sources and collect both
 approvals again. The update is attached once; the demonstration never rewrites or
 deletes Case history. Retrying initialization also preserves existing history.
@@ -102,14 +110,20 @@ pnpm exec playwright install chromium
 pnpm test:workbench
 ```
 
-The seven browser tests run once against a database that has not run this Workbench
+The eight browser tests run once against a database that has not run this Workbench
 demo; they intentionally retain its Case/history. They cover the primary flow,
 reload, concurrent reviewers, uncertain responses, terminal interventions,
-replacement, changed evidence, ineligible seats and unsafe responses. Use a separate
+replacement, changed evidence, ineligible seats, unsafe responses and a confirmed
+write followed by a failed read. They also check keyboard focus/order, unchanged
+seat selection, visible uncertainty, hidden technical bindings and 390px overflow. Use a separate
 instance for another full run; do not delete existing data to reset it. CI installs
 the browser driver and runs independent scenario groups against fresh CI-owned
 Compose volumes, with the primary approval/reload/evidence-change story kept
 together. This prevents unrelated fixtures from accumulating whole-history replay
-cost; it does not assert scalability. All seven browser scenarios, existing
+cost; it does not assert scalability. All eight browser scenarios, existing
 appliance checks and frozen ECC checks remain required. Playwright is a development
 dependency.
+
+D6-D claims review progress only. D7 supplies simulated execution and independent
+verification; D8 supplies outcome/economics receipts. No time savings, recovered
+revenue, action outcome or resolution is measured by this review surface.
