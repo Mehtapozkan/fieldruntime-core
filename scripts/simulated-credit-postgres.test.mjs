@@ -20,6 +20,17 @@ import {
   CREDIT_ACTION_HASH,
 } from "../dist/packages/runtime/src/index.js";
 import { PostgresSimulatedCreditStore } from "../dist/packages/runtime/src/postgres-simulated-credit-store.js";
+import { loadAuthorityStore } from "../dist/packages/runtime/src/postgres-authority-store.js";
+import {
+  CREDIT_COLUMNS,
+  loadCreditEvidence,
+} from "../dist/packages/runtime/src/postgres-credit-evidence.js";
+import {
+  assertCreditIntegrity,
+  creditEntry,
+  creditSource,
+  evaluateCredit,
+} from "../dist/packages/runtime/src/simulated-credit.js";
 import {
   caseCommand,
   createRequestCommand,
@@ -1131,4 +1142,154 @@ test("D7 envelopes expose only the bound Case while replay preserves the runtime
     "ALTER TABLE simulated_action_journal ENABLE TRIGGER simulated_action_append_only",
   );
   await h.request(view, undefined, 500);
+});
+
+function appendReplayEvidence() {
+  return {
+    type: "case.attach_work_event",
+    tenant_id: TENANT,
+    case_id: CASE,
+    expected_case_version: 4,
+    actor_identity_id: "identity_d6_operator",
+    idempotency_key: "evidence:replay",
+    correlation_id: "evidence:replay",
+    work_event: workEvent("replay_update", "update"),
+  };
+}
+
+for (const delay of [0, 1000])
+  test(`D7 legitimate action survives restart after evidence recorded ${delay}ms later`, async (t) => {
+    const h = await fixture(t),
+      id = await h.approved(),
+      command = await h.command(id);
+    h.advance(1000);
+    const original = await h.request(action, command);
+    h.advance(delay);
+    await h.case(appendReplayEvidence());
+    const before = await h.dump();
+    await h.restart();
+    assert.equal((await h.request("/readyz")).status, "ready");
+    const read = await h.request(view);
+    assert.deepEqual(read.attempts, [original.receipt]);
+    assert.deepEqual(read.source, original.receipt.source);
+    assert.equal(read.current.eligible, false);
+    assert.equal(read.closure_permission, false);
+    const retry = await h.request(action, command);
+    assert.equal(retry.status, "duplicate");
+    assert.deepEqual(retry.receipt, original.receipt);
+    assert.deepEqual(await h.dump(), before);
+  });
+
+test("D7 obsolete Case forgery preserves canonical histories but fails replay, readiness, reads and restart", async (t) => {
+  const h = await fixture(t),
+    id = await h.approved(),
+    command = await h.command(id);
+  const prefix = await loadAuthorityStore({ query: h.sql }, true);
+  h.advance(1000);
+  const original = (await h.request(action, command)).receipt;
+  h.advance(1000);
+  const changedAt = h.now().toISOString();
+  await h.case(appendReplayEvidence());
+  await h.restart();
+  assert.deepEqual((await h.request(view)).attempts, [original]);
+  const canonical = await h.dump();
+  const current = await loadAuthorityStore({ query: h.sql }, true);
+  h.advance(1000);
+  // Re-evaluate the obsolete C=4 prefix at t=3, although unchanged canonical
+  // Case history records C=5 at t=2. Keep a canonically supported clock floor.
+  const past = {
+    ...prefix,
+    heads: [{ ...prefix.heads[0], last_recorded_at: changedAt }],
+  };
+  const envelope = evaluateCredit(past, command, h.now().toISOString());
+  assert.equal(envelope.authorized, true);
+  const source = creditSource(original.id, h.now().toISOString());
+  const forged = creditEntry(past, envelope, original.id, "success", source);
+  const candidate = {
+    ...current,
+    heads: [{ ...current.heads[0], last_recorded_at: forged.recorded_at }],
+    credit: { entries: [forged], sources: [source] },
+  };
+  let forgedReplayAccepted = true;
+  try {
+    assertCreditIntegrity(candidate);
+  } catch (error) {
+    assert.equal(error.code, "CREDIT_INTEGRITY");
+    assert.match(error.message, /credit ignored an earlier Case change/);
+    forgedReplayAccepted = false;
+  }
+  // Deliberately bypass only the two action/source immutability triggers to
+  // simulate a privileged coherent rewrite. Preserve all Case/review/catalog
+  // snapshots, repairing every action index, source hash and mutable clock guard.
+  await h.sql(
+    "ALTER TABLE simulated_action_journal DISABLE TRIGGER simulated_action_append_only",
+  );
+  await h.sql(
+    "ALTER TABLE simulated_credit_source DISABLE TRIGGER simulated_source_append_only",
+  );
+  const n = CREDIT_COLUMNS.length;
+  await h.sql(
+    `WITH rewritten_action AS (
+      UPDATE simulated_action_journal SET ${CREDIT_COLUMNS.map((c, i) => `${c}=$${i + 1}`).join(", ")},entry=$${n + 1} WHERE id=$1 RETURNING id
+    ), rewritten_source AS (
+      UPDATE simulated_credit_source SET source_row=$${n + 2},row_hash=$${n + 3}
+      WHERE origin_attempt_id=(SELECT id FROM rewritten_action) RETURNING origin_attempt_id
+    ) UPDATE authority_catalog SET last_recorded_at=$${n + 4} WHERE tenant_id='tenant_orchid'`,
+    [
+      ...CREDIT_COLUMNS.map((c) => forged[c]),
+      forged,
+      source,
+      source.row_hash,
+      forged.recorded_at,
+    ],
+  );
+  await h.sql(
+    "ALTER TABLE simulated_action_journal ENABLE TRIGGER simulated_action_append_only",
+  );
+  await h.sql(
+    "ALTER TABLE simulated_credit_source ENABLE TRIGGER simulated_source_append_only",
+  );
+  assert.deepEqual(
+    await loadCreditEvidence({ query: h.sql }, true),
+    candidate.credit,
+  );
+  const rewritten = await h.dump();
+  for (const table of tables.filter(
+    (name) =>
+      ![
+        "simulated_action_journal",
+        "simulated_credit_source",
+        "authority_catalog",
+      ].includes(name),
+  ))
+    assert.deepEqual(
+      rewritten[table],
+      canonical[table],
+      `${table} must remain canonical`,
+    );
+  assert.deepEqual(
+    rewritten.authority_catalog,
+    canonical.authority_catalog.map(({ row }) => ({
+      row: { ...row, last_recorded_at: forged.recorded_at },
+    })),
+  );
+  const ready = await h.request("/readyz", undefined, [200, 503]);
+  const read = await h.request(view, undefined, [200, 500]);
+  const restart = await Promise.allSettled([h.restart()]);
+  const observed = {
+    legitimate_history_control: true,
+    forged_replay_accepted: forgedReplayAccepted,
+    readiness: ready.status,
+    operation_read_accepted:
+      read.schema_version === "simulated-credit-read-response.v1",
+    restart_accepted: restart[0].status === "fulfilled",
+  };
+  t.diagnostic(JSON.stringify(observed));
+  assert.deepEqual(observed, {
+    legitimate_history_control: true,
+    forged_replay_accepted: false,
+    readiness: "not_ready",
+    operation_read_accepted: false,
+    restart_accepted: false,
+  });
 });

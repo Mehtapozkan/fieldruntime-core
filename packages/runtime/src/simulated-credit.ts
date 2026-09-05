@@ -491,6 +491,15 @@ export function assertCreditIntegrity(context: CreditContext): void {
           current.journal[version - 1]?.event_hash === anchor.event_hash,
         "credit Case anchor drift",
       );
+      // A valid prefix was not current if an omitted Case entry strictly
+      // predates issuance. Later changes preserve historical actions; equal
+      // timestamps alone cannot order the separate Case and action journals.
+      creditAssert(
+        !current.journal
+          .slice(version)
+          .some((later) => later.recorded_at < string(entry.recorded_at)),
+        "credit ignored an earlier Case change",
+      );
       return replayCaseJournal(current.journal.slice(0, version));
     });
     creditAssert(

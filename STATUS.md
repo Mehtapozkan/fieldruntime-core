@@ -74,9 +74,9 @@ verification; an invocation without source evidence cannot be repeated without
 D7-C's independent absence proof. Customer impact, Case resolution and recovered
 revenue remain unproven. Legacy execution and incomplete-proof closure guards remain.
 
-Local repository validation passes **254 tests**, including preserved authority
+Local repository validation passes **258 tests**, including preserved authority
 repairs and Workbench coverage. The real local PostgreSQL D6 suite passes **63**.
-The D7 suite passes **53 real PostgreSQL/API tests** covering fresh/upgrade
+The D7 suite passes **56 real PostgreSQL/API tests** covering fresh/upgrade
 enrollment, atomic action/replacement boundaries,
 current eligibility (including exact workflow identity/version and two distinct
 human reviewers), terminal/concurrent
@@ -84,6 +84,20 @@ commands, duplicates, clock guards,
 tampering, source/action rollback and restart retries. Operation envelopes retain
 only the bound Orchid Case; unrelated Case identifiers/hashes are excluded, while
 the runtime clock floor remains a validated scalar replay input. The local appliance action → PostgreSQL/API restart → exact retry smoke also passes.
+
+The obsolete-Case replay defect was reproduced at `b5272ad` before changing the
+implementation. Legitimate earlier-action controls passed, but coherent action/
+source/index/hash/clock rewrites claiming issuance after canonical changed evidence
+were accepted by replay, readiness, operation reads and restart. The repair rejects
+an anchor that omits any Case entry recorded strictly before claimed issuance;
+runtime coverage also checks D-014 version increments. Canonical Case/review/catalog
+histories remain unchanged in the PostgreSQL forgery regression. Earlier actions,
+including subsequent Case changes with equal timestamps, remain reconstructable
+and exact retries cause no writes.
+Equal timestamps cannot establish order across journals without a shared per-entry
+writer sequence; this repair preserves that limitation and adds no sequence,
+schema, migration or new trust boundary. Live command ordering still uses the lock.
+
 ECC passes 620/620; its intended negative control exits 1 with 152/620 and a full
 assertion receipt. Hosted PostgreSQL/Compose/browser evidence is linked in the
 implementation PR. Docker is

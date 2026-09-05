@@ -90,6 +90,14 @@ these inputs from canonical history and never calls the adapter. The retained ru
 clock floor is a scalar control snapshot checked against canonical timestamps; no
 unrelated Case identifiers or head hashes are exposed.
 
+Historical replay also rejects a bound Case prefix if an omitted canonical Case
+entry was recorded strictly before the claimed action issuance. This includes
+changed evidence and D-014 version increments. Actions issued before later Case
+changes remain reconstructable, including exact retries. Equal timestamps alone
+cannot establish ordering across the separate Case/action journals: they retain
+no shared per-entry writer sequence. Live writes remain serialized by the existing
+lock; replay does not infer that a same-timestamp Case append preceded an action.
+
 | Result              | Meaning                                                                                                                               |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | 200 `applied`       | Atomic simulated action and any source row committed. Receipt remains unverified.                                                     |
