@@ -12,8 +12,10 @@ at `527cfb6f`. D7-A PR #22 merged normally at
 from reviewed head `56490f9a` after required checks. D7-C PR #24 merged at `3936843fba4126bdb852e2ee5681de0f7162525a`
 from reviewed head `f72a0256` with passing required checks. D7-D PR #25 merged normally
 at `f49dd71e3d1d8a393729690437d6f568b7473238`, preserving reviewed head `2f3434fe`
-and passing checks. D8-A’s read-only Case receipt is implemented for review on this
-branch. No release or deployment is included.
+and passing checks. D8-A merged in PR #26 at
+`4ce7175556b2a0ecf954ec5a57677a591050db2c` from reviewed head `e1caeb28`, with passing
+checks and its finding resolved. D8-B’s failure walkthrough and measurement-readiness
+note are implemented for review on this branch. No release or deployment is included.
 
 The published `v0.1.0-evaluation-preview.0` is a historical snapshot at `3db1b4bf`,
 before D6/D7; merges do not update it. This plan describes current source and future
@@ -49,7 +51,7 @@ historical behavior alone never establishes business authority.
 | GitHub #14 — Automated Evaluation Prerelease         | Merged      | Automate the evaluation prerelease while retaining the repository's explicit preview boundary                                                                                                                                                                               | The published prerelease remains tied to validated source and release checks                                                                               |
 | D6 — Governed Case Session                           | Merged      | Authoritative identity, delegation, and business authority; exact Case owner, delegated worker, authority owner, and verifier; payload-bound approvals; deterministic authority resolution                                                                                  | The Decision Packet is runtime-backed, approvals bind the exact payload, and authority resolution fails closed                                             |
 | D7 — Controlled Action + Independent Verification    | Merged      | Bounded Orchid credit, independent verification and Workbench action/check controls merged in PRs #23–#25                                                                                                                                                                   | Bypass, self-verification, unbound-payload, precondition, and duplicate-effect negative tests pass                                                         |
-| D8 — Receipts + Economics + Failure Theater          | In progress | D8-A read-only Case progress/evidence receipt implemented for review; accepted-outcome, measured economics and remaining failure demonstrations planned                                                                                                                     | A Case is reconstructable, economics derive from receipts, and unsafe authority/action/verification demonstrations fail closed                             |
+| D8 — Receipts + Economics + Failure Theater          | In progress | D8-A receipt merged; D8-B reproducible failure walkthrough and measurement-readiness note implemented for review; accepted-outcome and measured economics planned                                                                                                           | A Case is reconstructable, economics derive from receipts, and unsafe authority/action/verification demonstrations fail closed                             |
 | D9 — Intake + Case Formation                         | Planned     | Canonical intake for email, file, form, event, queue row, and human submission; provenance-preserving evidence links; related-signal linking; uncertainty-preserving Case candidates and existing-Case import                                                               | Repeatable candidate formation and safe mapping of upstream Cases both preserve provenance, ambiguity, conflicts, unknowns, and system-of-record ownership |
 | D10 — Case Discovery + Operational Legibility        | Planned     | Reconstruct representative historical work; distinguish authoritative fact, approved policy, cited memory, extraction, and inference; expose missing evidence/conflicts and classify operability                                                                            | Evaluation reports agent-workable, human-judgment-required, authority-blocked, evidence-blocked, and unclear-outcome work without inferring authority      |
 | D11 — Runtime Builder                                | Planned     | Human review of discovered or imported actors, systems, evidence sources, Case classes, authority references, commitments, actions, and outcome contracts; compile a versioned Organization Runtime Pack                                                                    | A reviewed Runtime Pack is reproducible without turning implementation into bespoke BPMN consulting                                                        |
@@ -133,7 +135,7 @@ credit does not prove customer impact or permit Case closure.
 
 ## D8-A delivery boundary
 
-Implemented for review: replace the existing History lists with one compact Case
+Merged in PR #26: replace the existing History lists with one compact Case
 progress and evidence receipt. Reuse the existing validated Case, request, action
 and verification reads. Expand each stage for its retained material, canonical
 synthetic identity, exact bindings and recorded time. No new ledger, contract,
@@ -146,10 +148,24 @@ evidence. Reconcile explicit revisions and anchors; if independent views disagre
 show incomplete information. Preserve journal ordering without inferring order
 across equal timestamps. Historical evidence never grants current permission.
 
-Next: review this presentation and its desktop/390px evidence. Remaining D8 work
-must separately establish accepted-outcome evidence and any real measurements
-before claiming economics. Customer impact, acceptance and complete Case closure
-remain unproven; elapsed timestamps do not measure processing time or time saved.
+## D8-B delivery boundary
+
+Implemented for review: a [five-scenario failure walkthrough](docs/guides/d8-failure-walkthrough.md)
+using existing PostgreSQL/API fixtures, fault hooks and Node test selection. One
+legitimate match accompanies stale-consent denial, silent adapter failure caught
+by read-back, unavailable-read inconclusive proof and exact response-loss retry.
+Diagnostic excerpts expose commands, receipt hashes, synthetic attribution, observed
+source and recovery without a new runner, ledger, API or fault-control surface.
+
+Retain all authority, action, verification, browser, replay and closure tests. Expected
+negative outcomes pass assertions; unexpected authorization or duplicate effects
+fail. Fixtures create/drop only their own disposable schemas. Current runtime and
+frozen ECC behavior remain unchanged.
+
+Next: establish accepted-outcome evidence and collect comparable operational data
+before measured economics. Active human effort, baseline, operating costs, customer
+acceptance and real impact are missing. No elapsed interval is labor time or savings;
+unknown values are not zero. D8 economics and complete Case closure remain planned.
 
 ## Operational Legibility Gate
 
