@@ -750,11 +750,13 @@ and identical receipt after response-loss/restart retry. The legitimate control
 matches the independent source. A negative runtime outcome is a passing test only
 when its expected assertion holds; unexpected acceptance or duplicate effects fail.
 
-Validation remains `pnpm validate` (272 tests), 63 authority PostgreSQL tests and
-115 D7/D8 PostgreSQL/API tests including eight Chromium scenarios, plus all eight
-retained D6 Workbench browser cases. ECC and its intended negative control, Compose
-and appliance/restart remain required. Actual final-run results and CI evidence
-will be recorded in the implementation PR. Docker is unavailable locally; the
+Local validation passes: `pnpm validate` (272 tests), 63 authority PostgreSQL tests
+and 115 D7/D8 PostgreSQL/API tests including eight Chromium scenarios, plus all
+eight retained D6 Workbench browser cases. ECC passes 620/620; its negative control
+exits 1 at 152/620 from intended assertions. `git diff --check` and the staged
+public-release check pass; all 47 checked local documentation link targets exist.
+Final-commit Compose/appliance/restart and full-suite CI evidence is recorded in
+the implementation PR. Docker is unavailable locally (Compose exit 127); the
 optional disposable-container provisioning snippet is not claimed as locally run.
 No new visual inspection is claimed; the D8-A screenshots remain historical evidence.
 

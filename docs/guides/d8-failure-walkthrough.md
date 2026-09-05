@@ -5,9 +5,11 @@ success control and four failures. The same cases remain in full CI. It adds onl
 assertions and diagnostic evidence to the existing test host; no appliance fault
 controls, runtime contracts, migrations, dependencies or production capabilities.
 
-All operations are operator-triggered synthetic tests. A passing test means the
-asserted safeguard worked, not that a customer's problem was resolved. Fixed
-fixture clocks and runner durations are not business-performance measurements.
+An operator explicitly launches the tests; the harness then submits synthetic
+commands, including simulated reviewer decisions. This is not autonomous customer
+work or proof of human inspection. A passing test means the asserted safeguard
+worked, not that a customer's problem was resolved. Fixed fixture clocks and
+runner durations are not business-performance measurements.
 
 ## Run the five scenarios
 
@@ -66,8 +68,11 @@ Every `D8-B` line contains actual fixture results: original command/key and C/R/
 request/action/envelope hashes, recorded time, synthetic service attribution,
 adapter acknowledgment, source row and independent observation/comparison where
 applicable. These are diagnostic excerpts, **not new canonical receipts**. Entry
-hashes identify the complete retained records; rerunning reconstructs the fixture.
-Evidence from different fixtures must not be joined by repeated synthetic IDs.
+hashes identify the complete records validated during the run. Teardown deletes
+the fixture; these excerpts are not a standalone replay archive. Rerun the tests
+to reproduce reconstruction. Generated retry keys and hashes can differ between
+runs; each exact retry preserves its own original bytes/key. Evidence from different
+fixtures must not be joined by repeated synthetic IDs.
 
 | Scenario / attempted operation                                                  | Expected and observed assertion result                                                                                                      | Supporting evidence                                                                                                                                      | Permitted recovery                                                                                                                                                                                                                                                                                            |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
