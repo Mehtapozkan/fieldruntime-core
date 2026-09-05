@@ -139,8 +139,16 @@ is the **September 1, 2026** snapshot at
 [`3db1b4bf0304e67e1ef51be785d1f81b906016b3`](https://github.com/Mehtapozkan/fieldruntime-core/commit/3db1b4bf0304e67e1ef51be785d1f81b906016b3).
 It includes the Case engine, PostgreSQL appliance, ECC evaluation and legacy fixture
 Workbench. **It does not include persistent D6 review or the D7 action/verification
-APIs.** Use its [tag-pinned installation guide](https://github.com/Mehtapozkan/fieldruntime-core/blob/v0.1.0-evaluation-preview.0/docs/guides/5-minute-evaluation.md)
-when evaluating that historical version.
+APIs.** To evaluate that version, use a separate clone and select the tag before
+installation:
+
+```sh
+git switch --detach v0.1.0-evaluation-preview.0
+```
+
+Then follow the [tag-pinned guide](https://github.com/Mehtapozkan/fieldruntime-core/blob/v0.1.0-evaluation-preview.0/docs/guides/5-minute-evaluation.md)
+after its clone step. Use a separate fresh appliance volume; do not downgrade an
+upgraded database. The tag-pinned page alone does not select the cloned revision.
 
 Merging source changes does not update that immutable tag or release. PR #24
 publishes no new release or deployment. The source-clone appliance is the supported

@@ -18,9 +18,9 @@ On the current appliance choose **Legacy action simulation**, or open
 Use only the documented loopback appliance: synthetic case, simulated authority,
 no external writes and no production receipt.
 
-To reproduce the **published September 1 prerelease** instead, use its
-[tag-pinned installation guide](https://github.com/Mehtapozkan/fieldruntime-core/blob/v0.1.0-evaluation-preview.0/docs/guides/5-minute-evaluation.md).
-That version opens the Acme story by default and predates persistent D6 review and
+To reproduce the **published September 1 prerelease** instead, follow
+[README's release-tag selection and fresh-volume instructions](../../README.md#distribution)
+before using the historical installation guide. That version opens the Acme story by default and predates persistent D6 review and
 D7 action/verification APIs. Merges to main do not update the release.
 
 ## The six-action story
