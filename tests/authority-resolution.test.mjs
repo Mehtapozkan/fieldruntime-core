@@ -5,6 +5,7 @@ import {
   assertValidAuthorityPolicy,
   assertValidAuthorityRecord,
   assertValidAuthorityResolutionResult,
+  assertValidDelegationGrant,
   sha256Json,
 } from "../dist/packages/contracts/src/index.js";
 import { resolveAuthority } from "../dist/packages/domain/src/index.js";
@@ -78,6 +79,43 @@ function requirement(result, authorityClass) {
   return result.authority_requirements.find(
     (item) => item.authority_class === authorityClass,
   );
+}
+
+function resolveInEitherOrder(input) {
+  const result = resolveAuthority(input);
+  const reversed = clone(input);
+  for (const key of [
+    "identities",
+    "responsibilities",
+    "authorityRecords",
+    "delegations",
+    "policies",
+    "priorAuthorityDecisions",
+  ]) {
+    reversed[key].reverse();
+  }
+  assert.deepEqual(resolveAuthority(reversed), result);
+  return result;
+}
+
+function delegatedInput() {
+  const approval = approvalFor(
+    "credit_7000",
+    "finance_delegate",
+    "authority_decision_delegate_7000",
+  );
+  approval.relevant_delegation_ids = [fixture.delegations.active.delegation_id];
+  return baseInput("credit_7000", {
+    policies: [
+      namedApproverPolicy(
+        "rule_credit_5001_to_10000",
+        "finance_approver",
+        "identity_finance_delegate",
+      ),
+    ],
+    delegations: [clone(fixture.delegations.active)],
+    priorAuthorityDecisions: [approval],
+  });
 }
 
 test("the ECC resolver fixture has valid policy and authority records", () => {
@@ -535,4 +573,299 @@ test("cross-tenant authority records fail closed", () => {
   );
   assert.equal(result.outcome, "no_authority");
   assert.deepEqual(result.reason_codes, ["authority_record.tenant_mismatch"]);
+});
+
+test("approvals never clear an unresolved same-rank Executive conflict", () => {
+  const input = baseInput();
+  input.authorityRecords.push(
+    authorityRecordFor(
+      "executive_sponsor_b",
+      "executive_sponsor",
+      "authority_record_executive_b",
+      "fixture://authority/executive-b",
+    ),
+  );
+  for (const approvals of [
+    [],
+    [fixture.authority_decisions.finance_15000],
+    Object.values(fixture.authority_decisions),
+  ]) {
+    input.priorAuthorityDecisions = clone(approvals);
+    const result = resolveInEitherOrder(input);
+    assert.equal(result.outcome, "conflicting_authority");
+    assert.deepEqual(result.reason_codes, ["authority.same_rank_conflict"]);
+    assert.equal(result.authority_candidates.length, 2);
+  }
+
+  input.policies = [
+    namedApproverPolicy(
+      "rule_credit_above_10000",
+      "executive_sponsor",
+      "identity_executive_sponsor",
+    ),
+  ];
+  assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+});
+
+test("a two-person requirement counts distinct approvals and preserves excess-holder conflicts", () => {
+  const input = baseInput("credit_7000");
+  input.policies[0].rules[1].requirements[0].required_approval_count = 2;
+  input.authorityRecords.push(
+    authorityRecordFor(
+      "finance_delegate",
+      "finance_approver",
+      "authority_record_finance_second",
+      "fixture://authority/finance-second",
+    ),
+  );
+  const first = approvalFor(
+    "credit_7000",
+    "finance_approver",
+    "approval_first",
+  );
+  input.priorAuthorityDecisions = [
+    first,
+    { ...first, authority_decision_id: "approval_duplicate_person" },
+  ];
+  const partial = resolveInEitherOrder(input);
+  assert.equal(partial.outcome, "approval_required");
+  assert.equal(
+    requirement(partial, "finance_approver").remaining_approval_count,
+    1,
+  );
+  input.priorAuthorityDecisions.push(
+    approvalFor("credit_7000", "finance_delegate", "approval_second"),
+  );
+  assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+  input.authorityRecords.push(
+    authorityRecordFor(
+      "business_approver",
+      "finance_approver",
+      "authority_record_finance_third",
+      "fixture://authority/finance-third",
+    ),
+  );
+  assert.equal(resolveInEitherOrder(input).outcome, "conflicting_authority");
+  input.policies[0].rules[1].requirements[0].named_approver_identity_ids = [
+    "identity_finance_approver",
+    "identity_finance_delegate",
+  ];
+  assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+});
+
+test("contradictory authority-record IDs fail before status, time, or scope filtering", () => {
+  const input = baseInput("credit_7000", {
+    priorAuthorityDecisions: [
+      approvalFor("credit_7000", "finance_approver", "approval_finance"),
+    ],
+  });
+  assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+  for (const changes of [
+    { status: "revoked" },
+    { effective_from: "2026-08-27T00:00:00.000Z" },
+    { scope: { case_ids: ["case_other"] } },
+  ]) {
+    const contradictory = { ...clone(input.authorityRecords[1]), ...changes };
+    assertValidAuthorityRecord(contradictory);
+    const result = resolveInEitherOrder({
+      ...input,
+      authorityRecords: [...input.authorityRecords, contradictory],
+    });
+    assert.equal(result.outcome, "no_authority");
+    assert.deepEqual(result.reason_codes, [
+      "authority_record.conflicting_records",
+    ]);
+  }
+});
+
+test("contradictory delegation IDs fail before status, time, or scope filtering", () => {
+  const input = delegatedInput();
+  assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+  for (const changes of [
+    { status: "revoked", revocation: fixture.delegations.revoked.revocation },
+    { effective_from: "2026-08-27T00:00:00.000Z" },
+    { scope: { case_ids: ["case_other"] } },
+  ]) {
+    const contradictory = { ...clone(input.delegations[0]), ...changes };
+    assertValidDelegationGrant(contradictory);
+    const result = resolveInEitherOrder({
+      ...input,
+      delegations: [...input.delegations, contradictory],
+    });
+    assert.equal(result.outcome, "no_authority");
+    assert.deepEqual(result.reason_codes, ["delegation.conflicting_records"]);
+  }
+});
+
+test("identical authority and delegation copies remain harmless", () => {
+  const input = delegatedInput();
+  const baseline = resolveInEitherOrder(input);
+  input.authorityRecords.push(...clone(input.authorityRecords));
+  input.delegations.push(...clone(input.delegations));
+  assert.deepEqual(resolveInEitherOrder(input), baseline);
+});
+
+test("the cited grant itself must already be effective at the approval instant", () => {
+  const input = delegatedInput();
+  const later = clone(input.delegations[0]);
+  later.delegation_id = "delegation_finance_later";
+  later.effective_from = "2026-08-26T16:06:30.000Z";
+  input.delegations.push(later);
+  const approval = input.priorAuthorityDecisions[0];
+  assert.equal(approval.decided_at, "2026-08-26T16:06:00.000Z");
+  assert.equal(input.asOf, "2026-08-26T16:07:00.000Z");
+  approval.relevant_delegation_ids = [later.delegation_id];
+  const result = resolveInEitherOrder(input);
+  assert.equal(result.outcome, "approval_required");
+  assert.deepEqual(
+    requirement(result, "finance_approver").satisfied_approval_ids,
+    [],
+  );
+
+  approval.relevant_delegation_ids = [input.delegations[0].delegation_id];
+  assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+  approval.relevant_delegation_ids = [later.delegation_id];
+  approval.decided_at = later.effective_from;
+  approval.lineage.recorded_at = later.effective_from;
+  assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+});
+
+test("a cited grant cannot borrow another delegator's effective authority record", () => {
+  const input = delegatedInput();
+  const laterRecord = authorityRecordFor(
+    "business_approver",
+    "finance_approver",
+    "authority_record_later_finance",
+    "fixture://authority/later-finance",
+  );
+  laterRecord.effective_from = "2026-08-26T16:06:30.000Z";
+  input.authorityRecords.push(laterRecord);
+  const secondGrant = clone(input.delegations[0]);
+  secondGrant.delegation_id = "delegation_second_finance";
+  secondGrant.delegator_identity = clone(fixture.identities.business_approver);
+  input.delegations.push(secondGrant);
+  const approval = input.priorAuthorityDecisions[0];
+  approval.relevant_delegation_ids = [secondGrant.delegation_id];
+  const result = resolveInEitherOrder(input);
+  assert.equal(result.outcome, "approval_required");
+  assert.deepEqual(
+    requirement(result, "finance_approver").satisfied_approval_ids,
+    [],
+  );
+  approval.relevant_delegation_ids = [input.delegations[0].delegation_id];
+  assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+  laterRecord.effective_from = "2026-08-26T16:06:00.000Z";
+  approval.relevant_delegation_ids = [secondGrant.delegation_id];
+  assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+});
+
+test("another valid grant cannot rescue a cited grant with invalid scope, status, or identity", () => {
+  for (const changes of [
+    { scope: { case_ids: ["case_other"] } },
+    { status: "revoked", revocation: fixture.delegations.revoked.revocation },
+    { effective_from: "2026-08-26T16:08:00.000Z" },
+    { effective_until: "2026-08-26T16:06:00.000Z" },
+    {
+      delegator_identity: {
+        ...fixture.identities.finance_approver,
+        identity_id: "identity_unknown_delegator",
+      },
+    },
+    { delegate_identity: clone(fixture.identities.business_approver) },
+    {
+      approved_by_identity: {
+        ...fixture.identities.executive_sponsor,
+        identity_id: "identity_unknown_approver",
+      },
+    },
+  ]) {
+    const input = delegatedInput();
+    const unusable = {
+      ...clone(input.delegations[0]),
+      delegation_id: "delegation_unusable",
+      ...changes,
+    };
+    assertValidDelegationGrant(unusable);
+    input.delegations.push(unusable);
+    input.priorAuthorityDecisions[0].relevant_delegation_ids = [
+      unusable.delegation_id,
+    ];
+    const result = resolveInEitherOrder(input);
+    assert.equal(result.outcome, "approval_required");
+    assert.deepEqual(
+      requirement(result, "finance_approver").satisfied_approval_ids,
+      [],
+    );
+    input.priorAuthorityDecisions[0].relevant_delegation_ids = [
+      input.delegations[0].delegation_id,
+    ];
+    assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+  }
+});
+
+test("an unrelated incoming delegation does not invalidate a complete direct approval", () => {
+  const input = delegatedInput();
+  input.authorityRecords.push(
+    authorityRecordFor(
+      "finance_delegate",
+      "finance_approver",
+      "authority_record_delegate_direct",
+      "fixture://authority/delegate-direct",
+    ),
+  );
+  delete input.priorAuthorityDecisions[0].relevant_delegation_ids;
+  assert.equal(resolveInEitherOrder(input).outcome, "authorized");
+});
+
+test("a supplied evaluator cannot override canonical status or identity kind", () => {
+  for (const changes of [
+    { status: "revoked" },
+    { status: "inactive" },
+    { identity_kind: "human" },
+  ]) {
+    const input = baseInput("credit_15000", {
+      priorAuthorityDecisions: Object.values(fixture.authority_decisions),
+    });
+    Object.assign(
+      input.identities.find(
+        ({ identity_id }) =>
+          identity_id === input.evaluatedByIdentity.identity_id,
+      ),
+      changes,
+    );
+    const result = resolveInEitherOrder(input);
+    assert.equal(result.outcome, "no_authority");
+    assert.deepEqual(result.reason_codes, [
+      "identity.tenant_or_evaluator_mismatch",
+    ]);
+  }
+});
+
+test("delegation approval attribution requires a known matching active historical principal", () => {
+  for (const changes of [
+    { identity_id: "identity_unknown_approver" },
+    { identity_kind: "service" },
+    { status: "revoked" },
+  ]) {
+    const input = delegatedInput();
+    Object.assign(input.delegations[0].approved_by_identity, changes);
+    assertValidDelegationGrant(input.delegations[0]);
+    const result = resolveInEitherOrder(input);
+    assert.equal(result.outcome, "no_authority");
+    assert.deepEqual(result.reason_codes, ["authority.no_eligible_principal"]);
+  }
+});
+
+test("historical delegation approval survives a later inactive or revoked identity", () => {
+  for (const status of ["inactive", "revoked"]) {
+    const input = delegatedInput();
+    input.authorityRecords = input.authorityRecords.filter(
+      ({ authority_class }) => authority_class === "finance_approver",
+    );
+    input.identities.find(
+      ({ identity_id }) => identity_id === "identity_executive_sponsor",
+    ).status = status;
+    const result = resolveInEitherOrder(input);
+    assert.equal(result.outcome, "authorized");
+  }
 });
