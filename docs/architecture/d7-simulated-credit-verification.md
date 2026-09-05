@@ -10,6 +10,10 @@ resolved, but GitHub still requires an approving review. This proposal can be
 reviewed independently; implementation and Workbench integration depend on its
 normal protected merge.
 
+The human operator accepted D6-D's supplied desktop/390px presentation at that head
+on 2026-09-05. The two nonblocking Workbench follow-ups in STATUS/PLAN do not change
+this proposal or constitute approval of its new execution/verification boundary.
+
 ## Decision requested
 
 Approve a single, versioned **simulated customer-credit operation** in the existing

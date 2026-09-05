@@ -71,6 +71,13 @@ approving review. The implementation preserves explicit refresh/resubmission and
 exact uncertain retries. Production authentication, identity history, external
 catalog sources and general workflows remain outside this synthetic step.
 
+The human operator accepted the desktop/390px presentation at `1561329858` on
+2026-09-05; no further UI redesign is a D6-D merge prerequisite. Keep two
+nonblocking follow-ups for the existing Workbench: acknowledge an already-recorded
+approval without suppressing permitted interventions, and reduce mobile scrolling
+before review controls. Preserve server authority, visible uncertainty and exact
+consent/retry behavior. These follow-ups do not gate D7-B/C or accept D-033.
+
 ## D7-A proposed implementation boundary
 
 [D-033](docs/architecture/d7-simulated-credit-verification.md) remains Proposed.

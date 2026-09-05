@@ -20,6 +20,23 @@ GitHub requires at least one approving review and none is recorded at this check
 PR #21 remains unmerged. Current main therefore still has the legacy simulated
 Workbench. No protection was bypassed and main remains `940462ec`.
 
+The human operator accepted the supplied desktop/390px visual review for
+`1561329858d8340291dda505fdfe12291cece1c9` on 2026-09-05: “Accept the current
+presentation for this milestone; no further UI redesign is required before merge.”
+This records D6-D presentation acceptance, not a GitHub approving review or approval
+of D-033. No additional visual checks or UI changes are claimed by this docs pass.
+
+Two nonblocking UI follow-ups remain for the existing Workbench:
+
+- Acknowledge an already-recorded approval using validated server history while
+  preserving permitted reject/modify/escalate interventions. An old receipt must
+  not imply current authorization or override the server's reviewer checks.
+- Reduce mobile scrolling before the review controls while keeping the proposed
+  consequence, uncertainty and reviewer progress readable. Preserve explicit
+  consent, refresh and exact uncertain-response retries.
+
+Neither follow-up blocks D6-D's merge or expands the D7 trust boundary.
+
 ## D7-A design review
 
 [D-033](docs/architecture/d7-simulated-credit-verification.md) is **Proposed**, not
@@ -53,7 +70,11 @@ D7-A local validation: `pnpm validate` passes all 234 current-main tests plus
 formatting/lint/typecheck/release checks. ECC passes 30/30 cases and 620/620 checks;
 its negative control exits 1 for the intended hard-gate/assertion failures with a
 complete receipt (152/620 checks). Docker is unavailable locally (exit 127), so
-Compose and PostgreSQL/appliance evidence must come from this docs PR's CI.
+Compose and PostgreSQL/appliance evidence comes from this docs PR's CI.
+[D7-A baseline CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33951098585)
+passes 234 repository tests, 62 PostgreSQL/API scenarios, Compose and appliance/
+restart smokes at `d6e2142e4d584237b864b5252b5ed8692b10e572`. The PR description
+records validation for the final docs head separately.
 No new D7 runtime tests or behavior are claimed by these existing-suite results.
 
 ## D6-C implementation
