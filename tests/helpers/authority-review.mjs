@@ -15,7 +15,7 @@ export function workEvent(id, source = "intake") {
     event_type: "message.created",
     actor_identity_id: "identity_d6_operator",
     scope_ids: ["scope_customer_ops"],
-    occurred_at: "2026-09-01T12:00:00.000Z",
+    occurred_at: SYNTHETIC_EVIDENCE[ref].observed_at,
     source_timezone: "UTC",
     content_hash: sha256Json(SYNTHETIC_EVIDENCE[ref]),
     payload_ref: ref,

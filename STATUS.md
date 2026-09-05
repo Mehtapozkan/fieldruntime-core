@@ -190,7 +190,7 @@ No merge, release, deployment, external writes or D7 execution is included.
 - `pnpm release:check` passes across current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 208 tests pass, including 14 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
+- 209 tests pass, including 15 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
   immutable authority-binding, lifecycle, conflict, and agent-authority tests;
   42 D6-B threshold, multi-approval, prior-decision, delegation, ambiguity,
   policy-selection, tenant, agent, evidence-lineage, immutability, and input-order
@@ -223,15 +223,17 @@ No merge, release, deployment, external writes or D7 execution is included.
   tests require loopback access outside the sandbox; the sandbox-only attempt
   failed with `listen EPERM`, then the complete run passed with that access.
 - `git diff --check` passes.
-- 37 explicit API/PostgreSQL integration tests pass locally against an isolated
+- 38 explicit API/PostgreSQL integration tests pass locally against an isolated
   PostgreSQL 18.4 instance: fresh installation, preview migration without Case
   loss, two-person review/restart, strict inputs, C/R/S races, expiry, terminal
   states, immutable read snapshots, rollback at each persistence step, uncertain
   commit retry, failed-rollback eviction and tampering/SQL constraints.
 - CI runs the same suite on pinned PostgreSQL 17 and the actual Compose
   create → Finance → Executive → PostgreSQL/API restart → reconstruction demo.
-  The implementation PR must have passing CI evidence before handoff; local
-  PostgreSQL 18 results alone do not establish Compose/PostgreSQL 17 compatibility.
+  [CI run 33943965085](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33943965085)
+  passed all 37 initial PostgreSQL scenarios, Compose config and both appliance
+  smoke phases at `841adfe6`. CI reruns the complete 38-scenario suite on subsequent
+  PR heads; the PR checks provide final-commit evidence.
 - The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
@@ -262,6 +264,9 @@ No merge, release, deployment, external writes or D7 execution is included.
   no public catalog editor, live identity verification, production authentication
   or automatic import of legacy approvals. Unsupported evidence references or
   content hashes fail closed rather than fetching external content.
+- Catalog authoring remains internal. The v0 conflict-result contract requires
+  distinct source citations; conflicting records sharing only one source reference
+  fail closed with a validation error rather than a reviewable conflict packet.
 - Historical evaluations pin engine/resolver/projection versions; future semantic
   upgrades must retain their implementation or fail closed. No general version
   dispatch/history framework is introduced in this step.

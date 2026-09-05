@@ -421,3 +421,30 @@ test("D6-C rejects client-supplied authority before dependency consumption", () 
     (error) => !error.message.includes("clock consumed"),
   );
 });
+
+test("coherently rehashed authorization results, missing revisions and reordered history fail replay", () => {
+  const h = harness(),
+    id = h.create().receipt.authority_request_id;
+  h.decide(id, "finance");
+  const forged = structuredClone(h.state);
+  const entry = forged.entries[1];
+  const evaluation = forged.snapshots.find(
+    (item) => item.hash === entry.evaluation_snapshot_hash,
+  );
+  evaluation.content.result.authorized = true;
+  evaluation.hash = sha256Json(evaluation.content);
+  entry.evaluation_snapshot_hash = evaluation.hash;
+  entry.event_hash = sha256Json(
+    Object.fromEntries(
+      Object.entries(entry).filter(([key]) => key !== "event_hash"),
+    ),
+  );
+  assert.throws(() => h.verify(forged), /replay/);
+  h.decide(id, "executive");
+  const gap = structuredClone(h.state);
+  gap.entries.splice(1, 1);
+  assert.throws(() => h.verify(gap));
+  const reversed = structuredClone(h.state);
+  reversed.entries.reverse();
+  assert.throws(() => h.verify(reversed));
+});

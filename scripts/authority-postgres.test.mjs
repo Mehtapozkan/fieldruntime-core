@@ -991,3 +991,44 @@ test("PostgreSQL deferred constraints reject half of a replacement even if store
   );
   assert.equal((await h.read(id)).review_revision, 0);
 });
+
+test("HTTP eligible Finance can veto unresolved Executive authority, but cannot approve through its conflict", async (t) => {
+  const h = await fixture(t);
+  await h.catalog((data) => {
+    const executive = data.authority_records.find(
+      (item) => item.authority_class === "executive_sponsor",
+    );
+    const other = {
+      schema_version: "identity-reference.v0",
+      identity_id: "identity_d6_other_executive",
+      identity_kind: "human",
+      tenant_id: TENANT,
+      status: "active",
+    };
+    data.identities.push(other);
+    data.authority_records.push({
+      ...structuredClone(executive),
+      authority_record_id: "authority_d6_other_executive",
+      source_ref: "synthetic://d6/authority/other_executive",
+      identity: other,
+    });
+  });
+  const id = await h.create("unresolved", {
+    expected_authority_state_revision: 2,
+  });
+  const packet = await h.read(id);
+  assert.equal(packet.current.resolution.outcome, "conflicting_authority");
+  await h.request(
+    `${root}/${id}/decisions/finance`,
+    decideCommand(packet, "cannot-bypass-conflict"),
+    409,
+  );
+  assert.equal(
+    (
+      await h.decide(id, "finance", "reject", {
+        reason: "Unresolved Executive authority",
+      })
+    ).receipt.result.lifecycle,
+    "rejected",
+  );
+});
