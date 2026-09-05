@@ -1,4 +1,4 @@
-// Reproducible D7-B appliance demonstration. D7-C read-back is deliberately absent.
+// Reproducible D7-B/C appliance demonstration: committed action, separate verification and restart.
 import assert from "node:assert/strict";
 import {
   caseCommand,
@@ -87,7 +87,24 @@ if (mode === "applied") {
   };
   const applied = await request(action, command);
   assert.equal(applied.status, "applied");
-  assert.equal(applied.receipt.verification, "not_implemented");
+  assert.equal(applied.receipt.verification, "unverified");
+  const verification = await request(
+    `${action}/${applied.receipt.id}/verifications`,
+    {
+      schema_version: "simulated-credit-verification-command.v1",
+      type: "simulated-credit.verify",
+      tenant_id: TENANT,
+      case_id: caseId,
+      attempt_id: applied.receipt.id,
+      expected_action_entry_hash: applied.receipt.event_hash,
+      idempotency_key: "d7-smoke-verification",
+      correlation_id: "d7-smoke",
+    },
+  );
+  assert.equal(
+    verification.receipt.comparison.outcome,
+    "verified_simulated_effect",
+  );
   assert.equal(applied.receipt.closure_permission, false);
 }
 const read = await request(view);
@@ -95,6 +112,16 @@ assert.equal(read.attempts.length, 1);
 assert.equal(read.source.payload.amount_minor, 1500000);
 assert.equal(read.current.eligible, false);
 assert.ok(read.current.reason_codes.includes("credit_already_recorded"));
+assert.equal(read.verifications.length, 1);
+assert.equal(
+  read.verifications[0].comparison.outcome,
+  "verified_simulated_effect",
+);
+assert.equal(read.verifications[0].closure_permission, false);
+assert.equal(
+  read.verifications[0].authority.verifier_identity.identity_id,
+  "identity_d7_credit_verifier",
+);
 const entry = read.attempts[0];
 assert.equal(entry.case_version, 4);
 assert.equal(entry.review_revision, 2);
@@ -104,6 +131,13 @@ if (mode === "durable") {
   assert.equal(retry.status, "duplicate");
   assert.deepEqual(retry.receipt, entry);
   assert.equal(retry.historical_only, true);
+  const proof = read.verifications[0];
+  const verificationRetry = await request(
+    `${action}/${entry.id}/verifications`,
+    proof.command,
+  );
+  assert.equal(verificationRetry.status, "duplicate");
+  assert.deepEqual(verificationRetry.receipt, proof);
 }
 assert.equal(
   (await request(`/v0/tenants/${TENANT}/cases/${caseId}`)).journal.length,
@@ -115,5 +149,5 @@ assert.equal(
   2,
 );
 process.stdout.write(
-  `D7-B ${mode}: one $15,000 simulated Orchid credit; exact source/action evidence and retry reconstructed; verification not implemented; closure blocked.\n`,
+  `D7-B/C ${mode}: one $15,000 simulated Orchid credit; independent exact source read verified; action/proof and exact retries reconstructed; impact unverified and closure blocked.\n`,
 );

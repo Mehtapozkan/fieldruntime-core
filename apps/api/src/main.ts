@@ -1,3 +1,5 @@
+import { PostgresCreditVerificationStore } from "../../../packages/runtime/src/postgres-credit-verification-store.js";
+import { TransactionalCreditVerificationWorker } from "../../worker/src/credit-verification-service.js";
 import { PostgresSimulatedCreditStore } from "../../../packages/runtime/src/postgres-simulated-credit-store.js";
 import { TransactionalCreditWorker } from "../../worker/src/simulated-credit-service.js";
 import { readFile } from "node:fs/promises";
@@ -142,6 +144,7 @@ async function start(): Promise<void> {
     migrationSql,
     authorityMigrationSql,
     creditMigrationSql,
+    verificationMigrationSql,
     fixtureDocument,
     walkthroughDocument,
   ] = await Promise.all([
@@ -162,6 +165,13 @@ async function start(): Promise<void> {
     readFile(
       new URL(
         "../../../packages/runtime/migrations/0003_simulated_credit.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../../../packages/runtime/migrations/0004_credit_verification.sql",
         import.meta.url,
       ),
       "utf8",
@@ -190,6 +200,7 @@ async function start(): Promise<void> {
   ];
   migrations.push(
     createMigrationSource("0003_simulated_credit", creditMigrationSql),
+    createMigrationSource("0004_credit_verification", verificationMigrationSql),
   );
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
   const walkthrough = createGuidedWalkthroughRecord(
@@ -211,6 +222,13 @@ async function start(): Promise<void> {
   const authorityWorker = new TransactionalAuthorityWorker(authorityStore);
   const creditStore = new PostgresSimulatedCreditStore(pool);
   const creditWorker = new TransactionalCreditWorker(creditStore);
+  const readerPgPool = new Pool({
+    connectionString: configuration.databaseUrl,
+    connectionTimeoutMillis: 5000,
+  });
+  const verificationWorker = new TransactionalCreditVerificationWorker(
+    new PostgresCreditVerificationStore(pool, new PgPoolAdapter(readerPgPool)),
+  );
   const workbenchAssets = await loadWorkbenchAssets();
   const server = createApiServer(
     {
@@ -223,6 +241,7 @@ async function start(): Promise<void> {
       },
       credit: {
         execute: (command) => creditWorker.execute(command),
+        verify: (command) => verificationWorker.verify(command),
         read: (tenant, caseId) => creditStore.read(tenant, caseId),
       },
       authority: {
@@ -265,7 +284,7 @@ async function start(): Promise<void> {
 
   const stop = (): void => {
     server.close(() => {
-      void pgPool.end().finally(() => {
+      void Promise.all([pgPool.end(), readerPgPool.end()]).finally(() => {
         process.exitCode = 0;
       });
     });

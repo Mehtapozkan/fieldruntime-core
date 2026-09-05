@@ -1,3 +1,5 @@
+import { PostgresCreditVerificationStore } from "../dist/packages/runtime/src/postgres-credit-verification-store.js";
+import { TransactionalCreditVerificationWorker } from "../dist/apps/worker/src/credit-verification-service.js";
 // Real PostgreSQL and HTTP; no skipped or in-memory substitute acceptance tests.
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -63,6 +65,16 @@ const migrations = await Promise.all(
     ),
   ),
 );
+const verificationMigration = createMigrationSource(
+  "0004_credit_verification",
+  await readFile(
+    new URL(
+      "../packages/runtime/migrations/0004_credit_verification.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  ),
+);
 const CASE = "case_d6_workbench",
   root = `/v1/tenants/${TENANT}/authority-requests`,
   action = `/v1/tenants/${TENANT}/cases/${CASE}/simulated-credit-attempts`,
@@ -93,11 +105,18 @@ function transition(version, to) {
     reason: `Prepare the synthetic Case for ${to}`,
   };
 }
-async function fixture(t, { upgrade = false, adapter } = {}) {
+async function fixture(
+  t,
+  { upgrade = false, adapter, verification = false } = {},
+) {
   const schema = `d7_test_${randomUUID().replaceAll("-", "")}`,
     admin = new Pool({ connectionString: url });
   await admin.query(`CREATE SCHEMA ${schema}`);
-  let pg,
+  let readerPg,
+    readerPool,
+    verifier,
+    readerHook,
+    pg,
     pool,
     cases,
     authority,
@@ -151,6 +170,27 @@ async function fixture(t, { upgrade = false, adapter } = {}) {
         };
       },
     };
+    readerPg = new Pool({
+      connectionString: url,
+      options: `-c search_path=${schema}`,
+      max: 4,
+    });
+    readerPool = {
+      async connect() {
+        const c = await readerPg.connect();
+        return {
+          async query(sql, values) {
+            trace.push(`reader: ${sql}`);
+            if (readerHook) await readerHook(sql, c.processID);
+            return c.query(sql, values);
+          },
+          release(discard = false) {
+            c.release(discard);
+          },
+        };
+      },
+    };
+    verifier = new PostgresCreditVerificationStore(pool, readerPool);
     cases = new PostgresCaseStore(pool);
     authority = new PostgresAuthorityStore(pool);
     credit = new PostgresSimulatedCreditStore(pool, adapter);
@@ -167,6 +207,10 @@ async function fixture(t, { upgrade = false, adapter } = {}) {
       now,
       nextId: () => `attempt_${++ids}`,
     }));
+    const verificationWorker = new TransactionalCreditVerificationWorker(
+      verifier,
+      () => ({ now, nextId: () => `verification_${++ids}` }),
+    );
     server = createApiServer({
       isReady: async () => {
         await credit.assertReady();
@@ -185,6 +229,7 @@ async function fixture(t, { upgrade = false, adapter } = {}) {
         catalogRevision: (t) => authority.readCatalogRevision(t),
       },
       credit: {
+        verify: (c) => verificationWorker.verify(c),
         execute: (c) => effect.execute(c),
         read: (t, id) => credit.read(t, id, now),
       },
@@ -197,7 +242,7 @@ async function fixture(t, { upgrade = false, adapter } = {}) {
       await new Promise((resolve) => server.close(resolve));
       server = undefined;
     }
-    await pg.end();
+    await Promise.all([pg.end(), readerPg.end()]);
   };
   open();
   t.after(async () => {
@@ -225,7 +270,10 @@ async function fixture(t, { upgrade = false, adapter } = {}) {
     )
   ).rows;
   await applyMigration(pool, migrations[2]);
-  for (const m of migrations) {
+  if (verification) await applyMigration(pool, verificationMigration);
+  for (const m of verification
+    ? [...migrations, verificationMigration]
+    : migrations) {
     assert.equal(await applyMigration(pool, m), "unchanged");
     await assert.rejects(
       () =>
@@ -249,6 +297,35 @@ async function fixture(t, { upgrade = false, adapter } = {}) {
   const api = {
     trace,
     discarded,
+    get verifier() {
+      return verifier;
+    },
+    setReaderHook(fn) {
+      readerHook = fn;
+    },
+    async upgradeVerification() {
+      return applyMigration(pool, verificationMigration);
+    },
+    verifyCommand(attempt, key = `verify:${++ids}`, overrides = {}) {
+      return {
+        schema_version: "simulated-credit-verification-command.v1",
+        type: "simulated-credit.verify",
+        tenant_id: TENANT,
+        case_id: CASE,
+        attempt_id: attempt.id,
+        expected_action_entry_hash: attempt.event_hash,
+        idempotency_key: key,
+        correlation_id: "d7-verify",
+        ...overrides,
+      };
+    },
+    verify(command, status = 200) {
+      return api.request(
+        `${action}/${command.attempt_id}/verifications`,
+        command,
+        status,
+      );
+    },
     now,
     get authority() {
       return authority;
@@ -1292,4 +1369,790 @@ test("D7 obsolete Case forgery preserves canonical histories but fails replay, r
     operation_read_accepted: false,
     restart_accepted: false,
   });
+});
+
+test("D7-C exact independent source read, immutable proof, unchanged C/R/S, read-only GET and restart retry", async (t) => {
+  const h = await fixture(t, { verification: true });
+  const id = await h.approved(),
+    applied = await h.request(action, await h.command(id));
+  assert.equal(applied.receipt.verification, "unverified");
+  const command = h.verifyCommand(applied.receipt),
+    before = await h.dump();
+  h.advance(1000);
+  const pids = { reader: new Set(), writer: new Set() };
+  h.setReaderHook((sql, pid) => {
+    if (sql.includes("verification-read-source")) pids.reader.add(pid);
+  });
+  h.setHook((sql, pid) => {
+    if (sql.includes("verification-read-source")) pids.writer.add(pid);
+  });
+  const verified = await h.verify(command);
+  assert.equal(
+    verified.receipt.comparison.outcome,
+    "verified_simulated_effect",
+  );
+  assert.equal(verified.receipt.comparison.absence_proven, false);
+  assert.equal(
+    verified.receipt.authority.verifier_identity.identity_id,
+    "identity_d7_credit_verifier",
+  );
+  assert.equal(
+    verified.receipt.observation.raw.rows[0].source_row.origin_attempt_id,
+    applied.receipt.id,
+  );
+  assert.equal(verified.receipt.closure_permission, false);
+  assert.equal(pids.reader.size, 1);
+  assert.equal(pids.writer.size, 1);
+  assert.notEqual([...pids.reader][0], [...pids.writer][0]);
+  assert.ok(
+    h.trace.includes("reader: BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY"),
+  );
+  assert.ok(
+    !h.trace.some(
+      (sql) =>
+        sql.startsWith("reader:") &&
+        /FOR UPDATE|INSERT|UPDATE authority_catalog/.test(sql),
+    ),
+  );
+  const after = await h.dump();
+  for (const table of [
+    "case_journal",
+    "case_projections",
+    "authority_request_journal",
+    "authority_snapshots",
+    "simulated_credit_source",
+  ])
+    assert.deepEqual(after[table], before[table]);
+  assert.equal(
+    after.authority_catalog[0].row.revision,
+    before.authority_catalog[0].row.revision,
+  );
+  assert.equal(
+    after.authority_catalog[0].row.last_recorded_at,
+    h.now().toISOString(),
+  );
+  h.setHook(undefined);
+  h.setReaderHook(undefined);
+  const packet = await h.request(view);
+  assert.equal(packet.verifications.length, 1);
+  assert.equal(packet.attempts.length, 1);
+  await h.request(view);
+  await h.read(id);
+  assert.deepEqual(await h.dump(), after);
+  await h.restart();
+  assert.deepEqual(await h.request(view), packet);
+  const count = h.ids;
+  h.setReaderHook(() => {
+    throw Error("duplicate must never read source");
+  });
+  h.advance(-1000);
+  assert.deepEqual((await h.verify(command)).receipt, verified.receipt);
+  assert.equal(h.ids, count);
+  assert.deepEqual(await h.dump(), after);
+});
+
+test("D7-C migration of a committed v1 action preserves its evidence and permits independent verification", async (t) => {
+  const h = await fixture(t, { upgrade: true });
+  const id = await h.approved(),
+    applied = await h.request(action, await h.command(id));
+  const before = await h.dump();
+  assert.equal(await h.upgradeVerification(), "applied");
+  assert.equal(await h.upgradeVerification(), "unchanged");
+  const after = await h.dump();
+  for (const table of [
+    "case_journal",
+    "authority_snapshots",
+    "authority_request_journal",
+    "simulated_credit_source",
+  ])
+    assert.deepEqual(after[table], before[table]);
+  assert.deepEqual(
+    after.simulated_action_journal[0].row.entry,
+    before.simulated_action_journal[0].row.entry,
+  );
+  const verified = await h.verify(h.verifyCommand(applied.receipt));
+  assert.equal(
+    verified.receipt.comparison.outcome,
+    "verified_simulated_effect",
+  );
+  await h.restart();
+  assert.equal(
+    (await h.request(view)).attempts[0].schema_version,
+    "simulated-action-journal-entry.v1",
+  );
+});
+
+async function invocation(t, options = {}) {
+  const h = await fixture(t, { verification: true, ...options });
+  const id = await h.approved(),
+    execution = await h.command(id);
+  const attempt = (await h.request(action, execution)).receipt;
+  return { h, id, execution, attempt, command: h.verifyCommand(attempt) };
+}
+test("D7-C strict HTTP verification bindings reject supplied authority, mismatched scope and altered retry bytes", async (t) => {
+  const { h, attempt, command } = await invocation(t);
+  const before = await h.dump();
+  for (const extra of [
+    { verifier_identity_id: "identity_d7_credit_executor" },
+    { success: true },
+    { observation: [] },
+    { authorized: true },
+    { recorded_at: START },
+    { policy: {} },
+  ])
+    await h.verify({ ...command, ...extra }, 400);
+  await h.request(
+    `${action}/${attempt.id}/verifications`,
+    { ...command, case_id: "case_other" },
+    400,
+  );
+  await h.request(`${action}/attempt_other/verifications`, command, 400);
+  assert.equal(
+    (
+      await h.verify(
+        { ...command, expected_action_entry_hash: `sha256:${"0".repeat(64)}` },
+        409,
+      )
+    ).code,
+    "attempt_binding_conflict",
+  );
+  assert.deepEqual(await h.dump(), before);
+  await h.verify(command);
+  const recorded = await h.dump();
+  assert.equal(
+    (await h.verify({ ...command, correlation_id: "different" }, 409)).code,
+    "idempotency_conflict",
+  );
+  assert.deepEqual(await h.dump(), recorded);
+});
+for (const variant of [
+  "revoked identity",
+  "revoked grant",
+  "expired grant",
+  "future grant",
+  "wrong scope",
+  "executor grant",
+  "ambiguous grant",
+])
+  test(`D7-C current verifier rejects ${variant} without a proof or clock write`, async (t) => {
+    const { h, command } = await invocation(t);
+    h.advance(1000);
+    await h.catalog((d) => {
+      const g = d.authority_records.find(
+        (g) => g.authority_class === "simulated_credit_verifier",
+      );
+      if (variant === "revoked identity")
+        d.identities.find(
+          (i) => i.identity_id === "identity_d7_credit_verifier",
+        ).status = "revoked";
+      if (variant === "revoked grant") g.status = "revoked";
+      if (variant === "expired grant") {
+        g.effective_until = h.now().toISOString();
+        g.effective_until_source_timezone = "UTC";
+      }
+      if (variant === "future grant")
+        g.effective_from = new Date(h.now().valueOf() + 1).toISOString();
+      if (variant === "wrong scope") g.scope.case_ids = ["case_other"];
+      if (variant === "executor grant")
+        g.identity = structuredClone(
+          d.identities.find(
+            (i) => i.identity_id === "identity_d7_credit_executor",
+          ),
+        );
+      if (variant === "ambiguous grant")
+        d.authority_records.push({
+          ...g,
+          authority_record_id: "authority_conflicting_verifier",
+        });
+    });
+    const before = await h.dump();
+    assert.equal((await h.verify(command, 409)).code, "verifier_ineligible");
+    assert.deepEqual(await h.dump(), before);
+  });
+test("D7-C verification of an earlier effect survives later evidence, rejection and catalog change without restoring authority", async (t) => {
+  const { h, id, command } = await invocation(t);
+  h.advance(1000);
+  await h.decide(id, "finance", "reject", { reason: "Stop further authority" });
+  await h.case(appendReplayEvidence());
+  await h.catalog((d) => {
+    d.policies[0].source_ref += "/later";
+  });
+  assert.equal(
+    (await h.verify(command)).receipt.comparison.outcome,
+    "verified_simulated_effect",
+  );
+  await h.restart();
+  const packet = await h.request(view);
+  assert.equal(packet.current.eligible, false);
+  assert.equal(packet.closure_permission, false);
+  assert.equal((await h.read(id)).current.authorized, false);
+  const rejected = await h.case(
+    {
+      type: "case.transition",
+      tenant_id: TENANT,
+      case_id: CASE,
+      expected_case_version: 5,
+      actor_identity_id: "identity_d6_operator",
+      idempotency_key: "verify-closure-denied",
+      correlation_id: "closure",
+      to_state: "resolved",
+      reason: "Effect proof alone is insufficient",
+    },
+    200,
+  );
+  assert.equal(rejected.status, "rejected");
+});
+test("D7-C adapter success without source is a mismatch; only latest independent absence permits one explicit current retry", async (t) => {
+  let inserts = false;
+  const { h, id, attempt, command } = await invocation(t, {
+    adapter: async (insert) => {
+      if (inserts) await insert();
+      return "success";
+    },
+  });
+  assert.equal(attempt.source, null);
+  const premature = await h.request(
+    action,
+    await h.command(id, "fresh-too-soon"),
+    409,
+  );
+  assert.ok(
+    premature.receipt.envelope.reason_codes.includes(
+      "independent_absence_check_required",
+    ),
+  );
+  const absence = await h.verify(command);
+  assert.equal(absence.receipt.comparison.outcome, "mismatch");
+  assert.equal(absence.receipt.comparison.absence_proven, true);
+  await h.restart();
+  const second = await h.request(
+    action,
+    await h.command(id, "explicit-second"),
+  );
+  assert.equal(
+    second.receipt.envelope.absence_verification_hash,
+    absence.receipt.event_hash,
+  );
+  assert.equal(second.receipt.source, null);
+  await h.request(action, await h.command(id, "needs-new-absence"), 409);
+  // Rechecking an older invocation cannot satisfy the latest one.
+  await h.verify(h.verifyCommand(attempt));
+  await h.request(action, await h.command(id, "still-needs-new-absence"), 409);
+  const latest = await h.verify(h.verifyCommand(second.receipt));
+  assert.equal(latest.receipt.comparison.absence_proven, true);
+  inserts = true;
+  const final = await h.request(action, await h.command(id, "explicit-final"));
+  assert.equal(
+    final.receipt.envelope.absence_verification_hash,
+    latest.receipt.event_hash,
+  );
+  assert.ok(final.receipt.source);
+  const oldOrigin = (await h.verify(h.verifyCommand(attempt))).receipt;
+  assert.equal(oldOrigin.comparison.outcome, "mismatch");
+  assert.ok(oldOrigin.comparison.reason_codes.includes("wrong_origin"));
+  assert.equal(oldOrigin.comparison.absence_proven, false);
+  await h.request(action, await h.command(id, "occupied"), 409);
+  await h.restart();
+  assert.equal(
+    (await h.request(view)).source.origin_attempt_id,
+    final.receipt.id,
+  );
+});
+test("D7-C unavailable reads are inconclusive, survive restart, and cannot enable financial retries", async (t) => {
+  const { h, id, command } = await invocation(t, {
+    adapter: async () => "uncertain",
+  });
+  h.setReaderHook((sql) => {
+    if (sql.includes("verification-read-source"))
+      throw Error("injected read timeout");
+  });
+  const failed = await h.verify(command);
+  assert.equal(failed.receipt.observation.raw.status, "unavailable");
+  assert.equal(failed.receipt.comparison.outcome, "inconclusive");
+  assert.equal(failed.receipt.comparison.absence_proven, false);
+  h.setReaderHook(undefined);
+  await h.request(action, await h.command(id, "error-is-not-absence"), 409);
+  await h.restart();
+  assert.deepEqual((await h.verify(command)).receipt, failed.receipt);
+  const fresh = await h.verify(
+    h.verifyCommand((await h.request(view)).attempts[0]),
+  );
+  assert.equal(fresh.receipt.comparison.absence_proven, true);
+});
+
+for (const variant of [
+  "wrong amount",
+  "wrong account",
+  "wrong origin",
+  "malformed row",
+])
+  test(`D7-C independently records ${variant} as a problem without accepting adapter acknowledgment`, async (t) => {
+    const { h, attempt, command } = await invocation(t);
+    // Privileged source corruption is deliberately distinct from canonical
+    // action/Case/review/catalog history, which remains unchanged.
+    const row = structuredClone(attempt.source);
+    if (variant === "wrong amount") row.payload.amount_minor = 999;
+    if (variant === "wrong account")
+      row.target.account_ref = "synthetic://accounts/wrong";
+    if (variant === "wrong origin")
+      row.effected_at = new Date(h.now().valueOf() - 1).toISOString();
+    if (variant === "malformed row") row.payload = null;
+    delete row.row_hash;
+    row.row_hash = sha256Json(row);
+    await h.sql(
+      "ALTER TABLE simulated_credit_source DISABLE TRIGGER simulated_source_append_only",
+    );
+    await h.sql(
+      "UPDATE simulated_credit_source SET source_row=$1,row_hash=$2",
+      [row, row.row_hash],
+    );
+    await h.sql(
+      "ALTER TABLE simulated_credit_source ENABLE TRIGGER simulated_source_append_only",
+    );
+    const proof = (await h.verify(command)).receipt;
+    assert.equal(
+      proof.comparison.outcome,
+      variant === "malformed row" ? "inconclusive" : "mismatch",
+    );
+    assert.equal(proof.comparison.absence_proven, false);
+    assert.deepEqual(proof.observation.raw.rows[0].source_row, row);
+    const state = await loadAuthorityStore({ query: h.sql }, true, true);
+    assert.doesNotThrow(() => assertCreditIntegrity(state));
+    assert.equal(
+      (await h.request("/readyz", undefined, 503)).status,
+      "not_ready",
+    );
+    await h.request(view, undefined, 500);
+    await h.request(
+      action,
+      (await h.dump()).simulated_action_journal[0].row.entry.command,
+      500,
+    );
+  });
+
+test("D7-C a committed source change between observation and recording is inconclusive", async (t) => {
+  let insertNow = false;
+  const { h, id, attempt, command } = await invocation(t, {
+    adapter: async (insert) => {
+      if (insertNow) await insert();
+      return "success";
+    },
+  });
+  assert.equal(
+    (await h.verify(command)).receipt.comparison.absence_proven,
+    true,
+  );
+  const next = await h.command(id, "explicit-after-absence");
+  let raced = false;
+  h.setReaderHook(async (sql) => {
+    if (sql === "COMMIT" && !raced) {
+      raced = true;
+      insertNow = true;
+      await h.request(action, next);
+    }
+  });
+  const proof = (await h.verify(h.verifyCommand(attempt))).receipt;
+  h.setReaderHook(undefined);
+  assert.equal(raced, true);
+  assert.equal(proof.comparison.outcome, "inconclusive");
+  assert.ok(proof.comparison.reason_codes.includes("source_changed"));
+  assert.ok(proof.comparison.reason_codes.includes("operation_changed"));
+  assert.equal(proof.comparison.absence_proven, false);
+  await h.restart();
+  assert.deepEqual((await h.request(view)).verifications.at(-1), proof);
+  await h.request(action, await h.command(id, "race-cannot-credit-again"), 409);
+});
+
+test("D7-C simultaneous verification keys serialize; same-key races return one exact proof", async (t) => {
+  const { h, attempt, command } = await invocation(t);
+  const same = await Promise.all([h.verify(command), h.verify(command)]);
+  assert.deepEqual(same.map((r) => r.status).sort(), ["applied", "duplicate"]);
+  assert.deepEqual(same[0].receipt, same[1].receipt);
+  let readers = 0,
+    release;
+  const barrier = new Promise((resolve) => {
+    release = resolve;
+  });
+  h.setReaderHook(async (sql) => {
+    if (sql === "COMMIT") {
+      if (++readers === 2) release();
+      await barrier;
+    }
+  });
+  const different = await Promise.all([
+    h.verify(h.verifyCommand(attempt)),
+    h.verify(h.verifyCommand(attempt)),
+  ]);
+  h.setReaderHook(undefined);
+  assert.deepEqual(different.map((r) => r.receipt.comparison.outcome).sort(), [
+    "inconclusive",
+    "verified_simulated_effect",
+  ]);
+  assert.equal((await h.request(view)).verifications.length, 3);
+  await h.restart();
+  assert.equal((await h.request(view)).verifications.length, 3);
+});
+
+for (const change of ["revoke", "expire", "regress"])
+  test(`D7-C recording rechecks current verifier and final time after observation: ${change}`, async (t) => {
+    const { h, command } = await invocation(t);
+    if (change === "expire")
+      await h.catalog((d) => {
+        const g = d.authority_records.find(
+          (g) => g.authority_class === "simulated_credit_verifier",
+        );
+        g.effective_until = new Date(h.now().valueOf() + 1000).toISOString();
+        g.effective_until_source_timezone = "UTC";
+      });
+    let before = await h.dump(),
+      changed = false;
+    h.setReaderHook(async (sql) => {
+      if (sql === "COMMIT" && !changed) {
+        changed = true;
+        h.advance(change === "regress" ? -1 : 1000);
+        if (change === "revoke") {
+          await h.catalog((d) => {
+            d.identities.find(
+              (i) => i.identity_id === "identity_d7_credit_verifier",
+            ).status = "revoked";
+          });
+          before = await h.dump();
+        }
+      }
+    });
+    await h.verify(command, change === "regress" ? 500 : 409);
+    h.setReaderHook(undefined);
+    assert.equal(changed, true);
+    assert.deepEqual(await h.dump(), before);
+  });
+
+for (const [tag, remaining] of [
+  ["fr:verification-insert-journal", 1],
+  ["fr:verification-clock", 1],
+  ["fr:authority-increment-writer", 1],
+  ["fr:credit-load-journal", 3],
+  ["COMMIT", 2],
+])
+  test(`D7-C persistence failure ${tag} rolls back proof and clock and exact retry works after restart`, async (t) => {
+    const { h, command } = await invocation(t);
+    h.advance(1000);
+    const before = await h.dump();
+    h.inject(tag, { remaining });
+    await h.verify(command, 500);
+    assert.deepEqual(await h.dump(), before);
+    await h.restart();
+    const result = await h.verify(command);
+    assert.equal(
+      result.receipt.comparison.outcome,
+      "verified_simulated_effect",
+    );
+    assert.equal(
+      (await h.dump()).authority_catalog[0].row.last_recorded_at,
+      h.now().toISOString(),
+    );
+  });
+
+test("D7-C lost commit response reconstructs exact proof before any new read or clock sample", async (t) => {
+  const { h, command } = await invocation(t);
+  h.advance(1000);
+  h.inject("COMMIT", { remaining: 2, after: true });
+  await h.verify(command, 500);
+  const durable = await h.dump(),
+    receipt = durable.simulated_action_journal.at(-1).row.entry;
+  assert.equal(receipt.comparison.outcome, "verified_simulated_effect");
+  await h.restart();
+  h.setReaderHook(() => {
+    throw Error("retry read is forbidden");
+  });
+  h.advance(-1000);
+  assert.deepEqual((await h.verify(command)).receipt, receipt);
+  assert.deepEqual(await h.dump(), durable);
+});
+
+test("D7-C writer read failure is inconclusive and failed rollback evicts the connection", async (t) => {
+  const { h, command, attempt } = await invocation(t);
+  h.inject("fr:verification-read-source");
+  const proof = (await h.verify(command)).receipt;
+  assert.equal(proof.comparison.outcome, "inconclusive");
+  assert.equal(proof.comparison.absence_proven, false);
+  assert.equal(proof.recording_source.status, "unavailable");
+  const next = h.verifyCommand(attempt),
+    before = await h.dump();
+  h.inject("fr:verification-clock", { rollback: true });
+  await h.verify(next, 500);
+  assert.ok(h.discarded.includes(true));
+  assert.deepEqual(await h.dump(), before);
+  await h.restart();
+  assert.equal(
+    (await h.verify(next)).receipt.comparison.outcome,
+    "verified_simulated_effect",
+  );
+});
+
+test("D7-C terminated writer cannot leave partial verification proof", async (t) => {
+  const { h, command } = await invocation(t),
+    before = await h.dump();
+  let killed = false;
+  h.setHook(async (sql, pid) => {
+    if (!killed && sql.includes("fr:verification-clock")) {
+      killed = true;
+      await h.sql("SELECT pg_terminate_backend($1)", [pid]);
+    }
+  });
+  await h.verify(command, 500);
+  h.setHook(undefined);
+  assert.ok(killed);
+  assert.deepEqual(await h.dump(), before);
+  await h.restart();
+  assert.equal(
+    (await h.verify(command)).receipt.comparison.outcome,
+    "verified_simulated_effect",
+  );
+});
+
+for (const forgery of [
+  "false absence",
+  "false match",
+  "wrong verifier",
+  "success from read error",
+])
+  test(`D7-C coherent ${forgery} proof fails runtime replay, readiness, operation reads and restart`, async (t) => {
+    const { h, attempt, command } = await invocation(
+      t,
+      forgery === "false match" ? { adapter: async () => "success" } : {},
+    );
+    const proof = (await h.verify(command)).receipt,
+      canonical = await h.dump();
+    const state = await loadAuthorityStore({ query: h.sql }, true);
+    assert.doesNotThrow(() => assertCreditIntegrity(state));
+    const forged = structuredClone(proof);
+    if (forgery === "false absence") {
+      forged.observation.raw = {
+        status: "read",
+        rows: [],
+        hash: sha256Json([]),
+      };
+      forged.recording_source = structuredClone(forged.observation.raw);
+      forged.comparison = {
+        outcome: "mismatch",
+        reason_codes: ["source_absent"],
+        absence_proven: true,
+      };
+    }
+    if (forgery === "false match") {
+      const source = creditSource(attempt.id, attempt.recorded_at);
+      const rows = [
+        {
+          tenant_id: TENANT,
+          case_id: CASE,
+          slot: "service_remedy",
+          origin_attempt_id: attempt.id,
+          row_hash: source.row_hash,
+          source_row: source,
+        },
+      ];
+      forged.observation.raw = { status: "read", rows, hash: sha256Json(rows) };
+      forged.recording_source = structuredClone(forged.observation.raw);
+      forged.comparison = {
+        outcome: "verified_simulated_effect",
+        reason_codes: [],
+        absence_proven: false,
+      };
+    }
+    if (forgery === "wrong verifier") {
+      forged.authority.verifier_identity.identity_id =
+        "identity_d7_credit_executor";
+      forged.authority.read_grant.identity.identity_id =
+        "identity_d7_credit_executor";
+      forged.authority.recording_grant.identity.identity_id =
+        "identity_d7_credit_executor";
+    }
+    if (forgery === "success from read error")
+      forged.observation.raw = {
+        status: "unavailable",
+        rows: null,
+        hash: null,
+      };
+    forged.envelope_hash = attempt.envelope_hash;
+    delete forged.event_hash;
+    forged.event_hash = sha256Json(forged);
+    assert.throws(
+      () =>
+        assertCreditIntegrity({
+          ...state,
+          credit: { ...state.credit, entries: [attempt, forged] },
+        }),
+      /verification differs from canonical replay/,
+    );
+    await h.sql(
+      "ALTER TABLE simulated_action_journal DISABLE TRIGGER simulated_action_append_only",
+    );
+    const columns = [...CREDIT_COLUMNS, "entry"];
+    await h.sql(
+      `UPDATE simulated_action_journal SET ${columns.map((c, i) => `${c}=$${i + 1}`).join(",")} WHERE id=$1`,
+      [...CREDIT_COLUMNS.map((k) => forged[k]), forged],
+    );
+    await h.sql(
+      "ALTER TABLE simulated_action_journal ENABLE TRIGGER simulated_action_append_only",
+    );
+    const after = await h.dump();
+    for (const table of tables.filter((t) => t !== "simulated_action_journal"))
+      assert.deepEqual(after[table], canonical[table]);
+    await h.request("/readyz", undefined, 503);
+    await h.request(view, undefined, 500);
+    await assert.rejects(() => h.restart(), /replay validation/);
+  });
+
+test("D7-C later inconclusive check supersedes absence; fresh execution still needs current authority", async (t) => {
+  const { h, id, attempt, command } = await invocation(t, {
+    adapter: async () => "success",
+  });
+  await h.verify(command);
+  assert.equal((await h.request(view)).current.eligible, true);
+  h.setReaderHook((sql) => {
+    if (sql.includes("verification-read-source")) throw Error("unavailable");
+  });
+  await h.verify(h.verifyCommand(attempt));
+  h.setReaderHook(undefined);
+  await h.request(action, await h.command(id, "later-error-blocks"), 409);
+  await h.verify(h.verifyCommand(attempt));
+  await h.decide(id, "finance", "reject", {
+    reason: "Absence does not grant execution authority",
+  });
+  const denied = await h.request(
+    action,
+    await h.command(id, "terminal-even-with-absence"),
+    409,
+  );
+  assert.ok(
+    denied.receipt.envelope.reason_codes.includes("current_authority_required"),
+  );
+  assert.equal(denied.receipt.adapter_report, "not_invoked");
+  await h.restart();
+  assert.equal((await h.request(view)).source, null);
+});
+
+test("D7-C replay rejects an obsolete read catalog hidden behind an older review position", async (t) => {
+  const { h, id, attempt, command } = await invocation(t);
+  const original = (await h.verify(command)).receipt;
+  h.advance(1000);
+  await h.decide(id, "finance", "escalate", {
+    reason: "Review changes before verifier revocation",
+  });
+  h.advance(1000);
+  await h.catalog((d) => {
+    d.identities.find(
+      (i) => i.identity_id === "identity_d7_credit_verifier",
+    ).status = "revoked";
+  });
+  h.advance(1000);
+  const duringRevocation = h.now().toISOString();
+  h.advance(1000);
+  await h.catalog((d) => {
+    d.identities.find(
+      (i) => i.identity_id === "identity_d7_credit_verifier",
+    ).status = "active";
+  });
+  // Explicit later catalog restoration is current, never retroactive permission.
+  const state = await loadAuthorityStore({ query: h.sql }, true);
+  const beforeProof = {
+    ...state,
+    credit: { ...state.credit, entries: [attempt] },
+  };
+  const observation = {
+    ...original.observation,
+    observed_at: duringRevocation,
+  };
+  h.advance(1000);
+  const { verificationEntry } =
+    await import("../dist/packages/runtime/src/credit-verification.js");
+  let forged = verificationEntry(
+    beforeProof,
+    command,
+    observation,
+    original.recording_source,
+    h.now().toISOString(),
+    state.heads[0].last_recorded_at,
+    original.id,
+  );
+  assert.equal(forged.comparison.outcome, "inconclusive");
+  assert.ok(forged.comparison.reason_codes.includes("catalog_changed"));
+  const falseProof = structuredClone(forged);
+  falseProof.comparison = {
+    outcome: "verified_simulated_effect",
+    reason_codes: [],
+    absence_proven: false,
+  };
+  delete falseProof.event_hash;
+  falseProof.event_hash = sha256Json(falseProof);
+  forged = falseProof;
+  assert.throws(
+    () =>
+      assertCreditIntegrity({
+        ...state,
+        credit: { ...state.credit, entries: [attempt, forged] },
+      }),
+    /verification differs from canonical replay/,
+  );
+  const canonical = await h.dump();
+  await h.sql(
+    "ALTER TABLE simulated_action_journal DISABLE TRIGGER simulated_action_append_only",
+  );
+  const columns = [...CREDIT_COLUMNS, "entry"];
+  await h.sql(
+    `WITH proof AS (UPDATE simulated_action_journal SET ${columns.map((c, i) => `${c}=$${i + 1}`).join(",")} WHERE id=$1 RETURNING id)
+    UPDATE authority_catalog SET last_recorded_at=$${columns.length + 1} WHERE EXISTS (SELECT 1 FROM proof)`,
+    [...CREDIT_COLUMNS.map((k) => forged[k]), forged, forged.recorded_at],
+  );
+  await h.sql(
+    "ALTER TABLE simulated_action_journal ENABLE TRIGGER simulated_action_append_only",
+  );
+  const changed = await h.dump();
+  for (const table of [
+    "case_journal",
+    "authority_request_journal",
+    "authority_snapshots",
+    "simulated_credit_source",
+  ])
+    assert.deepEqual(changed[table], canonical[table]);
+  await h.request("/readyz", undefined, 503);
+  await h.request(view, undefined, 500);
+  await assert.rejects(() => h.restart(), /replay validation/);
+});
+
+test("D7-C a read overlapping an uncommitted catalog write retains inconclusive evidence, never a false match", async (t) => {
+  const { h, command } = await invocation(t);
+  let entered, release;
+  const waiting = new Promise((r) => {
+      entered = r;
+    }),
+    barrier = new Promise((r) => {
+      release = r;
+    });
+  h.advance(1000);
+  h.setHook(async (sql) => {
+    if (sql.includes("fr:authority-update-catalog")) {
+      entered();
+      await barrier;
+    }
+  });
+  const changing = h.catalog((d) => {
+    d.policies[0].source_ref += "/overlap";
+  });
+  await waiting;
+  h.advance(1000);
+  h.setReaderHook(async (sql) => {
+    if (sql === "COMMIT") {
+      release();
+      await changing;
+    }
+  });
+  const proof = (await h.verify(command)).receipt;
+  h.setHook(undefined);
+  h.setReaderHook(undefined);
+  assert.equal(proof.comparison.outcome, "inconclusive");
+  assert.ok(proof.comparison.reason_codes.includes("catalog_changed"));
+  assert.equal(proof.comparison.absence_proven, false);
+  await h.restart();
+  assert.deepEqual((await h.verify(command)).receipt, proof);
 });

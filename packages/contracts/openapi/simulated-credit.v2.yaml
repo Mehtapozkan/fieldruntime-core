@@ -1,0 +1,79 @@
+openapi: 3.1.0
+info:
+  title: Synthetic Orchid credit and independent verification
+  version: 2.0.0
+  description: D-033 only. No customer-impact proof, economics, acceptance or Case closure.
+servers:
+  - url: http://127.0.0.1:3210
+paths:
+  /v1/tenants/tenant_orchid/cases/case_d6_workbench/simulated-credit:
+    get:
+      operationId: readSimulatedCredit
+      description: One read-only snapshot; no writer lock, IDs, observation or clock writes.
+      responses:
+        "200":
+          description: Historical attempts and proofs, with separate current execution eligibility.
+          content:
+            application/json:
+              schema:
+                $ref: ../schemas/simulated-credit.v2.schema.json#/$defs/read
+        "500":
+          description: Canonical history or source integrity failure; no trusted view.
+  /v1/tenants/tenant_orchid/cases/case_d6_workbench/simulated-credit-attempts:
+    post:
+      operationId: executeSimulatedCredit
+      description: Server recomputes authority; latest retained absence and current authority are required for explicit re-invocation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/simulated-credit.v1.schema.json#/$defs/command
+      responses:
+        "200":
+          description: Atomic applied action or exact historical duplicate; acknowledgment is unverified.
+        "400":
+          description: Invalid command or scope.
+        "409":
+          description: Denied execution or binding/idempotency conflict.
+        "500":
+          description: Unconfirmed outcome; preserve and retry original bytes/key.
+  /v1/tenants/tenant_orchid/cases/case_d6_workbench/simulated-credit-attempts/{attemptId}/verifications:
+    post:
+      operationId: verifySimulatedCredit
+      description: Fixed server verifier; independent read then atomic current authority/consistency recheck. Advances neither C, R nor S.
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^attempt_[A-Za-z0-9_-]{1,119}$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/simulated-credit.v2.schema.json#/$defs/verify_command
+      responses:
+        "200":
+          description: Applied immutable match/mismatch/inconclusive evidence or exact historical duplicate.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status, historical_only, receipt]
+                properties:
+                  status:
+                    enum: [applied, duplicate]
+                  historical_only:
+                    const: true
+                  receipt:
+                    $ref: ../schemas/simulated-credit.v2.schema.json#/$defs/verification
+        "400":
+          description: Invalid command, caller authority/result fields or path/body mismatch.
+        "409":
+          description: Current verifier ineligible, unknown/unbound/uninvoked attempt or changed idempotency bytes; no new proof.
+        "500":
+          description: Unconfirmed persistence/integrity outcome; retry exact original command. Never infer source absence.

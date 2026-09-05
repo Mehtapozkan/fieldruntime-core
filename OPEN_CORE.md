@@ -21,20 +21,22 @@ implementations for:
 - Worker adapter and Worker Pack contracts; and
 - a local evaluation workbench.
 
-The current repository implements only the evaluation components identified in
-`STATUS.md`, including canonical Case and journal contracts, deterministic Case
-state and integrity rules, PostgreSQL evaluation persistence, the loopback-only
-appliance, the ECC synthetic pack and Production Test, receipts, and the Guided
-Workbench. Listing a possible open Core component does not claim that it is
-implemented today.
+The implemented inventory is in [README.md](README.md#what-works-today) and
+[STATUS.md](STATUS.md): canonical Case history, PostgreSQL persistence, synthetic
+Decision Packets and human review, deterministic authority, the bounded simulated
+credit API and the ECC evaluation. D7-C independent verification is implemented on
+the review branch; Workbench action/check controls remain pending. These current
+source capabilities are not all in the historical published prerelease. Listing a
+possible Core component above does not claim it is implemented today.
 
 Organizations can inspect, modify, self-host, test providers against, and export
 from this core under the license terms.
 
-## Commercial and managed products
+## Potential commercial and managed offerings
 
 Field Runtime may separately offer software and services that are not contained in
-this repository, including:
+this repository. This is a potential offering, not an implemented product list or
+claim that these services are available today. Possibilities include:
 
 - hosted Intake and Operational Legibility services;
 - a managed Runtime Builder;

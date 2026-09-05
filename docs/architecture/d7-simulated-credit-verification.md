@@ -2,8 +2,9 @@
 
 Status: **Accepted** by explicit human approval of the reviewed design at
 [527cfb6f44dac61e495f45559d170d0bbb50e8f2](https://github.com/Mehtapozkan/fieldruntime-core/blob/527cfb6f44dac61e495f45559d170d0bbb50e8f2/docs/architecture/d7-simulated-credit-verification.md).
-D7-A was documentation only. D7-B is implemented on the subsequent review branch;
-D7-C independent verification and D7-D Workbench controls remain unimplemented.
+D7-A was documentation only. D7-B merged in PR #23 at `6766d9d99569fbff0e95e8b8b91748c1c0646b7a`.
+D7-C independent verification is implemented on the subsequent review branch;
+D7-D Workbench controls remain unimplemented.
 
 Base: main `ba340cc5135343e12820992cf4a7542cf7cc9c29` includes the normal merge of
 [D6-D PR #21](https://github.com/Mehtapozkan/fieldruntime-core/pull/21), reviewed at
@@ -399,7 +400,7 @@ completion, accepted outcome, full closure proof or a resolved Case.
 ## Implementation sequence and acceptance
 
 D-033 is accepted and PRs #21 and #22 are merged, with all D6-D coverage retained.
-D7-B is implemented on the subsequent review branch; D7-C and D7-D remain next.
+D7-B is merged in PR #23; D7-C is implemented for review and D7-D remains next.
 The accepted implementation sequence and acceptance requirements are:
 
 1. **D7-B — bound operation and atomic simulated source.** Add the strict new

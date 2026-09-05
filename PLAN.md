@@ -8,9 +8,14 @@ in PR #20 at `940462ec`; D6-D merged in PR #21 at
 `ba340cc5135343e12820992cf4a7542cf7cc9c29` with passing required checks. The human
 operator accepted [D-033](docs/architecture/d7-simulated-credit-verification.md)
 at `527cfb6f`. D7-A PR #22 merged normally at
-`f6dcddc03da8ee7c86cce76979aca751b2b0266d` with full D6-D coverage. D7-B is implemented
-on this review branch; its PR remains open. Independent verification (D7-C) and
-Workbench action controls (D7-D) remain next. No release or deployment is included.
+`f6dcddc03da8ee7c86cce76979aca751b2b0266d` with full D6-D coverage. D7-B PR #23 merged normally at `6766d9d99569fbff0e95e8b8b91748c1c0646b7a`
+from reviewed head `56490f9a` after required checks. D7-C is implemented on this
+review branch; its implementation PR remains open. D7-D Workbench controls are next. No release or deployment is included.
+
+The published `v0.1.0-evaluation-preview.0` is a historical snapshot at `3db1b4bf`,
+before D6/D7; merges do not update it. This plan describes current source and future
+work. [README's functionality table](README.md#what-works-today) separates Workbench,
+API, review-branch and release availability.
 
 ## Delivery labels and GitHub pull requests
 
@@ -39,8 +44,8 @@ historical behavior alone never establishes business authority.
 | GitHub #6 — Preview Readiness                        | Merged      | Apache 2.0 boundary, public governance and security files, pinned infrastructure, release checks, preview image, and five-minute walkthrough                                                                                                                                | Public-release audit and hosted appliance CI pass before repository visibility changes                                                                     |
 | GitHub #12 — Public Launch Finalization              | Merged      | Final public copy, release-state reconciliation, repository metadata and protection checks, anonymous-clone verification, and prerelease publication gate                                                                                                                   | Final `main` passes hosted CI and `pnpm release:check`; every checklist stop condition is clear before visibility changes                                  |
 | GitHub #14 — Automated Evaluation Prerelease         | Merged      | Automate the evaluation prerelease while retaining the repository's explicit preview boundary                                                                                                                                                                               | The published prerelease remains tied to validated source and release checks                                                                               |
-| D6 — Governed Case Session                           | In progress | Authoritative identity, delegation, and business authority; exact Case owner, delegated worker, authority owner, and verifier; payload-bound approvals; deterministic authority resolution                                                                                  | The Decision Packet is runtime-backed, approvals bind the exact payload, and authority resolution fails closed                                             |
-| D7 — Controlled Action + Independent Verification    | In progress | Staged action through a deny-by-default Action Gateway with idempotency and preconditions; independent verification through a separate identity and read path; simulated effects only                                                                                       | Bypass, self-verification, unbound-payload, precondition, and duplicate-effect negative tests pass                                                         |
+| D6 — Governed Case Session                           | Merged      | Authoritative identity, delegation, and business authority; exact Case owner, delegated worker, authority owner, and verifier; payload-bound approvals; deterministic authority resolution                                                                                  | The Decision Packet is runtime-backed, approvals bind the exact payload, and authority resolution fails closed                                             |
+| D7 — Controlled Action + Independent Verification    | In progress | Bounded Orchid simulated-credit API merged; independent verification implemented in PR #24; Workbench action/check controls pending                                                                                                                                         | Bypass, self-verification, unbound-payload, precondition, and duplicate-effect negative tests pass                                                         |
 | D8 — Receipts + Economics + Failure Theater          | Planned     | Reconstructable authority, action, verifier, and outcome lineage plus human intervention, wait/handoff time, and cost per accepted outcome; unsafe paths fail visibly                                                                                                       | A Case is reconstructable, economics derive from receipts, and unsafe authority/action/verification demonstrations fail closed                             |
 | D9 — Intake + Case Formation                         | Planned     | Canonical intake for email, file, form, event, queue row, and human submission; provenance-preserving evidence links; related-signal linking; uncertainty-preserving Case candidates and existing-Case import                                                               | Repeatable candidate formation and safe mapping of upstream Cases both preserve provenance, ambiguity, conflicts, unknowns, and system-of-record ownership |
 | D10 — Case Discovery + Operational Legibility        | Planned     | Reconstruct representative historical work; distinguish authoritative fact, approved policy, cited memory, extraction, and inference; expose missing evidence/conflicts and classify operability                                                                            | Evaluation reports agent-workable, human-judgment-required, authority-blocked, evidence-blocked, and unclear-outcome work without inferring authority      |
@@ -81,8 +86,8 @@ PR #21 passed repository validation, real PostgreSQL/API, Compose and
 appliance/browser acceptance checks before normal merge. It introduced no
 runtime contracts or migrations. Production authentication, identity history,
 external catalog sources and general workflows remain outside this synthetic step.
-D7-B below supplies the bounded action API; independent verification and complete
-closure proof remain unimplemented.
+D7-B/C below supply the bounded action and independent verification APIs. Complete
+closure proof and Workbench action/check controls remain unimplemented.
 
 The human operator accepted the desktop/390px presentation at `1561329858` on
 2026-09-05; no further UI redesign is a D6-D merge prerequisite. Keep two
@@ -98,17 +103,20 @@ accepted by the human operator.
 PR #22 merged after the restored repository, PostgreSQL/API, Compose and Workbench
 checks passed, preserving the effective solo-maintainer protections without bypass.
 
-1. **D7-B — implemented for review:** strict operation/envelope contracts, fixed
+1. **D7-B — merged in PR #23:** strict operation/envelope contracts, fixed
    synthetic enrollment, migration 0003, read-only action views, current bound
    action API, atomic source/action evidence, duplicate prevention and replay.
    [API examples and migration notes](docs/guides/simulated-credit-api.md).
-   Require passing real PostgreSQL, appliance restart/retry and preserved Workbench
-   CI on the final commit. Leave this implementation PR open.
-2. **D7-C — next:** separate verifier identity/read path, retained observations,
-   mismatch/unavailable/uncertain behavior and comparison/replay proof. Adapter
-   success cannot replace this check. An unverified no-source invocation cannot
-   justify a fresh invocation in D7-B.
-3. **D7-D — later:** existing Workbench action/check controls with explicit
+   Reviewed replay/scope repairs, PostgreSQL, appliance and Workbench CI passed.
+2. **D7-C — implemented for review:** strict verification POST, dedicated read-only
+   source connection, current scoped verifier checks, immutable observations and
+   deterministic proof replay. Migration 0004 extends the existing journal without
+   changing prior checksums/history. Exact retries, observation races and failed
+   persistence remain fail closed. Only latest retained independent absence plus
+   current authority permits explicit fresh execution; occupied slots always block.
+   Require passing repository, PostgreSQL/API, restart and preserved Workbench CI
+   on the final commit; leave this implementation PR open.
+3. **D7-D — next after D7-C review:** existing Workbench action/check controls with explicit
    conflict/retry and historical/current labels, verified through the appliance.
 
 Each step carries D-033's applicable acceptance tests. Action supporting history

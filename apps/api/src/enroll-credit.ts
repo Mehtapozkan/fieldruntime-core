@@ -15,7 +15,7 @@ async function enroll(): Promise<void> {
       () => new Date(),
     );
     process.stdout.write(
-      `${status}: Orchid simulated-credit profile. Fresh review is required after catalog changes. Verification is not implemented.\n`,
+      `${status}: Orchid simulated-credit profile. Fresh review is required after catalog changes. Check committed effects through the independent verification API.\n`,
     );
   } finally {
     await pg.end();

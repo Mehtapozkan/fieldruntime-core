@@ -3,7 +3,7 @@
 ## Validate the repository
 
 ```bash
-corepack enable
+# Requires Node.js 24 and pnpm 11.24.0; see README for installation.
 pnpm install --frozen-lockfile
 pnpm validate
 docker compose config --quiet
@@ -27,8 +27,11 @@ and external writes off, builds the API image, applies the checksum-bound migrat
 loads the immutable ECC fixture, and waits for readiness.
 
 When startup succeeds, the CLI prints the workbench URL. Open
-`http://127.0.0.1:3210/` to begin directly in the Acme case. There is no signup,
-API key, blank dashboard, or setup step before the four-stage walkthrough.
+`http://127.0.0.1:3210/` for persistent Orchid review, then explicitly choose
+**Start or reopen $15,000 review**. Opening the page creates nothing. See the
+[Workbench walkthrough](../../apps/admin/README.md). The historical Acme fixture
+story is separate at `/?view=legacy`; the published prerelease opens that older
+story by default. Neither path needs signup or API keys.
 
 Both published ports are loopback-only:
 
@@ -53,11 +56,18 @@ PostgreSQL replay/projection integrity. The fixture response is labeled
 `authoritative: false` and `replayable: false`; authoritative cases enter through
 the tenant-scoped command endpoint defined by the OpenAPI contract.
 
-The walkthrough response and browser controls are presentation-only. They are
+The legacy walkthrough response and its browser controls are presentation-only. They are
 schema-bound to the immutable fixture, but they do not create approvals, execute
 actions, mutate authoritative cases, emit production receipts, or make an
-external request. The workbench remains visibly labeled `Synthetic`,
-`Guided simulation`, and `External writes off` throughout.
+external request. The persistent Orchid controls instead submit canonical review
+commands through the [authority API](../guides/d6-authority-review.md), with visibly
+synthetic seats. Both experiences keep external writes disabled.
+
+The [simulated-credit API guide](../guides/simulated-credit-api.md) covers explicit
+D7 enrollment, fresh review, bound action and this D7-C branch's independent
+verification. Those action/check operations are not connected to Workbench controls.
+For existing volumes, consult its migration and backup limits before upgrading;
+startup preserves history and does not enroll new authority automatically.
 
 Useful diagnostics:
 
