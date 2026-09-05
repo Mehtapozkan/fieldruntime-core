@@ -2259,3 +2259,32 @@ button {
   padding: 1rem 0 0;
   border: 0;
 }
+
+.case-receipt-stages {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 0;
+}
+.case-receipt-stages > li {
+  min-width: 0;
+}
+.case-receipt-stages > li > details > summary {
+  font-size: 1rem;
+}
+.receipt-stage-summary {
+  display: block;
+  margin-top: 6px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+.receipt-uncertainty p {
+  margin: 8px 0 0;
+}
+.case-receipt .review-history {
+  margin-top: 18px;
+}
+.case-receipt pre {
+  max-width: 100%;
+}

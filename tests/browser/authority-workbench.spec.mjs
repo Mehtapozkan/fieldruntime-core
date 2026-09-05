@@ -223,6 +223,7 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
   );
   await refresh(page);
   await page.locator('[data-stage="history"]').click();
+  await page.locator('[data-receipt-stage="decisions"] > summary').click();
   await expect(
     page.getByRole("heading", { name: "Finance · Approve", exact: true }),
   ).toBeVisible();
@@ -349,6 +350,7 @@ for (const decision of ["reject", "modify", "escalate"])
       }[decision],
     );
     await page.locator('[data-stage="history"]').click();
+    await page.locator('[data-receipt-stage="decisions"] > summary').click();
     await expect(
       page.getByRole("heading", {
         name: `Finance · ${decision[0].toUpperCase()}${decision.slice(1)}`,

@@ -5,6 +5,7 @@ import {
   PROPOSALS,
   DEMO_UPDATE,
   preparationStep,
+  caseReceiptEvidence,
 } from "./authority-client.js";
 import {
   canExecuteCredit,
@@ -193,12 +194,15 @@ const checkLabel = (proof) =>
     mismatch: "Last confirmed check: credit mismatch",
     inconclusive: "Check inconclusive",
   })[proof.comparison.outcome];
-function checkEvidence(proof) {
+function checkEvidence(proof, includeMatch = false) {
   const evidence = box(
     "review-check-evidence",
     el("p", `Check recorded ${time(proof.recorded_at)}.`, "review-check-time"),
   );
-  if (proof.comparison.outcome !== "verified_simulated_effect") {
+  if (
+    includeMatch ||
+    proof.comparison.outcome !== "verified_simulated_effect"
+  ) {
     const rows = proof.observation.raw.rows;
     const observed = Array.isArray(rows)
       ? rows
@@ -476,7 +480,12 @@ export function mountAuthorityWorkbench() {
   $("experience-mode")
     .closest(".safety-rail")
     .classList.add("safety-rail--review");
-  let active = "packet",
+  const savedStage = new globalThis.URL(window.location.href).searchParams.get(
+    "stage",
+  );
+  let active = ["packet", "history", "safeguard"].includes(savedStage)
+      ? savedStage
+      : "packet",
     seat = "finance",
     decision = "approve",
     reason = "",
@@ -495,7 +504,7 @@ export function mountAuthorityWorkbench() {
   };
   const stages = [
     ["packet", "Decision Packet", "Credit, evidence & approvals"],
-    ["history", "History", "Decisions, action & checks"],
+    ["history", "History", "Case progress & evidence"],
     ["safeguard", "Changed evidence", "Fresh evidence, fresh review"],
   ];
   function formView(state) {
@@ -788,111 +797,364 @@ export function mountAuthorityWorkbench() {
     );
     return section;
   }
-  function historyView(packet, credit) {
-    const history = el("ol", undefined, "review-history");
-    for (const [index, entry] of packet.history.entries()) {
-      const evaluation = packet.historical_evaluations[index],
-        vote = entry.decision;
-      const item = el("li");
-      item.append(
-        box(
-          "review-history-heading",
-
-          el(
-            "h3",
-            vote
-              ? `${named(vote.approver_identity)} · ${title(vote.decision)}`
-              : "Request created",
-          ),
-        ),
-        el("small", time(entry.recorded_at)),
-        vote?.reason
-          ? el("p", vote.reason)
-          : el(
-              "p",
-              vote
-                ? "Consent recorded for the exact request binding."
-                : "Immutable credit and cited material retained.",
-            ),
+  function historyView(state) {
+    const packet = state.packet,
+      receipt = caseReceiptEvidence(state);
+    const identityName = (identity) =>
+      identity
+        ? ({
+            identity_d6_operator: "Demo operator",
+            identity_d7_credit_executor: "Credit executor",
+            identity_d7_credit_verifier: "Independent verifier",
+          }[identity.identity_id] ?? named(identity))
+        : "Attribution unavailable";
+    const raw = (label, value) =>
+      details(label, el("pre", JSON.stringify(value, null, 2)));
+    const list = el("ol", undefined, "case-receipt-stages");
+    function add(key, heading, summary, body, note) {
+      const item = el("li", undefined, "review-card");
+      const disclosure = details(heading, body);
+      disclosure.dataset.receiptStage = key;
+      disclosure
+        .querySelector("summary")
+        .append(el("span", summary, "receipt-stage-summary"));
+      item.append(disclosure);
+      if (note) item.append(note);
+      list.append(item);
+    }
+    const creator = receipt.reviews[0];
+    add(
+      "proposal",
+      "Proposed work",
+      `${money(packet.material.consequence.amount_minor)} credit to Orchid`,
+      box(
+        "",
         el(
           "p",
-          `Historical evaluation: ${evaluation.result.authorized ? "approvals complete then" : title(evaluation.result.lifecycle)}. This is not current permission.`,
-          "review-muted",
+          `Request retained ${time(packet.request.requested_at)} · ${identityName(creator?.identity)} · synthetic.`,
         ),
-        details(
-          "Recorded binding and replay evidence",
-          box(
-            "",
-            el("small", `Review R${entry.review_revision}`),
-            el("code", entry.request_binding_hash),
-            el("code", entry.event_hash),
-            el(
-              "p",
-              `Bound prior R${vote?.expected_review_revision ?? 0} · C${vote?.case_version ?? packet.request.case_version}`,
-            ),
-            el(
-              "small",
-              `Resolver ${evaluation.implementation_versions.resolver} · evaluated ${time(evaluation.recorded_at)}`,
-            ),
-            el("pre", JSON.stringify(evaluation.inputs, null, 2)),
-          ),
+        materialView(packet),
+        raw("Request binding and recorded creator", {
+          request: packet.request,
+          entry: creator?.entry,
+          identity: creator?.identity,
+        }),
+        raw("Case journal · its own recorded sequence", receipt.caseEntries),
+      ),
+      box(
+        "receipt-uncertainty",
+        el("p", packet.material.evidence[0].content.body),
+        ...packet.material.conflicts.map((c) =>
+          el("p", c.description, "review-warning-copy"),
         ),
+        ...packet.material.unknowns.map((unknown) =>
+          el("p", unknown, "review-muted"),
+        ),
+      ),
+    );
+    const decisions = el("ol", undefined, "review-history");
+    for (const item of receipt.decisions) {
+      const { entry, evaluation, identity } = item,
+        vote = entry.decision;
+      const row = el("li");
+      row.dataset.receiptDecision = vote.authority_decision_id;
+      row.append(
+        el("h3", `${identityName(identity)} · ${title(vote.decision)}`),
+        el(
+          "small",
+          `Synthetic ${identity?.identity_kind ?? "identity"} · recorded ${time(entry.recorded_at)}`,
+        ),
+        el(
+          "p",
+          vote.decision !== "approve"
+            ? "Terminal decision recorded; no approval transfer."
+            : item.applies === null
+              ? "Current applicability unconfirmed."
+              : item.applies
+                ? "Counts in the latest reconciled review."
+                : "Not effective in the latest review.",
+        ),
+        ...(vote.reason ? [el("p", vote.reason)] : []),
+        raw("Canonical identity, consent and evaluation evidence", {
+          identity,
+          entry,
+          evaluation,
+        }),
       );
-      if (vote?.replacement_authority_request_id)
-        item.append(
-          button("Open unapproved replacement", "open", false, false, {
+      if (vote.replacement_authority_request_id)
+        row.append(
+          button("Open unapproved replacement", "open", state.busy, false, {
             "data-request-id": vote.replacement_authority_request_id,
           }),
         );
-      history.append(item);
+      decisions.append(row);
     }
-    const operationHistory = el("ol", undefined, "review-history");
-    for (const entry of [
-      ...(credit?.attempts ?? []),
-      ...(credit?.verifications ?? []),
-    ].sort((a, b) => a.sequence - b.sequence)) {
-      const label = entry.comparison
-        ? {
-            verified_simulated_effect: "Independent check matched",
-            mismatch: "Independent check found a mismatch",
-            inconclusive: "Independent check was inconclusive",
-          }[entry.comparison.outcome]
-        : entry.outcome === "denied"
-          ? "Simulated action denied"
-          : "Simulated action recorded; verification separate";
-      const item = el("li");
-      item.append(
-        el("h4", label),
-        el("small", time(entry.recorded_at)),
-        details(
-          "Historical entry and exact bindings",
-          el("pre", JSON.stringify(entry, null, 2)),
+    const decisionSummary = receipt.decisions.length
+      ? receipt.decisions
+          .map(
+            (d) =>
+              `${identityName(d.identity)} ${{ approve: "approved", reject: "rejected", modify: "modified", escalate: "escalated" }[d.entry.decision.decision]}`,
+          )
+          .join(" · ")
+      : "No decisions recorded for this request";
+    add(
+      "decisions",
+      "Human review",
+      decisionSummary,
+      box(
+        "",
+        decisions,
+        el("p", policyExplanation(packet)),
+        raw(
+          "Bound policy and review requirements",
+          packet.current.resolution?.authority_requirements ??
+            packet.historical_evaluations[0].inputs.resolution.policies,
         ),
-      );
-      operationHistory.append(item);
-    }
-    return box(
-      "",
-      intro(
-        "02 / Immutable history",
-        "What was decided, and on what basis",
-        "These records are historical evidence. Only a fresh packet describes current eligibility.",
       ),
-      history,
-      details("Consent material for this request", materialView(packet)),
-      ...(operationHistory.childElementCount
-        ? [
-            card(
-              "Case action and check history · historical evidence",
+      el(
+        "small",
+        receipt.reconciled
+          ? packet.current.authorized
+            ? "Approvals complete in the latest reconciled review; execution is a separate check."
+            : packet.current.eligible
+              ? `Awaiting ${packet.current.resolution.authority_requirements
+                  .filter((r) => r.status !== "satisfied")
+                  .map((r) => reviewerName(r.authority_class))
+                  .join(" and ")} review.`
+              : `Latest review: ${title(packet.current.lifecycle)}. ${packet.current.reason_codes.map(creditReason).join(" ")}`
+          : "Recorded decisions retained; current applicability unconfirmed.",
+        "review-muted",
+      ),
+    );
+    const actionRows = el("ol", undefined, "review-history");
+    for (const entry of receipt.attempts) {
+      const row = el("li");
+      row.dataset.receiptAttempt = entry.id;
+      row.append(
+        el(
+          "h3",
+          entry.outcome === "denied"
+            ? "Simulated action denied"
+            : "Simulated action recorded",
+        ),
+        el(
+          "small",
+          `Recorded ${time(entry.recorded_at)} · ${identityName(receipt.identities.get(entry.id))} · synthetic service.`,
+        ),
+        el(
+          "p",
+          "Explicit execute command; the initiating person is not authenticated or recorded by this receipt.",
+        ),
+        ...(entry.authority_request_id !== packet.authority_request_id
+          ? [
               el(
                 "p",
-                "This Case’s operation history can reference an earlier request. It does not grant current permission.",
+                "Bound to another request; it did not execute the selected proposal.",
               ),
-              operationHistory,
+              button("Inspect action's request", "open", state.busy, false, {
+                "data-request-id": entry.authority_request_id,
+              }),
+            ]
+          : []),
+        el(
+          "p",
+          entry.outcome === "denied"
+            ? entry.envelope.reason_codes.map(creditReason).join(" ")
+            : entry.source
+              ? "A simulated source row was recorded atomically. Adapter acknowledgment is not verification."
+              : "The invocation was recorded without a source row; an independent check is needed.",
+        ),
+        raw("Exact action, identity and request evidence", entry),
+      );
+      actionRows.append(row);
+    }
+    const attempt = receipt.latestAttempt,
+      proof = receipt.latestCheck;
+    add(
+      "action",
+      "Simulated action",
+      attempt
+        ? attempt.outcome === "denied"
+          ? "Latest attempt denied"
+          : attempt.source
+            ? "Simulated credit recorded"
+            : "Invocation recorded; effect unconfirmed"
+        : "No confirmed action in loaded history",
+      actionRows,
+      attempt && attempt.authority_request_id !== packet.authority_request_id
+        ? el(
+            "p",
+            "This action belongs to another request; it did not execute the selected proposal.",
+            "review-muted",
+          )
+        : undefined,
+    );
+    const checkRows = el("ol", undefined, "review-history");
+    for (const entry of receipt.checks) {
+      const row = el("li");
+      row.dataset.receiptCheck = entry.id;
+      row.append(
+        el(
+          "h3",
+          `${entry.id === proof?.id ? "Latest matching check" : "Historical check"} · ${title(entry.comparison.outcome)}`,
+        ),
+        el(
+          "small",
+          `${identityName(receipt.identities.get(entry.id))} · synthetic service. Observed ${time(entry.observation.observed_at)}; recorded ${time(entry.recorded_at)}.`,
+        ),
+        checkEvidence(entry, true),
+        raw("Observation, verifier and originating attempt", entry),
+      );
+      checkRows.append(row);
+    }
+    add(
+      "verification",
+      "Independent check",
+      proof
+        ? checkLabel(proof)
+        : attempt?.outcome === "denied"
+          ? "Latest attempt was denied; earlier checks remain history"
+          : "No check confirmed for the latest attempt",
+      checkRows,
+      proof
+        ? checkEvidence(proof, true)
+        : el(
+            "small",
+            "An older attempt's check does not prove a newer attempt.",
+            "review-muted",
+          ),
+    );
+    const next = state.pending
+      ? "Recover the original command with an exact retry."
+      : !receipt.reconciled
+        ? "Refresh to reconcile the views. Historical source checks remain available in the controls."
+        : attempt &&
+            attempt.authority_request_id !== packet.authority_request_id &&
+            !requestBlocked(packet)
+          ? "Review the selected proposal afresh. Earlier action and check evidence belongs to its original request."
+          : attempt
+            ? proof?.comparison.outcome === "verified_simulated_effect"
+              ? "Review the remaining impact and acceptance gaps; a fresh source check is available."
+              : "Inspect the result and request an independent source check from the controls."
+            : canExecuteCredit({ ...state, busy: false })
+              ? "Record the simulated credit when ready."
+              : preparationStep(state.caseRecord)
+                ? "Explicitly prepare the original Case, then create a fresh review."
+                : requestBlocked(packet)
+                  ? "Create a fresh request and obtain fresh consent."
+                  : "Review the evidence and record the outstanding human decision.";
+    add(
+      "remaining",
+      "Still unresolved",
+      "Customer impact and acceptance remain unproven; the Case is unresolved.",
+      box(
+        "",
+        el(
+          "p",
+          "The Case remains unresolved. External writes and Case closure remain blocked.",
+        ),
+        el(
+          "p",
+          "Labor time, cost, savings and recovered revenue are not measured. The proposed credit amount is not money saved or revenue gained.",
+        ),
+        raw("Current server evaluations · informational only", {
+          review: packet.current,
+          operation: state.credit?.current,
+        }),
+      ),
+      box(
+        "",
+        el("p", next, "review-next-action"),
+        button("Open review and action controls", "stage", state.busy, true, {
+          "data-open-stage": "packet",
+        }),
+      ),
+    );
+    const root = box(
+      "case-receipt",
+      intro(
+        "02 / History",
+        "Case progress and evidence",
+        "A read-only account of recorded work. Historical evidence never grants current permission.",
+      ),
+      box(
+        "review-refresh",
+        button("Refresh receipt", "refresh", state.busy),
+        el("small", `Review evaluated ${time(packet.evaluated_at)}`),
+      ),
+      el(
+        "p",
+        receipt.reconciled
+          ? "Loaded bindings agree; current eligibility is still rechecked on submission."
+          : "Incomplete or stale view — current applicability unconfirmed.",
+        receipt.reconciled
+          ? "review-muted"
+          : "review-notice review-notice--error",
+        {
+          "data-receipt-status": receipt.reconciled
+            ? "reconciled"
+            : "incomplete",
+        },
+      ),
+      ...(receipt.issues.length
+        ? [
+            details(
+              "Why this view is incomplete",
+              box("", ...receipt.issues.map((issue) => el("p", issue))),
             ),
           ]
         : []),
+      list,
+      el(
+        "p",
+        "Review revisions and the action/check sequence preserve their own recorded order. Equal timestamps do not establish order across separate journals.",
+        "review-muted",
+      ),
     );
+    root.dataset.caseReceipt = "";
+    root.querySelector("h2").id = "review-current-status";
+    root.querySelector("h2").tabIndex = -1;
+    if (packet.request.predecessor_authority_request_id)
+      root.append(
+        button("Inspect predecessor history", "open", state.busy, false, {
+          "data-request-id": packet.request.predecessor_authority_request_id,
+        }),
+      );
+    const other = receipt.relatedRequests.filter(
+      (id) => id !== packet.request.predecessor_authority_request_id,
+    );
+    if (other.length)
+      root.append(
+        details(
+          "Other referenced request history",
+          box(
+            "",
+            ...other.map((id) =>
+              button("Inspect referenced request", "open", state.busy, false, {
+                "data-request-id": id,
+              }),
+            ),
+          ),
+        ),
+      );
+    if (
+      state.receipt?.historical &&
+      (state.receipt.authority_request_id !== packet.authority_request_id ||
+        state.receipt.review_revision > packet.review_revision)
+    )
+      root.append(
+        card(
+          state.receipt.authority_request_id === packet.authority_request_id
+            ? "Confirmed review submission; history refresh incomplete"
+            : "Confirmed review submission · another request",
+          el(
+            "p",
+            `Recorded ${time(state.receipt.recorded_at)}. This submission is not counted again or treated as current permission.`,
+          ),
+          raw("Confirmed submission receipt", state.receipt),
+        ),
+      );
+    return root;
   }
   function safeguardView(state) {
     const added = state.caseRecord?.document.events.some(
@@ -1083,47 +1345,50 @@ export function mountAuthorityWorkbench() {
       const progress = reviewProgress(state);
       const attempt = selectedInvocation(state);
       const proof = selectedCheck(state, attempt);
-      content.append(
-        box(
-          "review-current",
-          el("h2", progress.heading, undefined, {
-            id: "review-current-status",
-            tabindex: "-1",
-            "data-credit-result": proof?.comparison.outcome,
-          }),
-          ...(proof
-            ? [checkEvidence(proof)]
-            : attempt
-              ? [
-                  el(
-                    "p",
-                    `Action recorded ${time(attempt.recorded_at)}.`,
-                    "review-check-time",
-                  ),
-                ]
-              : []),
-          el("p", progress.next, "review-next-action"),
-          requirementsView(state),
+      if (active !== "history")
+        content.append(
           box(
-            "review-refresh",
-            button("Refresh packet", "refresh", state.busy),
-            el(
-              "small",
-              state.needsRefresh || state.pending
-                ? "Previously loaded view"
-                : `Review refreshed ${time(packet.evaluated_at)}`,
+            "review-current",
+            el("h2", progress.heading, undefined, {
+              id: "review-current-status",
+              tabindex: "-1",
+              "data-credit-result": proof?.comparison.outcome,
+            }),
+            ...(proof
+              ? [checkEvidence(proof)]
+              : attempt
+                ? [
+                    el(
+                      "p",
+                      `Action recorded ${time(attempt.recorded_at)}.`,
+                      "review-check-time",
+                    ),
+                  ]
+                : []),
+            el("p", progress.next, "review-next-action"),
+            requirementsView(state),
+            box(
+              "review-refresh",
+              button("Refresh packet", "refresh", state.busy),
+              el(
+                "small",
+                state.needsRefresh || state.pending
+                  ? "Previously loaded view"
+                  : `Review refreshed ${time(packet.evaluated_at)}`,
+              ),
             ),
           ),
-        ),
-      );
-      if (proof)
+        );
+      if (proof && active !== "history")
         content
           .querySelector(".review-current")
           .setAttribute("data-confirmed-credit", "");
-      if (attempt) content.append(eligibilityView(state));
+      if (attempt && active !== "history")
+        content.append(eligibilityView(state));
       if (
         showNotice &&
         !(
+          active !== "history" &&
           attempt &&
           state.error?.includes("could not be refreshed") &&
           !state.pending &&
@@ -1146,17 +1411,7 @@ export function mountAuthorityWorkbench() {
           ),
         );
       }
-      if (
-        packet.request.predecessor_authority_request_id &&
-        active === "history"
-      )
-        content.append(
-          button("Inspect predecessor history", "open", state.busy, false, {
-            "data-request-id": packet.request.predecessor_authority_request_id,
-          }),
-        );
-      if (active === "history")
-        content.append(historyView(packet, state.credit));
+      if (active === "history") content.append(historyView(state));
       else if (active === "safeguard") content.append(safeguardView(state));
       else
         content.append(
@@ -1175,9 +1430,13 @@ export function mountAuthorityWorkbench() {
           card("Why these reviewers", el("p", policyExplanation(packet))),
           materialView(packet),
         );
-      if (active !== "packet") content.append(creditView(state));
-      content.append(bindings(packet));
-      if (state.receipt?.historical && !state.creditReceipt)
+      if (active === "safeguard") content.append(creditView(state));
+      if (active !== "history") content.append(bindings(packet));
+      if (
+        active !== "history" &&
+        state.receipt?.historical &&
+        !state.creditReceipt
+      )
         content.append(
           card(
             "Last response · historical receipt",
@@ -1215,24 +1474,26 @@ export function mountAuthorityWorkbench() {
           ),
         );
     }
-    content.append(
-      box(
-        "review-execution-lock",
-        el(
-          "b",
-          "Local simulation only · External writes and Case closure blocked",
+    if (active !== "history" || !state.packet)
+      content.append(
+        box(
+          "review-execution-lock",
+          el(
+            "b",
+            "Local simulation only · External writes and Case closure blocked",
+          ),
+          el(
+            "p",
+            "The Case remains unresolved. A simulated credit does not establish customer impact, acceptance or recovered revenue.",
+          ),
         ),
-        el(
-          "p",
-          "The Case remains unresolved. A simulated credit does not establish customer impact, acceptance or recovered revenue.",
-        ),
-      ),
-    );
+      );
     stage.replaceChildren(content);
     stage.setAttribute("aria-busy", String(state.busy));
     if (state.requestId) {
       const url = new globalThis.URL(window.location.href);
       url.searchParams.set("request", state.requestId);
+      url.searchParams.set("stage", active);
       window.history.replaceState(null, "", url);
     }
     const announcement =
@@ -1255,7 +1516,7 @@ export function mountAuthorityWorkbench() {
     if (!control || control.disabled) return;
     const action = control.dataset.reviewAction;
     if (action === "stage") {
-      active = control.dataset.stage;
+      active = control.dataset.stage ?? control.dataset.openStage;
       render(client.state);
       stage.focus();
       return;

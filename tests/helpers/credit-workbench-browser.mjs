@@ -51,9 +51,13 @@ async function openBrowser(t, h) {
   await idle(page);
   return { browser, context, page };
 }
-async function screenshot(page, name) {
-  if (!process.env.D7_SCREENSHOT_DIR) return;
-  await mkdir(process.env.D7_SCREENSHOT_DIR, { recursive: true });
+async function screenshot(
+  page,
+  name,
+  directory = process.env.D7_SCREENSHOT_DIR,
+) {
+  if (!directory) return;
+  await mkdir(directory, { recursive: true });
   for (const [label, width] of [
     ["desktop", 1440],
     ["mobile", 390],
@@ -61,7 +65,7 @@ async function screenshot(page, name) {
     await page.setViewportSize({ width, height: 1000 });
     await page.evaluate(() => globalThis.scrollTo(0, 0));
     await page.screenshot({
-      path: `${process.env.D7_SCREENSHOT_DIR}/${name}-${label}.png`,
+      path: `${directory}/${name}-${label}.png`,
       fullPage: true,
     });
     assert.equal(
@@ -75,6 +79,21 @@ async function screenshot(page, name) {
     );
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
+}
+async function receiptView(page, { status = "reconciled", check, name } = {}) {
+  await page.locator('[data-stage="history"]').click();
+  await expect(page.locator(`[data-receipt-status="${status}"]`)).toBeVisible();
+  await expect(
+    page.locator('[data-receipt-stage="remaining"] > summary'),
+  ).toContainText("Customer impact and acceptance remain unproven");
+  if (check)
+    await expect(
+      page.locator('[data-receipt-stage="verification"] > summary'),
+    ).toContainText(check);
+  if (name) await screenshot(page, name, process.env.D8_SCREENSHOT_DIR);
+}
+async function controls(page) {
+  await page.locator('[data-stage="packet"]').click();
 }
 async function prepare(page) {
   await click(page, "initialize");
@@ -103,6 +122,31 @@ export function registerCreditBrowserTests(fixture) {
       page.getByRole("button", { name: "Record approve", exact: true }),
     ).toBeFocused();
     await screenshot(page, "01-review");
+    await receiptView(page, { name: "01-awaiting-review" });
+    const readOnly = await h.dump();
+    const proposal = page.locator('[data-receipt-stage="proposal"] > summary');
+    await proposal.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("heading", { name: "Linked evidence", exact: true }),
+    ).toBeVisible();
+    await page.keyboard.press("Enter");
+    await click(page, "refresh");
+    await expect(
+      page.getByRole("heading", {
+        name: "Case progress and evidence",
+        exact: true,
+      }),
+    ).toBeFocused();
+    await page.reload();
+    await idle(page);
+    await expect(page.locator("[data-case-receipt]")).toBeVisible();
+    assert.deepEqual(
+      await h.dump(),
+      readOnly,
+      "receipt open/expand/refresh/reload write nothing",
+    );
+    await controls(page);
     await vote(page, "finance");
     await expect(page.locator("#review-current-status")).toContainText(
       "Finance approved",
@@ -119,6 +163,11 @@ export function registerCreditBrowserTests(fixture) {
     ).toBeEnabled();
     await page.getByLabel("Decision", { exact: true }).selectOption("approve");
     await screenshot(page, "02-finance-approved");
+    await receiptView(page, { name: "02-finance-approved" });
+    await expect(
+      page.locator('[data-receipt-stage="decisions"] > summary'),
+    ).toContainText("Finance approved");
+    await controls(page);
     await vote(page, "executive");
     await expect(action(page, "execute-credit")).toBeEnabled();
     await expect(
@@ -136,16 +185,47 @@ export function registerCreditBrowserTests(fixture) {
       page.getByLabel("Reviewer", { exact: true }),
     ).not.toBeVisible();
     await screenshot(page, "03-approvals-complete");
+    await receiptView(page, { name: "03-approvals-complete" });
+    await controls(page);
     await click(page, "execute-credit");
     await expect(page.locator("#review-current-status")).toContainText(
       "independent check needed",
     );
     await screenshot(page, "04-credit-recorded");
+    await receiptView(page, {
+      name: "04-credit-recorded",
+      check: "No check confirmed",
+    });
+    await controls(page);
     await click(page, "verify-credit");
     await expect(
       page.locator('[data-credit-result="verified_simulated_effect"]'),
     ).toBeVisible();
     await screenshot(page, "05-independently-checked");
+    await receiptView(page, {
+      name: "05-independently-checked",
+      check: "independently checked",
+    });
+    await expect(
+      page.getByRole("heading", {
+        name: "Case progress and evidence",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(page.locator("[data-case-receipt]")).toContainText(
+      "Customer impact and acceptance remain unproven",
+    );
+    await expect(
+      page.locator('[data-receipt-status="reconciled"]'),
+    ).toBeVisible();
+    const snapshot = await h.dump();
+    await page.reload();
+    await idle(page);
+    await expect(
+      page.locator('[data-receipt-stage="verification"] > summary'),
+    ).toContainText("independently checked");
+    assert.deepEqual(await h.dump(), snapshot);
+    await controls(page);
     const url = page.url();
     await page.close();
     const reopened = await context.newPage();
@@ -299,6 +379,15 @@ export function registerCreditBrowserTests(fixture) {
     }
     await expect(action(page, "retry")).toHaveCount(0);
     await screenshot(page, "07-mismatch-refresh-unavailable");
+    await receiptView(page, {
+      status: "incomplete",
+      check: "Last confirmed check: credit mismatch",
+      name: "06-mismatch-refresh-unavailable",
+    });
+    await expect(page.locator("[data-case-receipt]")).toContainText(
+      "Observed: No credit found",
+    );
+    await controls(page);
     await page.unroute(`**${CREDIT_ROOT}`);
     await click(page, "refresh");
     await expect(action(page, "execute-credit")).toBeEnabled();
@@ -318,6 +407,9 @@ export function registerCreditBrowserTests(fixture) {
     const { page } = await openBrowser(t, h);
     await prepare(page);
     await approve(page);
+    const selected = (await h.request(CREDIT_ROOT)).current.bindings
+      .authority_request_id;
+    const priorPacket = await h.read(selected);
     await page.locator('[data-stage="safeguard"]').click();
     await click(page, "evidence");
     await expect(page.locator("#review-current-status")).toContainText(
@@ -326,6 +418,32 @@ export function registerCreditBrowserTests(fixture) {
     await expect(action(page, "execute-credit")).toBeDisabled();
     await page.locator('[data-stage="packet"]').click();
     await screenshot(page, "08-changed-evidence");
+    await receiptView(page, { name: "07-changed-evidence" });
+    await page.locator('[data-receipt-stage="decisions"] > summary').click();
+    await expect(
+      page.getByText("Not effective in the latest review.", { exact: true }),
+    ).toHaveCount(2);
+    // A individually valid earlier packet must not be combined with newer Case/action reads.
+    await page.route("**/authority-requests/*/packet", (route) =>
+      route.fulfill({ json: priorPacket }),
+    );
+    await click(page, "refresh");
+    await receiptView(page, {
+      status: "incomplete",
+      name: "09-inconsistent-reads",
+    });
+    await expect(
+      page.locator('[data-receipt-stage="decisions"] > summary'),
+    ).toContainText("Finance approved");
+    await expect(page.locator("[data-case-receipt]")).toContainText(
+      "current applicability unconfirmed",
+    );
+    await page.unroute("**/authority-requests/*/packet");
+    await click(page, "refresh");
+    await expect(
+      page.locator('[data-receipt-status="reconciled"]'),
+    ).toBeVisible();
+    await controls(page);
     await click(page, "fresh");
     await expect(page.locator("#review-current-status")).toContainText(
       "Awaiting review",
@@ -361,6 +479,14 @@ export function registerCreditBrowserTests(fixture) {
     await expect(
       page.locator('[data-credit-result="verified_simulated_effect"]'),
     ).toHaveCount(0);
+    await receiptView(page, {
+      status: "incomplete",
+      check: "No check confirmed for the latest attempt",
+    });
+    await expect(
+      page.locator('[data-receipt-stage="verification"] > summary'),
+    ).not.toContainText("mismatch");
+    await controls(page);
     const newer = (await h.request(CREDIT_ROOT)).attempts.at(-1);
     await click(page, "verify-credit");
     await expect(
@@ -376,6 +502,47 @@ export function registerCreditBrowserTests(fixture) {
       newer.id,
     );
     await expect(action(page, "retry")).toHaveCount(0);
+    await page.unroute(`**${CREDIT_ROOT}`);
+    await click(page, "refresh");
+    await vote(page, "executive", "modify");
+    await receiptView(page, { status: "incomplete" });
+    await page.locator('[data-receipt-stage="decisions"] > summary').click();
+    await page
+      .getByRole("button", { name: "Open unapproved replacement", exact: true })
+      .click();
+    await idle(page);
+    await receiptView(page, {
+      name: "10-unapproved-replacement",
+      check: "independently checked",
+    });
+    await expect(
+      page.getByText(
+        "Confirmed review submission; history refresh incomplete",
+        { exact: true },
+      ),
+    ).toHaveCount(0);
+    await expect(
+      page.getByText("Confirmed review submission · another request", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.locator('[data-receipt-stage="decisions"] > summary'),
+    ).toContainText("No decisions recorded");
+    await expect(page.locator("[data-case-receipt]")).toContainText(
+      "This action belongs to another request; it did not execute the selected proposal.",
+    );
+    await page.reload();
+    await idle(page);
+    await expect(
+      page.locator('[data-receipt-stage="decisions"] > summary'),
+    ).toContainText("No decisions recorded");
+    await expect(
+      page.getByRole("button", {
+        name: "Inspect predecessor history",
+        exact: true,
+      }),
+    ).toBeVisible();
   });
   test("D7-D browser: a later inconclusive check replaces a successful result despite failed and reordered refresh", async (t) => {
     const h = await fixture(t, { verification: true });
@@ -404,6 +571,15 @@ export function registerCreditBrowserTests(fixture) {
       page.locator('[data-credit-result="inconclusive"]'),
     ).toBeVisible();
     await expect(action(page, "execute-credit")).toHaveCount(0);
+    await receiptView(page, {
+      status: "incomplete",
+      check: "Check inconclusive",
+      name: "08-later-inconclusive",
+    });
+    await expect(
+      page.locator('[data-receipt-stage="verification"] > summary'),
+    ).not.toContainText("independently checked");
+    await controls(page);
     await vote(page, "business", "reject");
     await expect(
       page.locator(".review-notice").filter({

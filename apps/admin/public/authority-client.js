@@ -6,6 +6,9 @@ import {
   creditCommand,
   verificationCommand,
   selectedInvocation,
+  creditMatchesPacket,
+  validateAttempt,
+  validateVerification,
   creditReason,
 } from "./credit-client.js";
 
@@ -415,6 +418,258 @@ export function requestBlocked(packet) {
   // Whole-request current.eligible does not decide individual veto rights.
 }
 
+const recordedBytes = (value) =>
+  JSON.stringify(value, (_key, item) =>
+    item && typeof item === "object" && !Array.isArray(item)
+      ? Object.fromEntries(
+          Object.keys(item)
+            .sort()
+            .map((key) => [key, item[key]]),
+        )
+      : item,
+  );
+const sameRecord = (a, b) => recordedBytes(a) === recordedBytes(b);
+function recordedIdentity(reference, identities) {
+  const matches = Array.isArray(identities)
+    ? identities.filter(
+        (identity) => identity?.identity_id === reference?.identity_id,
+      )
+    : [];
+  return matches.length === 1 && sameRecord(matches[0], reference)
+    ? matches[0]
+    : null;
+}
+
+// A read-only presentation projection, never an authority calculation or ledger.
+// Exact revisions/anchors reconcile reads; timestamps do not order separate journals.
+export function caseReceiptEvidence(state) {
+  const issues = [];
+  let packet = null,
+    credit = null;
+  try {
+    packet = validatePacket(state.packet);
+  } catch {
+    issues.push("Review evidence is unavailable or inconsistent.");
+  }
+  if (state.credit) {
+    try {
+      credit = validateCredit(state.credit);
+    } catch {
+      issues.push("Action and check evidence is inconsistent.");
+    }
+  } else issues.push("Action and check history has not been loaded.");
+  const record = state.caseRecord,
+    journal = record?.journal;
+  const validCase =
+    record?.tenant_id === TENANT &&
+    record.case_id === CASE_ID &&
+    record.document?.case?.id === CASE_ID &&
+    record.document.case.tenant_id === TENANT &&
+    Array.isArray(journal) &&
+    journal.length === record.document.case.version &&
+    journal.every(
+      (entry, index) =>
+        entry?.sequence === index + 1 &&
+        entry.case_version === index + 1 &&
+        entry.case_id === CASE_ID &&
+        entry.tenant_id === TENANT &&
+        HASH.test(entry.event_hash) &&
+        entry.previous_event_hash === (journal[index - 1]?.event_hash ?? null),
+    );
+  if (!validCase) issues.push("Case history is unavailable or inconsistent.");
+  if (
+    packet &&
+    (!validCase ||
+      record.document.case.version !== packet.case_version ||
+      state.catalogRevision !== packet.authority_state_revision)
+  )
+    issues.push("Case or catalog reads do not match the review snapshot.");
+  if (packet && !creditMatchesPacket(credit, packet))
+    issues.push(
+      "The operation view and selected request do not share the same binding and revisions.",
+    );
+  if (
+    packet &&
+    (state.requestId !== packet.authority_request_id ||
+      (packet.current.authorized &&
+        credit?.current?.reason_codes.includes("current_authority_required")) ||
+      (credit?.current?.eligible && !packet.current.authorized))
+  )
+    issues.push(
+      "The loaded review and operation evaluations disagree; refresh before treating approvals as current.",
+    );
+  if (
+    state.pending ||
+    state.needsRefresh ||
+    state.creditNeedsRefresh ||
+    state.busy
+  )
+    issues.push(
+      "A submission or refresh is incomplete; current applicability is unconfirmed.",
+    );
+  const caseEntries = validCase ? journal : [];
+  const anchor = (version, hash) =>
+    caseEntries[version - 1]?.event_hash === hash && HASH.test(hash);
+  const reviews = (packet?.history ?? []).map((entry, index) => {
+    const evaluation = packet.historical_evaluations[index];
+    let identity = recordedIdentity(
+      entry.actor_identity,
+      evaluation.inputs.resolution?.identities,
+    );
+    if (
+      entry.decision &&
+      !sameRecord(entry.decision.approver_identity, identity)
+    )
+      identity = null;
+    if (!identity)
+      issues.push(
+        "Recorded reviewer attribution cannot be reconciled with its canonical identity snapshot.",
+      );
+    if (
+      evaluation.request_binding_hash !== entry.request_binding_hash ||
+      evaluation.recorded_at !== entry.recorded_at ||
+      !anchor(
+        evaluation.inputs.resolution?.case?.case?.version,
+        evaluation.case_journal_head_hash,
+      )
+    )
+      issues.push(
+        "A review entry cannot be reconciled with its retained Case anchor.",
+      );
+    return { entry, evaluation, identity, applies: null };
+  });
+  const byId = new Map(),
+    conflicts = new Set();
+  const retain = (entry) => {
+    if (!entry) return;
+    const prior = byId.get(entry.id);
+    if (conflicts.has(entry.id)) return;
+    if (prior && !sameRecord(prior, entry)) {
+      issues.push(
+        "Conflicting copies of recorded action evidence are unavailable for a combined result.",
+      );
+      byId.delete(entry.id);
+      conflicts.add(entry.id);
+    } else byId.set(entry.id, entry);
+  };
+  for (const entry of [
+    ...(credit?.attempts ?? []),
+    ...(credit?.verifications ?? []),
+  ])
+    retain(entry);
+  for (const retained of [state.confirmedAttempt, state.creditReceipt]) {
+    if (!retained) continue;
+    try {
+      if (retained.comparison) validateVerification(retained);
+      else validateAttempt(retained);
+      retain(retained);
+    } catch {
+      issues.push("A retained submission receipt is inconsistent.");
+    }
+  }
+  const operations = [...byId.values()].sort((a, b) => a.sequence - b.sequence);
+  const attempts = operations.filter((entry) => !entry.comparison);
+  const checks = operations.filter((entry) => entry.comparison);
+  const identities = new Map();
+  for (const [index, entry] of operations.entries()) {
+    if (
+      entry.sequence !== index + 1 ||
+      entry.previous_event_hash !== (operations[index - 1]?.event_hash ?? null)
+    )
+      issues.push(
+        "Some action/check entries are missing or conflict in recorded sequence.",
+      );
+    if (!anchor(entry.case_version, entry.case_head_hash))
+      issues.push(
+        "An operation cannot be reconciled with the loaded Case history.",
+      );
+    if (
+      entry.authority_request_id === packet?.authority_request_id &&
+      packet.history[entry.review_revision]?.event_hash !==
+        entry.review_head_hash
+    )
+      issues.push(
+        "An operation's review anchor is not present in the selected request history.",
+      );
+    if (entry.comparison) {
+      const attempt = attempts.find((a) => a.id === entry.command.attempt_id);
+      try {
+        requireValue(attempt);
+        validateVerification(entry, attempt);
+        const identity = entry.authority.verifier_identity;
+        requireValue(
+          identity.identity_kind === "service" &&
+            identity.tenant_id === TENANT &&
+            sameRecord(identity, entry.authority.recording_grant.identity),
+        );
+        identities.set(entry.id, identity);
+      } catch {
+        issues.push(
+          "A check's attempt binding or canonical verifier attribution is incomplete.",
+        );
+      }
+    } else {
+      const identity = recordedIdentity(
+        Array.isArray(entry.envelope.service_grants)
+          ? entry.envelope.service_grants.find(
+              (g) =>
+                g?.identity?.identity_id === entry.envelope.profile?.executor,
+            )?.identity
+          : null,
+        entry.envelope.catalog?.data?.identities,
+      );
+      identities.set(entry.id, identity);
+      if (!identity && entry.outcome !== "denied")
+        issues.push("The recorded executor attribution is incomplete.");
+    }
+  }
+  const reconciled = issues.length === 0;
+  const decisions = reviews.filter((item) => item.entry.decision);
+  for (const item of decisions)
+    if (reconciled)
+      item.applies =
+        item.entry.decision.decision === "approve" &&
+        packet.current.effective_approval_ids.includes(
+          item.entry.decision.authority_decision_id,
+        );
+  const latestAttempt = attempts.at(-1) ?? null;
+  const latestCheck =
+    checks
+      .filter(
+        (entry) =>
+          entry.action_entry_hash === latestAttempt?.event_hash &&
+          entry.command.attempt_id === latestAttempt.id &&
+          identities.has(entry.id),
+      )
+      .at(-1) ?? null;
+  const relatedRequests = [
+    ...new Set(
+      [
+        packet?.request.predecessor_authority_request_id,
+        ...decisions.map(
+          (item) => item.entry.decision.replacement_authority_request_id,
+        ),
+        ...attempts.map((entry) => entry.authority_request_id),
+        credit?.current?.bindings.authority_request_id,
+      ].filter((id) => id && id !== packet?.authority_request_id),
+    ),
+  ];
+  return {
+    reconciled,
+    issues: [...new Set(issues)],
+    reviews,
+    decisions,
+    caseEntries,
+    operations,
+    attempts,
+    checks,
+    identities,
+    latestAttempt,
+    latestCheck,
+    relatedRequests,
+  };
+}
+
 const explanations = {
   stale_case:
     "The Case version changed. Prior approvals no longer apply. Refresh, then create a fresh request.",
@@ -496,6 +751,7 @@ export function createReviewClient({
   let state = {
     packet: null,
     caseRecord: null,
+    catalogRevision: null,
     requestId: null,
     pending: null,
     receipt: null,
@@ -595,7 +851,10 @@ export function createReviewClient({
           integer(record.document?.case?.version, 1) &&
           Array.isArray(record.document.events),
       );
-    emit({ caseRecord: record });
+    emit({
+      caseRecord: record,
+      catalogRevision: catalog.authority_state_revision,
+    });
     return { record, catalog };
   }
   async function load(id) {
