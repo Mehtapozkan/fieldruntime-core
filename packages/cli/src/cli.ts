@@ -186,7 +186,10 @@ async function assertRepositoryRoot(
   }
 }
 
-async function startAppliance(dependencies: CliDependencies): Promise<number> {
+async function startAppliance(
+  dependencies: CliDependencies,
+  enroll = false,
+): Promise<number> {
   const cwd = dependencies.cwd();
   await readManifest(dependencies, projectPaths(cwd).manifest);
   await assertRepositoryRoot(dependencies, cwd);
@@ -194,7 +197,16 @@ async function startAppliance(dependencies: CliDependencies): Promise<number> {
   try {
     result = await dependencies.runProcess(
       "docker",
-      ["compose", "up", "--build", "--detach", "--wait"],
+      enroll
+        ? [
+            "compose",
+            "exec",
+            "-T",
+            "core",
+            "node",
+            "dist/apps/api/src/enroll-credit.js",
+          ]
+        : ["compose", "up", "--build", "--detach", "--wait"],
       {
         cwd,
         env: {
@@ -216,7 +228,7 @@ async function startAppliance(dependencies: CliDependencies): Promise<number> {
   if (!Number.isSafeInteger(result.exitCode) || result.exitCode < 0) {
     throw new CliError("Docker Compose returned an invalid exit code.", 1);
   }
-  if (result.exitCode === 0) {
+  if (result.exitCode === 0 && !enroll) {
     dependencies.stdout.write(
       "Field Runtime workbench: http://127.0.0.1:3210/\n",
     );
@@ -224,7 +236,7 @@ async function startAppliance(dependencies: CliDependencies): Promise<number> {
   return result.exitCode;
 }
 
-function assertCommand(args: readonly string[]): "init" | "up" {
+function assertCommand(args: readonly string[]): "init" | "up" | "enroll" {
   if (
     args.length === 3 &&
     args[0] === "init" &&
@@ -234,7 +246,16 @@ function assertCommand(args: readonly string[]): "init" | "up" {
     return "init";
   }
   if (args.length === 1 && args[0] === "up") return "up";
-  throw new CliError("Usage: fr init ecc --demo\n       fr up");
+  if (
+    args.length === 3 &&
+    args[0] === "d7" &&
+    args[1] === "enroll" &&
+    args[2] === "--demo"
+  )
+    return "enroll";
+  throw new CliError(
+    "Usage: fr init ecc --demo\n       fr up\n       fr d7 enroll --demo",
+  );
 }
 
 export async function runCli(
@@ -247,7 +268,7 @@ export async function runCli(
       await initialize(dependencies);
       return 0;
     }
-    return await startAppliance(dependencies);
+    return await startAppliance(dependencies, command === "enroll");
   } catch (error) {
     if (error instanceof CliError) {
       dependencies.stderr.write(`${error.message}\n`);

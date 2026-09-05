@@ -764,6 +764,7 @@ export function assertAuthorityStateIntegrity(
   state: AuthorityState,
   cases: CaseEngineState,
   heads: readonly AuthorityCatalogHead[],
+  supportClocks: readonly ObjectValue[] = [],
 ): void {
   const hashes = new Set<string>();
   for (const item of state.snapshots) {
@@ -831,7 +832,7 @@ export function assertAuthorityStateIntegrity(
       previous?.hash === head.snapshot_hash,
       "catalog head differs from snapshots",
     );
-    const expectedClock = state.entries
+    const expectedClock = [...state.entries, ...supportClocks]
       .filter((entry) => entry.tenant_id === head.tenant_id)
       .map((entry) => string(entry.recorded_at))
       .reduce(
@@ -890,7 +891,15 @@ export function assertAuthorityStateIntegrity(
       tenant_id: tenant,
       revision: integer(catalog.content.revision),
       snapshot_hash: catalog.hash,
-      last_recorded_at: prefix.entries
+      last_recorded_at: [
+        ...prefix.entries,
+        ...supportClocks.filter(
+          (item) =>
+            integer(item.authority_position) <= index &&
+            integer(item.authority_state_revision) <=
+              integer(catalog.content.revision),
+        ),
+      ]
         .filter((item) => item.tenant_id === tenant)
         .map((item) => string(item.recorded_at))
         .reduce(

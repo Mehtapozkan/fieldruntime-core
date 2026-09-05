@@ -7,9 +7,10 @@ Delivery position: GitHub PRs #1–#6, #12, #14 and #19 are merged. D6-C merged
 in PR #20 at `940462ec`; D6-D merged in PR #21 at
 `ba340cc5135343e12820992cf4a7542cf7cc9c29` with passing required checks. The human
 operator accepted [D-033](docs/architecture/d7-simulated-credit-verification.md)
-at `527cfb6f`. D7-A PR #22 is updated from that main, preserving the full D6-D
-implementation and coverage. No D7 runtime behavior is implemented. D7-B begins
-only after #22 passes its required checks and merges normally.
+at `527cfb6f`. D7-A PR #22 merged normally at
+`f6dcddc03da8ee7c86cce76979aca751b2b0266d` with full D6-D coverage. D7-B is implemented
+on this review branch; its PR remains open. Independent verification (D7-C) and
+Workbench action controls (D7-D) remain next. No release or deployment is included.
 
 ## Delivery labels and GitHub pull requests
 
@@ -39,7 +40,7 @@ historical behavior alone never establishes business authority.
 | GitHub #12 — Public Launch Finalization              | Merged      | Final public copy, release-state reconciliation, repository metadata and protection checks, anonymous-clone verification, and prerelease publication gate                                                                                                                   | Final `main` passes hosted CI and `pnpm release:check`; every checklist stop condition is clear before visibility changes                                  |
 | GitHub #14 — Automated Evaluation Prerelease         | Merged      | Automate the evaluation prerelease while retaining the repository's explicit preview boundary                                                                                                                                                                               | The published prerelease remains tied to validated source and release checks                                                                               |
 | D6 — Governed Case Session                           | In progress | Authoritative identity, delegation, and business authority; exact Case owner, delegated worker, authority owner, and verifier; payload-bound approvals; deterministic authority resolution                                                                                  | The Decision Packet is runtime-backed, approvals bind the exact payload, and authority resolution fails closed                                             |
-| D7 — Controlled Action + Independent Verification    | Planned     | Staged action through a deny-by-default Action Gateway with idempotency and preconditions; independent verification through a separate identity and read path; simulated effects only                                                                                       | Bypass, self-verification, unbound-payload, precondition, and duplicate-effect negative tests pass                                                         |
+| D7 — Controlled Action + Independent Verification    | In progress | Staged action through a deny-by-default Action Gateway with idempotency and preconditions; independent verification through a separate identity and read path; simulated effects only                                                                                       | Bypass, self-verification, unbound-payload, precondition, and duplicate-effect negative tests pass                                                         |
 | D8 — Receipts + Economics + Failure Theater          | Planned     | Reconstructable authority, action, verifier, and outcome lineage plus human intervention, wait/handoff time, and cost per accepted outcome; unsafe paths fail visibly                                                                                                       | A Case is reconstructable, economics derive from receipts, and unsafe authority/action/verification demonstrations fail closed                             |
 | D9 — Intake + Case Formation                         | Planned     | Canonical intake for email, file, form, event, queue row, and human submission; provenance-preserving evidence links; related-signal linking; uncertainty-preserving Case candidates and existing-Case import                                                               | Repeatable candidate formation and safe mapping of upstream Cases both preserve provenance, ambiguity, conflicts, unknowns, and system-of-record ownership |
 | D10 — Case Discovery + Operational Legibility        | Planned     | Reconstruct representative historical work; distinguish authoritative fact, approved policy, cited memory, extraction, and inference; expose missing evidence/conflicts and classify operability                                                                            | Evaluation reports agent-workable, human-judgment-required, authority-blocked, evidence-blocked, and unclear-outcome work without inferring authority      |
@@ -80,8 +81,8 @@ PR #21 passed repository validation, real PostgreSQL/API, Compose and
 appliance/browser acceptance checks before normal merge. It introduced no
 runtime contracts or migrations. Production authentication, identity history,
 external catalog sources and general workflows remain outside this synthetic step.
-Next is D7 controlled simulated action and independent verification; it and complete
-closure proof remain unimplemented and require a separate scoped implementation.
+D7-B below supplies the bounded action API; independent verification and complete
+closure proof remain unimplemented.
 
 The human operator accepted the desktop/390px presentation at `1561329858` on
 2026-09-05; no further UI redesign is a D6-D merge prerequisite. Keep two
@@ -91,30 +92,29 @@ before review controls. Preserve server authority, visible uncertainty and exact
 consent/retry behavior. These follow-ups do not gate D7-B/C. D-033 was separately
 accepted by the human operator.
 
-## D7-A accepted implementation boundary
+## D7 delivery under Accepted D-033
 
-[D-033](docs/architecture/d7-simulated-credit-verification.md) is Accepted; its
-implementation is pending.
-The smallest operation is Orchid's exact $15,000 simulated credit, with a fresh
-D7-bound approval request, one atomic PostgreSQL effect/receipt commit, and a
-separate verifier read. This docs-only branch includes merged D6-D unchanged.
+[D-033](docs/architecture/d7-simulated-credit-verification.md) remains Accepted.
+PR #22 merged after the restored repository, PostgreSQL/API, Compose and Workbench
+checks passed, preserving the effective solo-maintainer protections without bypass.
 
-Before PR #22 merges, rerun repository/PostgreSQL/API validation and all restored
-Workbench/browser coverage. Preserve the required PR, passing `validate`, strict
-up-to-date branch, force-push and deletion protections under the operator's revised
-solo-maintainer rules; no bypass. After #22 merges, deliver D7-B only in an open
-implementation PR. D7-C and D7-D remain later steps:
+1. **D7-B — implemented for review:** strict operation/envelope contracts, fixed
+   synthetic enrollment, migration 0003, read-only action views, current bound
+   action API, atomic source/action evidence, duplicate prevention and replay.
+   [API examples and migration notes](docs/guides/simulated-credit-api.md).
+   Require passing real PostgreSQL, appliance restart/retry and preserved Workbench
+   CI on the final commit. Leave this implementation PR open.
+2. **D7-C — next:** separate verifier identity/read path, retained observations,
+   mismatch/unavailable/uncertain behavior and comparison/replay proof. Adapter
+   success cannot replace this check. An unverified no-source invocation cannot
+   justify a fresh invocation in D7-B.
+3. **D7-D — later:** existing Workbench action/check controls with explicit
+   conflict/retry and historical/current labels, verified through the appliance.
 
-1. D7-B: strict operation/envelope contracts, scoped synthetic catalog enrollment,
-   minimal migration, action API and atomic source/receipt persistence.
-2. D7-C: independent verifier identity/read path, immutable observations and
-   comparison/replay proof, including unavailable/mismatched read-back.
-3. D7-D: existing Workbench action/check controls with explicit conflict/retry and
-   historical/current labels, verified through the real appliance.
-
-Each PR carries the acceptance tests in D-033. External writes, production
-identity, connectors, a generic worker framework and D8 economics remain out of
-scope. A verified credit does not prove customer impact or permit Case closure.
+Each step carries D-033's applicable acceptance tests. Action supporting history
+advances neither C, R nor S. External writes, production identity, connectors,
+generic worker infrastructure and D8 economics remain out of scope. A simulated
+credit does not prove customer impact or permit Case closure.
 
 ## Operational Legibility Gate
 

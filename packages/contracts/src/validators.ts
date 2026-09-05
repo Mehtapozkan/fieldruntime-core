@@ -1,3 +1,4 @@
+import simulatedCreditSchema from "../schemas/simulated-credit.v1.schema.json" with { type: "json" };
 import Ajv2020Module, {
   type ErrorObject,
   type ValidateFunction,
@@ -69,6 +70,25 @@ const reviewValidators = {
     $ref: `${reviewSupportSchema.$id}#/$defs/evaluation_snapshot`,
   }),
 };
+
+ajv.addSchema(simulatedCreditSchema);
+const creditValidators = Object.fromEntries(
+  (["command", "envelope", "journal", "source", "read"] as const).map(
+    (kind) => [
+      kind,
+      ajv.compile({ $ref: `${simulatedCreditSchema.$id}#/$defs/${kind}` }),
+    ],
+  ),
+) as Record<
+  "command" | "envelope" | "journal" | "source" | "read",
+  ValidateFunction
+>;
+export function assertValidSimulatedCreditContract(
+  kind: keyof typeof creditValidators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(creditValidators[kind], value, `simulated-credit.v1/${kind}`);
+}
 
 export function assertValidAuthorityReviewContract(
   kind: keyof typeof reviewValidators,

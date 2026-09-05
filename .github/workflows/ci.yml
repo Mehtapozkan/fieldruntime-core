@@ -36,6 +36,7 @@ jobs:
           pnpm fr init ecc --demo
           pnpm fr up
           D6_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/authority-postgres.test.mjs
+          D7_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/simulated-credit-postgres.test.mjs
           node scripts/smoke-local-appliance.mjs applied
           node scripts/smoke-authority-api.mjs applied
           docker compose restart postgres
@@ -47,6 +48,14 @@ jobs:
           docker compose up --detach --wait
           node scripts/smoke-local-appliance.mjs durable
           node scripts/smoke-authority-api.mjs durable
+          pnpm fr d7 enroll --demo
+          pnpm fr d7 enroll --demo
+          node scripts/smoke-simulated-credit-api.mjs applied
+          docker compose restart postgres
+          docker compose up --detach --wait postgres
+          docker compose restart core
+          docker compose up --detach --wait
+          node scripts/smoke-simulated-credit-api.mjs durable
           if docker compose exec -T postgres psql -v ON_ERROR_STOP=1 --username=fieldruntime --dbname=fieldruntime --command "UPDATE case_journal SET recorded_at = recorded_at;"; then
             echo "append-only journal update unexpectedly succeeded"
             exit 1

@@ -21,6 +21,7 @@ export type { AuthorityContractViolation } from "./authority-contracts.js";
 export { validateCrossRecordInvariants } from "./invariants.js";
 export type { InvariantViolation } from "./invariants.js";
 export {
+  assertValidSimulatedCreditContract,
   assertValidAuthorityReviewContract,
   assertValidAuthorityDecision,
   assertValidAuthorityPolicy,

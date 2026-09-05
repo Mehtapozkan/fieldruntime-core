@@ -1,3 +1,5 @@
+import { PostgresSimulatedCreditStore } from "../../../packages/runtime/src/postgres-simulated-credit-store.js";
+import { TransactionalCreditWorker } from "../../worker/src/simulated-credit-service.js";
 import { readFile } from "node:fs/promises";
 import { Pool, type PoolClient, type QueryResultRow } from "pg";
 import {
@@ -122,7 +124,7 @@ class PgClientAdapter implements SqlClient {
   }
 }
 
-class PgPoolAdapter implements SqlPool {
+export class PgPoolAdapter implements SqlPool {
   readonly #pool: Pool;
 
   constructor(pool: Pool) {
@@ -139,6 +141,7 @@ async function start(): Promise<void> {
   const [
     migrationSql,
     authorityMigrationSql,
+    creditMigrationSql,
     fixtureDocument,
     walkthroughDocument,
   ] = await Promise.all([
@@ -152,6 +155,13 @@ async function start(): Promise<void> {
     readFile(
       new URL(
         "../../../packages/runtime/migrations/0002_authority_request_review.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../../../packages/runtime/migrations/0003_simulated_credit.sql",
         import.meta.url,
       ),
       "utf8",
@@ -178,6 +188,9 @@ async function start(): Promise<void> {
       authorityMigrationSql,
     ),
   ];
+  migrations.push(
+    createMigrationSource("0003_simulated_credit", creditMigrationSql),
+  );
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
   const walkthrough = createGuidedWalkthroughRecord(
     walkthroughDocument,
@@ -196,14 +209,21 @@ async function start(): Promise<void> {
     () => new Date(),
   );
   const authorityWorker = new TransactionalAuthorityWorker(authorityStore);
+  const creditStore = new PostgresSimulatedCreditStore(pool);
+  const creditWorker = new TransactionalCreditWorker(creditStore);
   const workbenchAssets = await loadWorkbenchAssets();
   const server = createApiServer(
     {
       isReady: async () => {
         if (!(await applianceIsReady(pool, migrations, fixture))) return false;
+        await creditStore.assertReady();
         await store.assertReady();
         await authorityStore.assertReady(SYNTHETIC_AUTHORITY_TENANT);
         return true;
+      },
+      credit: {
+        execute: (command) => creditWorker.execute(command),
+        read: (tenant, caseId) => creditStore.read(tenant, caseId),
       },
       authority: {
         create: (command) => authorityWorker.create(command),

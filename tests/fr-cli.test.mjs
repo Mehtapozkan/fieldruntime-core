@@ -317,3 +317,43 @@ test("the bin-style symlink resolves the shebang entry point", async () => {
     );
   });
 });
+
+test("d7 enroll --demo is an explicit fixed safe appliance command with no overrides", async () => {
+  await withTemporaryDirectory(async (directory) => {
+    const context = harness(directory);
+    assert.equal(
+      await runCli(["d7", "enroll", "--demo"], context.dependencies),
+      2,
+    );
+    assert.equal(context.processCalls.length, 0);
+    await writeManifest(directory, expectedManifest);
+    await writeRepositorySurface(directory);
+    for (const args of [
+      ["d7", "enroll"],
+      ["d7", "enroll", "--demo", "--policy", "anything"],
+      ["d7", "enroll", "--production"],
+    ])
+      assert.equal(await runCli(args, context.dependencies), 2);
+    assert.equal(context.processCalls.length, 0);
+    assert.equal(
+      await runCli(["d7", "enroll", "--demo"], context.dependencies),
+      0,
+    );
+    assert.deepEqual(context.processCalls[0].args, [
+      "compose",
+      "exec",
+      "-T",
+      "core",
+      "node",
+      "dist/apps/api/src/enroll-credit.js",
+    ]);
+    assert.equal(
+      context.processCalls[0].options.env.FIELD_RUNTIME_EXTERNAL_WRITES,
+      "false",
+    );
+    assert.equal(
+      context.processCalls[0].options.env.FIELD_RUNTIME_MODE,
+      "simulation",
+    );
+  });
+});
