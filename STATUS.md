@@ -9,10 +9,52 @@ repository and `v0.1.0-evaluation-preview.0` GitHub prerelease are public. D6 is
 in progress; D6-A defines contracts and D6-B adds deterministic authority
 resolution. PR #18 repaired the authority correctness defects. PR #19 is merged
 at `76c9b472eabaff4e66ee4d5dd4ade6c144f95f7e`, including Accepted D-032 and its
-explicit human approval. **D6-C is implemented in [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)**: persistent
-synthetic authority-request review and a runtime-backed Decision Packet API.
-The Guided Workbench remains simulated; its UI connection is the next D6 step.
-No merge, release, deployment, external writes or D7 execution is included.
+explicit human approval. **D6-C is merged in [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)**
+at `940462ec0a666975e3530763349bad89986cf457`: persistent synthetic authority-request
+review and a runtime-backed Decision Packet API.
+
+**D6-D is implemented in [PR #21](https://github.com/Mehtapozkan/fieldruntime-core/pull/21)**
+at `1561329858d8340291dda505fdfe12291cece1c9`, including the operator-experience
+correction. Its final CI passes and its authorization-coherence thread is resolved.
+GitHub requires at least one approving review and none is recorded at this check;
+PR #21 remains unmerged. Current main therefore still has the legacy simulated
+Workbench. No protection was bypassed and main remains `940462ec`.
+
+## D7-A design review
+
+[D-033](docs/architecture/d7-simulated-credit-verification.md) is **Proposed**, not
+Accepted or implemented. It describes one Orchid $15,000 simulated credit, with
+server-recomputed exact authority/payload/state bindings, an atomic local source
+write and action receipt, business-key duplicate prevention, and a separately
+identified read-only verifier. It proposes two supporting tables in the existing
+PostgreSQL database; it does not change runtime contracts or migrations here.
+
+The design reuses D6 request/decision/catalog contracts and preserves C/R/S,
+terminal review decisions and immutable consent. Explicit D7 catalog enrollment
+and Case preparation require a fresh request and fresh approvals. Verification
+checks the simulated credit effect, not the customer's original impact claim;
+execution, verification and Case closure are still unavailable on main. D7-A is
+reviewable from current main while PR #21 awaits its normal approval gate.
+
+The D6-D desktop/390px handoff is associated with full head `1561329858` above.
+Manual desktop/390px readability, keyboard/focus, evidence and error states were
+inspected against the local appliance. The downloadable task handoff contains nine
+screenshots, an offline gallery, walkthrough and file-hash manifest. No cross-browser
+or assistive-technology certification is claimed. [D6-D final CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33949784838)
+passes 250 repository tests, 63 PostgreSQL/API tests, eight browser scenarios,
+Compose and appliance/restart smokes. Those counts describe PR #21, not this
+D6-C-based docs branch.
+
+D7-A adds documentation only. No new boundary is enabled, no runtime implementation
+is claimed, and no release or deployment is included. Human approval is required
+for D-033 before its three proposed implementation PRs.
+
+D7-A local validation: `pnpm validate` passes all 234 current-main tests plus
+formatting/lint/typecheck/release checks. ECC passes 30/30 cases and 620/620 checks;
+its negative control exits 1 for the intended hard-gate/assertion failures with a
+complete receipt (152/620 checks). Docker is unavailable locally (exit 127), so
+Compose and PostgreSQL/appliance evidence must come from this docs PR's CI.
+No new D7 runtime tests or behavior are claimed by these existing-suite results.
 
 ## D6-C implementation
 
@@ -325,12 +367,13 @@ No merge, release, deployment, external writes or D7 execution is included.
 
 ## Next
 
-After PR #20 and its reviewer-eligibility correction are reviewed and merged,
-connect the Guided Workbench to the D6-C runtime/API in a separate D6 UI step,
-keeping its simulation labels and refresh/resubmission behavior explicit. D6 is
-not yet a completed governed user experience. D7 remains the subsequent controlled
-simulated Action Gateway and independent verification milestone; incomplete proof
-still cannot close a Case. No later capability is enabled by a review approval.
+Obtain the required approving review for PR #21 and merge through repository
+protections; its checked head is `1561329858`. Review Proposed D-033 without
+enabling it. After D6-D merges and D-033 receives explicit human approval, implement
+D7-B (bound operation and atomic simulated source), D7-C (independent verification)
+and D7-D (existing Workbench controls) as separate reviewable PRs. Incomplete proof
+continues to block closure; even a verified simulated credit does not establish
+customer impact, accepted outcome or recovered revenue. D8 remains separate.
 
 The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
 This roadmap alignment does not displace the trusted-kernel priority, add live
