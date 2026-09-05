@@ -141,6 +141,17 @@ resolution, but the governed runtime and Decision Packet are not connected.
   contradictory policy, missing or ambiguous authority, expired or revoked
   delegation, stale Case state, cross-tenant records, hash drift, and invalid
   self-approval.
+- Same-rank authority conflicts remain unresolved even after sufficient approvals
+  arrive; explicit named principals and legitimate two-person policies still work.
+- Contradictory copies of one authority-record or delegation ID fail closed before
+  status, scope, or effective-time filtering; identical copies remain harmless.
+- Delegated approvals require a cited grant and its own supporting authority
+  record to be valid at both evaluation and decision time. An uncited grant or
+  another delegator's authority cannot fill a gap in that path.
+- Evaluator attribution matches the active canonical identity. Delegation approval
+  attribution requires a known tenant/kind-matching principal with an active
+  recorded identity, while preserving historical attribution when that principal
+  is currently inactive or revoked.
 
 ## Verified
 
@@ -149,9 +160,9 @@ resolution, but the governed runtime and Decision Packet are not connected.
 - `pnpm release:check` passes across 140 current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 182 tests pass, including 16 D6-A identity, delegation, responsibility,
+- 194 tests pass, including 16 D6-A identity, delegation, responsibility,
   immutable authority-binding, lifecycle, conflict, and agent-authority tests;
-  30 D6-B threshold, multi-approval, prior-decision, delegation, ambiguity,
+  42 D6-B threshold, multi-approval, prior-decision, delegation, ambiguity,
   policy-selection, tenant, agent, evidence-lineage, immutability, and input-order
   tests;
   the canonical Case fixture; all 30 evaluation schemas;
@@ -171,10 +182,23 @@ resolution, but the governed runtime and Decision Packet are not connected.
   topology contracts, walkthrough schema and cross-bindings, simulation safety,
   reducer gating, six-action journey, local-only browser behavior, accessible
   static structure, security headers, exact asset routing, and traversal denial.
+- Authority correctness repairs were reproduced against main `5285f8c7`: all 30
+  original resolver tests passed and nine new regressions failed on assertions,
+  covering every reported defect. After repair, all 58 focused authority contract
+  and resolver tests pass, including named/direct/delegated/two-person positives,
+  contradictory status/time/scope copies, exact delegation timing and supporting
+  records, canonical identity attribution, historical identities, and reversed
+  input ordering.
+- `pnpm validate` passes using Node 24.19.0 and pinned pnpm 11.24.0. Local HTTP
+  tests require loopback access outside the sandbox; the sandbox-only attempt
+  failed with `listen EPERM`, then the complete run passed with that access.
+- `git diff --check` passes.
 - The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
-  trips hard safety gates.
+  trips hard safety gates. `pnpm eval:ecc -- --negative-control` exits 1 for its
+  intended assertion failures, with a complete evaluation receipt, not a crash or
+  setup failure. The frozen corpus and gold hashes are unchanged.
 - `docker compose config --quiet` and the fresh-volume, restart, persistence, and
   append-only smoke are required by CI. Docker is unavailable in the current local
   build environment, so the live Compose evidence is produced by the CI runner.
@@ -197,6 +221,10 @@ resolution, but the governed runtime and Decision Packet are not connected.
 - Operational Legibility evaluation is not implemented.
 - The Decision Packet is not backed by authoritative runtime D6 authority
   evaluation; D6-B currently resolves only over explicitly supplied state.
+- Identity references have no effective-dated status history. Historical
+  delegation approval attribution verifies stable identity and its recorded
+  status; this repair does not infer retroactive revocation from current status
+  or add live identity verification.
 - The action gateway is not implemented.
 - The independent runtime verifier is not implemented.
 - No external writes are implemented.
@@ -225,7 +253,8 @@ resolution, but the governed runtime and Decision Packet are not connected.
 
 ## Next
 
-D6-C — Runtime-backed Governed Case Session / Decision Packet integration is next:
+D6-B authority correctness repairs are ready for review; D6-C — Runtime-backed
+Governed Case Session / Decision Packet integration remains the next milestone:
 connect deterministic resolution to authoritative runtime Case state and expose
 its exact satisfied and outstanding requirements without changing the simulated
 Workbench or adding D7 execution. D6 remains incomplete.

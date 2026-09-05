@@ -53,6 +53,20 @@ policies, authority records, scoped delegations, and prior decisions. It exposes
 both satisfied and outstanding multi-approver requirements with their evidence
 lineage and never silently selects among equal authority candidates.
 
+Approvals cannot clear an unresolved same-rank authority conflict. Explicit named
+principals and required approval counts still determine the policy's accountable
+approvers. Contradictory copies of one authority-record or delegation ID fail
+closed before status, scope, or effective-time selection; identical copies are
+one input. A delegated approval must cite a grant whose own supporting authority
+record and grant are valid both at evaluation and at the decision instant.
+
+The evaluator must match an active canonical registry identity. Delegation
+approval attribution must identify a known principal with the same tenant and
+identity kind, active in the recorded approval identity. That historical identity
+is not a current-status assertion: the registry has no identity revocation time,
+so a later inactive or revoked approver does not retroactively revoke the grant.
+Current delegator/delegate eligibility and explicit grant revocation still apply.
+
 The resolver does not yet consume authoritative runtime Case state or drive a
 Decision Packet. That D6-C integration must preserve the same deterministic
 boundary before any D7 action path can depend on it.

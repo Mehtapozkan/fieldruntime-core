@@ -208,6 +208,15 @@ function uniqueJsonValues(values: readonly JsonValue[]): JsonValue[] {
     .map(([, value]) => value);
 }
 
+// Call after exact-copy deduplication, before selecting status, scope, or time.
+function hasConflictingIds(
+  records: readonly JsonObject[],
+  idField: string,
+): boolean {
+  const ids = records.map((record) => requireString(record, idField));
+  return new Set(ids).size !== ids.length;
+}
+
 function validates(value: JsonValue, assertion: ContractAssertion): boolean {
   try {
     assertion(value);
@@ -228,12 +237,17 @@ function identityId(identity: JsonObject): string {
   return requireString(identity, "identity_id");
 }
 
-function sameIdentityReference(left: JsonObject, right: JsonObject): boolean {
+function samePrincipal(left: JsonObject, right: JsonObject): boolean {
   return (
     stringField(left, "identity_id") === stringField(right, "identity_id") &&
     stringField(left, "tenant_id") === stringField(right, "tenant_id") &&
-    stringField(left, "identity_kind") ===
-      stringField(right, "identity_kind") &&
+    stringField(left, "identity_kind") === stringField(right, "identity_kind")
+  );
+}
+
+function sameIdentityReference(left: JsonObject, right: JsonObject): boolean {
+  return (
+    samePrincipal(left, right) &&
     stringField(left, "status") === stringField(right, "status")
   );
 }
@@ -418,6 +432,10 @@ function delegatedCandidate(
   const delegate = requireObject(grant, "delegate_identity");
   const known = identities.get(identityId(delegate));
   const approvedBy = objectField(grant, "approved_by_identity");
+  const knownApprover =
+    approvedBy === undefined
+      ? undefined
+      : identities.get(identityId(approvedBy));
   if (
     !sameIdentityReference(direct.identity, delegator) ||
     known === undefined ||
@@ -425,7 +443,10 @@ function delegatedCandidate(
     stringField(known, "status") !== "active" ||
     stringField(known, "identity_kind") === "agent" ||
     approvedBy === undefined ||
-    stringField(approvedBy, "identity_kind") === "agent"
+    knownApprover === undefined ||
+    !samePrincipal(knownApprover, approvedBy) ||
+    stringField(approvedBy, "identity_kind") === "agent" ||
+    stringField(approvedBy, "status") !== "active"
   ) {
     return undefined;
   }
@@ -563,20 +584,40 @@ function resolveCandidates(
     : { kind: "missing" };
 }
 
-function candidateIsValidAt(
+function candidateHasApprovalPath(
   candidate: InternalCandidate,
   asOf: string,
+  recordedDelegations: readonly string[],
 ): boolean {
+  // Records and grants already passed evaluation-time scope and identity checks.
+  // Keep each grant bound to its own delegator's record at decision time too.
+  const records = candidate.authorityRecords.filter((record) =>
+    authorityRecordIsCurrent(record, asOf),
+  );
   if (
-    !candidate.authorityRecords.some((record) =>
-      authorityRecordIsCurrent(record, asOf),
+    records.some((record) =>
+      sameIdentityReference(
+        requireObject(record, "identity"),
+        candidate.identity,
+      ),
     )
   ) {
-    return false;
+    return true;
   }
-  return (
-    candidate.delegations.length === 0 ||
-    candidate.delegations.some((grant) => delegationIsCurrent(grant, asOf))
+  return candidate.delegations.some(
+    (grant) =>
+      recordedDelegations.includes(requireString(grant, "delegation_id")) &&
+      delegationIsCurrent(grant, asOf) &&
+      sameIdentityReference(
+        requireObject(grant, "delegate_identity"),
+        candidate.identity,
+      ) &&
+      records.some((record) =>
+        sameIdentityReference(
+          requireObject(record, "identity"),
+          requireObject(grant, "delegator_identity"),
+        ),
+      ),
   );
 }
 
@@ -622,22 +663,14 @@ function decisionSatisfies(
   const candidate = candidates.find((item) =>
     sameIdentityReference(item.identity, approver),
   );
-  if (candidate === undefined || !candidateIsValidAt(candidate, decidedAt)) {
-    return false;
-  }
-  if (candidate.delegations.length > 0) {
-    const recordedDelegations = new Set(
+  return (
+    candidate !== undefined &&
+    candidateHasApprovalPath(
+      candidate,
+      decidedAt,
       stringArrayField(decision, "relevant_delegation_ids"),
-    );
-    if (
-      !candidate.delegations.some((grant) =>
-        recordedDelegations.has(requireString(grant, "delegation_id")),
-      )
-    ) {
-      return false;
-    }
-  }
-  return true;
+    )
+  );
 }
 
 function decisionEvidence(decision: JsonObject): string[] {
@@ -951,11 +984,13 @@ export function resolveAuthority(
       reason_codes: ["identity.conflicting_records"],
     });
   }
+  const knownEvaluator = identitiesById.get(identityId(evaluatedBy));
   if (
     identities.some(
       (identity) => stringField(identity, "tenant_id") !== tenantId,
     ) ||
-    !identitiesById.has(identityId(evaluatedBy)) ||
+    knownEvaluator === undefined ||
+    !sameIdentityReference(knownEvaluator, evaluatedBy) ||
     stringField(evaluatedBy, "status") !== "active"
   ) {
     return finalize(base, {
@@ -1062,6 +1097,12 @@ export function resolveAuthority(
   const authorityRecords = uniqueObjects(
     authorityRecordValues.filter(isObject),
   );
+  if (hasConflictingIds(authorityRecords, "authority_record_id")) {
+    return finalize(base, {
+      outcome: "no_authority",
+      reason_codes: ["authority_record.conflicting_records"],
+    });
+  }
   if (
     authorityRecords.some(
       (record) => stringField(record, "tenant_id") !== tenantId,
@@ -1090,6 +1131,12 @@ export function resolveAuthority(
     });
   }
   const delegations = uniqueObjects(delegationValues.filter(isObject));
+  if (hasConflictingIds(delegations, "delegation_id")) {
+    return finalize(base, {
+      outcome: "no_authority",
+      reason_codes: ["delegation.conflicting_records"],
+    });
+  }
   if (
     delegations.some((grant) => stringField(grant, "tenant_id") !== tenantId)
   ) {
@@ -1189,6 +1236,19 @@ export function resolveAuthority(
       requirement,
       "required_approval_count",
     );
+    if (candidateResolution.directCandidates.length > requiredCount) {
+      return finalize(base, {
+        outcome: "conflicting_authority",
+        authority_candidates:
+          candidateResolution.directCandidates.map(candidateOutput),
+        conflicting_source_refs: uniqueSorted(
+          candidateResolution.directCandidates.flatMap(
+            (candidate) => candidate.evidenceRefs,
+          ),
+        ),
+        reason_codes: ["authority.same_rank_conflict"],
+      });
+    }
     const partial = resolveRequirement(
       requirement,
       candidateResolution.candidates,
@@ -1200,19 +1260,6 @@ export function resolveAuthority(
     );
     const satisfiedCount = partial.satisfiedDecisionIds.length;
     if (satisfiedCount < requiredCount) {
-      if (candidateResolution.directCandidates.length > requiredCount) {
-        return finalize(base, {
-          outcome: "conflicting_authority",
-          authority_candidates:
-            candidateResolution.directCandidates.map(candidateOutput),
-          conflicting_source_refs: uniqueSorted(
-            candidateResolution.directCandidates.flatMap(
-              (candidate) => candidate.evidenceRefs,
-            ),
-          ),
-          reason_codes: ["authority.same_rank_conflict"],
-        });
-      }
       if (candidateResolution.candidates.length > requiredCount) {
         return finalize(base, {
           outcome: "ambiguous_authority",
