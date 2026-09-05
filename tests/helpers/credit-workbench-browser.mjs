@@ -90,7 +90,8 @@ async function receiptView(page, { status = "reconciled", check, name } = {}) {
     await expect(
       page.locator('[data-receipt-stage="verification"] > summary'),
     ).toContainText(check);
-  if (name) await screenshot(page, name, process.env.D8_SCREENSHOT_DIR);
+  if (name && process.env.D8_SCREENSHOT_DIR)
+    await screenshot(page, name, process.env.D8_SCREENSHOT_DIR);
 }
 async function controls(page) {
   await page.locator('[data-stage="packet"]').click();
