@@ -9,7 +9,6 @@ import {
 import {
   canExecuteCredit,
   creditMatchesPacket,
-  latestInvocation,
   selectedInvocation,
   selectedCheck,
   creditReason,
@@ -95,6 +94,28 @@ const sourceName = (value) =>
 // Summarize validated server projections. This never decides reviewer eligibility.
 export function reviewProgress(state) {
   const { packet } = state;
+  const attempt = selectedInvocation(state);
+  if (attempt) {
+    const proof = selectedCheck(state, attempt);
+    const differentRequest =
+      attempt.authority_request_id !== packet.authority_request_id
+        ? " This recorded operation belongs to an earlier request; it does not execute this proposal."
+        : "";
+    return {
+      heading: proof
+        ? checkLabel(proof)
+        : attempt.source
+          ? "Simulated credit recorded; independent check needed"
+          : "Simulated action recorded; independent check needed",
+      next:
+        (proof?.comparison.outcome === "verified_simulated_effect"
+          ? "The retained check matched the simulated credit effect."
+          : proof?.comparison.outcome === "mismatch"
+            ? "Inspect the discrepancy before choosing a fresh source check."
+            : "Check the simulated source to establish whether the credit exists.") +
+        differentRequest,
+    };
+  }
   if (state.pending || state.needsRefresh)
     return {
       heading: "Refresh required — current eligibility unconfirmed",
@@ -102,36 +123,6 @@ export function reviewProgress(state) {
         ? "Recover the saved command with an exact retry before another decision."
         : "Refresh, inspect what changed, then choose whether to submit a new decision.",
     };
-  const attempt = selectedInvocation(state);
-  if (attempt) {
-    const proof = selectedCheck(state, attempt);
-    const differentRequest =
-      attempt.authority_request_id !== packet.authority_request_id
-        ? " The recorded $15,000 operation belongs to an earlier request; it does not execute this proposal."
-        : "";
-    const invalidation = packet.current.reason_codes.includes("stale_case")
-      ? " The Case changed; prior approvals no longer apply."
-      : packet.current.reason_codes.includes("authority_state_changed")
-        ? " Authority changed; fresh review is required before any new execution."
-        : packet.current.reason_codes.includes("request_expired")
-          ? " The request expired; its earlier approvals no longer apply."
-          : "";
-    return {
-      heading: state.creditNeedsRefresh
-        ? "Credit history needs refresh"
-        : proof
-          ? {
-              verified_simulated_effect:
-                "Simulated credit independently checked",
-              mismatch: "Mismatch — inspect the simulated source",
-              inconclusive: "Check inconclusive",
-            }[proof.comparison.outcome]
-          : attempt.source
-            ? "Simulated credit recorded; independent check needed"
-            : "Simulated action recorded; effect unconfirmed",
-      next: `${state.creditNeedsRefresh ? "The last confirmed history is retained. Refresh to check current state." : proof?.comparison.outcome === "verified_simulated_effect" ? "The retained check matched the credit effect." : "Next: check the simulated source and inspect the independent result."} Customer impact remains unconfirmed and the Case remains unresolved.${differentRequest}${invalidation}${packet.current.lifecycle !== "open" ? ` This request is ${packet.current.lifecycle}; historical verification remains available.` : ""}`,
-    };
-  }
   const lifecycle = packet.current.lifecycle;
   if (
     state.credit &&
@@ -172,7 +163,7 @@ export function reviewProgress(state) {
   if (packet.current.authorized)
     return {
       heading: "Approvals complete; credit not recorded",
-      next: "Inspect the simulated credit prerequisites below. Approvals alone do not record a credit or resolve the Case.",
+      next: "Next: record the proposed credit in the simulated source.",
     };
   if (!packet.current.eligible)
     return {
@@ -194,6 +185,87 @@ export function reviewProgress(state) {
       : "Awaiting review",
     next: `Next: ${waiting.join(" and ")} review the proposal and uncertainty.`,
   };
+}
+
+const checkLabel = (proof) =>
+  ({
+    verified_simulated_effect: "Simulated credit independently checked",
+    mismatch: "Last confirmed check: credit mismatch",
+    inconclusive: "Check inconclusive",
+  })[proof.comparison.outcome];
+function checkEvidence(proof) {
+  const evidence = box(
+    "review-check-evidence",
+    el("p", `Check recorded ${time(proof.recorded_at)}.`, "review-check-time"),
+  );
+  if (proof.comparison.outcome !== "verified_simulated_effect") {
+    const rows = proof.observation.raw.rows;
+    const observed = Array.isArray(rows)
+      ? rows
+          .map((row) => {
+            const source = row?.source_row;
+            return source?.payload
+              ? `${source.payload.amount_minor / 100} ${source.payload.currency} · ${source.target?.account_ref === "synthetic://accounts/orchid" ? "Orchid" : "different account"} · ${source.origin_attempt_id === proof.command.attempt_id ? "expected attempt" : "different attempt"}`
+              : "Unreadable source row";
+          })
+          .join("; ") || "No credit found"
+      : "Unknown — no usable source read";
+    evidence.append(
+      el(
+        "p",
+        "Expected: one $15,000 USD credit to Orchid in this Case’s service-remedy slot, attributed to the recorded attempt.",
+      ),
+      el("p", `Observed: ${observed}.`),
+      el(
+        "p",
+        proof.comparison.reason_codes.map(creditReason).join(" "),
+        "review-muted",
+      ),
+    );
+  }
+  return evidence;
+}
+const refreshFailed = (state) =>
+  !!state.creditError || !!state.error?.includes("could not be refreshed");
+function eligibilityView(state) {
+  const unknown =
+    state.pending || state.needsRefresh || state.creditNeedsRefresh;
+  const reasons = state.packet.current.reason_codes;
+  const text = unknown
+    ? "Current eligibility unconfirmed."
+    : reasons.includes("stale_case")
+      ? "Case changed — prior approvals no longer apply."
+      : reasons.includes("authority_state_changed")
+        ? "Authority changed — fresh review is required."
+        : reasons.includes("request_expired")
+          ? "Request expired — fresh review is required."
+          : state.packet.current.lifecycle !== "open"
+            ? `Request ${state.packet.current.lifecycle}; new execution is unavailable.`
+            : state.credit?.source
+              ? "Another credit is blocked; the source slot is occupied."
+              : canExecuteCredit({ ...state, busy: false })
+                ? "The last refresh confirmed execution eligibility."
+                : "New execution is unavailable; inspect the prerequisites below.";
+  const node = box(
+    `review-eligibility${refreshFailed(state) ? " review-notice review-notice--error" : ""}`,
+    el("b", `${refreshFailed(state) ? "Refresh failed. " : ""}${text}`),
+    el(
+      "small",
+      "Confirmed history is not current permission. Refresh before a new execution; historical source checks remain available.",
+    ),
+  );
+  node.setAttribute("data-current-eligibility", "");
+  node.tabIndex = -1;
+  if (refreshFailed(state)) {
+    node.setAttribute("role", "alert");
+    node.append(
+      details(
+        "Read failure details",
+        el("p", state.creditError ?? state.error),
+      ),
+    );
+  }
+  return node;
 }
 
 function bindings(packet) {
@@ -543,6 +615,22 @@ export function mountAuthorityWorkbench() {
         disabled: disabled || (decision === "approve" && !!prior),
       }),
     );
+    if (
+      state.packet.historical_evaluations.some(
+        (entry) => entry.result.authorized,
+      )
+    ) {
+      const disclosure = details("Review or intervene", form);
+      disclosure.setAttribute(
+        "data-review-intervention",
+        state.packet.authority_request_id,
+      );
+      const previous = stage.querySelector("details[data-review-intervention]");
+      disclosure.open =
+        previous?.dataset.reviewIntervention ===
+          state.packet.authority_request_id && previous.open;
+      return disclosure;
+    }
     return form;
   }
   function creditView(state) {
@@ -551,20 +639,17 @@ export function mountAuthorityWorkbench() {
     const retained = state.creditReceipt;
     const latest = selectedCheck(state, attempt);
     const blocked = state.busy || !!state.pending;
-    const section = card(
-      "Simulated credit",
-      el(
-        "p",
-        "Record the approved Orchid credit, then check the resulting source independently. Customer impact remains unconfirmed; the Case remains unresolved.",
-        "review-muted",
-      ),
-    );
+    const section = card("Simulated credit");
     section.id = "credit-controls";
-    if (state.creditError)
+    if (state.creditError && !attempt)
       section.append(
-        el("p", state.creditError, "review-notice review-notice--error", {
-          role: "alert",
-        }),
+        el(
+          "p",
+          "Credit history could not be refreshed. Refresh before recording a credit.",
+          "review-notice review-notice--error",
+          { role: "alert" },
+        ),
+        details("Read failure details", el("p", state.creditError)),
       );
     const step = preparationStep(state.caseRecord);
     if (step)
@@ -621,51 +706,6 @@ export function mountAuthorityWorkbench() {
           ),
         ),
       );
-    if (latest) {
-      const labels = {
-        verified_simulated_effect: "Simulated credit independently checked",
-        mismatch: "Mismatch — simulated source differs",
-        inconclusive: "Check inconclusive",
-      };
-      section.append(
-        el("h4", labels[latest.comparison.outcome], undefined, {
-          "data-credit-result": latest.comparison.outcome,
-        }),
-        el(
-          "p",
-          `Historical check recorded ${time(latest.recorded_at)}. ${latest.comparison.outcome === "verified_simulated_effect" ? "The independent read matched the account, Case, credit slot, $15,000 USD and originating attempt." : latest.comparison.reason_codes.map(creditReason).join(" ")}`,
-        ),
-      );
-      if (latest.comparison.outcome !== "verified_simulated_effect") {
-        const rows = latest.observation.raw.rows;
-        const observed = Array.isArray(rows)
-          ? rows
-              .map((row) => {
-                const s = row?.source_row;
-                return s?.payload
-                  ? `${s.payload.amount_minor / 100} ${s.payload.currency} · ${s.target?.account_ref === "synthetic://accounts/orchid" ? "Orchid" : "different account"} · ${s.origin_attempt_id === latest.command.attempt_id ? "expected attempt" : "different attempt"}`
-                  : "Unreadable source row";
-              })
-              .join("; ") || "No credit found"
-          : "Unknown — no usable source read";
-        section.append(
-          el(
-            "p",
-            "Expected: one $15,000 USD credit to Orchid in this Case’s service-remedy slot, attributed to the recorded attempt.",
-          ),
-          el("p", `Observed: ${observed}.`),
-        );
-      }
-    } else if (attempt || retained?.outcome === "simulated_action_recorded")
-      section.append(
-        el("h4", "Simulated action recorded; independent check needed"),
-        el(
-          "p",
-          "The adapter acknowledgment is not verification. Check the simulated source to establish whether the credit exists.",
-        ),
-      );
-    else if (state.packet.current.authorized)
-      section.append(el("h4", "Approvals complete; credit not recorded"));
     if (retained?.outcome === "denied")
       section.append(
         el(
@@ -682,11 +722,6 @@ export function mountAuthorityWorkbench() {
           blocked,
           !latest || latest.comparison.outcome !== "verified_simulated_effect",
         ),
-        el(
-          "small",
-          "A fresh check uses a new key and the server-selected independent verifier. It does not need current execution permission.",
-          "review-muted",
-        ),
       );
     if (!credit?.source) {
       const fresh = !!attempt;
@@ -698,14 +733,6 @@ export function mountAuthorityWorkbench() {
           !attempt,
         ),
       );
-      if (fresh)
-        section.append(
-          el(
-            "small",
-            "A fresh financial attempt is explicit and requires the latest independent absence evidence plus current approvals. An occupied slot always blocks another credit.",
-            "review-muted",
-          ),
-        );
       if (credit?.current && !creditMatchesPacket(credit, state.packet))
         section.append(
           el(
@@ -725,28 +752,40 @@ export function mountAuthorityWorkbench() {
             box("", ...reasons.map((r) => el("p", creditReason(r)))),
           ),
         );
-    } else
-      section.append(
-        el(
-          "p",
-          "The credit slot is occupied. Another credit is blocked.",
-          "review-muted",
+    }
+    section.append(
+      details(
+        "Technical action and verification evidence",
+        box(
+          "",
+          el(
+            "p",
+            "Fresh checks use a new key and the server-selected independent verifier. They do not require current execution permission. Uncertain submissions must recover the original command and key.",
+          ),
+          el(
+            "p",
+            "A fresh financial attempt requires the latest independent absence evidence plus current authority. An occupied slot blocks another credit. No financial retry is automatic.",
+          ),
+          ...(credit ? [el("pre", JSON.stringify(credit, null, 2))] : []),
+          ...(attempt
+            ? [
+                details(
+                  "Selected committed attempt",
+                  el("pre", JSON.stringify(attempt, null, 2)),
+                ),
+              ]
+            : []),
+          ...(retained
+            ? [
+                details(
+                  "Confirmed submission receipt",
+                  el("pre", JSON.stringify(retained, null, 2)),
+                ),
+              ]
+            : []),
         ),
-      );
-    if (credit)
-      section.append(
-        details(
-          "Technical action and verification evidence",
-          el("pre", JSON.stringify(credit, null, 2)),
-        ),
-      );
-    if (retained)
-      section.append(
-        details(
-          "Confirmed submission receipt · historical evidence",
-          el("pre", JSON.stringify(retained, null, 2)),
-        ),
-      );
+      ),
+    );
     return section;
   }
   function historyView(packet, credit) {
@@ -978,37 +1017,42 @@ export function mountAuthorityWorkbench() {
         button("Retry exact command", "retry", state.busy, true),
       );
     }
-    if (state.error || state.pending || state.busy) content.append(notice);
+    const showNotice = state.error || state.pending || state.busy;
     if (!state.packet) {
-      if (state.creditReceipt)
-        content.append(
-          card(
-            "Confirmed historical receipt",
-            el(
-              "p",
-              state.creditReceipt.comparison
-                ? {
-                    verified_simulated_effect:
-                      "Simulated credit independently checked. Customer impact remains unconfirmed; the Case remains unresolved.",
-                    mismatch:
-                      "Mismatch — the independent check did not match the expected credit.",
-                    inconclusive:
-                      "Check inconclusive — the credit effect remains unknown.",
-                  }[state.creditReceipt.comparison.outcome]
-                : state.creditReceipt.outcome === "simulated_action_recorded"
-                  ? "Simulated action recorded; independent check needed."
-                  : "The simulated credit was denied and retained in history.",
-            ),
-            el(
-              "p",
-              "The command is confirmed. Current state is unavailable until refresh; this historical receipt does not grant permission.",
-            ),
-            details(
-              "Accepted receipt",
-              el("pre", JSON.stringify(state.creditReceipt, null, 2)),
-            ),
+      if (state.creditReceipt) {
+        const receipt = state.creditReceipt;
+        const proof = receipt.comparison ? receipt : null;
+        const confirmed = card(
+          proof ? checkLabel(proof) : "Confirmed historical receipt",
+          ...(proof
+            ? [
+                el("small", "Confirmed historical receipt"),
+                checkEvidence(proof),
+              ]
+            : [
+                el(
+                  "p",
+                  receipt.outcome === "simulated_action_recorded"
+                    ? "Simulated action recorded; independent check needed."
+                    : "The simulated credit was denied and retained in history.",
+                ),
+              ]),
+          details(
+            "Accepted receipt",
+            el("pre", JSON.stringify(receipt, null, 2)),
           ),
         );
+        confirmed.setAttribute("data-confirmed-credit", "");
+        content.append(
+          confirmed,
+          el(
+            "p",
+            "Current eligibility unconfirmed. This historical receipt does not grant permission.",
+            "review-muted",
+          ),
+        );
+      }
+      if (showNotice) content.append(notice);
       content.append(
         intro(
           "01 / Governed review",
@@ -1037,13 +1081,27 @@ export function mountAuthorityWorkbench() {
     } else {
       const packet = state.packet;
       const progress = reviewProgress(state);
+      const attempt = selectedInvocation(state);
+      const proof = selectedCheck(state, attempt);
       content.append(
         box(
           "review-current",
           el("h2", progress.heading, undefined, {
             id: "review-current-status",
             tabindex: "-1",
+            "data-credit-result": proof?.comparison.outcome,
           }),
+          ...(proof
+            ? [checkEvidence(proof)]
+            : attempt
+              ? [
+                  el(
+                    "p",
+                    `Action recorded ${time(attempt.recorded_at)}.`,
+                    "review-check-time",
+                  ),
+                ]
+              : []),
           el("p", progress.next, "review-next-action"),
           requirementsView(state),
           box(
@@ -1053,11 +1111,21 @@ export function mountAuthorityWorkbench() {
               "small",
               state.needsRefresh || state.pending
                 ? "Previously loaded view"
-                : `Checked ${time(packet.evaluated_at)}`,
+                : `Review refreshed ${time(packet.evaluated_at)}`,
             ),
           ),
         ),
       );
+      if (proof)
+        content
+          .querySelector(".review-current")
+          .setAttribute("data-confirmed-credit", "");
+      if (attempt) content.append(eligibilityView(state));
+      if (
+        showNotice &&
+        !(attempt && refreshFailed(state) && !state.pending && !state.busy)
+      )
+        content.append(notice);
       if (!state.needsRefresh && requestBlocked(packet)) {
         content.append(
           box(
@@ -1093,7 +1161,7 @@ export function mountAuthorityWorkbench() {
             box(
               "review-controls",
               ...(packet.current.authorized ||
-              latestInvocation(state.credit) ||
+              selectedInvocation(state) ||
               preparationStep(state.caseRecord)
                 ? [creditView(state), formView(state)]
                 : [formView(state), creditView(state)]),
@@ -1104,7 +1172,7 @@ export function mountAuthorityWorkbench() {
         );
       if (active !== "packet") content.append(creditView(state));
       content.append(bindings(packet));
-      if (state.receipt?.historical)
+      if (state.receipt?.historical && !state.creditReceipt)
         content.append(
           card(
             "Last response · historical receipt",
@@ -1145,10 +1213,13 @@ export function mountAuthorityWorkbench() {
     content.append(
       box(
         "review-execution-lock",
-        el("b", "Local simulation only · Case closure blocked"),
+        el(
+          "b",
+          "Local simulation only · External writes and Case closure blocked",
+        ),
         el(
           "p",
-          "A checked simulated credit does not establish customer impact, recovered revenue, acceptance or a resolved Case. No external action is available.",
+          "The Case remains unresolved. A simulated credit does not establish customer impact, acceptance or recovered revenue.",
         ),
       ),
     );

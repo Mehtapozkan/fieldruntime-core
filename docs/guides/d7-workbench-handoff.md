@@ -22,11 +22,11 @@ proof of a real credit, customer impact or Case resolution.
 | Changed evidence; approvals stale and fresh consent needed       | [View](../assets/d7d/08-changed-evidence-desktop.png)             | [View](../assets/d7d/08-changed-evidence-mobile.png)             |
 | Different observed amount; retained mismatch                     | [View](../assets/d7d/09-wrong-amount-desktop.png)                 | [View](../assets/d7d/09-wrong-amount-mobile.png)                 |
 
-The seven D7-D Chromium scenarios exercise the full journey, reopening with exact
+The eight D7-D Chromium scenarios exercise the full journey, reopening with exact
 pending bytes/keys, historical verification after rejection, source absence and
 explicit financial retry, newer confirmed attempts during failed refresh, changed
-evidence, unavailable reads and a different
-observed amount. Fault injection is confined to the test host. The existing eight
+evidence, unavailable reads, later inconclusive checks and a different observed
+amount. Fault injection is confined to the test host. The existing eight
 D6-D scenarios retain keyboard focus/order, stale submission, concurrent review,
 terminal/replacement, ineligible-seat and failed-refresh coverage. All reads remain
 free of durable changes.
@@ -35,7 +35,11 @@ Visual inspection checks the proposal, uncertainty, reviewer progress and contro
 labels at desktop and 390px. Technical IDs/hashes/source URIs remain expandable.
 Disabled controls are visibly muted; recorded approvals are acknowledged without
 removing permitted interventions. On mobile, reviewer and decision fields share a
-row and predecessor navigation sits in History. Some scrolling remains; this is
+row; completed review collapses behind **Review or intervene**, with no automatic
+seat change. Confirmed mismatch leads with check time and expected/observed values;
+refresh failures and current eligibility appear separately. Technical retry and
+verifier details are expandable. Predecessor navigation sits in History.
+Some scrolling remains; this is
 one existing Case experience, not a multi-case dashboard.
 
 Only Chromium was exercised here. No Safari/Firefox, screen-reader audit,

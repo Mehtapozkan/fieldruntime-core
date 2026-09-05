@@ -2217,3 +2217,45 @@ button {
     display: none;
   }
 }
+
+/* Confirmed evidence stays distinct from refresh status and current permission. */
+.review-check-evidence {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 70ch;
+  margin: 0.65rem 0;
+}
+.review-check-evidence p {
+  margin: 0;
+}
+.review-check-time {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+.review-eligibility {
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--line-strong);
+  background: var(--surface);
+  font-size: 0.88rem;
+}
+.review-eligibility small {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--ink-soft);
+}
+.review-controls > [data-review-intervention] {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+[data-review-intervention] > summary {
+  cursor: pointer;
+  color: var(--forest);
+  font-weight: 600;
+}
+[data-review-intervention] > .review-form {
+  padding: 1rem 0 0;
+  border: 0;
+}

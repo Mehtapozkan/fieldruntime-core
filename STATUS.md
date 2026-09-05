@@ -621,6 +621,18 @@ even when the packet read fails. Additional regressions reject contradictory sou
 attribution and prevent reordered history from hiding a later inconclusive check.
 No current permission is derived from these retained historical receipts.
 
+Operator-clarity pass from `d74deb4`: three browser assertions reproduced the
+expanded completed form and refresh errors displacing confirmed mismatch/inconclusive
+headings. Confirmed results now lead the page, with check time and expected/observed
+values. Refresh failure and current eligibility appear separately. A later
+inconclusive check cannot inherit an earlier match, and a newer attempt cannot use
+an older attempt's proof. Completed review collapses behind keyboard-accessible
+“Review or intervene” without switching seats or removing permitted interventions.
+Duplicate result/uncertainty copy is removed; retry mechanics, verifier selection
+and receipt internals are expandable. Retained material and citations are unchanged.
+This pass changes presentation, browser tests and documentation only; Accepted
+D-033, command/retry logic, runtime contracts, migrations and dependencies are unchanged.
+
 Local storage contains navigation and exact pending commands, never authority or
 accepted history. Separate per-command retry records survive reload/reopening;
 confirmed writes are followed only by read-only refresh. Financial retries remain
@@ -629,8 +641,8 @@ bypass an occupied slot. Clearing browser site data loses retry information; dur
 server history remains. Synthetic seats are not production authentication.
 
 Local validation passes: `pnpm validate` **262 tests**; real PostgreSQL/API
-**63 D6 tests and 112 D7 tests** (the latter includes 12 new client/API regressions
-and seven new Chromium scenarios). The retained eight D6-D browser scenarios pass.
+**63 D6 tests and 113 D7 tests** (the latter includes 12 new client/API regressions
+and eight new Chromium scenarios). The retained eight D6-D browser scenarios pass.
 ECC passes **620/620**; its negative control exits **1 at 152/620** from intended
 assertion failures. The local action/check smoke passes before and after API
 restart, reconstructing the same credit and independent proof. `git diff --check`
@@ -646,7 +658,7 @@ has no horizontal overflow at 390px. Screenshots show synthetic retained test da
 they do not demonstrate external effects or customer-impact proof.
 
 Docker is unavailable locally (`docker compose config --quiet` exits 127); no local
-Compose pass is claimed. Required CI runs PostgreSQL/API, seven D7-D browser scenarios,
+Compose pass is claimed. Required CI runs PostgreSQL/API, eight D7-D browser scenarios,
 all retained D6-D browser groups, Compose configuration and container appliance/
 restart smokes. Its timeout allows the added browser coverage; no check is removed.
 Final commit and CI evidence are recorded in the open implementation PR. No release

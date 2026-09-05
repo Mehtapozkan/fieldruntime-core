@@ -65,6 +65,12 @@ async function refresh(page) {
   await expect(current(page)).not.toContainText("unconfirmed");
 }
 async function vote(page, seat, decision = "approve") {
+  const disclosure = page.locator("details[data-review-intervention]");
+  if (
+    (await disclosure.count()) &&
+    !(await disclosure.evaluate((node) => node.open))
+  )
+    await disclosure.locator("summary").click();
   await page.getByLabel("Reviewer", { exact: true }).selectOption(seat);
   await page.getByLabel("Decision", { exact: true }).selectOption(decision);
   if (decision !== "approve")
@@ -198,7 +204,13 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
       "Customer-reported impact has not been independently confirmed.",
     ),
   ).toBeVisible();
+  await expect(page.getByLabel("Reviewer", { exact: true })).not.toBeVisible();
+  await page.getByText("Review or intervene", { exact: true }).click();
   await expect(page.getByLabel("Reviewer", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Reviewer", { exact: true })).toHaveValue(
+    "executive",
+  );
+  await page.getByText("Review or intervene", { exact: true }).click();
   await page.setViewportSize({ width: 1440, height: 1000 });
   const approved = await packet(request, primary);
   expect(approved.case_version).toBe(initial.case_version);
@@ -314,6 +326,7 @@ for (const decision of ["reject", "modify", "escalate"])
     await expect(current(page)).toHaveText(
       "Approvals complete; credit not recorded",
     );
+    await page.getByText("Review or intervene", { exact: true }).click();
     await page.getByLabel("Decision", { exact: true }).selectOption(decision);
     await submit(page, decision).click();
     expect((await packet(request, id)).review_revision).toBe(

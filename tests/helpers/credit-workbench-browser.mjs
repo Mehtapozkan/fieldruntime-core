@@ -20,6 +20,12 @@ async function click(page, name) {
   await idle(page);
 }
 async function vote(page, seat, decision = "approve") {
+  const disclosure = page.locator("details[data-review-intervention]");
+  if (
+    (await disclosure.count()) &&
+    !(await disclosure.evaluate((node) => node.open))
+  )
+    await disclosure.locator("summary").click();
   await page.getByLabel("Reviewer", { exact: true }).selectOption(seat);
   await page.getByLabel("Decision", { exact: true }).selectOption(decision);
   if (decision !== "approve")
@@ -115,6 +121,20 @@ export function registerCreditBrowserTests(fixture) {
     await screenshot(page, "02-finance-approved");
     await vote(page, "executive");
     await expect(action(page, "execute-credit")).toBeEnabled();
+    await expect(
+      page.getByLabel("Reviewer", { exact: true }),
+    ).not.toBeVisible();
+    const intervention = page.getByText("Review or intervene", { exact: true });
+    await intervention.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("Reviewer", { exact: true })).toHaveValue(
+      "executive",
+    );
+    await expect(page.getByLabel("Reviewer", { exact: true })).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByLabel("Reviewer", { exact: true }),
+    ).not.toBeVisible();
     await screenshot(page, "03-approvals-complete");
     await click(page, "execute-credit");
     await expect(page.locator("#review-current-status")).toContainText(
@@ -135,7 +155,11 @@ export function registerCreditBrowserTests(fixture) {
       reopened.locator('[data-credit-result="verified_simulated_effect"]'),
     ).toBeVisible();
     await expect(
-      reopened.getByText(/Customer impact remains unconfirmed/).first(),
+      reopened
+        .getByText(
+          /Customer-reported impact has not been independently confirmed/,
+        )
+        .first(),
     ).toBeVisible();
     await vote(reopened, "finance", "reject");
     await expect(action(reopened, "verify-credit")).toBeEnabled();
@@ -151,7 +175,10 @@ export function registerCreditBrowserTests(fixture) {
 
   for (const kind of ["execute-credit", "verify-credit"])
     test(`D7-D browser: uncertain ${kind} recovers exact bytes after reopening without duplicate effect`, async (t) => {
-      const h = await fixture(t, { verification: true });
+      const h = await fixture(t, {
+        verification: true,
+        ...(kind === "verify-credit" ? { adapter: async () => "success" } : {}),
+      });
       await h.enroll();
       const { page, context } = await openBrowser(t, h);
       await prepare(page);
@@ -192,6 +219,20 @@ export function registerCreditBrowserTests(fixture) {
       await expect(
         reopened.getByText("Confirmed historical receipt", { exact: true }),
       ).toBeVisible();
+      if (kind === "verify-credit") {
+        await expect(
+          reopened.getByRole("heading", {
+            name: "Last confirmed check: credit mismatch",
+            exact: true,
+          }),
+        ).toBeVisible();
+        await expect(reopened.locator("[data-confirmed-credit]")).toContainText(
+          "Observed: No credit found",
+        );
+        await expect(reopened.locator("[data-confirmed-credit]")).toContainText(
+          "Sep 6, 2026",
+        );
+      }
       await reopened.unroute(packetReads);
       await click(reopened, "refresh");
       await expect(action(reopened, "retry")).toHaveCount(0);
@@ -228,9 +269,34 @@ export function registerCreditBrowserTests(fixture) {
     await page.route(`**${CREDIT_ROOT}`, (route) => route.abort("failed"));
     await click(page, "verify-credit");
     await expect(page.locator('[data-credit-result="mismatch"]')).toBeVisible();
-    await expect(
-      page.getByText(/confirmed receipt remains recorded/),
-    ).toBeVisible();
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Last confirmed check: credit mismatch",
+    );
+    const confirmed = page.locator("[data-confirmed-credit]");
+    await expect(confirmed).toContainText(
+      "Expected: one $15,000 USD credit to Orchid",
+    );
+    await expect(confirmed).toContainText("Observed: No credit found");
+    await expect(confirmed).toContainText("Sep 6, 2026");
+    await expect(page.locator("[data-current-eligibility]")).toContainText(
+      "Current eligibility unconfirmed",
+    );
+    await expect(page.locator("[data-current-eligibility]")).toContainText(
+      "Refresh failed",
+    );
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const resultY = await confirmed.evaluate(
+        (node) => node.getBoundingClientRect().top,
+      );
+      const errorY = await page
+        .locator("[data-current-eligibility]")
+        .evaluate((node) => node.getBoundingClientRect().top);
+      assert.ok(
+        resultY < errorY,
+        "confirmed result leads the separate eligibility notice",
+      );
+    }
     await expect(action(page, "retry")).toHaveCount(0);
     await screenshot(page, "07-mismatch-refresh-unavailable");
     await page.unroute(`**${CREDIT_ROOT}`);
@@ -289,11 +355,12 @@ export function registerCreditBrowserTests(fixture) {
     await expect(page.locator('[data-credit-result="mismatch"]')).toHaveCount(
       0,
     );
+    await expect(page.locator("#review-current-status")).toContainText(
+      "recorded; independent check needed",
+    );
     await expect(
-      page.getByText("Simulated action recorded; independent check needed", {
-        exact: true,
-      }),
-    ).toBeVisible();
+      page.locator('[data-credit-result="verified_simulated_effect"]'),
+    ).toHaveCount(0);
     const newer = (await h.request(CREDIT_ROOT)).attempts.at(-1);
     await click(page, "verify-credit");
     await expect(
@@ -309,6 +376,49 @@ export function registerCreditBrowserTests(fixture) {
       newer.id,
     );
     await expect(action(page, "retry")).toHaveCount(0);
+  });
+  test("D7-D browser: a later inconclusive check replaces a successful result despite failed and reordered refresh", async (t) => {
+    const h = await fixture(t, { verification: true });
+    await h.enroll();
+    const { page } = await openBrowser(t, h);
+    await prepare(page);
+    await approve(page);
+    await click(page, "execute-credit");
+    await click(page, "verify-credit");
+    await expect(
+      page.locator('[data-credit-result="verified_simulated_effect"]'),
+    ).toBeVisible();
+    h.setReaderHook((sql) => {
+      if (sql.includes("verification-read-source"))
+        throw Error("unavailable read");
+    });
+    await page.route(`**${CREDIT_ROOT}`, (route) => route.abort("failed"));
+    await click(page, "verify-credit");
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Check inconclusive",
+    );
+    await expect(
+      page.locator('[data-credit-result="verified_simulated_effect"]'),
+    ).toHaveCount(0);
+    await expect(
+      page.locator('[data-credit-result="inconclusive"]'),
+    ).toBeVisible();
+    await expect(action(page, "execute-credit")).toHaveCount(0);
+    await page.unroute(`**${CREDIT_ROOT}`);
+    await page.route(`**${CREDIT_ROOT}`, async (route) => {
+      const response = await route.fetch();
+      const data = await response.json();
+      data.attempts.reverse();
+      data.verifications.reverse();
+      await route.fulfill({ response, json: data });
+    });
+    await click(page, "refresh");
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Check inconclusive",
+    );
+    await expect(
+      page.locator('[data-credit-result="verified_simulated_effect"]'),
+    ).toHaveCount(0);
   });
   test("D7-D browser: wrong amount is a retained mismatch, never successful verification", async (t) => {
     const h = await fixture(t, { verification: true });
@@ -335,6 +445,12 @@ export function registerCreditBrowserTests(fixture) {
     await click(page, "verify-credit");
     await expect(page.locator('[data-credit-result="mismatch"]')).toBeVisible();
     await expect(page.getByText(/Observed: 9.99 USD/)).toBeVisible();
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Last confirmed check: credit mismatch",
+    );
+    await expect(page.locator("[data-current-eligibility]")).toContainText(
+      "Refresh failed",
+    );
     await expect(
       page.locator('[data-credit-result="verified_simulated_effect"]'),
     ).toHaveCount(0);

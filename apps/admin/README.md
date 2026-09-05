@@ -39,6 +39,9 @@ Do not discard existing history to reset this demo.
    approval is acknowledged; reject/modify/escalate remain available when permitted.
    Inspect the refreshed packet, explicitly select **Executive** and approve.
    The browser never switches reviewer automatically. R advances, C does not.
+   Completed review collapses behind **Review or intervene**. Open it to inspect
+   the recorded approval or choose a permitted reject, modify or escalate decision;
+   the selected seat remains unchanged.
 5. **Approvals complete; credit not recorded** is distinct from an effect. Choose
    **Record simulated credit**. The server recomputes authority against the exact
    displayed request and C/R/S; a previous read never grants execution permission.
@@ -74,7 +77,12 @@ this operation. A source slot already containing a credit prevents another credi
   A newer confirmed attempt is shown with its own check; an older absence result
   cannot replace it when refresh fails. No receipt alone becomes current execution
   permission.
-- **Mismatch** explains expected versus observed source values. Authoritative
+- **Last confirmed check: credit mismatch** leads with the check time and expected
+  versus observed values, even when the following refresh fails. Refresh failure
+  and unconfirmed current eligibility appear separately; historical evidence never
+  grants permission. A later inconclusive check supersedes an earlier match.
+  Retry-key mechanics, verifier selection and full receipts remain available under
+  **Technical action and verification evidence**. Authoritative
   absence is distinct from an unavailable read. **Check inconclusive** explains
   unreadable, unavailable or changing evidence; it is never successful verification.
   **Check simulated source again** is a deliberate new check with a new key.
