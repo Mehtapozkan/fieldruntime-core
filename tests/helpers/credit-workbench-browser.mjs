@@ -220,6 +220,41 @@ export function registerCreditBrowserTests(fixture) {
       page.locator('[data-receipt-status="reconciled"]'),
     ).toBeVisible();
     const snapshot = await h.dump();
+    const caseRead = "**/v0/tenants/tenant_orchid/cases/case_d6_workbench";
+    for (const field of ["journal", "document"]) {
+      await page.route(caseRead, async (route) => {
+        const response = await route.fetch(),
+          body = await response.json();
+        if (field === "journal") body.journal[1].payload.to_state = "resolved";
+        else body.document.case.state = "resolved";
+        await route.fulfill({ response, json: body });
+      });
+      await click(page, "refresh");
+      await expect(
+        page.locator('[data-receipt-status="incomplete"]'),
+      ).toBeVisible();
+      await expect(
+        page.locator(".review-notice").filter({
+          hasText: "Case evidence failed content or projection validation",
+        }),
+      ).toBeVisible();
+      await expect(
+        page.locator('[data-receipt-stage="verification"] > summary'),
+      ).toContainText("independently checked");
+      await expect(page.locator("[data-case-receipt]")).toContainText(
+        "current applicability unconfirmed",
+      );
+      await page.unroute(caseRead);
+      await click(page, "refresh");
+      await expect(
+        page.locator('[data-receipt-status="reconciled"]'),
+      ).toBeVisible();
+    }
+    assert.deepEqual(
+      await h.dump(),
+      snapshot,
+      "altered Case reads never write or replace validated evidence",
+    );
     await page.reload();
     await idle(page);
     await expect(

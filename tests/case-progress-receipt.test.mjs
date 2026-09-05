@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as clientModule from "../apps/admin/public/authority-client.js";
-import { browserApiHarness } from "./helpers/authority-browser-api.mjs";
+import {
+  browserApiHarness,
+  memoryStorage,
+} from "./helpers/authority-browser-api.mjs";
 import { readCredit } from "../dist/packages/runtime/src/simulated-credit.js";
+import { sha256Json } from "../dist/packages/runtime/src/canonical-json.js";
 const at = new Date("2026-09-06T16:00:00.000Z");
 
 async function reviewed() {
@@ -86,3 +90,84 @@ test("D8-A receipt uses recorded canonical identity, not an altered approval ide
   assert.equal(result.decisions[0].identity, null);
   assert.equal(result.decisions[0].applies, null);
 });
+
+for (const [name, alter] of [
+  [
+    "journal event type",
+    (r) => (r.journal[0].event_type = "case.transition_rejected"),
+  ],
+  [
+    "journal payload",
+    (r) => (r.journal[0].payload.document.case.state = "ready"),
+  ],
+  ["journal timestamp", (r) => (r.journal[0].recorded_at = "invalid-time")],
+  ["document projection", (r) => (r.document.case.state = "ready")],
+  [
+    "document evidence",
+    (r) => (r.document.events[0].content_hash = `sha256:${"a".repeat(64)}`),
+  ],
+  [
+    "rehash with false projection anchor",
+    (r) => {
+      const entry = r.journal.at(-1);
+      entry.after_hash = `sha256:${"a".repeat(64)}`;
+      delete entry.event_hash;
+      entry.event_hash = sha256Json(entry);
+    },
+  ],
+  [
+    "rehash with conflicting audit actor",
+    (r) => {
+      const entry = r.journal.at(-1);
+      entry.payload.document.audit_entries[0].actor_identity_id =
+        "identity_someone_else";
+      delete entry.event_hash;
+      entry.event_hash = sha256Json(entry);
+    },
+  ],
+])
+  test(`D8-A Case GET ${name} tampering cannot be marked reconciled`, async () => {
+    const { h, state } = await reviewed();
+    let corrupt = false;
+    const c = clientModule.createReviewClient({
+      storage: memoryStorage(),
+      fetcher: async (path, options) => {
+        const response = await h.fetcher(path, options);
+        if (!corrupt || !path.endsWith("/cases/case_d6_workbench"))
+          return response;
+        const body = await response.json();
+        alter(body);
+        return new globalThis.Response(JSON.stringify(body), {
+          status: response.status,
+          headers: response.headers,
+        });
+      },
+    });
+    await c.start(state.requestId);
+    const clean = c.state.caseRecord,
+      before = h.snapshot();
+    corrupt = true;
+    await c.refresh();
+    const result = receipt({
+      ...c.state,
+      credit: state.credit,
+      creditNeedsRefresh: false,
+    });
+    assert.equal(
+      result.reconciled,
+      false,
+      "altered Case evidence was labelled reconciled",
+    );
+    assert.equal(c.state.needsRefresh, true);
+    assert.match(c.state.error, /Case evidence failed/);
+    assert.deepEqual(
+      c.state.caseRecord,
+      clean,
+      "retain the previous validated read",
+    );
+    assert.deepEqual(
+      h.snapshot(),
+      before,
+      "validation and failed reads create nothing",
+    );
+  });

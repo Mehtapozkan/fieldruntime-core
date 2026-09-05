@@ -429,6 +429,203 @@ const recordedBytes = (value) =>
       : item,
   );
 const sameRecord = (a, b) => recordedBytes(a) === recordedBytes(b);
+
+// Verify the existing v0 read's byte and projection relationships. This folds
+// recorded facts only: transition permission and domain replay remain server-side.
+// Web Crypto is available on the supported loopback origin; no fallback crypto.
+async function checkCaseRead(record) {
+  const check = (value) =>
+    requireValue(
+      value,
+      "Case evidence failed content or projection validation. Refresh; current applicability is unconfirmed.",
+    );
+  const object = (v) =>
+    v !== null && typeof v === "object" && !Array.isArray(v);
+  const keys = (v, required, optional = []) =>
+    object(v) &&
+    required.every((k) => Object.hasOwn(v, k)) &&
+    Object.keys(v).every((k) => required.includes(k) || optional.includes(k));
+  const id = (v) =>
+    typeof v === "string" && /^[A-Za-z][A-Za-z0-9_-]{2,127}$/.test(v);
+  const text = (v, max = 512) =>
+    typeof v === "string" && v.length > 0 && v.length <= max;
+  const utc = (v) => instant(v) && new Date(v).toISOString() === v;
+  const hash = async (value) => {
+    const bytes = new globalThis.TextEncoder().encode(recordedBytes(value));
+    const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+    return `sha256:${[...new globalThis.Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
+  };
+  check(
+    keys(record, ["tenant_id", "case_id", "document", "journal"]) &&
+      record.tenant_id === TENANT &&
+      record.case_id === CASE_ID &&
+      Array.isArray(record.journal) &&
+      record.journal.length > 0,
+  );
+  const seen = new Set(),
+    eventIds = new Set(),
+    commands = new Set();
+  let projection,
+    previous = null;
+  for (const [index, entry] of record.journal.entries()) {
+    check(
+      keys(
+        entry,
+        [
+          "schema_version",
+          "id",
+          "tenant_id",
+          "case_id",
+          "sequence",
+          "case_version",
+          "event_type",
+          "recorded_at",
+          "actor_identity_id",
+          "idempotency_key",
+          "command_fingerprint",
+          "correlation_id",
+          "previous_event_hash",
+          "before_hash",
+          "after_hash",
+          "payload",
+          "event_hash",
+        ],
+        ["causation_event_id"],
+      ),
+    );
+    check(
+      entry.schema_version === "case-journal-entry.v0" &&
+        id(entry.id) &&
+        id(entry.actor_identity_id) &&
+        !seen.has(entry.id) &&
+        !commands.has(entry.idempotency_key) &&
+        text(entry.idempotency_key) &&
+        text(entry.correlation_id) &&
+        HASH.test(entry.command_fingerprint) &&
+        entry.tenant_id === TENANT &&
+        entry.case_id === CASE_ID &&
+        entry.sequence === index + 1 &&
+        entry.case_version === index + 1 &&
+        utc(entry.recorded_at) &&
+        (!previous ||
+          Date.parse(entry.recorded_at) >= Date.parse(previous.recorded_at)) &&
+        (entry.causation_event_id === undefined ||
+          eventIds.has(entry.causation_event_id)) &&
+        entry.previous_event_hash === (previous?.event_hash ?? null) &&
+        HASH.test(entry.after_hash) &&
+        HASH.test(entry.event_hash),
+    );
+    const { event_hash: eventHash, ...unsigned } = entry;
+    check((await hash(unsigned)) === eventHash);
+    seen.add(entry.id);
+    eventIds.add(entry.id);
+    commands.add(entry.idempotency_key);
+    const payload = entry.payload;
+    let audit;
+    if (index === 0) {
+      check(
+        entry.event_type === "case.created" &&
+          entry.before_hash === null &&
+          keys(payload, ["document"]) &&
+          keys(payload.document, [
+            "tenant",
+            "workflow_version",
+            "case",
+            "events",
+            "audit_entries",
+          ]),
+      );
+      projection = clone(payload.document);
+      check(
+        projection.case?.id === CASE_ID &&
+          projection.case.tenant_id === TENANT &&
+          projection.tenant?.id === TENANT &&
+          object(projection.workflow_version) &&
+          projection.case.version === 1 &&
+          projection.case.state === "detected" &&
+          projection.case.created_at === entry.recorded_at &&
+          projection.case.updated_at === entry.recorded_at &&
+          Array.isArray(projection.events) &&
+          projection.events.length === 1 &&
+          Array.isArray(projection.audit_entries) &&
+          projection.audit_entries.length === 1,
+      );
+      audit = projection.audit_entries[0];
+    } else {
+      check((await hash(projection.case)) === entry.before_hash);
+      if (entry.event_type === "case.work_event_attached") {
+        check(
+          keys(payload, ["work_event", "audit_entry"]) &&
+            object(payload.work_event) &&
+            payload.work_event.tenant_id === TENANT,
+        );
+        projection.events.push(clone(payload.work_event));
+      } else {
+        const rejected = entry.event_type === "case.transition_rejected";
+        check(
+          (rejected || entry.event_type === "case.state_transitioned") &&
+            keys(payload, [
+              "from_state",
+              "to_state",
+              "reason",
+              "audit_entry",
+              ...(rejected ? ["reason_code"] : []),
+            ]) &&
+            payload.from_state === projection.case.state &&
+            text(payload.to_state, 128) &&
+            text(payload.reason, 2000) &&
+            (!rejected ||
+              ["invalid_transition", "closure_proof_required"].includes(
+                payload.reason_code,
+              )),
+        );
+        if (!rejected) projection.case.state = payload.to_state;
+      }
+      projection.case.version = entry.case_version;
+      projection.case.updated_at = entry.recorded_at;
+      audit = payload.audit_entry;
+      projection.audit_entries.push(clone(audit));
+    }
+    check((await hash(projection.case)) === entry.after_hash);
+    check(
+      keys(audit, [
+        "id",
+        "tenant_id",
+        "case_id",
+        "actor_identity_id",
+        "operation",
+        "target_ref",
+        "before_hash",
+        "after_hash",
+        "occurred_at",
+        "trace_id",
+        "metadata",
+      ]) &&
+        id(audit.id) &&
+        !seen.has(audit.id) &&
+        object(audit.metadata) &&
+        audit.tenant_id === TENANT &&
+        audit.case_id === CASE_ID &&
+        audit.actor_identity_id === entry.actor_identity_id &&
+        audit.operation === entry.event_type &&
+        audit.target_ref === `case://${CASE_ID}` &&
+        audit.before_hash === entry.before_hash &&
+        audit.after_hash === entry.after_hash &&
+        audit.occurred_at === entry.recorded_at &&
+        audit.trace_id === entry.correlation_id &&
+        audit.metadata.journal_entry_id === entry.id &&
+        audit.metadata.idempotency_key === entry.idempotency_key &&
+        audit.metadata.command_fingerprint === entry.command_fingerprint &&
+        audit.metadata.journal_sequence === entry.sequence &&
+        audit.metadata.case_version === entry.case_version,
+    );
+    seen.add(audit.id);
+    previous = entry;
+  }
+  check(sameRecord(projection, record.document));
+  return recordedBytes(record);
+}
+
 function recordedIdentity(reference, identities) {
   const matches = Array.isArray(identities)
     ? identities.filter(
@@ -461,6 +658,7 @@ export function caseReceiptEvidence(state) {
   const record = state.caseRecord,
     journal = record?.journal;
   const validCase =
+    state.checkedCaseBytes === recordedBytes(record) &&
     record?.tenant_id === TENANT &&
     record.case_id === CASE_ID &&
     record.document?.case?.id === CASE_ID &&
@@ -751,6 +949,7 @@ export function createReviewClient({
   let state = {
     packet: null,
     caseRecord: null,
+    checkedCaseBytes: null,
     catalogRevision: null,
     requestId: null,
     pending: null,
@@ -844,15 +1043,12 @@ export function createReviewClient({
         integer(catalog.authority_state_revision, 1),
     );
     const record = caseResponse.status === 404 ? null : caseResponse.data;
-    if (record)
-      requireValue(
-        record.case_id === CASE_ID &&
-          record.tenant_id === TENANT &&
-          integer(record.document?.case?.version, 1) &&
-          Array.isArray(record.document.events),
-      );
+    // Keep only one in-memory validation witness. It is never persisted or sent
+    // as permission; it also prevents later presentation mutation of these bytes.
+    const checkedCaseBytes = record ? await checkCaseRead(record) : null;
     emit({
       caseRecord: record,
+      checkedCaseBytes,
       catalogRevision: catalog.authority_state_revision,
     });
     return { record, catalog };

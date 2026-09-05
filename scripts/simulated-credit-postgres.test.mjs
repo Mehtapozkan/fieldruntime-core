@@ -2636,6 +2636,70 @@ test("D8-A independently loaded Case and review projections remain incomplete un
   assert.deepEqual(await h.dump(), before);
 });
 
+test("D8-A full Case read integrity rejects altered journal and projection bytes while preserving D-014 and restart", async (t) => {
+  const { h, client } = await readyWorkbench(t);
+  const originalVersion = client.state.packet.case_version;
+  assert.equal(
+    (await h.case(transition(originalVersion, "resolved"))).status,
+    "rejected",
+  );
+  await client.refresh();
+  assert.equal(
+    client.state.caseRecord.document.case.version,
+    originalVersion + 1,
+  );
+  assert.equal(client.state.caseRecord.document.case.state, "needs_review");
+  await client.attachEvidence();
+  const clean = client.state.caseRecord;
+  assert.equal(clean.journal.at(-1).event_type, "case.work_event_attached");
+  assert.equal(caseReceiptEvidence(client.state).reconciled, true);
+  const before = await h.dump();
+  for (const alter of [
+    (r) => (r.journal[1].event_type = "case.created"),
+    (r) =>
+      (r.journal.at(-1).payload.work_event.content_hash =
+        `sha256:${"a".repeat(64)}`),
+    (r) => (r.journal.at(-1).recorded_at = "not-time"),
+    (r) =>
+      (r.journal.at(-1).payload.audit_entry.actor_identity_id =
+        "identity_someone_else"),
+    (r) => (r.document.case.state = "resolved"),
+    (r) => r.document.events.reverse(),
+  ]) {
+    const reader = workbench(h, {
+      fetcher: async (path, options) => {
+        const response = await h.fetcher(path, options);
+        if (!path.endsWith("/cases/case_d6_workbench")) return response;
+        const record = await response.json();
+        alter(record);
+        return new globalThis.Response(JSON.stringify(record), {
+          status: response.status,
+          headers: response.headers,
+        });
+      },
+    });
+    await reader.start(client.state.requestId);
+    assert.equal(
+      reader.state.packet,
+      null,
+      "do not publish a mixed packet with invalid Case evidence",
+    );
+    assert.equal(reader.state.needsRefresh, true);
+    assert.match(reader.state.error, /Case evidence failed/);
+    assert.equal(caseReceiptEvidence(reader.state).reconciled, false);
+  }
+  assert.deepEqual(
+    await h.dump(),
+    before,
+    "failed content verification creates no durable changes",
+  );
+  await h.restart();
+  const reopened = workbench(h);
+  await reopened.start(client.state.requestId);
+  assert.deepEqual(reopened.state.caseRecord, clean);
+  assert.equal(caseReceiptEvidence(reopened.state).reconciled, true);
+});
+
 if (process.env.D7_WORKBENCH_BROWSER === "1") {
   const { registerCreditBrowserTests } =
     await import("../tests/helpers/credit-workbench-browser.mjs");

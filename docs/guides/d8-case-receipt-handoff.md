@@ -44,6 +44,12 @@ not authenticate a person. Separate reads can disagree during concurrent changes
 without manufacturing current permission or silently resubmitting anything.
 Equal timestamps do not establish order across separate journals.
 
+Case reads also verify journal contents and their document projection using native
+SHA-256 on the supported loopback browser origin. Altered contents, inconsistent
+audit attribution or unavailable validation leave current applicability unconfirmed;
+the last validated evidence remains inspectable. This is an in-memory read check,
+not another ledger or a browser authorization decision.
+
 ## Screenshots
 
 These are actual Chromium captures from the branch's served Workbench and real
@@ -90,6 +96,10 @@ approvals, newer attempts, later inconclusive checks and confirmed evidence afte
 failed refresh. A real HTTP interleaving proves mixed Case/review reads remain
 incomplete. Browser fault injection for unavailable reads exists only in the test
 host; it is not an operator endpoint.
+
+Case integrity regressions alter journal payloads, timestamps, audit attribution
+and the returned document, including rehashed inconsistent anchors. They also
+preserve valid rejected transitions (D-014), attached evidence and restart reads.
 
 [STATUS](../../STATUS.md) and the implementation PR distinguish actual local tests
 from final-head CI. Docker is unavailable in the local editing environment, so

@@ -688,6 +688,16 @@ A confirmed receipt is deduplicated against its canonical entry; the newest atte
 gets only its own latest check, and a later inconclusive result replaces a positive
 result label. Failed refresh retains recorded evidence without granting permission.
 
+Review found that unchanged hash strings could conceal altered Case GET contents.
+Five regressions reproduced the false reconciled label before the repair. Case
+reads now recompute native SHA-256 journal hashes, check audit/sequence/time bindings
+and reconstruct the returned document from recorded events before reconciliation.
+This checks recorded facts, not transition permission. Altered payloads, timestamps,
+projections and rehashed conflicting anchors/attribution are rejected; a failed read
+retains earlier validated evidence and leaves current applicability unconfirmed.
+Real PostgreSQL/API and browser regressions cover this boundary, read-only behavior,
+D-014 rejected transitions, attached evidence and restart.
+
 No runtime contract, authority rule, persistence, migration, worker or dependency is
 added. Receipt opening, expansion and refresh create no durable records. Browser
 storage remains navigation/exact pending retries only; history reloads from the API.
@@ -695,8 +705,8 @@ No percentage, ROI, saved time or economic value is inferred. The $15,000 is a p
 simulated credit, not recovered revenue. Customer impact, acceptance and complete
 Case closure remain unproven; external effects stay disabled.
 
-Local validation: `pnpm validate` passes **265 tests**; real PostgreSQL/API passes
-**63 D6 tests and 114 D7/D8 tests**, including eight Chromium scenarios extended
+Local validation: `pnpm validate` passes **272 tests**; real PostgreSQL/API passes
+**63 D6 tests and 115 D7/D8 tests**, including eight Chromium scenarios extended
 for the receipt. The separate eight D6-D browser scenarios pass. Focused final
 receipt/restart/retry/read-interleaving checks pass; the newer-denial regression
 also preserves the earlier match as history without inheriting its positive label.
