@@ -1,39 +1,27 @@
 # Five-Minute Field Runtime Evaluation
 
-This walkthrough demonstrates why an enterprise runtime must retain the complete
-case—not merely return an AI answer. The complete case keeps evidence, conflicts,
-people, commitments, decision options, authority, actions, verification, outcomes,
-corrections, and receipts together across a multiplayer workflow.
+This is the **legacy Acme fixture walkthrough**. Its action, verification, outcome
+and receipt screens illustrate the product contract; they do not call the runtime
+action/verification APIs or retain human decisions. They never become authoritative
+because newer APIs exist alongside them.
 
-## Boundary
+For the working persistent Orchid review, start with the
+[current-source quick start](../../README.md#try-current-source) and
+[Workbench walkthrough](../../apps/admin/README.md). The default page lets you
+explicitly initialize the proposed $15,000 credit review, record Finance/Executive
+decisions and reload canonical history. Execution controls remain unavailable.
 
-Synthetic case. Simulated authority. No external writes. No production receipt.
-Run it only on the documented loopback appliance.
+## Start the legacy story
 
-## Start
+On the current appliance choose **Legacy action simulation**, or open
+<http://127.0.0.1:3210/?view=legacy>. Opening either page creates no runtime history.
+Use only the documented loopback appliance: synthetic case, simulated authority,
+no external writes and no production receipt.
 
-Requirements:
-
-- Node.js 24.x and pnpm 11.x (Corepack may provide pnpm).
-- Docker Engine or Docker Desktop with the Docker daemon running and Compose v2
-  available through `docker compose`.
-- Local ports `3210` and `5432` available.
-- Permission to build images and start local containers.
-
-```bash
-git clone https://github.com/Mehtapozkan/fieldruntime-core.git
-cd fieldruntime-core
-corepack enable
-pnpm install --frozen-lockfile
-pnpm fr init ecc --demo
-pnpm fr up
-```
-
-On current main, open <http://127.0.0.1:3210/> for the
-[persistent synthetic credit review](../../apps/admin/README.md): explicit demo
-initialization, Finance approval, refresh, Executive approval and reload. It keeps
-execution unavailable. For the original release's six-action fixture story below,
-choose **Legacy action simulation** or open <http://127.0.0.1:3210/?view=legacy>.
+To reproduce the **published September 1 prerelease** instead, use its
+[tag-pinned installation guide](https://github.com/Mehtapozkan/fieldruntime-core/blob/v0.1.0-evaluation-preview.0/docs/guides/5-minute-evaluation.md).
+That version opens the Acme story by default and predates persistent D6 review and
+D7 action/verification APIs. Merges to main do not update the release.
 
 ## The six-action story
 
@@ -45,7 +33,7 @@ choose **Legacy action simulation** or open <http://127.0.0.1:3210/?view=legacy>
    payload hash, and idempotency identity.
 4. **Run the simulation.** The fixture connector reports success.
 5. **Reveal safe recovery.** Independent read-back finds no customer update, so the
-   guided simulation rejects the effect and leaves the authoritative fixture open.
+   guided simulation rejects the effect and leaves the fixture unchanged.
    A bounded retry verifies only the exact simulated effect.
 6. **Open the receipt.** Reconstruct evidence, recommendation, authority, payload,
    connector response, independent observation, rejection, recovery, and
@@ -63,13 +51,13 @@ choose **Legacy action simulation** or open <http://127.0.0.1:3210/?view=legacy>
 
 ## What this does not prove
 
-The published preview's legacy story does not provide production identity, live
-connectors, recorded human approval, external writes, high availability or compliance
-certification. Current main adds synthetic persistent review through D6; controlled
-action, independent verification and complete outcome receipts remain D7–D8 work.
-These Delivery labels
-are not GitHub pull request numbers. GitHub PR #6 was the completed public
-evaluation-preview readiness change.
+The legacy story cannot prove that a runtime decision, source effect, independent
+check or accepted outcome occurred. Current main separately implements persistent
+synthetic review and the bounded credit API; PR #24 adds independent verification
+for review. [The API guide](simulated-credit-api.md) demonstrates those operations.
+Workbench action/check controls remain pending, and complete Case closure stays
+blocked. No path provides production authentication, real connectors, external
+writes, customer-impact proof, recovered revenue or high-availability guarantees.
 
 ## Stop and clean up
 

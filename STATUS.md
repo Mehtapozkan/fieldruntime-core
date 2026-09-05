@@ -1,6 +1,11 @@
 # Status
 
-Current milestone: v0.1.0 Evaluation Preview release candidate
+Current milestone: D7-C independent simulated-credit verification, implemented in
+open [PR #24](https://github.com/Mehtapozkan/fieldruntime-core/pull/24).
+D6 persistent review/Workbench and D7-B action are merged; D7-D controls are next.
+The published `v0.1.0-evaluation-preview.0` remains the September 1 snapshot at
+`3db1b4bf0304e67e1ef51be785d1f81b906016b3`, before D6/D7. Current source and this
+review branch are not a new release. [Operator functionality table](README.md#what-works-today).
 
 Release position: GitHub PRs #6 (Public Evaluation Preview Readiness), #12
 (Public Launch Finalization), #14 (Automate the Evaluation Prerelease), and #15
@@ -249,7 +254,7 @@ identity-history system, external writes, connectors or generic workflow is adde
   client-controlled version selection were added for this repair.
 - [API examples, reproducible demo and migration notes](docs/guides/d6-authority-review.md).
 
-## Implemented
+## Other merged foundations
 
 - Product constitution and v0 trust boundary.
 - pnpm and TypeScript monorepo foundation.
@@ -272,8 +277,8 @@ identity-history system, external writes, connectors or generic workflow is adde
 - Attributed audit projection for creation, attachment, accepted transitions, and
   rejected transition attempts.
 - Fail-closed resolution until the complete closure-proof engine is implemented.
-- Fail-closed executed-action invariant until the authorization-envelope proof
-  engine is implemented.
+- Legacy Case `executed` records remain denied. The separate D7-B simulated
+  operation recomputes a bound authorization envelope without relaxing that guard.
 - Contract, workflow, fixture, and transition tests.
 - Local PostgreSQL Compose configuration and credential-free CI foundation.
 - Deterministic ECC reference adapter that executes all 30 synthetic cases without
@@ -393,7 +398,7 @@ identity-history system, external writes, connectors or generic workflow is adde
   recorded identity, while preserving historical attribution when that principal
   is currently inactive or revoked.
 
-## Verified
+## Earlier D6 validation evidence (historical)
 
 - D6-D adds 16 focused client/API regressions and a real PostgreSQL/HTTP client
   scenario. The PostgreSQL suite passes 63 tests locally, including no durable
@@ -429,7 +434,7 @@ identity-history system, external writes, connectors or generic workflow is adde
 - `pnpm release:check` passes across current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 250 tests pass, including 16 D6-D client/API regressions, 40 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
+- At D6-D, 250 tests passed, including 16 D6-D client/API regressions, 40 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
   immutable authority-binding, lifecycle, conflict, and agent-authority tests;
   42 D6-B threshold, multi-approval, prior-decision, delegation, ambiguity,
   policy-selection, tenant, agent, evidence-lineage, immutability, and input-order
@@ -505,10 +510,9 @@ identity-history system, external writes, connectors or generic workflow is adde
   the tab can lose an unconfirmed command's local key. Committed history remains
   canonical and inspectable by request URL. Reads/decisions can take longer as
   whole-history integrity replay grows; requests time out visibly and fail closed.
-- D6-D adds no migration. Existing preview history, strict v0 contracts, frozen ECC
-  fixtures and Accepted D-032 semantics remain intact. The next milestone is D7:
-  controlled simulated action and independent verification, with a separately
-  reviewed implementation before any execution or complete closure proof.
+- Strict v0 contracts, frozen ECC and Accepted D-032 remain intact. D7-B adds
+  migration 0003; this D7-C branch adds 0004. Complete closure proof and Workbench
+  action/check controls remain unimplemented.
 
 - The appliance is single-node and evaluation-only. Its singleton writer lock and
   whole-state integrity hydration favor auditability over throughput; it does not
@@ -538,11 +542,12 @@ identity-history system, external writes, connectors or generic workflow is adde
   delegation approval attribution verifies stable identity and its recorded
   status; this repair does not infer retroactive revocation from current status
   or add live identity verification.
-- The action gateway is not implemented.
-- The independent runtime verifier is not implemented.
-- No external writes are implemented.
-- Declared action payload hashes are not independently recomputed; every claimed
-  executed action therefore fails closed in this milestone.
+- A general Action Gateway is not implemented. The merged D7-B API supports only
+  the enrolled Orchid credit; this branch's D7-C verifier checks only its simulated
+  source. No external writes are implemented.
+- Legacy caller-declared executed Case actions still fail closed. The separate
+  simulated operation recomputes exact payload/authority bindings server-side;
+  those proofs do not authorize legacy Case arrays or complete closure.
 - No general worker runtime or provider adapter implementation.
 - No live connector implementation.
 - The drifted upstream normalized PostgreSQL SQL remains reference-only. PR4 uses
@@ -556,23 +561,46 @@ identity-history system, external writes, connectors or generic workflow is adde
   exist yet.
 - The current result is synthetic and deterministic; it does not measure live
   providers, human usefulness, resolution economics, or production performance.
-- The legacy guided authority, connector response, read-back, recovery, receipt, and
-  learning trace is presentation-only. D7–D8 must supply
-  deterministic authority envelopes, a simulated action gateway, and
-  runtime-enforced independent verification before those controls can mutate an
-  authoritative case.
+- The legacy guided authority, connector response, read-back, recovery, receipt,
+  outcome and learning trace remains presentation-only and isolated from runtime
+  history. D7-D must connect separate action/check controls to the implemented
+  APIs; D8 outcome/economics receipts remain future work.
 - Workbench review history is persistent but all actors, policy and evidence remain
   synthetic. Production identity and execution are outside D6-D.
 
+## Public documentation and maintenance reconciliation
+
+README distinguishes merged source, this D7-C review branch, the historical
+published prerelease and future work. Its functionality table separates Workbench
+review from the action/verification APIs and the legacy fixture screens. Quick-start
+and operations links describe explicit initialization, enrollment and fresh review;
+OPEN_CORE labels commercial services as potential offerings. Historical release
+notes and accepted decision records are preserved. All 42 local Markdown links and
+anchors across the affected docs and linked API/Workbench guides resolve; the
+public-release audit passes with pnpm store access. Documented command names and
+browser labels were checked against the implementation.
+
+Dependabot [PR #13](https://github.com/Mehtapozkan/fieldruntime-core/pull/13) merged
+separately at `e4130d5b81ff153ca7c3859aecee75c439c7e057` after its up-to-date required
+[CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33975171883).
+The pinned pnpm setup action now runs on Node 24; pnpm stays 11.24.0. Upstream
+v4.4.0/v5.0.0 both resolve to the retained full SHA. Normal PR/status/branch
+protections were preserved. This maintenance merge is included in D7-C before
+final validation and adds no product capability.
+
+Final combined-commit validation and PostgreSQL/API, restart, Compose and Workbench
+CI evidence are recorded in PR #24. Docker is unavailable locally; no local Compose
+pass or new visual inspection is claimed by this documentation pass.
+
 ## Next
 
-Review the D7-B implementation PR and its final CI evidence; leave it open and
-unmerged in this task. D7-C supplies independent verification using a separate
-identity/read path and immutable observations; D7-D then connects Workbench controls.
-Incomplete proof continues to block closure. Neither a credit nor its verification
-proves the original impact claim, accepted outcome or recovered revenue. D8 remains
-separate. Keep both recorded nonblocking D6-D UI follow-ups outside D7-B.
+Review D7-C in PR #24 with final validation evidence; leave it open and unmerged.
+After review, D7-D connects the existing Workbench to simulated action and independent
+check APIs, with current/historical labels and explicit uncertainty/retry guidance.
+Retain the two nonblocking D6-D UI follow-ups above. D8 then addresses accepted
+outcome/economics receipts; neither a credit nor verification proves customer impact,
+accepted outcome or recovered revenue. Incomplete proof continues to block closure.
 
-The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
-This roadmap alignment does not displace the trusted-kernel priority, add live
-connectors or external writes, or implement any of those planned capabilities.
+Case formation/import and Operational Legibility (D9–D10) precede a general worker
+runtime. No live connectors, production authentication, external actions, release
+or deployment are supplied by this milestone.
