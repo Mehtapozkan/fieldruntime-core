@@ -60,6 +60,7 @@ export const CREDIT_PROFILE = json({
   version: "orchid-simulated-credit.v1",
   service_requirements: SERVICE_REQUIREMENTS,
   one_credit_per_case: true,
+  minimum_distinct_reviewers: 2,
   precondition: "slot_absent",
   target: CREDIT_TARGET,
   payload: CREDIT_PAYLOAD,
@@ -319,6 +320,27 @@ export function evaluateCredit(
         ),
       ),
     "policy_rule_mismatch",
+  );
+  const effectiveIds = new Set(
+    object(packet.current).effective_approval_ids as readonly string[],
+  );
+  const approvingPeople = new Set(
+    objects(packet.history)
+      .filter((entry) => entry.decision !== undefined)
+      .map((entry) => object(entry.decision))
+      .filter(
+        (decision) =>
+          effectiveIds.has(string(decision.authority_decision_id)) &&
+          decision.decision === "approve" &&
+          object(decision.approver_identity).identity_kind === "human",
+      )
+      .map((decision) =>
+        string(object(decision.approver_identity).identity_id),
+      ),
+  );
+  check(
+    approvingPeople.size >= integer(CREDIT_PROFILE.minimum_distinct_reviewers),
+    "distinct_reviewers_required",
   );
   const serviceGrants: ObjectValue[] = [];
   for (const [key, id, authority] of serviceSpecs.filter(

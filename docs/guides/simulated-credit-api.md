@@ -80,7 +80,8 @@ flags, are rejected. Synthetic services and all authority inputs are server sele
 
 Under the existing writer transaction, the server revalidates canonical history,
 recomputes authority using validated D6 v1→v0 adaptation, folds terminal decisions,
-checks exact bindings/current policy and scoped evaluator/executor grants, samples
+checks exact bindings/current policy, two distinct human reviewers and scoped
+evaluator/executor grants, samples
 UTC at issuance, and checks the stable credit slot. A read or historical receipt
 never grants permission. The retained `authorization-envelope.v1` contains the
 profile, exact Case heads, request/material/review history, catalog, evaluated

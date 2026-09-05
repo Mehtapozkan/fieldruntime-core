@@ -76,9 +76,10 @@ revenue remain unproven. Legacy execution and incomplete-proof closure guards re
 
 Local repository validation passes **254 tests**, including preserved authority
 repairs and Workbench coverage. The real local PostgreSQL D6 suite passes **63**.
-The D7 suite passes **51 real PostgreSQL/API tests** covering fresh/upgrade
+The D7 suite passes **52 real PostgreSQL/API tests** covering fresh/upgrade
 enrollment, atomic action/replacement boundaries,
-current eligibility (including exact workflow identity/version), terminal/concurrent
+current eligibility (including exact workflow identity/version and two distinct
+human reviewers), terminal/concurrent
 commands, duplicates, clock guards,
 tampering, source/action rollback and restart retries. The local appliance action → PostgreSQL/API restart → exact retry smoke also passes.
 ECC passes 620/620; its intended negative control exits 1 with 152/620 and a full

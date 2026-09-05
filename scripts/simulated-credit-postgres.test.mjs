@@ -1059,3 +1059,27 @@ test("D7 exact workflow identity/version cannot be changed behind the expected r
     assert.equal((await h.request(view)).source, null);
   }
 });
+
+test("D7 requires two distinct human reviewers even when one principal holds both classes", async (t) => {
+  const h = await fixture(t);
+  await h.prepare();
+  await h.enroll();
+  await h.catalog((d) => {
+    d.authority_records.find(
+      (r) => r.authority_class === "executive_sponsor",
+    ).identity = structuredClone(
+      d.identities.find((i) => i.identity_id === "identity_d6_finance"),
+    );
+  });
+  const id = await h.create();
+  await h.decide(id, "finance");
+  // D6 resolves individual class requirements; this operation additionally
+  // requires the accepted Finance-then-Executive two-person consent boundary.
+  const denied = await h.request(action, await h.command(id), 409);
+  assert.ok(
+    denied.receipt.envelope.reason_codes.includes(
+      "distinct_reviewers_required",
+    ),
+  );
+  assert.equal((await h.request(view)).source, null);
+});

@@ -151,7 +151,8 @@
         "precondition",
         "service_requirements",
         "workflow_id",
-        "workflow_version"
+        "workflow_version",
+        "minimum_distinct_reviewers"
       ],
       "properties": {
         "version": {
@@ -241,6 +242,9 @@
         },
         "workflow_version": {
           "const": "0.1.0"
+        },
+        "minimum_distinct_reviewers": {
+          "const": 2
         }
       }
     },
