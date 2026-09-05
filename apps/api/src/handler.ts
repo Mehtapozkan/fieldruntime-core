@@ -5,6 +5,11 @@ import type {
   JsonValue,
 } from "../../../packages/runtime/src/index.js";
 import { CaseCommandInputError } from "../../worker/src/command-service.js";
+import {
+  AuthorityCommandInputError,
+  SYNTHETIC_REVIEW_SEATS,
+} from "../../worker/src/authority-service.js";
+import type { AuthorityCommandResult } from "../../../packages/runtime/src/authority-review.js";
 
 type JsonObject = { readonly [key: string]: JsonValue };
 
@@ -38,6 +43,18 @@ export interface GuidedWalkthroughRecord {
 }
 
 export interface ApiDependencies {
+  readonly authority?: {
+    readonly create: (command: unknown) => Promise<AuthorityCommandResult>;
+    readonly decide: (
+      command: unknown,
+      seat: string,
+    ) => Promise<AuthorityCommandResult>;
+    readonly read: (
+      tenantId: string,
+      requestId: string,
+    ) => Promise<JsonObject | undefined>;
+    readonly catalogRevision: (tenantId: string) => Promise<number | undefined>;
+  };
   readonly isReady: () => Promise<boolean>;
   readonly executeCaseCommand: (
     tenantId: string,
@@ -212,6 +229,82 @@ export async function handleApiRequest(
           replayable: false,
           production_receipt: false,
         });
+  }
+
+  if (
+    segments[0] === "v1" &&
+    segments[1] === "tenants" &&
+    segments[2] !== undefined &&
+    CANONICAL_ID.test(segments[2]) &&
+    dependencies.authority !== undefined
+  ) {
+    const tenantId = segments[2];
+    const authority = dependencies.authority;
+    if (
+      method === "GET" &&
+      segments.length === 4 &&
+      segments[3] === "authority-catalog"
+    ) {
+      const revision = await authority.catalogRevision(tenantId);
+      return revision === undefined
+        ? response(404, { error: "not_found" })
+        : response(200, {
+            tenant_id: tenantId,
+            authority_state_revision: revision,
+            simulation: true,
+            synthetic_review_seats: [...SYNTHETIC_REVIEW_SEATS],
+            action_permission: false,
+          });
+    }
+    if (segments[3] === "authority-requests") {
+      const requestId = segments[4];
+      if (
+        method === "GET" &&
+        requestId !== undefined &&
+        CANONICAL_ID.test(requestId) &&
+        (segments.length === 5 ||
+          (segments.length === 6 && segments[5] === "packet"))
+      ) {
+        const packet = await authority.read(tenantId, requestId);
+        return packet === undefined
+          ? response(404, { error: "not_found" })
+          : response(200, packet);
+      }
+      const isCreate = segments.length === 4;
+      const isDecide =
+        segments.length === 7 &&
+        segments[5] === "decisions" &&
+        requestId !== undefined &&
+        CANONICAL_ID.test(requestId);
+      if (method === "POST" && (isCreate || isDecide)) {
+        const parsed = parseCommand(request);
+        if ("error" in parsed) return parsed.error;
+        if (parsed.command.tenant_id !== tenantId)
+          return response(400, { error: "tenant_mismatch" });
+        if (
+          parsed.command.type !==
+            (isCreate
+              ? "authority.request.create"
+              : "authority.request.decide") ||
+          (!isCreate && parsed.command.authority_request_id !== requestId)
+        )
+          return response(400, { error: "request_binding_mismatch" });
+        try {
+          const result = isCreate
+            ? await authority.create(parsed.command)
+            : await authority.decide(parsed.command, segments[6] ?? "");
+          return response(result.status === "conflict" ? 409 : 200, {
+            status: result.status,
+            ...(result.code === undefined ? {} : { code: result.code }),
+            receipt: result.receipt,
+          });
+        } catch (error) {
+          return error instanceof AuthorityCommandInputError
+            ? response(400, { error: "invalid_authority_command" })
+            : response(500, { error: "internal_error" });
+        }
+      }
+    }
   }
 
   if (

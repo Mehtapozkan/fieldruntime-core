@@ -1,0 +1,435 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/authority-review-support.v1.schema.json",
+  "title": "Field Runtime authority-review-support.v1",
+  "$defs": {
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine",
+        "resolver",
+        "projection"
+      ],
+      "properties": {
+        "engine": {
+          "const": "authority-review-engine.v1"
+        },
+        "resolver": {
+          "const": "authority-resolution.d6c.v1"
+        },
+        "projection": {
+          "const": "authority-packet.v1"
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lifecycle",
+        "eligible",
+        "authorized",
+        "reason_codes",
+        "effective_approval_ids",
+        "resolution"
+      ],
+      "properties": {
+        "lifecycle": {
+          "enum": [
+            "open",
+            "rejected",
+            "superseded",
+            "escalated"
+          ]
+        },
+        "eligible": {
+          "type": "boolean"
+        },
+        "authorized": {
+          "type": "boolean"
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "effective_approval_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+          }
+        },
+        "resolution": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.ai/schemas/authority-resolution-result.v0.schema.json"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "catalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "revision",
+        "previous_catalog_hash",
+        "recorded_at",
+        "data",
+        "after_review_position"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "authority-catalog.v1"
+        },
+        "tenant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "previous_catalog_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "identities",
+            "policies",
+            "authority_records",
+            "delegations",
+            "actors"
+          ],
+          "properties": {
+            "identities": {
+              "type": "array",
+              "items": {
+                "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+              }
+            },
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "https://fieldruntime.ai/schemas/authority-policy.v0.schema.json"
+              }
+            },
+            "authority_records": {
+              "type": "array",
+              "items": {
+                "$ref": "https://fieldruntime.ai/schemas/authority-record.v0.schema.json"
+              }
+            },
+            "delegations": {
+              "type": "array",
+              "items": {
+                "$ref": "https://fieldruntime.ai/schemas/delegation-grant.v0.schema.json"
+              }
+            },
+            "actors": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "operator",
+                "business",
+                "finance",
+                "executive",
+                "finance_delegate",
+                "evaluator"
+              ],
+              "properties": {
+                "operator": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                },
+                "business": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                },
+                "finance": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                },
+                "executive": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                },
+                "finance_delegate": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                },
+                "evaluator": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                }
+              }
+            }
+          }
+        },
+        "after_review_position": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "material": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "case_id",
+        "case_version",
+        "proposal_key",
+        "consequence",
+        "evidence",
+        "conflicts",
+        "unknowns",
+        "recommendation",
+        "implementation_versions",
+        "freshness_basis"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "authority-review-material.v1"
+        },
+        "tenant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "case_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "proposal_key": {
+          "enum": [
+            "credit_4000",
+            "credit_7000",
+            "credit_12000",
+            "credit_15000"
+          ]
+        },
+        "consequence": {
+          "type": "object"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "work_event",
+              "content"
+            ],
+            "properties": {
+              "work_event": {
+                "type": "object"
+              },
+              "content": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "unknowns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "recommendation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "implementation_versions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "engine",
+            "resolver",
+            "projection"
+          ],
+          "properties": {
+            "engine": {
+              "const": "authority-review-engine.v1"
+            },
+            "resolver": {
+              "const": "authority-resolution.d6c.v1"
+            },
+            "projection": {
+              "const": "authority-packet.v1"
+            }
+          }
+        },
+        "freshness_basis": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "evaluation_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "request_binding_hash",
+        "prior_review_revision",
+        "authority_snapshot_hash",
+        "case_journal_head_hash",
+        "recorded_at",
+        "inputs",
+        "result",
+        "implementation_versions"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "authority-evaluation.v1"
+        },
+        "tenant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "request_binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "prior_review_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "authority_snapshot_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "case_journal_head_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+        },
+        "inputs": {
+          "type": "object"
+        },
+        "result": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lifecycle",
+            "eligible",
+            "authorized",
+            "reason_codes",
+            "effective_approval_ids",
+            "resolution"
+          ],
+          "properties": {
+            "lifecycle": {
+              "enum": [
+                "open",
+                "rejected",
+                "superseded",
+                "escalated"
+              ]
+            },
+            "eligible": {
+              "type": "boolean"
+            },
+            "authorized": {
+              "type": "boolean"
+            },
+            "reason_codes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048
+              }
+            },
+            "effective_approval_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+              }
+            },
+            "resolution": {
+              "anyOf": [
+                {
+                  "$ref": "https://fieldruntime.ai/schemas/authority-resolution-result.v0.schema.json"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "implementation_versions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "engine",
+            "resolver",
+            "projection"
+          ],
+          "properties": {
+            "engine": {
+              "const": "authority-review-engine.v1"
+            },
+            "resolver": {
+              "const": "authority-resolution.d6c.v1"
+            },
+            "projection": {
+              "const": "authority-packet.v1"
+            }
+          }
+        }
+      }
+    }
+  }
+}

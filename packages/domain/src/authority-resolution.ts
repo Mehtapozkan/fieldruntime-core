@@ -873,6 +873,47 @@ function resolutionIdentifier(
 export function resolveAuthority(
   input: ResolveAuthorityInput,
 ): AuthorityResolutionResult {
+  return resolveAuthorityInternal(input);
+}
+
+/** Eligibility to veto/modify/escalate one applicable policy requirement.
+ * This is never a whole-request authorization result. All original input,
+ * policy selection, candidate, identity, scope and path checks still run.
+ */
+export function resolveReviewerEligibility(
+  input: ResolveAuthorityInput,
+  probeDecisionId: string,
+): Readonly<{ eligible: boolean; requirement_ids: readonly string[] }> {
+  const normalized = canonicalizeJson(input);
+  if (!isObject(normalized))
+    throw new AuthorityResolutionInputError("root must be an object");
+  const ids = uniqueSorted(
+    requireArray(normalized, "policies")
+      .filter(isObject)
+      .flatMap((policy) =>
+        objectArrayField(policy, "rules").flatMap((rule) =>
+          objectArrayField(rule, "requirements").map((requirement) =>
+            requireString(requirement, "requirement_id"),
+          ),
+        ),
+      ),
+  );
+  const eligible = ids.filter((id) => {
+    const result = resolveAuthorityInternal(input, id);
+    return stringArrayField(result, "authority_decision_ids").includes(
+      probeDecisionId,
+    );
+  });
+  return immutableJson({
+    eligible: eligible.length > 0,
+    requirement_ids: eligible,
+  });
+}
+
+function resolveAuthorityInternal(
+  input: ResolveAuthorityInput,
+  reviewerRequirementId?: string,
+): AuthorityResolutionResult {
   const normalized = canonicalizeJson(input);
   if (!isObject(normalized)) {
     throw new AuthorityResolutionInputError("root must be an object");
@@ -1176,9 +1217,20 @@ export function resolveAuthority(
   };
   const businessDomain = stringField(consequence, "business_domain");
   const requirementOutputs: RequirementResolution[] = [];
-  for (const requirement of [
-    ...objectArrayField(selectedRule, "requirements"),
-  ].sort((left, right) =>
+  const selectedRequirements = objectArrayField(
+    selectedRule,
+    "requirements",
+  ).filter(
+    (requirement) =>
+      reviewerRequirementId === undefined ||
+      stringField(requirement, "requirement_id") === reviewerRequirementId,
+  );
+  if (selectedRequirements.length === 0)
+    return finalize(base, {
+      outcome: "no_authority",
+      reason_codes: ["authority.no_applicable_review_requirement"],
+    });
+  for (const requirement of [...selectedRequirements].sort((left, right) =>
     requireString(left, "requirement_id").localeCompare(
       requireString(right, "requirement_id"),
     ),

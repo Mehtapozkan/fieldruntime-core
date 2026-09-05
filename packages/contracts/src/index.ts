@@ -21,6 +21,7 @@ export type { AuthorityContractViolation } from "./authority-contracts.js";
 export { validateCrossRecordInvariants } from "./invariants.js";
 export type { InvariantViolation } from "./invariants.js";
 export {
+  assertValidAuthorityReviewContract,
   assertValidAuthorityDecision,
   assertValidAuthorityPolicy,
   assertValidAuthorityRecord,
@@ -34,3 +35,5 @@ export {
   assertValidIdentityReference,
   ContractValidationError,
 } from "./validators.js";
+export { requestV1ToV0, decisionV1ToV0 } from "./authority-review-contracts.js";
+export type { ReviewObject } from "./authority-review-contracts.js";

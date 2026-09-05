@@ -3,9 +3,10 @@
 Status: **Accepted** by explicit human approval of the reviewed design at
 [e7f781dcee9639189cba8115042ea3ba62489eb8](https://github.com/Mehtapozkan/fieldruntime-core/blob/e7f781dcee9639189cba8115042ea3ba62489eb8/docs/architecture/d6-authority-request-lifecycle.md),
 including the amendment making ordinary reads free of durable side effects.
-Documentation only; **D6-C not implemented**. Inspected main: `29fd0a7`, including
-merged PR #18. Contract, runtime and migration implementation requires a separate
-reviewable PR.
+Design accepted and merged in PR #19 at `76c9b472`. D6-C is now implemented in a
+separate review branch; see [STATUS](../../STATUS.md) and the
+[API/migration guide](../guides/d6-authority-review.md) for implementation evidence
+and remaining scope. The original approval below remains unchanged.
 
 ## Human approval
 
@@ -113,7 +114,7 @@ At submission, compare current evaluation time with the durable clock guard from
 prior committed writes. Ordinary reads and historical replay never update that
 guard; a read's eligibility result is informational, not permission to submit.
 
-## Minimal contract and API additions (accepted design, not schema files)
+## Minimal contract and API additions (accepted design)
 
 Introduce explicit **Authority Request v1**, **Authority Decision v1**, and a
 versioned request-journal/read-response envelope in a later implementation. Keep
@@ -299,7 +300,7 @@ from runtime Case history, not imported from the non-replayable legacy fixture.
 | Finance and Executive simultaneously submit expected R=0                                   | 7         | Q: 0 → 1            | Singleton lock gives one applied decision; loser gets `review_revision_conflict` and no append. After refresh/new key at expected R=1, loser may append R=2; both then count. No predetermined winner.                                                                            |
 | Double-click or retry after commit and restart                                             | 7         | Q: 0 → 1 → 1        | Same key/bytes returns original receipt once; no extra vote. Changed bytes with that key conflict. If rollback happened before commit, retry applies once at R=1. If C or S changed after commit, duplicate still returns history but current eligibility is false.               |
 
-## Implementation acceptance criteria (not yet implemented)
+## Implementation acceptance criteria
 
 1. Add versioned contract tests for complete snapshot/material/policy binding,
    absent v1 fields, v0 non-promotion, terminal dispositions and replacement lineage.

@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/authority-request-journal-entry.v1.schema.json",
+  "title": "Field Runtime authority-request-journal-entry.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "tenant_id",
+    "case_id",
+    "authority_request_id",
+    "review_revision",
+    "event_type",
+    "previous_event_hash",
+    "request_binding_hash",
+    "command",
+    "command_fingerprint",
+    "idempotency_key",
+    "actor_key",
+    "actor_identity",
+    "correlation_id",
+    "causation_event_id",
+    "recorded_at",
+    "recorded_at_source_timezone",
+    "evaluation_snapshot_hash",
+    "implementation_versions",
+    "event_hash",
+    "position"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "authority-request-journal-entry.v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "tenant_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "authority_request_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "review_revision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "event_type": {
+      "enum": [
+        "authority.request.created",
+        "authority.request.decided"
+      ]
+    },
+    "previous_event_hash": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "request_binding_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "command": {
+      "$ref": "https://fieldruntime.ai/schemas/authority-command.v1.schema.json"
+    },
+    "command_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "actor_key": {
+      "enum": [
+        "operator",
+        "business",
+        "finance",
+        "executive",
+        "finance_delegate"
+      ]
+    },
+    "actor_identity": {
+      "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "causation_event_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "recorded_at_source_timezone": {
+      "const": "UTC"
+    },
+    "evaluation_snapshot_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "implementation_versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine",
+        "resolver",
+        "projection"
+      ],
+      "properties": {
+        "engine": {
+          "const": "authority-review-engine.v1"
+        },
+        "resolver": {
+          "const": "authority-resolution.d6c.v1"
+        },
+        "projection": {
+          "const": "authority-packet.v1"
+        }
+      }
+    },
+    "request": {
+      "$ref": "https://fieldruntime.ai/schemas/authority-request.v1.schema.json"
+    },
+    "decision": {
+      "$ref": "https://fieldruntime.ai/schemas/authority-decision.v1.schema.json"
+    },
+    "replacement_creation_entry_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "replaces_entry_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+    },
+    "event_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "position": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "authority.request.created"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "request"
+        ],
+        "properties": {
+          "review_revision": {
+            "const": 0
+          },
+          "previous_event_hash": {
+            "type": "null"
+          },
+          "request": {}
+        },
+        "not": {
+          "required": [
+            "decision"
+          ],
+          "properties": {
+            "decision": {}
+          }
+        }
+      },
+      "else": {
+        "required": [
+          "decision"
+        ],
+        "properties": {
+          "review_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "previous_event_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "decision": {}
+        },
+        "not": {
+          "required": [
+            "request"
+          ],
+          "properties": {
+            "request": {}
+          }
+        }
+      }
+    }
+  ]
+}

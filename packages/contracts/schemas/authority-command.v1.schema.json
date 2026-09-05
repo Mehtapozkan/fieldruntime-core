@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/authority-command.v1.schema.json",
+  "title": "Field Runtime authority-command.v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "tenant_id",
+        "case_id",
+        "expected_case_version",
+        "expected_authority_state_revision",
+        "idempotency_key",
+        "correlation_id",
+        "proposal_key"
+      ],
+      "properties": {
+        "type": {
+          "const": "authority.request.create"
+        },
+        "tenant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_case_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "expected_authority_state_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "correlation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "proposal_key": {
+          "enum": [
+            "credit_4000",
+            "credit_7000",
+            "credit_12000",
+            "credit_15000"
+          ]
+        },
+        "predecessor_authority_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "tenant_id",
+        "case_id",
+        "expected_case_version",
+        "expected_authority_state_revision",
+        "idempotency_key",
+        "correlation_id",
+        "authority_request_id",
+        "expected_review_revision",
+        "request_binding_hash",
+        "decision"
+      ],
+      "properties": {
+        "type": {
+          "const": "authority.request.decide"
+        },
+        "tenant_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_case_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "expected_authority_state_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "correlation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "authority_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_review_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "request_binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "decision": {
+          "enum": [
+            "approve",
+            "reject",
+            "modify",
+            "escalate"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "replacement_proposal_key": {
+          "enum": [
+            "credit_4000",
+            "credit_7000",
+            "credit_12000",
+            "credit_15000"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "decision": {
+                "const": "modify"
+              }
+            },
+            "required": [
+              "decision"
+            ]
+          },
+          "then": {
+            "required": [
+              "replacement_proposal_key",
+              "reason"
+            ],
+            "properties": {
+              "replacement_proposal_key": {},
+              "reason": {}
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "replacement_proposal_key"
+              ],
+              "properties": {
+                "replacement_proposal_key": {}
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "decision": {
+                "enum": [
+                  "reject",
+                  "escalate"
+                ]
+              }
+            },
+            "required": [
+              "decision"
+            ]
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {}
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
