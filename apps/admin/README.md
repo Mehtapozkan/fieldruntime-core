@@ -1,33 +1,129 @@
 # Guided Workbench
 
-The browser workbench opens directly into the synthetic Acme SSO escalation. It
-is a four-stage, no-typing walkthrough:
+D6-D connects the existing layout to the persistent synthetic authority API in
+[Accepted D-032](../../docs/architecture/d6-authority-request-lifecycle.md).
+Start the local appliance with `pnpm fr init ecc --demo` and `pnpm fr up`, then
+open <http://127.0.0.1:3210/>. Opening the page creates nothing.
 
-- **Case** converges Slack, Linear, CRM, and policy evidence without hiding the
-  Slack-versus-Linear conflict.
-- **Decision** shows three proposed paths and reveals the people and policy gates
-  that would govern each consequence.
-- **Act & Verify** previews the exact fixture payload and runs a deterministic
-  silent-failure simulation. A connector reports success; an independently
-  identified fixture read-back finds no change, so the simulated effect is
-  rejected and cannot serve as case-resolution proof. The authoritative case
-  remains `needs_review`.
-- **Receipt** reconstructs the simulation trace, safe recovery, correction
-  preview, and unpromoted learning candidate.
+## Primary walkthrough
 
-The UI fetches the immutable fixture and its schema-bound guided walkthrough from
-same-origin GET endpoints. A missing, unsafe, cross-bound, or malformed record
-closes the workbench with an explicit error. It does not fall back to invented
-case data.
+1. Choose **Start or reopen $15,000 review**. This explicit action idempotently
+   creates `case_d6_workbench` through Case commands, then its authority request.
+   It uses retained Orchid intake evidence, separate from the frozen Acme fixture.
+2. The primary view leads with **Orchid / $15,000 proposed credit**, the retained
+   issue and uncertainty, prepared evidence and policy-selected reviewers. The
+   policy explanation identifies the tier above $10,000 and named Finance plus
+   Executive. This is a proposed amount, not an evidenced entitlement or recovered
+   value. Human-readable source links stay visible; C/R/S, hashes, raw references
+   and replay inputs are in expandable technical details.
+3. Choose **Finance · synthetic seat** and **Approve**, then record the decision.
+   After the server confirms the write, a read-only refresh shows **Finance
+   approved — Executive needed**. The selected seat does not change automatically.
+4. Inspect the refreshed material/history, explicitly select **Executive · synthetic
+   seat** and approve. The next read shows **Approvals complete — execution
+   unavailable**. C remains unchanged and R advances from 0 to 1 to 2. Reject,
+   modify and escalate remain available to an independently eligible reviewer.
+5. Reload the browser and open **Review history**. The same request, decisions,
+   immutable consent material and retained evaluation evidence reconstruct from
+   PostgreSQL. The request URL is also a read-only revisit link.
 
-## Safety boundary
+Synthetic seats select server-enrolled identities; this is not authentication.
+The default large-credit policy requires named Finance plus Executive. Selecting
+Business or Finance delegate does not make that seat eligible for this request.
+Execution and Case closure remain unavailable even after both approvals.
 
-`Synthetic`, `Guided simulation`, and `External writes off` remain visible at all
-times. UI controls preview or reveal data and run a local deterministic
-simulation; they do not record approval, call the case-command endpoint, create a
-production receipt, or perform an external effect.
+## Decisions and interruptions
 
-The workbench uses accessible vanilla HTML, CSS, and one ES module. It has no
-runtime dependency, external asset, third-party font, analytics call, inline
-script, or inline style. The state reducer and boundary model builder are exported
-from `public/workbench.js` for direct Node testing.
+- **Reject**, **Modify** and **Escalate** require a reason. Modify also selects a
+  different server-defined credit proposal. Its receipt/history links to an atomic
+  replacement at R0, with no transferred approvals. Terminal history never revives.
+- An open request's whole-route `current.eligible` does not gate every reviewer.
+  The server independently decides whether the chosen seat may intervene, including
+  when another authority requirement is unresolved.
+- A submission binds the exact displayed request hash, C/R/S and request correlation
+  ID. Conflicts explain the changed Case, review or catalog revision. Refresh and
+  deliberate resubmission are required; no approval is silently rebased.
+- A timeout, lost response, 5xx or malformed success is **unconfirmed**. The original
+  command bytes, seat and idempotency key are saved before sending. Reload then
+  **Retry exact command** recovers the historical receipt without another vote.
+  Do not clear the tab's session storage while a command is unconfirmed. Closing
+  the tab may lose retry information; the server's committed history remains.
+- If a write is confirmed but its follow-up GET fails, retain the accepted historical
+  receipt and show current progress as unverified. Offer refresh, not another write
+  retry. No conflict or uncertain write triggers an automatic resubmission.
+- Packet reads may fail or become stale after evaluation. The prior view is labeled
+  unconfirmed and cannot submit until a successful refresh. The server rechecks
+  current eligibility at submission regardless of any previous read.
+
+## Demonstrate changed evidence
+
+After both approvals, open **Changed evidence** and choose **Attach evidence ·
+invalidate prior approvals**. This submits the retained synthetic operations
+update through the existing Case-command API. A confirmed write fetches the current
+packet automatically: C advances, the old request reports `stale_case`, and its historical approvals are no longer effective. Choose
+**Create fresh $15,000 request**, inspect both cited sources and collect both
+approvals again. The update is attached once; the demonstration never rewrites or
+deletes Case history. Retrying initialization also preserves existing history.
+
+## Boundary and implementation
+
+`authority-client.js` manages API calls, presentation checks, navigation and exact
+retries. `authority-workbench.js` renders server packets using the existing vanilla
+HTML/CSS layout. No browser reducer grants authority. Session storage contains only
+request navigation and a pending command, never a packet, accepted receipt or
+authorization flag. Reads use only existing GET endpoints; they do not initialize
+the demo, persist previews, reserve IDs, update clocks or acquire the writer lock.
+
+The server validates v1 contracts and reconstructs canonical evidence. Browser
+response checks protect presentation; they are not cryptographic verification or a
+replacement for server authorization. All assets and requests stay same-origin
+under the existing no-inline CSP. There are no production browser dependencies,
+new endpoints, contracts, migrations, catalog editor or external effects.
+
+Packet acceptance checks that lifecycle, C/S/time, authorization/eligibility flags,
+resolver outcome/reasons, requirement counts and recorded effective approvals agree.
+Contradictory projections fail closed instead of displaying completed approvals.
+
+**Last response · historical receipt** is separate from current eligibility.
+Retaining consent bindings does not prove that a human read the screen.
+
+## Legacy simulation
+
+**Legacy action simulation** opens `/?view=legacy`: the original Acme Case →
+Decision → Act & Verify → Receipt walkthrough. It retains its immutable fixtures,
+six local presentation actions and explicit non-authoritative labels. It records
+no approval and its simulated effects/receipts never enter persistent review.
+The home link returns to the persistent experience.
+
+## Verification
+
+`pnpm validate` includes client/API regressions for initialization, exact binding,
+refresh, reload, terminal decisions, eligibility and uncertain retries. The explicit
+PostgreSQL suite additionally executes the client against real HTTP transactions,
+compares every durable table and emitted-ID count around reads, and verifies
+restart/retry after a lost commit acknowledgement.
+
+Run Chromium against a **separate disposable appliance** after build/start:
+
+```sh
+pnpm exec playwright install chromium
+pnpm test:workbench
+```
+
+The eight browser tests run once against a database that has not run this Workbench
+demo; they intentionally retain its Case/history. They cover the primary flow,
+reload, concurrent reviewers, uncertain responses, terminal interventions,
+replacement, changed evidence, ineligible seats, unsafe responses and a confirmed
+write followed by a failed read. They also check keyboard focus/order, unchanged
+seat selection, visible uncertainty, hidden technical bindings and 390px overflow. Use a separate
+instance for another full run; do not delete existing data to reset it. CI installs
+the browser driver and runs independent scenario groups against fresh CI-owned
+Compose volumes, with the primary approval/reload/evidence-change story kept
+together. This prevents unrelated fixtures from accumulating whole-history replay
+cost; it does not assert scalability. All eight browser scenarios, existing
+appliance checks and frozen ECC checks remain required. Playwright is a development
+dependency.
+
+D6-D claims review progress only. D7 supplies simulated execution and independent
+verification; D8 supplies outcome/economics receipts. No time savings, recovered
+revenue, action outcome or resolution is measured by this review surface.

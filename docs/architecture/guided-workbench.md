@@ -1,5 +1,31 @@
 # Guided Workbench Boundary
 
+## D6-D persistent synthetic review
+
+The default `/` view now connects to the existing D6-C authority API under Accepted
+D-032. An explicit, idempotent action creates one synthetic Orchid Case and its
+credit request. Packet, required approvals, history and current eligibility are
+rendered from runtime responses. Submission binds the reviewed request hash and
+C/R/S; a conflict requires explicit refresh and resubmission. The browser stores
+only navigation and the exact pending command for an uncertain-response retry.
+
+Reads never initialize the demo or invoke a write. PostgreSQL's existing read-only
+snapshot remains the packet boundary. Decisions use the server-selected synthetic
+seat, strict commands and current eligibility checks. No local flag, preview or
+historical receipt can authorize an action. Eligible terminal interventions remain
+available when another requirement is unresolved; a replacement starts at R0.
+Retained evidence can be attached through Case commands to demonstrate C-version
+invalidation without introducing a catalog editor or changing Case semantics.
+
+The browser does not claim that consent bindings prove screen inspection. Approval
+completion is shown as **execution unavailable**. Action Gateway, independent
+runtime verification and closure proof remain unimplemented. No new runtime
+contract, persistence aggregate or trust boundary is introduced by this adapter.
+
+See the [Workbench walkthrough and checks](../../apps/admin/README.md).
+
+## Legacy fixture simulation (`/?view=legacy`)
+
 GitHub PR #5 made the existing evaluation appliance understandable without
 granting new authority.
 
@@ -29,8 +55,9 @@ after the independent read-back matches. This effect-acceptance gate does not cl
 that deployment was verified or that the case can close; the authoritative fixture
 remains `needs_review`.
 
-D6–D8 must replace these presentation observations with deterministic authority
-envelopes, payload-bound approvals, an idempotent simulated effect ledger,
+D6-C/D6-D add separate persistent synthetic requests and payload-bound approvals;
+they never promote this fixture history. D7–D8 must supply authority envelopes,
+an idempotent simulated effect ledger,
 runtime-enforced independent verification, and reconstructable receipts. GitHub PR
 #6 was the public evaluation-preview readiness change; it did not add those
 controls. The PR #5 data is a replaceable work-surface adapter, not part of the

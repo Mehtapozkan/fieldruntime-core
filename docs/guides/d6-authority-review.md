@@ -4,8 +4,9 @@ D6-C implements [Accepted D-032](../architecture/d6-authority-request-lifecycle.
 inside the local evaluation appliance. PostgreSQL retains request history and
 consent material; the packet is a read-only derived response. This API uses
 runtime-enrolled synthetic seats, not production authentication. Run only on the
-existing loopback appliance. Every response denies action permission. The Guided
-Workbench still uses its separate, clearly labeled simulation.
+existing loopback appliance. Every response denies action permission. D6-D connects
+the [Guided Workbench](../../apps/admin/README.md) to this API; the legacy action
+simulation remains separate at `/?view=legacy`.
 
 ## Reproduce the complete path
 
@@ -179,4 +180,5 @@ races, terminal states, time windows, payload injection, restart/idempotency,
 read-only snapshot behavior, tampering, append-only/deferred constraints and
 persistence/rollback failures. The appliance smoke also restarts the actual
 PostgreSQL and API containers. No closure proof, Action Gateway, external writes
-or Workbench integration is enabled by this implementation.
+is enabled by this implementation. D6-D adds browser/API coverage through
+`pnpm test:workbench`, using this same persistence boundary without new migrations.

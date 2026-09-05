@@ -32,6 +32,7 @@
     "lint": "eslint .",
     "release:check": "node scripts/check-public-release.mjs",
     "test": "pnpm build && node --test tests/*.test.mjs",
+    "test:workbench": "playwright test",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "validate": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm release:check"
   },
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.62.1",
     "@types/node": "24.13.3",
     "@types/pg": "8.23.1",
     "eslint": "10.9.1",

@@ -5,9 +5,10 @@ a passing state.
 
 Delivery position: GitHub PRs #1–#6, #12, and #14 are merged. The public source
 preview and `v0.1.0-evaluation-preview.0` prerelease are published. PR #19 merged
-Accepted D-032. D6-C now implements the synthetic persistent review/API boundary
-in [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20); connecting
-the Guided Workbench is the next D6 step.
+Accepted D-032. D6-C [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)
+is merged at `940462ec0a666975e3530763349bad89986cf457`. D6-D connects the existing
+Guided Workbench to that persistent synthetic review/API boundary and is implemented
+for review, not merged or released.
 
 ## Delivery labels and GitHub pull requests
 
@@ -63,10 +64,23 @@ Case creation, Finance/Executive approval, restart and reconstruction. Real
 PostgreSQL CI exercises upgrade/fresh installation, races, failures, tampering,
 read-only snapshots and idempotent retries.
 
-Remaining D6 work is the Guided Workbench connection to this runtime API, including
-explicit refresh and resubmission. Production authentication, identity history,
-external catalog sources and general workflows remain outside this synthetic
-step. D7 action/verification and complete closure proof are still unimplemented.
+## D6-D delivery boundary
+
+The [Guided Workbench](apps/admin/README.md) now provides explicit idempotent demo
+initialization, runtime packet/evidence review, Finance and Executive approval,
+explicit refresh/resubmission and restart/reload reconstruction. Reject, modify
+and escalate use existing contracts; replacements start without approvals. Pending
+command bytes/keys survive reload for exact retries. Retained evidence demonstrates
+Case-version invalidation and explicit fresh review. Reads cause no durable writes;
+local state never grants authority. Legacy simulated action/receipt history stays
+separate, and execution/closure remain blocked.
+
+The D6-D PR must pass repository validation, real PostgreSQL/API, Compose and
+appliance/browser acceptance checks before human review/merge. It introduces no
+runtime contracts or migrations. Production authentication, identity history,
+external catalog sources and general workflows remain outside this synthetic step.
+Next is D7 controlled simulated action and independent verification; it and complete
+closure proof remain unimplemented and require a separate scoped implementation.
 
 ## Operational Legibility Gate
 

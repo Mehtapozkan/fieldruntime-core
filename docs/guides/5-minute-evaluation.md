@@ -29,7 +29,11 @@ pnpm fr init ecc --demo
 pnpm fr up
 ```
 
-Open <http://127.0.0.1:3210/>.
+On current main, open <http://127.0.0.1:3210/> for the
+[persistent synthetic credit review](../../apps/admin/README.md): explicit demo
+initialization, Finance approval, refresh, Executive approval and reload. It keeps
+execution unavailable. For the original release's six-action fixture story below,
+choose **Legacy action simulation** or open <http://127.0.0.1:3210/?view=legacy>.
 
 ## The six-action story
 
@@ -59,10 +63,11 @@ Open <http://127.0.0.1:3210/>.
 
 ## What this does not prove
 
-The preview does not provide production identity, live connectors, human approval,
-external writes, high availability, or compliance certification. Deterministic
-runtime authority, controlled action, independent verification, and receipt
-controls are planned for D6–D8, not included in this preview. These Delivery labels
+The published preview's legacy story does not provide production identity, live
+connectors, recorded human approval, external writes, high availability or compliance
+certification. Current main adds synthetic persistent review through D6; controlled
+action, independent verification and complete outcome receipts remain D7–D8 work.
+These Delivery labels
 are not GitHub pull request numbers. GitHub PR #6 was the completed public
 evaluation-preview readiness change.
 

@@ -4,6 +4,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import test from "node:test";
+import {
+  createReviewClient,
+  CASE_ID,
+} from "../apps/admin/public/authority-client.js";
 import { Pool } from "pg";
 import { createApiServer } from "../dist/apps/api/src/server.js";
 import { loadWorkbenchAssets } from "../dist/apps/api/src/workbench-assets.js";
@@ -224,6 +228,7 @@ async function fixture(
   }
   const api = {
     request,
+    fetcher: (path, options) => globalThis.fetch(`${baseUrl}${path}`, options),
     trace,
     discarded,
     get ids() {
@@ -299,6 +304,98 @@ async function fixture(
   if (!upgrade) assert.equal((await api.case(caseCommand())).status, "applied");
   return api;
 }
+
+test("Workbench client through PostgreSQL/HTTP: explicit init, read-only reload, approvals, restart/retry and stale evidence", async (t) => {
+  const h = await fixture(t);
+  let saved = null,
+    keys = 0;
+  const storage = {
+    getItem: () => saved,
+    setItem: (_key, value) => {
+      saved = value;
+    },
+  };
+  const client = () =>
+    createReviewClient({
+      fetcher: h.fetcher,
+      storage,
+      nextKey: () => `browser_${++keys}`,
+    });
+  let browser = client();
+  const empty = await h.dump();
+  await browser.start();
+  assert.deepEqual(await h.dump(), empty, "opening never initializes the demo");
+  await browser.initialize();
+  assert.equal(browser.state.error, null);
+  const id = browser.state.requestId;
+  await browser.initialize();
+  assert.equal(browser.state.requestId, id);
+  const created = await h.dump(),
+    ids = h.ids;
+  h.trace.length = 0;
+  for (let i = 0; i < 3; i++) {
+    browser = client();
+    await browser.start();
+    await browser.refresh();
+  }
+  assert.deepEqual(await h.dump(), created);
+  assert.equal(h.ids, ids);
+  assert.ok(
+    h.trace.every((sql) => !/FOR UPDATE|INSERT|UPDATE|DELETE/i.test(sql)),
+  );
+  await browser.decide("finance", "approve");
+  assert.equal(browser.state.receipt.review_revision, 1);
+  assert.equal(
+    browser.state.packet.review_revision,
+    1,
+    "confirmed write is followed by a read-only current packet",
+  );
+  assert.equal(browser.state.needsRefresh, false);
+  h.inject("COMMIT", { after: true });
+  await browser.decide("executive", "approve");
+  assert.match(browser.state.error, /unconfirmed/);
+  assert.equal(browser.state.receipt, null);
+  const pending = browser.state.pending;
+  await h.restart();
+  browser = client();
+  await browser.start();
+  assert.deepEqual(browser.state.pending, pending);
+  const committed = await h.dump();
+  await browser.retry();
+  assert.equal(browser.state.error, null);
+  assert.equal(browser.state.receipt.review_revision, 2);
+  assert.deepEqual(
+    await h.dump(),
+    committed,
+    "exact duplicate causes no durable changes",
+  );
+  await browser.refresh();
+  const approved = browser.state.packet;
+  assert.equal(approved.current.authorized, true);
+  assert.equal(approved.case_version, 1);
+  assert.equal(approved.history.length, 3);
+  await h.restart();
+  browser = client();
+  await browser.start();
+  assert.deepEqual(browser.state.packet.history, approved.history);
+  assert.deepEqual(
+    browser.state.packet.historical_evaluations,
+    approved.historical_evaluations,
+  );
+  await browser.attachEvidence();
+  assert.equal(browser.state.receipt.case_version, 2);
+  await browser.refresh();
+  assert.equal(browser.state.packet.current.authorized, false);
+  assert.ok(browser.state.packet.current.reason_codes.includes("stale_case"));
+  assert.deepEqual(browser.state.packet.current.effective_approval_ids, []);
+  await browser.freshRequest();
+  assert.equal(browser.state.error, null);
+  assert.equal(browser.state.packet.case_id, CASE_ID);
+  assert.equal(browser.state.packet.case_version, 2);
+  assert.equal(browser.state.packet.review_revision, 0);
+  assert.equal(browser.state.packet.material.evidence.length, 2);
+  assert.equal(browser.state.packet.current.authorized, false);
+});
 
 for (const upgrade of [false, true])
   test(`PostgreSQL ${upgrade ? "preview upgrade preserves Case history" : "fresh install"}: HTTP two-person review survives restart`, async (t) => {
