@@ -37,13 +37,16 @@ Two nonblocking UI follow-ups remain for the existing Workbench:
 
 Neither follow-up blocks D6-D's merge or expands the D7 trust boundary.
 
-## D7-A design review
+## D7-A accepted design; implementation pending
 
-[D-033](docs/architecture/d7-simulated-credit-verification.md) is **Proposed**, not
-Accepted or implemented. It describes one Orchid $15,000 simulated credit, with
+[D-033](docs/architecture/d7-simulated-credit-verification.md) is **Accepted** by
+explicit human approval on 2026-09-05 of PR #22 at
+`527cfb6f44dac61e495f45559d170d0bbb50e8f2`; the verbatim approval is retained in
+the decision record. **D7-B, D7-C and D7-D are not implemented.** The accepted
+design describes one Orchid $15,000 simulated credit, with
 server-recomputed exact authority/payload/state bindings, an atomic local source
 write and action receipt, business-key duplicate prevention, and a separately
-identified read-only verifier. It proposes two supporting tables in the existing
+identified read-only verifier. It specifies two supporting tables in the existing
 PostgreSQL database; it does not change runtime contracts or migrations here.
 
 The design reuses D6 request/decision/catalog contracts and preserves C/R/S,
@@ -63,8 +66,17 @@ Compose and appliance/restart smokes. Those counts describe PR #21, not this
 D6-C-based docs branch.
 
 D7-A adds documentation only. No new boundary is enabled, no runtime implementation
-is claimed, and no release or deployment is included. Human approval is required
-for D-033 before its three proposed implementation PRs.
+is claimed, and no release or deployment is included. Architectural approval does
+not replace GitHub review requirements: PR #21 still lacks an eligible approving
+review, and PR #22 also has none. After #21 merges, update #22 from that main,
+preserve all D6-D implementation/tests/docs, rerun the restored Workbench coverage
+and satisfy #22's own review gates before merging it. Only then begin D7-B.
+
+The docs clarify three PR #22 review findings: explicit idempotent enrollment on
+upgrades through a fixed local command, the scoped evaluator grant already required
+by the execution gate, and atomic verification clock updates. These mechanisms
+are documented acceptance criteria, not implemented features. D7-C remains the
+independent verifier step; D7-D remains the Workbench connection.
 
 D7-A local validation: `pnpm validate` passes all 234 current-main tests plus
 formatting/lint/typecheck/release checks. ECC passes 30/30 cases and 620/620 checks;
@@ -389,10 +401,12 @@ No new D7 runtime tests or behavior are claimed by these existing-suite results.
 ## Next
 
 Obtain the required approving review for PR #21 and merge through repository
-protections; its checked head is `1561329858`. Review Proposed D-033 without
-enabling it. After D6-D merges and D-033 receives explicit human approval, implement
-D7-B (bound operation and atomic simulated source), D7-C (independent verification)
-and D7-D (existing Workbench controls) as separate reviewable PRs. Incomplete proof
+protections; its checked head is `1561329858`. Update PR #22 from the resulting
+main without losing D6-D, rerun repository/PostgreSQL/API/Workbench coverage, and
+merge only after its own review requirements pass. D-033 is Accepted. After both
+merges, implement D7-B only (bound operation and atomic simulated source), leaving
+its PR open. D7-C (independent verification) and D7-D (existing Workbench controls)
+remain later, separate steps. Incomplete proof
 continues to block closure; even a verified simulated credit does not establish
 customer impact, accepted outcome or recovered revenue. D8 remains separate.
 

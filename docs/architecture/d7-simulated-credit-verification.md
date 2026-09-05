@@ -1,22 +1,42 @@
 # D-033 — One controlled simulated credit and independent read-back
 
-Status: **Proposed**. D7-A is documentation only; no new permission, runtime,
-contract, migration or UI behavior is enabled. Human approval has not been given.
+Status: **Accepted** by explicit human approval of the reviewed design at
+[527cfb6f44dac61e495f45559d170d0bbb50e8f2](https://github.com/Mehtapozkan/fieldruntime-core/blob/527cfb6f44dac61e495f45559d170d0bbb50e8f2/docs/architecture/d7-simulated-credit-verification.md).
+D7-A remains documentation only. D7-B, D7-C and D7-D are not implemented.
 
 Base: main `940462ec0a666975e3530763349bad89986cf457` (D6-C merged).
 [D6-D PR #21](https://github.com/Mehtapozkan/fieldruntime-core/pull/21), head
 `1561329858d8340291dda505fdfe12291cece1c9`, passes CI and its addressed thread is
-resolved, but GitHub still requires an approving review. This proposal can be
-reviewed independently; implementation and Workbench integration depend on its
-normal protected merge.
+resolved, but GitHub still requires an approving review. PR #22 must be updated
+from main after that protected merge, preserving D6-D and rerunning its Workbench
+coverage. D7-B begins only after both PRs merge through their own review gates.
 
 The human operator accepted D6-D's supplied desktop/390px presentation at that head
 on 2026-09-05. The two nonblocking Workbench follow-ups in STATUS/PLAN do not change
-this proposal or constitute approval of its new execution/verification boundary.
+this boundary. D-033's separate approval is recorded below.
 
-## Decision requested
+## Human approval
 
-Approve a single, versioned **simulated customer-credit operation** in the existing
+Approval source: the user's explicit instruction in this task on 2026-09-05,
+recorded verbatim:
+
+> I approve D-033 as specified in PR #22 at commit 527cfb6f44dac61e495f45559d170d0bbb50e8f2.
+>
+> This approves only the documented simulated Orchid credit boundary: server-recomputed authority, atomic source/action evidence, one-credit-per-Case duplicate prevention, concurrency ordering and a separate read-back verifier. Existing closure denial and legacy execution guards remain intact.
+
+The same instruction requires protected merges of PR #21 and then updated PR #22
+before implementing D7-B only, leaving its implementation PR open. D7-C supplies
+independent verification; D7-D supplies Workbench controls. Neither is implemented
+by D7-B. No release or deployment is authorized. This architectural acceptance
+does not substitute for an eligible GitHub approving review on either PR.
+
+The enrollment and verification-clock details below clarify the existing scoped
+grant, explicit install and atomic clock requirements in response to PR review;
+they do not expand the accepted operation or relax its gates.
+
+## Accepted decision
+
+Use a single, versioned **simulated customer-credit operation** in the existing
 loopback appliance. Its gateway may write a bounded synthetic source record only
 after recomputing current authorization under the existing PostgreSQL writer lock.
 Commit that source effect and its immutable action evidence together. A separately
@@ -25,8 +45,8 @@ what it observed; adapter success never proves the effect.
 
 This is the narrow execution-proof boundary deferred by D-017, not permission to
 promote arbitrary legacy `executed` records. D-013's closure denial remains.
-Approve the ordering and one-credit-per-Case rule below, the two supporting tables,
-and the use of existing D6 consent for an exactly matching consequence **only after
+The approval covers the ordering and one-credit-per-Case rule below, the two
+supporting tables, and existing D6 consent for an exactly matching consequence **only after
 the D7 catalog enrollment and fresh review**. D7 does not infer authority from old
 receipts or add undisclosed financial terms.
 
@@ -60,6 +80,14 @@ a public catalog editor. Scope both to this Case, customer-operations scope and
 credit/consequence classes. Require active, unambiguous, rank-one records and
 current canonical identities. Service identity or assignment alone is insufficient.
 
+Also enroll `authority_d7_credit_evaluator` for the existing canonical service
+`identity_d6_evaluator`, class `simulated_credit_evaluator`, with the same narrow
+Case/action/consequence/organization scope, active rank-one requirement and
+profile-bound source reference. The default D6 catalog has no evaluator authority
+record. Its actor mapping alone must not satisfy D7's evaluator-grant check; the
+D6 resolver's existing evaluator attribution semantics remain unchanged. Include
+all three grants in the compiled profile and retained execution/verification inputs.
+
 The compiled profile `orchid-simulated-credit.v1` defines the exact target, payload,
 state allowlist, service identities, one-credit rule and verification predicate.
 Its canonical bytes/hash are retained in action evidence. The service records'
@@ -67,6 +95,32 @@ Its canonical bytes/hash are retained in action evidence. The service records'
 validates this against compiled bytes. Any profile/identity/grant change updates
 the catalog through its existing S+1 path. Missing or changed profile references
 deny execution; startup never silently rewrites an existing catalog.
+
+### Explicit enrollment on fresh and upgraded appliances
+
+D7-B adds one fixed local command, `fr d7 enroll --demo`, using the existing safe
+repository/Compose configuration and an internal compiled enrollment operation.
+Run it explicitly after the schema migration and ordinary D6 catalog bootstrap,
+on both fresh and existing preview databases. It accepts no catalog JSON, identity,
+grant, policy, target or profile override; expose no catalog-edit HTTP endpoint.
+The migration creates only the two tables below and does not enroll permissions.
+`initializeCatalog` continues to preserve existing bytes on restart.
+
+Reuse the existing catalog replacement transaction: under the singleton writer
+lock, validate the complete current catalog/history, retain its non-D7 records
+unchanged, add the two identities and three compiled grants, and commit one
+hash-bound S+1 snapshot and clock/writer update atomically. No Case or review entry
+changes. A reserved ID collision, partial or altered enrollment, inactive canonical
+evaluator, or evidence of an earlier enrollment whose grants were subsequently
+removed/revoked fails closed; this command must not reset policy or undo revocation.
+
+If the exact enrolled records/profile are already present, return
+`already_enrolled` without IDs, snapshot, S or clock/writer changes. Concurrent
+enrollments serialize to one update and one no-op. A lost response/restart retry
+checks canonical catalog history and the exact compiled records before returning
+that no-op; it is not execution permission. Persistence failure rolls back the
+entire enrollment. In the default example, bootstrap S=1 becomes S=2 once; older
+requests become stale and fresh review must follow enrollment and Case preparation.
 
 Enrollment advances S, conservatively invalidating pre-D7 requests. The operator
 explicitly creates a fresh request at current C/S and collects Finance then
@@ -306,6 +360,14 @@ between observation and recording is inconclusive and requires a new explicit
 check. Retain the observation, comparison, expected action-entry/envelope hashes,
 current verifier inputs/time/versions and result atomically with its journal entry
 and idempotent disposition. No credit write is available to this path.
+Inside that writer lock, recheck the verification idempotency key before consuming
+time or IDs. For a new entry, sample final injected UTC time and require it to be
+at least the observation time and durable Case/catalog/action/verification clock
+floor. Recheck verifier eligibility at that instant, then atomically record the
+entry, advance the writer revision and update the durable clock guard to that
+recorded time. C/R/S do not advance. Guard-integrity replay includes committed
+verification times; a regressing clock or failed persistence exposes neither a
+new entry nor a guard update. Exact duplicates leave the guard unchanged.
 A retry after lost verification response returns the same evidence; a fresh key
 performs a new read. If persistence fails, no verified receipt is claimed: preserve
 that verification key and resolve it against durable history before another read.
@@ -332,7 +394,8 @@ completion, accepted outcome, full closure proof or a resolved Case.
 
 ## Implementation sequence and acceptance
 
-Each later PR is gated on D-033 acceptance and the protected D6-D merge:
+D-033 is accepted. Implementation is gated on the protected merge of PR #21,
+followed by PR #22 updated from that main with all D6-D coverage retained:
 
 1. **D7-B — bound operation and atomic simulated source.** Add the strict new
    contracts/pure envelope checks, the two-table checksum migration, scoped synthetic
@@ -342,12 +405,20 @@ Each later PR is gated on D-033 acceptance and the protected D6-D merge:
    target/profile, expiry at lock release, revoked identity/grant, wrong scope,
    missing quorum and unresolved conflict; all deny before effect. Test both
    orderings against rejection/modification/evidence/catalog changes.
+   Prove explicit enrollment on fresh and upgraded databases, no enrollment on
+   startup/read/migration, S+1 exactly once across concurrency/restart, rollback,
+   and denial of collisions, altered records or revocation reversal. Verify that
+   the required evaluator grant is enrolled and bound; missing, revoked, expired
+   or incorrectly scoped evaluator grants deny execution.
 2. **D7-C — independent source read and retained proof.** Add the verifier POST,
    immutable observations/comparison and deterministic reconstruction. Prove
    different service identities, executor self-verification denial, separate
    read-only connection, acknowledgment ignored, absent/mismatched/wrong-scope
    rows, unavailable reads, observation races and explicit check retries. Keep
    closure blocked for both successful and incomplete verification.
+   Prove verification after a later clock instant advances the guard atomically,
+   duplicates do not, regressing recording times fail, and restart/rollback retain
+   consistent guard and proof history. These are D7-C tests, not D7-B completion.
 3. **D7-D — existing Workbench action/check controls.** Add only the proposed
    operator story, current-vs-historical labels and explicit retry/problem guidance.
    Browser state never grants permission. Exercise Finance → Executive → simulated
@@ -377,7 +448,7 @@ previews and consent reconstruction remain intact. New action entries are
 Case-bound supporting evidence, not a second mutable Case or review session.
 
 D-017 currently denies every claimed executed Case action until a recomputed
-envelope exists. D-033 proposes its smallest scoped implementation: an independently
+envelope exists. D-033 accepts its smallest scoped implementation: an independently
 validated simulated operation with a retained envelope. Keep legacy `case.v0`
 executed-action denial and D-013 closure denial; any future promotion into Case
 arrays needs its own explicit contract/proof change. Do not remove those guards
@@ -388,4 +459,4 @@ The exact D-033 approval is the new gateway/service capability, atomic simulated
 source/evidence boundary, issuance ordering and separate verifier described above.
 No production authentication, external writes, connector/provider, new database,
 generic worker infrastructure, live source verification, D8 outcome/economics,
-release or deployment is approved or implemented by this proposal.
+release or deployment is approved or implemented by this decision record.
