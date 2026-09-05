@@ -44,6 +44,7 @@ interface InternalCandidate {
 interface RequirementResolution {
   readonly output: JsonObject;
   readonly satisfiedDecisionIds: readonly string[];
+  readonly validDecisionIds: readonly string[];
   readonly delegationIds: readonly string[];
 }
 
@@ -689,6 +690,7 @@ function resolveRequirement(
   policyRuleRef: string,
   asOf: string,
 ): RequirementResolution {
+  const validDecisionIds: string[] = [];
   const validDecisionsByApprover = new Map<string, JsonObject>();
   for (const decision of decisions) {
     if (
@@ -703,6 +705,7 @@ function resolveRequirement(
     ) {
       continue;
     }
+    validDecisionIds.push(requireString(decision, "authority_decision_id"));
     const approver = requireObject(decision, "approver_identity");
     const id = identityId(approver);
     const prior = validDecisionsByApprover.get(id);
@@ -755,6 +758,7 @@ function resolveRequirement(
   return {
     output,
     satisfiedDecisionIds: stringArrayField(output, "satisfied_approval_ids"),
+    validDecisionIds: uniqueSorted(validDecisionIds),
     delegationIds,
   };
 }
@@ -883,6 +887,10 @@ export function resolveAuthority(
 export function resolveReviewerEligibility(
   input: ResolveAuthorityInput,
   probeDecisionId: string,
+  // Only retained v1 evaluation evidence uses the old selected-approval proof.
+  version:
+    | "authority-resolution.d6c.v1"
+    | "authority-resolution.d6c.v2" = "authority-resolution.d6c.v2",
 ): Readonly<{ eligible: boolean; requirement_ids: readonly string[] }> {
   const normalized = canonicalizeJson(input);
   if (!isObject(normalized))
@@ -899,10 +907,13 @@ export function resolveReviewerEligibility(
       ),
   );
   const eligible = ids.filter((id) => {
-    const result = resolveAuthorityInternal(input, id);
-    return stringArrayField(result, "authority_decision_ids").includes(
-      probeDecisionId,
-    );
+    const validDecisionIds = new Set<string>();
+    const result = resolveAuthorityInternal(input, id, validDecisionIds);
+    return version === "authority-resolution.d6c.v1"
+      ? stringArrayField(result, "authority_decision_ids").includes(
+          probeDecisionId,
+        )
+      : validDecisionIds.has(probeDecisionId);
   });
   return immutableJson({
     eligible: eligible.length > 0,
@@ -913,6 +924,7 @@ export function resolveReviewerEligibility(
 function resolveAuthorityInternal(
   input: ResolveAuthorityInput,
   reviewerRequirementId?: string,
+  validReviewerDecisionIds?: Set<string>,
 ): AuthorityResolutionResult {
   const normalized = canonicalizeJson(input);
   if (!isObject(normalized)) {
@@ -1310,6 +1322,11 @@ function resolveAuthorityInternal(
       policyRuleRef,
       asOf,
     );
+    // Eligibility is validity of this reviewer's complete approval path, not
+    // membership in the deduplicated, quota-limited set counted for authorization.
+    // Input, policy, candidate and unresolved direct-conflict checks ran above.
+    for (const id of partial.validDecisionIds)
+      validReviewerDecisionIds?.add(id);
     const satisfiedCount = partial.satisfiedDecisionIds.length;
     if (satisfiedCount < requiredCount) {
       if (candidateResolution.candidates.length > requiredCount) {

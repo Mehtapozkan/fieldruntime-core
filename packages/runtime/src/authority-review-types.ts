@@ -7,9 +7,15 @@ import {
 export type ObjectValue = ReviewObject;
 export const REVIEW_VERSIONS = Object.freeze({
   engine: "authority-review-engine.v1",
-  resolver: "authority-resolution.d6c.v1",
+  resolver: "authority-resolution.d6c.v2",
   projection: "authority-packet.v1",
 });
+export type ReviewVersions = {
+  readonly engine: "authority-review-engine.v1";
+  readonly resolver:
+    "authority-resolution.d6c.v1" | "authority-resolution.d6c.v2";
+  readonly projection: "authority-packet.v1";
+};
 export type ReviewActor =
   "operator" | "business" | "finance" | "executive" | "finance_delegate";
 export type SnapshotKind = "catalog" | "material" | "evaluation";

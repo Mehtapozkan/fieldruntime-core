@@ -37,6 +37,15 @@ No merge, release, deployment, external writes or D7 execution is included.
 - SQL constraints, immutable hash bindings and deterministic replay check journal,
   catalog, snapshots, replacement pairs and JSONB/index agreement. Failed writes
   roll back; failed rollback discards the client.
+- Reviewer eligibility validates the reviewer's complete authority path before
+  per-principal approval deduplication or quota selection. Finance and its delegate
+  can independently reject, modify or escalate after the other fills a permitted
+  approval slot. The default named-Finance restriction is unchanged; unresolved
+  conflicts still block approval and invalid reviewers gain no intervention rights.
+- New evaluations record `authority-resolution.d6c.v2`; retained v1 evaluations
+  replay with their original eligibility calculation. Both supported versions are
+  explicit in the v1 evidence contracts. No tables, migrations, endpoints or
+  client-controlled version selection were added for this repair.
 - [API examples, reproducible demo and migration notes](docs/guides/d6-authority-review.md).
 
 ## Implemented
@@ -190,7 +199,7 @@ No merge, release, deployment, external writes or D7 execution is included.
 - `pnpm release:check` passes across current files, complete reachable Git
   history, required public-release artifacts, pinned container images, package
   metadata, and production dependency licenses.
-- 209 tests pass, including 15 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
+- 234 tests pass, including 40 D6-C contract/lifecycle/replay tests and 16 D6-A identity, delegation, responsibility,
   immutable authority-binding, lifecycle, conflict, and agent-authority tests;
   42 D6-B threshold, multi-approval, prior-decision, delegation, ambiguity,
   policy-selection, tenant, agent, evidence-lineage, immutability, and input-order
@@ -223,7 +232,20 @@ No merge, release, deployment, external writes or D7 execution is included.
   tests require loopback access outside the sandbox; the sandbox-only attempt
   failed with `listen EPERM`, then the complete run passed with that access.
 - `git diff --check` passes.
-- 38 explicit API/PostgreSQL integration tests pass locally against an isolated
+- The reviewer defect was reproduced before implementation changes at PR #20
+  head `cf8088dd`: in each of the runtime and PostgreSQL/API suites, 6/18 new
+  cases failed with `reviewer_ineligible`. All three terminal decisions failed
+  after the other eligible reviewer approved, in both reviewer orderings. All
+  before-approval cases and the alternate decision-ID ordering passed. After the
+  correction, all 18 cases pass in each suite, with terminal authorization removal,
+  unapproved replacements, restart reconstruction and duplicate-retry checks.
+- New negative cases preserve named-Finance policy and reject unrelated, revoked,
+  expired and out-of-scope reviewers after the slot is filled. Eligibility also
+  remains independent of same-principal decision deduplication, input ordering and
+  outstanding quorum. A pre-fix mixed-requirement history and the existing local
+  PostgreSQL request's three v1 journal entries reconstruct under the corrected
+  runtime without changing recorded evidence.
+- 62 explicit API/PostgreSQL integration tests pass locally against an isolated
   PostgreSQL 18.4 instance: fresh installation, preview migration without Case
   loss, two-person review/restart, strict inputs, C/R/S races, expiry, terminal
   states, immutable read snapshots, rollback at each persistence step, uncertain
@@ -232,8 +254,9 @@ No merge, release, deployment, external writes or D7 execution is included.
   create → Finance → Executive → PostgreSQL/API restart → reconstruction demo.
   [CI run 33943965085](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33943965085)
   passed all 37 initial PostgreSQL scenarios, Compose config and both appliance
-  smoke phases at `841adfe6`. CI reruns the complete 38-scenario suite on subsequent
-  PR heads; the PR checks provide final-commit evidence.
+  smoke phases at `841adfe6`. CI runs the complete 62-scenario suite on the corrected
+  PR head; final-commit PostgreSQL/API, Compose and appliance-smoke evidence is
+  linked from the PR checks and reviewer thread.
 - The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
@@ -302,7 +325,8 @@ No merge, release, deployment, external writes or D7 execution is included.
 
 ## Next
 
-Connect the Guided Workbench to the D6-C runtime/API in a separate D6 UI step,
+After PR #20 and its reviewer-eligibility correction are reviewed and merged,
+connect the Guided Workbench to the D6-C runtime/API in a separate D6 UI step,
 keeping its simulation labels and refresh/resubmission behavior explicit. D6 is
 not yet a completed governed user experience. D7 remains the subsequent controlled
 simulated Action Gateway and independent verification milestone; incomplete proof

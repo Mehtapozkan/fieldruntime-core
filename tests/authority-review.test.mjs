@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {
+  resolveAuthority,
+  resolveReviewerEligibility,
+} from "../dist/packages/domain/src/authority-resolution.js";
 import * as runtime from "../dist/packages/runtime/src/index.js";
 import {
   assertValidAuthorityReviewContract,
@@ -10,6 +14,8 @@ import {
   sha256Json,
 } from "../dist/packages/contracts/src/index.js";
 import {
+  allowEitherFinanceReviewer,
+  restrictFinanceDelegate,
   caseCommand,
   createRequestCommand,
   decideCommand,
@@ -18,12 +24,13 @@ import {
   TENANT,
 } from "./helpers/authority-review.mjs";
 
-function harness() {
+function harness({ decisionPrefix = "decision" } = {}) {
   let counter = 0,
     now = new Date(START);
   const dependencies = {
     now: () => now,
-    nextId: (kind) => `${kind}_${++counter}`,
+    nextId: (kind) =>
+      `${kind === "decision" ? decisionPrefix : kind}_${++counter}`,
   };
   let cases = runtime.executeCaseCommand(
     runtime.emptyCaseEngine(),
@@ -447,4 +454,203 @@ test("coherently rehashed authorization results, missing revisions and reordered
   const reversed = structuredClone(h.state);
   reversed.entries.reverse();
   assert.throws(() => h.verify(reversed));
+});
+
+for (const decision of ["reject", "modify", "escalate"])
+  for (const [first, reviewer] of [
+    ["finance", "finance_delegate"],
+    ["finance_delegate", "finance"],
+  ]) {
+    test(`independent reviewer: ${reviewer} can ${decision} before ${first} approves`, () => {
+      const h = harness();
+      h.catalog(allowEitherFinanceReviewer);
+      const id = h.create({ expected_authority_state_revision: 2 }).receipt
+        .authority_request_id;
+      const result = h.decide(id, reviewer, decision, {
+        reason: "Independent review",
+        ...(decision === "modify"
+          ? { replacement_proposal_key: "credit_12000" }
+          : {}),
+      });
+      assert.equal(result.status, "applied", JSON.stringify(result.receipt));
+    });
+    for (const decisionPrefix of ["decision", "decision_zz"])
+      test(`independent reviewer: ${reviewer} can ${decision} after ${first} approves (${decisionPrefix})`, () => {
+        const h = harness({ decisionPrefix });
+        h.catalog(allowEitherFinanceReviewer);
+        const id = h.create({ expected_authority_state_revision: 2 }).receipt
+          .authority_request_id;
+        assert.equal(h.decide(id, first).status, "applied");
+        assert.equal(h.read(id).current.authorized, true);
+        const result = h.decide(id, reviewer, decision, {
+          reason: "Independent review",
+          ...(decision === "modify"
+            ? { replacement_proposal_key: "credit_12000" }
+            : {}),
+        });
+        assert.equal(result.status, "applied", JSON.stringify(result.receipt));
+        const packet = h.read(id);
+        assert.deepEqual(
+          [
+            packet.case_version,
+            packet.review_revision,
+            packet.authority_state_revision,
+          ],
+          [1, 2, 2],
+        );
+        assert.equal(
+          packet.current.lifecycle,
+          { reject: "rejected", modify: "superseded", escalate: "escalated" }[
+            decision
+          ],
+        );
+        assert.equal(packet.current.authorized, false);
+        assert.deepEqual(packet.current.effective_approval_ids, []);
+        if (decision === "modify") {
+          const replacement = h.read(
+            result.receipt.replacement_authority_request_id,
+          );
+          assert.equal(replacement.review_revision, 0);
+          assert.equal(replacement.current.authorized, false);
+          assert.deepEqual(replacement.current.effective_approval_ids, []);
+        }
+        h.verify(structuredClone(h.state));
+      });
+  }
+
+for (const restriction of [
+  "named Finance",
+  "wrong role",
+  "revoked identity",
+  "expired grant",
+  "wrong scope",
+  "revoked grant",
+])
+  test(`filled approval does not give intervention rights: ${restriction}`, () => {
+    const h = harness();
+    if (restriction !== "named Finance")
+      h.catalog((data) => restrictFinanceDelegate(data, restriction));
+    const id = h.create({
+      proposal_key: "credit_7000",
+      expected_authority_state_revision: h.head.revision,
+    }).receipt.authority_request_id;
+    assert.equal(h.decide(id, "finance").status, "applied");
+    h.advance(2000);
+    const before = h.state;
+    for (const decision of ["reject", "modify", "escalate"]) {
+      const result = h.decide(
+        id,
+        restriction === "wrong role" ? "business" : "finance_delegate",
+        decision,
+        {
+          reason: "No authority to intervene",
+          ...(decision === "modify"
+            ? { replacement_proposal_key: "credit_12000" }
+            : {}),
+        },
+      );
+      assert.equal(result.code, "reviewer_ineligible");
+      assert.deepEqual(h.state, before);
+      assert.equal(h.read(id).current.authorized, true);
+    }
+  });
+
+test("reviewer validity is independent of approval selection; v1 evidence keeps its recorded calculation", () => {
+  const h = harness();
+  h.catalog((data) => {
+    allowEitherFinanceReviewer(data);
+    const rule = data.policies[0].rules[0];
+    rule.requirements.push({
+      ...rule.requirements[0],
+      requirement_id: "requirement_finance_delegate",
+      named_approver_identity_ids: [data.actors.finance_delegate],
+    });
+  });
+  const id = h.create({ expected_authority_state_revision: 2 }).receipt
+    .authority_request_id;
+  assert.equal(h.decide(id, "finance").status, "applied");
+  assert.equal(h.decide(id, "finance_delegate").status, "applied");
+  const packet = h.read(id);
+  const proof = packet.historical_evaluations.at(-1).inputs.reviewer;
+  const expected = {
+    eligible: true,
+    requirement_ids: ["requirement_d6_finance", "requirement_finance_delegate"],
+  };
+  const plain = (value) => JSON.parse(JSON.stringify(value));
+  assert.deepEqual(plain(proof.eligibility), expected);
+  assert.deepEqual(
+    plain(
+      resolveReviewerEligibility(
+        proof.input,
+        "decision_review_probe",
+        "authority-resolution.d6c.v1",
+      ),
+    ),
+    {
+      eligible: true,
+      requirement_ids: ["requirement_finance_delegate"],
+    },
+  );
+  assert.equal(
+    packet.history.at(-1).implementation_versions.resolver,
+    "authority-resolution.d6c.v2",
+  );
+  for (const decisionId of ["decision_000", "decision_zzz"])
+    for (const reverse of [false, true]) {
+      const input = structuredClone(proof.input);
+      // A valid same-principal duplicate can also win the counted slot. Neither
+      // per-principal deduplication nor quota selection defines reviewer rights.
+      const probe = input.priorAuthorityDecisions.find(
+        (item) => item.authority_decision_id === "decision_review_probe",
+      );
+      input.priorAuthorityDecisions.push({
+        ...probe,
+        authority_decision_id: decisionId,
+      });
+      if (reverse)
+        for (const key of [
+          "identities",
+          "policies",
+          "authorityRecords",
+          "delegations",
+          "priorAuthorityDecisions",
+        ])
+          input[key].reverse();
+      assert.deepEqual(
+        plain(resolveReviewerEligibility(input, "decision_review_probe")),
+        expected,
+      );
+      assert.ok(
+        resolveAuthority(input).authority_requirements.every(
+          (requirement) => requirement.satisfied_approval_ids.length === 1,
+        ),
+      );
+    }
+  const partial = structuredClone(proof.input);
+  const probe = partial.priorAuthorityDecisions.find(
+    (item) => item.authority_decision_id === "decision_review_probe",
+  );
+  partial.priorAuthorityDecisions = [probe];
+  partial.policies[0].rules[0].requirements = [
+    {
+      ...partial.policies[0].rules[0].requirements[0],
+      required_approval_count: 2,
+    },
+  ];
+  partial.delegations.push({
+    ...partial.delegations[0],
+    delegation_id: "delegation_d6_second_delegate",
+    delegate_identity: partial.identities.find(
+      (identity) => identity.identity_id === "identity_d6_business",
+    ),
+  });
+  assert.equal(resolveAuthority(partial).outcome, "ambiguous_authority");
+  assert.deepEqual(
+    plain(resolveReviewerEligibility(partial, "decision_review_probe")),
+    {
+      eligible: true,
+      requirement_ids: ["requirement_d6_finance"],
+    },
+  );
+  h.verify();
 });

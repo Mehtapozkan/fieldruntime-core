@@ -35,6 +35,7 @@ import {
   type ObjectValue,
   type ReviewActor,
   type ReviewDependencies,
+  type ReviewVersions,
   type ReviewSnapshot,
   type SnapshotKind,
 } from "./authority-review-types.js";
@@ -359,6 +360,7 @@ function reviewerProof(
   actorKey: ReviewActor,
   now: string,
   priorDecisions: readonly ObjectValue[],
+  versions: ReviewVersions,
 ): ObjectValue | undefined {
   const identity = actor(data, actorKey);
   if (identity.status !== "active" || identity.identity_kind !== "human")
@@ -390,6 +392,7 @@ function reviewerProof(
   const eligibility = resolveReviewerEligibility(
     input,
     "decision_review_probe",
+    versions.resolver,
   );
   // Conflicts elsewhere still permit an explicitly eligible reviewer to veto,
   // modify or escalate. An approve never bypasses the resolver's conflict result.
@@ -435,6 +438,7 @@ function applyCommand(
   command: ObjectValue,
   actorKey: ReviewActor,
   dependencies: ReviewDependencies,
+  versions: ReviewVersions = REVIEW_VERSIONS,
 ): AuthorityCommandResult {
   const fingerprint = sha256Json({ command, actor_key: actorKey });
   const conflict = (code: string): AuthorityCommandResult => ({
@@ -539,7 +543,7 @@ function applyCommand(
         recorded_at: now,
         inputs: { resolution: evaluated.input, reviewer: proof },
         result: evaluated.result,
-        implementation_versions: REVIEW_VERSIONS,
+        implementation_versions: versions,
       }),
     );
     additions.push(evaluation);
@@ -569,7 +573,7 @@ function applyCommand(
       recorded_at: now,
       recorded_at_source_timezone: "UTC",
       evaluation_snapshot_hash: evaluation.hash,
-      implementation_versions: REVIEW_VERSIONS,
+      implementation_versions: versions,
       ...(decision === undefined ? { request } : { decision }),
       ...links,
     });
@@ -584,7 +588,7 @@ function applyCommand(
     predecessor: string | undefined,
     links: ObjectValue,
   ): ObjectValue => {
-    const material = syntheticReviewMaterial(aggregate, proposal);
+    const material = syntheticReviewMaterial(aggregate, proposal, versions);
     additions.push(reviewSnapshot("material", material));
     const request = json({
       schema_version: "authority-request.v1",
@@ -687,6 +691,7 @@ function applyCommand(
       actorKey,
       now,
       decisionsOf(prior),
+      versions,
     );
     if (proof === undefined) return conflict("reviewer_ineligible");
     if (
@@ -924,6 +929,9 @@ export function assertAuthorityStateIntegrity(
           return id;
         },
       },
+      // Journal validation admits only supported versions; clients cannot select
+      // this replay-only argument or turn historical eligibility into permission.
+      entry.implementation_versions as ReviewVersions,
     );
     requireIntegrity(
       result.status === "applied" && ids.length === 0,

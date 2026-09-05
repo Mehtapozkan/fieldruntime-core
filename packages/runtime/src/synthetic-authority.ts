@@ -3,6 +3,7 @@ import type { CaseAggregate } from "./case-engine.js";
 import {
   AuthorityReviewError,
   REVIEW_VERSIONS,
+  type ReviewVersions,
   json,
   object,
   objects,
@@ -177,6 +178,7 @@ export const SYNTHETIC_EVIDENCE = json({
 export function syntheticReviewMaterial(
   aggregate: CaseAggregate,
   proposal: string,
+  versions: ReviewVersions = REVIEW_VERSIONS,
 ): ObjectValue {
   const record = object(aggregate.document.case);
   const amounts: Readonly<Record<string, number>> = {
@@ -232,6 +234,6 @@ export function syntheticReviewMaterial(
       "Evidence is pinned to the exact Case journal head; the synthetic policy imposes no additional age cutoff.",
     recommendation:
       "Review the exact proposed credit and cited conflicting evidence. This synthetic review grants no action or closure permission.",
-    implementation_versions: REVIEW_VERSIONS,
+    implementation_versions: versions,
   });
 }

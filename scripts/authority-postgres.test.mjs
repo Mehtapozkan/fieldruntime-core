@@ -20,6 +20,8 @@ import {
   sha256Json,
 } from "../dist/packages/runtime/src/index.js";
 import {
+  allowEitherFinanceReviewer,
+  restrictFinanceDelegate,
   caseCommand,
   createRequestCommand,
   decideCommand,
@@ -68,7 +70,10 @@ const tables = [
   "fieldruntime_schema_migrations",
 ];
 
-async function fixture(t, { upgrade = false } = {}) {
+async function fixture(
+  t,
+  { upgrade = false, decisionPrefix = "decision" } = {},
+) {
   const schema = `d6_test_${randomUUID().replaceAll("-", "")}`;
   const admin = new Pool({ connectionString: databaseUrl });
   await admin.query(`CREATE SCHEMA ${schema}`);
@@ -126,7 +131,8 @@ async function fixture(t, { upgrade = false } = {}) {
     });
     const review = new TransactionalAuthorityWorker(authority, () => ({
       now,
-      nextId: (kind) => `${kind}_${++ids}`,
+      nextId: (kind) =>
+        `${kind === "decision" ? decisionPrefix : kind}_${++ids}`,
     }));
     server = createApiServer(
       {
@@ -1032,3 +1038,136 @@ test("HTTP eligible Finance can veto unresolved Executive authority, but cannot 
     "rejected",
   );
 });
+
+for (const decision of ["reject", "modify", "escalate"])
+  for (const [first, reviewer] of [
+    ["finance", "finance_delegate"],
+    ["finance_delegate", "finance"],
+  ]) {
+    test(`HTTP independent reviewer: ${reviewer} can ${decision} before ${first} approves`, async (t) => {
+      const h = await fixture(t);
+      await h.catalog(allowEitherFinanceReviewer);
+      const id = await h.create("either-finance", {
+        expected_authority_state_revision: 2,
+      });
+      assert.equal(
+        (
+          await h.decide(id, reviewer, decision, {
+            reason: "Independent review",
+            ...(decision === "modify"
+              ? { replacement_proposal_key: "credit_12000" }
+              : {}),
+          })
+        ).status,
+        "applied",
+      );
+    });
+    for (const decisionPrefix of ["decision", "decision_zz"])
+      test(`HTTP independent reviewer: ${reviewer} can ${decision} after ${first} approves (${decisionPrefix})`, async (t) => {
+        const h = await fixture(t, { decisionPrefix });
+        await h.catalog(allowEitherFinanceReviewer);
+        const id = await h.create("either-finance", {
+          expected_authority_state_revision: 2,
+        });
+        assert.equal((await h.decide(id, first)).status, "applied");
+        const before = await h.read(id);
+        assert.equal(before.current.authorized, true);
+        assert.equal(
+          before.history[1].decision.authority_decision_id <
+            "decision_review_probe",
+          decisionPrefix === "decision",
+        );
+        const command = decideCommand(before, "intervention", decision, {
+          reason: "Independent review",
+          ...(decision === "modify"
+            ? { replacement_proposal_key: "credit_12000" }
+            : {}),
+        });
+        const path = `${root}/${id}/decisions/${reviewer}`;
+        const result = await h.request(path, command);
+        const packet = await h.read(id);
+        assert.deepEqual(
+          [
+            packet.case_version,
+            packet.review_revision,
+            packet.authority_state_revision,
+          ],
+          [1, 2, 2],
+        );
+        assert.equal(
+          packet.current.lifecycle,
+          { reject: "rejected", modify: "superseded", escalate: "escalated" }[
+            decision
+          ],
+        );
+        assert.equal(packet.current.authorized, false);
+        assert.deepEqual(packet.current.effective_approval_ids, []);
+        let replacement;
+        if (decision === "modify") {
+          replacement = await h.read(
+            result.receipt.replacement_authority_request_id,
+          );
+          assert.equal(replacement.review_revision, 0);
+          assert.equal(replacement.current.authorized, false);
+          assert.deepEqual(replacement.current.effective_approval_ids, []);
+          assert.equal(
+            replacement.request.predecessor_authority_request_id,
+            id,
+          );
+        }
+        const durable = await h.dump();
+        await h.restart();
+        assert.deepEqual(await h.read(id), packet);
+        if (replacement)
+          assert.deepEqual(
+            await h.read(replacement.authority_request_id),
+            replacement,
+          );
+        const duplicate = await h.request(path, command);
+        assert.equal(duplicate.status, "duplicate");
+        assert.deepEqual(duplicate.receipt, result.receipt);
+        await h.request(path, decideCommand(packet, "terminal-revival"), 409);
+        assert.deepEqual(await h.dump(), durable);
+      });
+  }
+
+for (const restriction of [
+  "named Finance",
+  "wrong role",
+  "revoked identity",
+  "expired grant",
+  "wrong scope",
+  "revoked grant",
+])
+  test(`HTTP filled approval does not give intervention rights: ${restriction}`, async (t) => {
+    const h = await fixture(t);
+    if (restriction !== "named Finance")
+      await h.catalog((data) => restrictFinanceDelegate(data, restriction));
+    const id = await h.create("restricted-reviewer", {
+      proposal_key: "credit_7000",
+      expected_authority_state_revision:
+        restriction === "named Finance" ? 1 : 2,
+    });
+    await h.decide(id, "finance");
+    h.advance(2000);
+    const before = await h.dump();
+    const packet = await h.read(id);
+    for (const decision of ["reject", "modify", "escalate"]) {
+      const seat =
+        restriction === "wrong role" ? "business" : "finance_delegate";
+      const result = await h.request(
+        `${root}/${id}/decisions/${seat}`,
+        decideCommand(packet, `ineligible:${decision}`, decision, {
+          reason: "No authority to intervene",
+          ...(decision === "modify"
+            ? { replacement_proposal_key: "credit_12000" }
+            : {}),
+        }),
+        409,
+      );
+      assert.equal(result.code, "reviewer_ineligible");
+    }
+    await h.restart();
+    assert.equal((await h.read(id)).current.authorized, true);
+    assert.deepEqual(await h.dump(), before);
+  });

@@ -132,7 +132,7 @@
           "const": "authority-review-engine.v1"
         },
         "resolver": {
-          "const": "authority-resolution.d6c.v1"
+          "enum": ["authority-resolution.d6c.v1", "authority-resolution.d6c.v2"]
         },
         "projection": {
           "const": "authority-packet.v1"

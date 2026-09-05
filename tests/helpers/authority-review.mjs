@@ -103,3 +103,48 @@ export function decideCommand(
     ...overrides,
   };
 }
+
+// A runtime-controlled test profile, separate from the default named-Finance policy.
+export function allowEitherFinanceReviewer(data) {
+  const rule = data.policies[0].rules.find(
+    (item) => item.rule_id === "rule_d6_medium",
+  );
+  const requirement = Object.fromEntries(
+    Object.entries(rule.requirements[0]).filter(
+      ([key]) => key !== "named_approver_identity_ids",
+    ),
+  );
+  data.policies[0].rules = [
+    {
+      ...rule,
+      condition: { currency: "USD", minimum_amount_minor: 0 },
+      requirements: [
+        { ...requirement, required_approval_count: 1, allow_delegation: true },
+      ],
+    },
+  ];
+}
+
+export function restrictFinanceDelegate(data, restriction) {
+  allowEitherFinanceReviewer(data);
+  if (restriction === "revoked identity")
+    data.identities.find(
+      (identity) => identity.identity_id === data.actors.finance_delegate,
+    ).status = "revoked";
+  if (restriction === "expired grant")
+    data.delegations[0].effective_until = "2026-09-06T16:00:01.000Z";
+  if (restriction === "wrong scope")
+    data.delegations[0].scope.organization_scope_ids = ["scope_other"];
+  if (restriction === "revoked grant") {
+    data.delegations[0].status = "revoked";
+    data.delegations[0].revocation = {
+      revoked_by_identity: data.identities.find(
+        (identity) => identity.identity_id === data.actors.executive,
+      ),
+      revoked_at: START,
+      revoked_at_source_timezone: "UTC",
+      reason: "Synthetic grant withdrawn",
+      source_ref: "synthetic://d6/revocation",
+    };
+  }
+}
