@@ -1123,7 +1123,12 @@ export function mountAuthorityWorkbench() {
       if (attempt) content.append(eligibilityView(state));
       if (
         showNotice &&
-        !(attempt && refreshFailed(state) && !state.pending && !state.busy)
+        !(
+          attempt &&
+          state.error?.includes("could not be refreshed") &&
+          !state.pending &&
+          !state.busy
+        )
       )
         content.append(notice);
       if (!state.needsRefresh && requestBlocked(packet)) {

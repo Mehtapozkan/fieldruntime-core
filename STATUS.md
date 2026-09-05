@@ -630,6 +630,9 @@ an older attempt's proof. Completed review collapses behind keyboard-accessible
 “Review or intervene” without switching seats or removing permitted interventions.
 Duplicate result/uncertainty copy is removed; retry mechanics, verifier selection
 and receipt internals are expandable. Retained material and citations are unchanged.
+Only duplicate refresh notices are suppressed: a later reviewer denial remains
+visible alongside an earlier credit-refresh failure, covered through PostgreSQL/API
+and the browser.
 This pass changes presentation, browser tests and documentation only; Accepted
 D-033, command/retry logic, runtime contracts, migrations and dependencies are unchanged.
 

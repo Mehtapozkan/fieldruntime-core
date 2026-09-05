@@ -404,6 +404,13 @@ export function registerCreditBrowserTests(fixture) {
       page.locator('[data-credit-result="inconclusive"]'),
     ).toBeVisible();
     await expect(action(page, "execute-credit")).toHaveCount(0);
+    await vote(page, "business", "reject");
+    await expect(
+      page.locator(".review-notice").filter({
+        hasText:
+          "This synthetic reviewer is not currently eligible for this decision. Refresh and inspect the authority requirements.",
+      }),
+    ).toBeVisible();
     await page.unroute(`**${CREDIT_ROOT}`);
     await page.route(`**${CREDIT_ROOT}`, async (route) => {
       const response = await route.fetch();
