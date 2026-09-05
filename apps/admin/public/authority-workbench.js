@@ -190,6 +190,9 @@ export function mountAuthorityWorkbench() {
   const stage = $("stage-content"),
     nav = $("stage-navigation");
   $("announcement").classList.add("announcement--sr-only");
+  $("experience-mode")
+    .closest(".safety-rail")
+    .classList.add("safety-rail--review");
   let active = "packet",
     seat = "finance",
     decision = "approve",
@@ -422,7 +425,7 @@ export function mountAuthorityWorkbench() {
       : "Request not initialized";
     $("case-mode").textContent = "Persistent review · execution off";
     $("case-due-label").textContent = "REQUEST EXPIRY";
-    $("experience-mode").textContent = "Persistent synthetic review";
+    $("experience-mode").textContent = "Persistent review";
     $("state-pill").parentElement.setAttribute("aria-label", "Request status");
     $("severity-pill").textContent = "Synthetic";
     $("state-pill").textContent = state.packet
@@ -446,12 +449,15 @@ export function mountAuthorityWorkbench() {
       );
       navigation.append(control);
     }
-    navigation.append(
-      el("a", "Legacy action simulation ↗", "review-legacy-link", {
+    const legacyLink = el(
+      "a",
+      "Legacy action simulation ↗",
+      "review-legacy-link",
+      {
         href: "/?view=legacy",
-      }),
+      },
     );
-    nav.replaceChildren(navigation);
+    nav.replaceChildren(navigation, legacyLink);
     const content = box("runtime-review");
     const notice = box(
       `review-notice${state.error ? " review-notice--error" : ""}`,

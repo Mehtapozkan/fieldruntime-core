@@ -2037,11 +2037,16 @@ button {
 .review-legacy-link {
   display: block;
   margin-top: 2rem;
-  color: #bfd6c9;
+  color: var(--forest);
   font-size: 0.74rem;
   text-decoration: underline;
 }
 @media (max-width: 760px) {
+  .safety-rail--review {
+    flex-wrap: wrap;
+    gap: 0.4rem 0.8rem;
+    overflow: visible;
+  }
   .review-grid {
     grid-template-columns: 1fr;
   }
@@ -2051,7 +2056,6 @@ button {
     padding: 1.15rem;
   }
   .review-legacy-link {
-    margin: 1rem;
-    color: var(--forest);
+    margin: 0.5rem 1rem;
   }
 }

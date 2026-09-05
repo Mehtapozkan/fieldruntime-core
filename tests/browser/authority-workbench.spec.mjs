@@ -87,6 +87,18 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
     exact: true,
   });
   await expect(start).toBeEnabled();
+  await page.setViewportSize({ width: 390, height: 844 });
+  const safety = await page
+    .getByText("External writes off", { exact: true })
+    .boundingBox();
+  expect(safety.x).toBeGreaterThanOrEqual(0);
+  expect(safety.x + safety.width).toBeLessThanOrEqual(390);
+  const navigation = await page.locator(".stage-list").boundingBox();
+  const legacy = await page
+    .getByRole("link", { name: "Legacy action simulation ↗" })
+    .boundingBox();
+  expect(legacy.y).toBeGreaterThanOrEqual(navigation.y + navigation.height);
+  await page.setViewportSize({ width: 1440, height: 1000 });
   expect(writes).toHaveLength(0);
   await start.click();
   await expect(submit(page)).toBeEnabled();
