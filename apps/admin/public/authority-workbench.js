@@ -10,7 +10,8 @@ import {
   canExecuteCredit,
   creditMatchesPacket,
   latestInvocation,
-  latestCheck,
+  selectedInvocation,
+  selectedCheck,
   creditReason,
 } from "./credit-client.js";
 
@@ -101,13 +102,9 @@ export function reviewProgress(state) {
         ? "Recover the saved command with an exact retry before another decision."
         : "Refresh, inspect what changed, then choose whether to submit a new decision.",
     };
-  const attempt =
-    latestInvocation(state.credit) ??
-    (state.creditReceipt?.outcome === "simulated_action_recorded"
-      ? state.creditReceipt
-      : null);
+  const attempt = selectedInvocation(state);
   if (attempt) {
-    const proof = latestCheck(state.credit);
+    const proof = selectedCheck(state, attempt);
     const differentRequest =
       attempt.authority_request_id !== packet.authority_request_id
         ? " The recorded $15,000 operation belongs to an earlier request; it does not execute this proposal."
@@ -550,13 +547,9 @@ export function mountAuthorityWorkbench() {
   }
   function creditView(state) {
     const credit = state.credit;
-    const attempt = latestInvocation(credit);
+    const attempt = selectedInvocation(state);
     const retained = state.creditReceipt;
-    const latest =
-      retained?.comparison &&
-      (!latestCheck(credit) || retained.sequence > latestCheck(credit).sequence)
-        ? retained
-        : latestCheck(credit);
+    const latest = selectedCheck(state, attempt);
     const blocked = state.busy || !!state.pending;
     const section = card(
       "Simulated credit",
@@ -987,6 +980,35 @@ export function mountAuthorityWorkbench() {
     }
     if (state.error || state.pending || state.busy) content.append(notice);
     if (!state.packet) {
+      if (state.creditReceipt)
+        content.append(
+          card(
+            "Confirmed historical receipt",
+            el(
+              "p",
+              state.creditReceipt.comparison
+                ? {
+                    verified_simulated_effect:
+                      "Simulated credit independently checked. Customer impact remains unconfirmed; the Case remains unresolved.",
+                    mismatch:
+                      "Mismatch — the independent check did not match the expected credit.",
+                    inconclusive:
+                      "Check inconclusive — the credit effect remains unknown.",
+                  }[state.creditReceipt.comparison.outcome]
+                : state.creditReceipt.outcome === "simulated_action_recorded"
+                  ? "Simulated action recorded; independent check needed."
+                  : "The simulated credit was denied and retained in history.",
+            ),
+            el(
+              "p",
+              "The command is confirmed. Current state is unavailable until refresh; this historical receipt does not grant permission.",
+            ),
+            details(
+              "Accepted receipt",
+              el("pre", JSON.stringify(state.creditReceipt, null, 2)),
+            ),
+          ),
+        );
       content.append(
         intro(
           "01 / Governed review",

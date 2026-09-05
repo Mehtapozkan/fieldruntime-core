@@ -7,10 +7,12 @@ import {
 import {
   CREDIT_ROOT,
   canExecuteCredit,
+  latestInvocation,
   latestCheck,
   validateCredit,
 } from "../apps/admin/public/credit-client.js";
 import { memoryStorage } from "../tests/helpers/authority-browser-api.mjs";
+import { reviewProgress } from "../apps/admin/public/authority-workbench.js";
 // Real PostgreSQL and HTTP; no skipped or in-memory substitute acceptance tests.
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -2381,6 +2383,17 @@ test("D7-D latest independent absence permits only an explicit fresh attempt; oc
     latestCheck(client.state.credit).comparison.outcome,
     "verified_simulated_effect",
   );
+  const reversed = structuredClone(client.state.credit);
+  reversed.attempts.reverse();
+  reversed.verifications.reverse();
+  assert.equal(
+    latestInvocation(reversed).id,
+    client.state.credit.source.origin_attempt_id,
+  );
+  assert.equal(
+    latestCheck(reversed).comparison.outcome,
+    "verified_simulated_effect",
+  );
   await h.restart();
   await client.refresh();
   assert.equal(canExecuteCredit(client.state), false);
@@ -2453,11 +2466,42 @@ test("D7-D altered presentation cannot turn adapter success or an inconclusive c
     (v) => {
       v.verifications[0].action_entry_hash = "sha256:" + "0".repeat(64);
     },
+    (v) => {
+      const proof = v.verifications[0];
+      proof.observation.raw.rows[0].case_id = "case_other";
+      proof.observation.raw.hash = sha256Json(proof.observation.raw.rows);
+      proof.recording_source = structuredClone(proof.observation.raw);
+      delete proof.event_hash;
+      proof.event_hash = sha256Json(proof);
+    },
   ]) {
     const changed = structuredClone(valid);
     edit(changed);
     assert.throws(() => validateCredit(changed), /invalid/);
   }
+});
+
+test("D7-D reordered history cannot hide a later inconclusive check behind an earlier match", async (t) => {
+  const { h, client } = await readyWorkbench(t);
+  await client.executeCredit();
+  await client.verifyCredit();
+  h.setReaderHook((sql) => {
+    if (sql.includes("verification-read-source"))
+      throw Error("unavailable read");
+  });
+  await client.verifyCredit();
+  assert.equal(
+    latestCheck(client.state.credit).comparison.outcome,
+    "inconclusive",
+  );
+  const reordered = structuredClone(client.state.credit);
+  reordered.attempts.reverse();
+  reordered.verifications.reverse();
+  validateCredit(reordered);
+  assert.equal(
+    reviewProgress({ ...client.state, credit: reordered }).heading,
+    "Check inconclusive",
+  );
 });
 
 if (process.env.D7_WORKBENCH_BROWSER === "1") {

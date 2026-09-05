@@ -5,7 +5,7 @@ import {
   canExecuteCredit,
   creditCommand,
   verificationCommand,
-  latestInvocation,
+  selectedInvocation,
   creditReason,
 } from "./credit-client.js";
 
@@ -501,6 +501,7 @@ export function createReviewClient({
     receipt: null,
     credit: null,
     creditReceipt: null,
+    confirmedAttempt: null,
     creditNeedsRefresh: true,
     creditError: null,
     needsRefresh: false,
@@ -743,7 +744,12 @@ export function createReviewClient({
       pending: next,
       requestId: id,
       ...(creditWrite
-        ? { creditReceipt: clone(receipt) }
+        ? {
+            creditReceipt: clone(receipt),
+            ...(receipt.outcome === "simulated_action_recorded"
+              ? { confirmedAttempt: clone(receipt) }
+              : {}),
+          }
         : { receipt: clone(receipt) }),
       error: null,
       message: "The command was recorded. Checking the current review…",
@@ -921,15 +927,7 @@ export function createReviewClient({
       return run(async () => {
         ensureWritable();
         // Verification is independent of current execution and review eligibility.
-        const loaded = latestInvocation(state.credit);
-        const confirmed =
-          state.creditReceipt?.outcome === "simulated_action_recorded"
-            ? state.creditReceipt
-            : null;
-        const attempt =
-          confirmed && (!loaded || confirmed.sequence > loaded.sequence)
-            ? confirmed
-            : loaded;
+        const attempt = selectedInvocation(state);
         requireValue(
           attempt,
           "Load a committed action attempt before checking its source.",

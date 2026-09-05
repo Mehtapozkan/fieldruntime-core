@@ -157,10 +157,15 @@ export function validateVerification(v, attempt) {
         o.raw.status === "read" &&
         o.raw.rows?.length === 1,
     );
-    const row = o.raw.rows[0]?.source_row;
+    const indexed = o.raw.rows[0],
+      row = indexed?.source_row;
     source(row);
     check(
       row !== null &&
+        scoped(indexed) &&
+        indexed.slot === "service_remedy" &&
+        indexed.origin_attempt_id === row.origin_attempt_id &&
+        indexed.row_hash === row.row_hash &&
         row.origin_attempt_id === v.command.attempt_id &&
         same(o.raw, v.recording_source),
     );
@@ -253,6 +258,7 @@ export function latestInvocation(credit) {
   return (
     credit?.attempts
       .filter((a) => a.outcome === "simulated_action_recorded")
+      .sort((a, b) => a.sequence - b.sequence)
       .at(-1) ?? null
   );
 }
@@ -260,8 +266,30 @@ export function latestCheck(credit, attempt = latestInvocation(credit)) {
   return (
     credit?.verifications
       .filter((v) => v.action_entry_hash === attempt?.event_hash)
+      .sort((a, b) => a.sequence - b.sequence)
       .at(-1) ?? null
   );
+}
+// Accepted receipts are historical evidence, never a replacement for current GET eligibility.
+export function selectedInvocation(state) {
+  const loaded = latestInvocation(state.credit);
+  const confirmed =
+    state.confirmedAttempt ??
+    (state.creditReceipt?.outcome === "simulated_action_recorded"
+      ? state.creditReceipt
+      : null);
+  return confirmed && (!loaded || confirmed.sequence > loaded.sequence)
+    ? confirmed
+    : loaded;
+}
+export function selectedCheck(state, attempt = selectedInvocation(state)) {
+  const loaded = latestCheck(state.credit, attempt);
+  const receipt = state.creditReceipt;
+  return receipt?.comparison &&
+    receipt.action_entry_hash === attempt?.event_hash &&
+    (!loaded || receipt.sequence > loaded.sequence)
+    ? receipt
+    : loaded;
 }
 export function canExecuteCredit(state) {
   const c = state.credit;

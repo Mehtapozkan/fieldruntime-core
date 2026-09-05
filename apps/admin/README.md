@@ -71,7 +71,9 @@ this operation. A source slot already containing a credit prevents another credi
   records prevent another tab from overwriting an outstanding retry.
 - A confirmed write followed by a failed GET retains its receipt and reports that
   current state could not be refreshed. It is not retried as an uncertain write.
-  No receipt alone becomes current execution permission.
+  A newer confirmed attempt is shown with its own check; an older absence result
+  cannot replace it when refresh fails. No receipt alone becomes current execution
+  permission.
 - **Mismatch** explains expected versus observed source values. Authoritative
   absence is distinct from an unavailable read. **Check inconclusive** explains
   unreadable, unavailable or changing evidence; it is never successful verification.

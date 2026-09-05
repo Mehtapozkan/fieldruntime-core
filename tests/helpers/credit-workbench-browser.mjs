@@ -178,6 +178,8 @@ export function registerCreditBrowserTests(fixture) {
       const url = page.url();
       await page.close();
       const reopened = await context.newPage();
+      const packetReads = "**/authority-requests/*/packet";
+      await reopened.route(packetReads, (route) => route.abort("failed"));
       await reopened.goto(url);
       await idle(reopened);
       await expect(action(reopened, "retry")).toBeVisible();
@@ -187,6 +189,11 @@ export function registerCreditBrowserTests(fixture) {
       });
       await click(reopened, "retry");
       assert.equal(retried, original);
+      await expect(
+        reopened.getByText("Confirmed historical receipt", { exact: true }),
+      ).toBeVisible();
+      await reopened.unroute(packetReads);
+      await click(reopened, "refresh");
       await expect(action(reopened, "retry")).toHaveCount(0);
       const view = await h.request(CREDIT_ROOT);
       assert.equal(view.attempts.length, 1);
@@ -258,6 +265,50 @@ export function registerCreditBrowserTests(fixture) {
       "Awaiting review",
     );
     await expect(action(page, "execute-credit")).toBeDisabled();
+  });
+
+  test("D7-D browser: a confirmed newer attempt and its check remain visible when refresh fails", async (t) => {
+    let inserts = false;
+    const h = await fixture(t, {
+      verification: true,
+      adapter: async (write) => {
+        if (inserts) await write();
+        return "success";
+      },
+    });
+    await h.enroll();
+    const { page } = await openBrowser(t, h);
+    await prepare(page);
+    await approve(page);
+    await click(page, "execute-credit");
+    await click(page, "verify-credit");
+    await expect(page.locator('[data-credit-result="mismatch"]')).toBeVisible();
+    inserts = true;
+    await page.route(`**${CREDIT_ROOT}`, (route) => route.abort("failed"));
+    await click(page, "execute-credit");
+    await expect(page.locator('[data-credit-result="mismatch"]')).toHaveCount(
+      0,
+    );
+    await expect(
+      page.getByText("Simulated action recorded; independent check needed", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    const newer = (await h.request(CREDIT_ROOT)).attempts.at(-1);
+    await click(page, "verify-credit");
+    await expect(
+      page.locator('[data-credit-result="verified_simulated_effect"]'),
+    ).toBeVisible();
+    assert.equal(
+      (await h.request(CREDIT_ROOT)).verifications.at(-1).command.attempt_id,
+      newer.id,
+    );
+    await click(page, "verify-credit");
+    assert.equal(
+      (await h.request(CREDIT_ROOT)).verifications.at(-1).command.attempt_id,
+      newer.id,
+    );
+    await expect(action(page, "retry")).toHaveCount(0);
   });
   test("D7-D browser: wrong amount is a retained mismatch, never successful verification", async (t) => {
     const h = await fixture(t, { verification: true });
