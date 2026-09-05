@@ -149,7 +149,9 @@
         "verification_predicate",
         "one_credit_per_case",
         "precondition",
-        "service_requirements"
+        "service_requirements",
+        "workflow_id",
+        "workflow_version"
       ],
       "properties": {
         "version": {
@@ -233,6 +235,12 @@
               }
             }
           }
+        },
+        "workflow_id": {
+          "const": "customer_escalation_commitment_control"
+        },
+        "workflow_version": {
+          "const": "0.1.0"
         }
       }
     },

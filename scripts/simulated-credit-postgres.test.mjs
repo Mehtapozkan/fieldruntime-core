@@ -272,7 +272,7 @@ async function fixture(t, { upgrade = false, adapter } = {}) {
       const b = await r.json();
       assert.ok(
         (Array.isArray(status) ? status : [status]).includes(r.status),
-        `HTTP ${r.status}: ${JSON.stringify(b)}`,
+        `HTTP ${r.status}: ${JSON.stringify(b).slice(0, 2000)}`,
       );
       return b;
     },
@@ -1034,4 +1034,28 @@ test("D7 terminated PostgreSQL writer rolls back an inserted source before journ
   await h.restart();
   assert.equal((await h.request(action, command)).status, "applied");
   assert.equal((await h.request(view)).attempts.length, 1);
+});
+
+test("D7 exact workflow identity/version cannot be changed behind the expected record ID", async (t) => {
+  for (const field of ["version", "workflow_id"]) {
+    const h = await fixture(t),
+      seed = caseCommand("d6_workbench");
+    seed.case_seed.workflow_version[field] =
+      field === "version" ? "9.9.9" : "another_workflow";
+    if (field === "workflow_id") {
+      const before = await h.dump();
+      await h.case(seed, 400); // The strict Case contract already rejects this identity.
+      assert.deepEqual(await h.dump(), before);
+      continue;
+    }
+    await h.case(seed);
+    const id = await h.approved();
+    const denied = await h.request(action, await h.command(id), 409);
+    assert.ok(
+      denied.receipt.envelope.reason_codes.includes(
+        "workflow_binding_mismatch",
+      ),
+    );
+    assert.equal((await h.request(view)).source, null);
+  }
 });

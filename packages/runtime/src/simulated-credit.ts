@@ -65,6 +65,8 @@ export const CREDIT_PROFILE = json({
   payload: CREDIT_PAYLOAD,
   allowed_states: ["needs_review"],
   workflow_version_id: "workflow_ecc_v0_1_0",
+  workflow_id: "customer_escalation_commitment_control",
+  workflow_version: "0.1.0",
   scope_ids: ["scope_customer_ops"],
   policy_id: "policy_d6_financial_remedy",
   policy_version: "1.0.0",
@@ -280,6 +282,13 @@ export function evaluateCredit(
       creditSame(record.scope_ids, CREDIT_PROFILE.scope_ids) &&
       record.workflow_version_id === CREDIT_PROFILE.workflow_version_id,
     "case_scope_mismatch",
+  );
+  const workflow = object(aggregate.document.workflow_version);
+  check(
+    workflow.id === CREDIT_PROFILE.workflow_version_id &&
+      workflow.workflow_id === CREDIT_PROFILE.workflow_id &&
+      workflow.version === CREDIT_PROFILE.workflow_version,
+    "workflow_binding_mismatch",
   );
   check(record.state === "needs_review", "case_state_ineligible");
   check(
