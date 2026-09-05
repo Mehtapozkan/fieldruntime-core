@@ -8,9 +8,10 @@ merged PR #18. D6-C remains unimplemented.
 
 Approve an immutable Authority Request with its own append-only review history in
 canonical PostgreSQL. A recorded decision advances **request review revision R**,
-never **Case version C**. A Decision Packet is a derived read model. Approvals
-become effective only after folding the entire request history and checking current
-eligibility; a stored `authorized` result is historical evidence, not permission.
+never **Case version C**. A Decision Packet is a derived read model with no durable
+read side effects. Approvals become effective only after folding the entire request
+history and checking current eligibility; a stored `authorized` result is historical
+evidence, not permission.
 
 For synthetic D6, bind each request to one runtime-controlled authority-catalog
 revision **S**. Any catalog change requires a new request and fresh approvals.
@@ -96,8 +97,9 @@ version cannot decrease, S cannot be reused, and the immutable request expiry
 cannot be extended. Only runtime time is permitted for current evaluation;
 backdated `asOf` belongs exclusively to historical replay and can never revive a
 request. Reject a regressing runtime clock rather than treating it as fresh time.
-Compare current evaluation time with durable prior evaluation/recording times;
-historical replay times never update that current-time guard.
+At submission, compare current evaluation time with the durable clock guard from
+prior committed writes. Ordinary reads and historical replay never update that
+guard; a read's eligibility result is informational, not permission to submit.
 
 ## Minimal contract and API additions (proposed, not schema files)
 
@@ -111,44 +113,52 @@ unchanged v0 fields into the repaired resolver. Preserve that exact projection i
 the evaluation inputs. Do not send a v1 object to today's strict v0 validator or
 treat a bare resolver result as the new lifecycle envelope.
 
-| Contract            | Minimum binding or addition                                                                                                                                                                                                                                                                                                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Request v1          | Retain all v0 identity, exact C, consequence and lineage fields. Require `policy_reference`; add `policy_content_hash`, `case_journal_head_hash`, `review_material_hash`, `authority_state_revision`, `authority_snapshot_hash`, and `expires_at` with source timezone. Optional `predecessor_authority_request_id` records fresh-attempt lineage.                                   |
-| Review material     | Immutable, hash-addressed canonical JSON containing the exact consequence body and the evidence actually presented: ordered/specified content, source IDs/versions, hashes, provenance, source times/timezones, freshness basis, conflicts and unknowns. Preserve any recommendation or explanation used for consent. No reference-only URL may stand in for missing review content. |
-| Decision v1         | Preserve v0 exact bindings and replacement semantics; add `request_binding_hash`, `presented_review_revision` and `presented_view_hash`. The runtime constructs actor identity, decision time and lineage from the controlled synthetic submission context.                                                                                                                          |
-| Journal envelope    | Request ID, R, event ID/type, predecessor hash, canonical command/fingerprint, idempotency key, actor/correlation/causation, recorded time/timezone, evaluation input/result hashes, evaluator implementation identifier, and event hash. Replacement creation and old `modify` entry cross-reference each other.                                                                    |
-| Evaluation snapshot | Retain the full trusted resolver inputs: replayed Case at its head, request/consequence, responsibilities, policies, identities, authority records, delegations, prior decisions at the recorded R, evaluator identity and exact `asOf`/timezone. Retain the result and pinned evaluator/projection implementation versions needed to reproduce it.                                  |
+| Contract            | Minimum binding or addition                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Request v1          | Retain all v0 identity, exact C, consequence and lineage fields. Require `policy_reference`; add `policy_content_hash`, `case_journal_head_hash`, `review_material_hash`, `authority_state_revision`, `authority_snapshot_hash`, and `expires_at` with source timezone. Optional `predecessor_authority_request_id` records fresh-attempt lineage.                                             |
+| Review material     | Preserve at request creation immutable, hash-addressed canonical JSON containing the exact consequence, cited evidence content, source IDs/versions, hashes, provenance, source times/timezones, freshness basis, conflicts, unknowns and recommendation/explanation used for consent. Preserve content order where meaningful. No reference-only URL may stand in for missing review content. |
+| Decision v1         | Preserve v0 exact bindings and replacement semantics; add `request_binding_hash` and `expected_review_revision` (the prior R bound by the submission). The runtime constructs actor identity, decision time and lineage from the controlled synthetic submission context.                                                                                                                      |
+| Journal envelope    | Request ID, R, event ID/type, predecessor hash, canonical command/fingerprint, idempotency key, actor/correlation/causation, recorded time/timezone, evaluation input/result hashes, evaluator implementation identifier, and event hash. Replacement creation and old `modify` entry cross-reference each other.                                                                              |
+| Evaluation snapshot | For each accepted decision, retain the full trusted resolver inputs: replayed Case at its head, request/consequence, responsibilities, policies, identities, authority records, delegations, prior decisions at the bound R, evaluator identity and exact `asOf`/timezone. Retain the result and pinned evaluator/projection implementation versions needed to reproduce it.                   |
 
 Hashes use the existing canonical JSON/SHA-256 contract over complete versioned
 content. `request_binding_hash` covers the whole v1 request; policy name/version
 alone cannot hide changed content. Hashes are integrity bindings, not substitutes
-for retained bytes or trust. Request material, policy and authority snapshots must
-be durably available before a request/decision can reference them. Evaluation
+for retained bytes or trust. Request creation atomically preserves its immutable
+review material, policy and authority snapshots. Decision acceptance atomically
+retains its trusted evaluation inputs and result with its journal entry. These
 snapshots are immutable evidence, not a separately editable Decision Basis or
-review-session aggregate.
+review-session aggregate; previews need no durable snapshot.
 
 Propose three bounded operations through the existing worker/API surface:
 `authority.request.create`, `authority.request.decide`, and a request/packet read.
 Create checks expected C and S. Decide supplies expected C, expected R, expected S,
-request binding hash, the presented view hash, disposition, reason/replacement
-input, and a tenant-scoped idempotency key. Reads return immutable request/history
-plus a derived packet containing C/R/S, eligibility, current requirements, source
-bindings, and evaluated time. The Case projection itself is unchanged.
+request binding hash, disposition, reason/replacement input, and a tenant-scoped
+idempotency key. Reads return immutable request/history plus a derived packet
+containing C/R/S, eligibility, current requirements, source bindings, and evaluated
+time. The Case projection itself is unchanged.
 
-The presented view is reproducible structured review content, not a persisted
-authoritative packet: material + request + prior decisions at R + displayed
-requirements/eligibility + evaluation time + projection version. Retain its bytes
-or all pinned deterministic inputs and verify its hash. At submit, verify the view
-was issued from trusted runtime state; do not accept client-supplied policy,
-identity, evidence or authorization results. Recheck at submission time even if
-the view matched when issued. Changed revisions/content require refresh, not
-silent client-side rebasing. A read result and a successful decision receipt are
-never executable action tokens.
+Ordinary request/packet reads derive their response from one consistent PostgreSQL
+snapshot of the Case, request/history and catalog, with one runtime evaluation
+time. Use a read-only transaction without acquiring the singleton writer lock.
+Reads append no records, reserve no IDs, advance neither C/R/S nor the writer-lock
+revision, and do not update the durable clock guard. Repeated reads or refreshes
+may report changed eligibility as time passes, but create no durable changes.
 
-Issuing a review view retains its immutable evaluation/presentation snapshot under
-the writer lock, without advancing C or R. A submission references that retained
-view; reconstructing a plausible hash client-side does not establish issuance.
-This is review evidence, not a mutable or independently authoritative packet.
+The exact request binding plus expected R identifies the consent material and
+prior decisions. Reconstruct required review content from that canonical material
+and history; remove `presented_view_hash` and the issued-view registry as redundant.
+Current requirements/eligibility are derived again at submission, using trusted
+runtime inputs. No prior read or proof of view issuance is required for acceptance.
+Do not accept client-supplied policy, identity, evidence or authorization results
+as evaluation inputs. Changed revisions/content require refresh and an explicit
+resubmission, not silent client-side rebasing. A read result and a successful
+decision receipt are never executable action tokens.
+
+The decision records the material to which the actor consented, not proof that a
+human inspected a screen. Even a stored issued view would not prove inspection.
+Reconstruction preserves bound content/history and the accepted evaluation, not
+every preview's transient eligibility, presentation time or browser rendering.
 
 ### Concrete contract fragment
 
@@ -178,12 +188,13 @@ fields are omitted here for brevity.
 ```
 
 Finance submits `decide(request_credit_001, approve, expected C=7/R=0/S=12,
-request_binding_hash=H_request_1, presented_view_hash=H_view_0, key=finance_1)`.
-The runtime records Decision v1 with `case_version=7`, `presented_review_revision=0`
+request_binding_hash=H_request_1, key=finance_1)`.
+The runtime records Decision v1 with `case_version=7`, `expected_review_revision=0`
 and `decided_at=2026-09-06T16:06:00.000Z`, appends review entry R=1, and returns
 `applied, open, approval_required, outstanding=[executive_sponsor]`. Its historical
 evaluation inputs include the exact submitted/recorded decision and prior R=0
-history; Executive's later evaluation consumes the resulting R=1 history.
+history, retained atomically with bindings, result and implementation versions;
+Executive's later evaluation consumes the resulting R=1 history.
 
 ## Atomicity, current eligibility and replay
 
@@ -198,11 +209,12 @@ do not repurpose the pending-reconciliation SQL.
 
 The catalog contains synthetic identity, policy, authority and delegation records.
 Its durable revision is monotonic and increments only on a controlled catalog
-update, under the same lock. Preserve snapshots used by reviews; no identity-status
-timeline, backfill, provider, public catalog-edit API or production authentication
-is proposed. A snapshot records what the runtime trusted then, not when an identity
-was actually revoked. Preserve PR #18's historical delegation-approver semantics;
-current evaluator, reviewer, delegator and delegate eligibility remains explicit.
+update, under the same lock. Preserve snapshots bound at creation and decision
+acceptance; no identity-status timeline, backfill, provider, public catalog-edit API
+or production authentication is proposed. A snapshot records what the runtime
+trusted then, not when an identity was actually revoked. Preserve PR #18's
+historical delegation-approver semantics; current evaluator, reviewer, delegator
+and delegate eligibility remains explicit.
 
 For each new write, inside one transaction:
 
@@ -211,17 +223,21 @@ For each new write, inside one transaction:
    freshness checks. Returning that historical receipt grants no current permission.
 2. Compare expected C/R/S to the locked current heads. Require request C = current C
    and request S = current S. Verify Case head, policy content and review material
-   bindings and submitted view. Require `requested_at <= now < expires_at`.
+   bindings, including the whole request hash, and reconstruct required review
+   content from canonical material/history at expected R. Require
+   `requested_at <= now < expires_at` and enforce the durable clock guard.
 3. Fold terminal dispositions **before** collecting approvals. Evaluate current
    approved policy, identity, scope, authority ranks/conflicts, effective windows,
    expiry and revocation using runtime-owned records and injected UTC time. Recheck
    every counted approval at its recorded instant and now using one complete
    supporting path. Catalog equality alone does not replace time checks.
-4. Atomically persist decision/creation, its evidence and evaluation snapshots,
-   idempotent disposition, replacement pair if any, and reserved IDs. Verify the
-   persisted result by rehydration before commit. C and the Case journal stay
-   unchanged. A rollback exposes none of the append; a failed rollback discards
-   the client as the current store does.
+4. Atomically persist decision/creation, its exact bindings and prior/new R,
+   evidence, trusted evaluation inputs/time, result and implementation versions
+   with its journal entry, idempotent disposition, replacement pair if any,
+   reserved IDs and durable clock-guard update. Verify the persisted result by
+   rehydration before commit. C and the Case journal stay unchanged. A rollback
+   exposes none of the write; a failed rollback discards the client as the current
+   store does.
 
 Enforce unique `(tenant, request, R)`, event/decision IDs, and `(tenant, authority
 idempotency key)` across creation and review entries; this authority-command key
@@ -244,9 +260,11 @@ Replay folds request entries in R order, verifies bindings and re-runs the pinne
 evaluator over retained inputs/time without consulting today's catalog or clock.
 It must reject gaps, reordered entries, false but coherently rehashed transitions,
 missing/tampered snapshots, identity/tenant drift and terminal revival. Case replay
-remains unchanged. Historical packet reconstruction includes the exact prior R
-seen by the reviewer; today's packet is a separate derived view. Hash chains remain
-unsigned and externally unanchored, as in the existing appliance.
+remains unchanged. After restart, historical packet reconstruction uses immutable
+request material, history through the decision's bound prior R, and its retained
+evaluation inputs/result/versions; no issued-view record is needed. Today's packet
+is a separate derived view. Hash chains remain unsigned and externally unanchored,
+as in the existing appliance.
 
 ## Required scenarios
 
@@ -273,17 +291,25 @@ from runtime Case history, not imported from the non-replayable legacy fixture.
 
 1. Add versioned contract tests for complete snapshot/material/policy binding,
    absent v1 fields, v0 non-promotion, terminal dispositions and replacement lineage.
+   Altered request bindings and stale expected review revisions cannot authorize.
+   With no issued-view registry, client-supplied policy, identity, evidence or
+   authorization inputs still cannot replace runtime-controlled evaluation inputs.
 2. Execute every scenario above with C/R/S assertions; retain all 42 repaired
    resolver tests, including named principals, direct/delegated authority,
    contradictory IDs, cited-grant timing and input-order equivalence.
 3. Extend the [runtime replay tests](../../tests/runtime-engine.test.mjs) pattern:
-   deterministic replay and packet reconstruction, tampering/gaps/coherent rehash
-   rejection, terminal revival denial and exact duplicate behavior without clocks
-   or IDs. Prove current evaluation does not reuse historical authorization.
+   deterministic replay and accepted-decision packet reconstruction after restart
+   without stored previews, tampering/gaps/coherent rehash rejection, terminal
+   revival denial and exact duplicate behavior without clocks or IDs. Prove current
+   evaluation does not reuse historical authorization or a prior read result.
 4. Extend the [store tests](../../tests/postgres-store.test.mjs) pattern and real
    PostgreSQL CI smoke: simultaneous reviewers, review-vs-Case/catalog races,
    failure at every persistence step, atomic replacement, restart retries,
    append-only constraints, snapshot drift and failed-rollback client eviction.
+   Prove repeated request/packet reads use consistent database snapshots and leave
+   durable records, reserved IDs, C/R/S, writer-lock revision and clock guard
+   unchanged. Case/catalog changes and request or supporting-authority expiry
+   between read and submission must prevent stale approval from authorizing.
 5. Keep existing Case version/journal tests and ECC corpus/gold unchanged; run
    `pnpm validate`, positive/negative ECC evaluations, Compose config and the
    appliance smoke. Test regressing/current-vs-historical clocks and expiry edges.

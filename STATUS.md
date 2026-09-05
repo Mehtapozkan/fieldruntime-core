@@ -17,6 +17,11 @@ accepted or implemented.
 - [D-032 — Authority Request review history and exact-version lifecycle](docs/architecture/d6-authority-request-lifecycle.md)
   keeps Case versions and D-014 unchanged, gives immutable requests an append-only
   review revision, and derives the Decision Packet from retained inputs/history.
+- Ordinary request/packet reads are proposed to use a consistent database snapshot
+  with no durable side effects. Request creation preserves consent material;
+  decision acceptance rechecks current eligibility and atomically retains exact
+  bindings, review revision and replay inputs/result/versions. No issued-view
+  registry or proof of human screen inspection is required or claimed.
 - The proposal defines current eligibility, terminal decisions, atomic replacement,
   concurrency, idempotency, PostgreSQL integrity/replay and concrete two-person
   review examples. It recommends fresh requests after any synthetic authority
@@ -209,8 +214,9 @@ accepted or implemented.
   tests require loopback access outside the sandbox; the sandbox-only attempt
   failed with `listen EPERM`, then the complete run passed with that access.
 - `git diff --check` passes.
-- The D-032 documentation proposal is checked with the unchanged runtime suite;
-  passing checks do not establish that its proposed lifecycle is implemented.
+- The D-032 documentation proposal, including its read-side-effect simplification,
+  is checked with the unchanged runtime suite; passing checks do not establish
+  that its proposed lifecycle is implemented.
 - The deterministic ECC adapter passes 30/30 cases and 620/620 checks with every
   hard gate passing.
 - The answer-only negative control fails 30/30 cases, scores 152/620 checks, and
