@@ -6,28 +6,29 @@ people, decisions and their history—outside any model or worker session. Model
 may propose; deterministic policy and attributable human review control authority.
 
 The working implementation is a local, credential-free synthetic appliance. You
-can review Orchid's **proposed $15,000 credit** in the Workbench and retain the
-review in PostgreSQL. A bounded API can record one simulated credit. This review
-branch adds an independent source check; the Workbench does not yet expose action
-or verification controls.
+can review Orchid's **proposed $15,000 credit** and retain its decisions in
+PostgreSQL. The merged API records one bounded simulated credit and independently
+checks its source. This D7-D review branch connects those operations to the existing
+Workbench, with explicit actions, historical evidence and recoverable retries.
 
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external writes.
 > Not production software. Selecting a synthetic reviewer seat is not authentication.
 
 ## What works today
 
-“Main” below means merged source. **D7-C is implemented in open [PR #24](https://github.com/Mehtapozkan/fieldruntime-core/pull/24),
-not yet merged or released.** The historical prerelease has a smaller boundary,
-described under [Distribution](#distribution).
+“Main” means merged source, including D7-C [PR #24](https://github.com/Mehtapozkan/fieldruntime-core/pull/24)
+at `3936843fba4126bdb852e2ee5681de0f7162525a`. **D7-D Workbench controls are implemented
+on this review branch, not yet merged or released.** The historical prerelease has
+a smaller boundary described under [Distribution](#distribution).
 
-| Functionality                                         | Workbench                                                                                                       | API / runtime                                                                                                                                   | Availability                                                                             |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Case and evidence history                             | Explicitly initialize Orchid; inspect retained sources, conflicts and unknowns; demonstrate changed evidence    | Create Cases, attach explicitly targeted evidence, replay immutable PostgreSQL history                                                          | Main                                                                                     |
-| Decision Packet and human review                      | Review the proposed credit; Finance then Executive approve; reject, modify or escalate; reload the same history | Persistent packets, deterministic authority resolution, exact Case/request/catalog checks and terminal decisions; replacements start unapproved | Main (D6)                                                                                |
-| Record simulated credit                               | Controls pending; review completion says execution unavailable                                                  | Explicit enrollment and fresh review, then one bound $15,000 Orchid credit; atomic source/action evidence and exact retries                     | Main (D7-B, merged [PR #23](https://github.com/Mehtapozkan/fieldruntime-core/pull/23))   |
-| Independently check simulated credit                  | Controls pending                                                                                                | Separate verifier/read-only source connection; retain match, mismatch or inconclusive evidence; reconstruct after restart                       | This review branch (D7-C)                                                                |
-| ECC evaluation and legacy walkthrough                 | Separate Acme fixture story, including illustrated action, verification and outcome screens                     | Thirty frozen synthetic cases, deterministic evaluation receipts and an intentionally failing negative control                                  | Main and published prerelease; legacy screens do not invoke the action/verification APIs |
-| Accepted outcome, economics and complete Case closure | Unavailable                                                                                                     | Incomplete-proof closure remains denied; no recovered-revenue or customer-impact proof                                                          | Future work                                                                              |
+| Functionality                                    | Workbench                                                                                                | API / runtime                                                                             | Availability                                                                          |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Case and evidence history                        | Explicit Orchid initialization; retained sources, uncertainty and changed-evidence demonstration         | Canonical PostgreSQL Case commands and replay                                             | Main                                                                                  |
+| Decision Packet and human review                 | Finance/Executive approve; reject, modify or escalate; reload history                                    | Deterministic authority, exact C/R/S and immutable consent; replacements start unapproved | Main (D6)                                                                             |
+| Record simulated credit                          | Explicit preparation and **Record simulated credit**                                                     | Scoped enrollment, one bound $15,000 Orchid credit, atomic source/action history          | API merged (D7-B); controls on this branch                                            |
+| Independently check credit                       | **Check simulated source**; match, mismatch or inconclusive result; exact retry after uncertain response | Separate verifier and source read; retained evidence and restart replay                   | API merged (D7-C); controls on this branch                                            |
+| ECC and legacy illustration                      | Separate Acme fixture story; illustrated action, verification and outcome screens                        | Thirty frozen synthetic cases and deterministic evaluation                                | Main and historical prerelease; legacy screens never invoke runtime action/check APIs |
+| Accepted outcome, economics and complete closure | Unavailable                                                                                              | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof            | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
 credit row's expected account, Case, amount, currency and originating attempt. It
@@ -46,34 +47,29 @@ git clone https://github.com/Mehtapozkan/fieldruntime-core.git
 cd fieldruntime-core
 ```
 
-The clone opens main: persistent review and the simulated action API are available.
-To also evaluate this PR's independent verification, select its branch **before
-installing and starting**:
+The clone opens main, which includes persistent review and the action/check APIs.
+To try this PR's Workbench controls, select its branch before installing:
 
 ```sh
-git switch --track origin/feat/d7c-independent-credit-verification
-```
-
-Then, from the repository root:
-
-```sh
+git switch --track origin/feat/d7d-credit-workbench
 pnpm install --frozen-lockfile
 pnpm fr init ecc --demo
 pnpm fr up
+pnpm fr d7 enroll --demo
 ```
 
-Open <http://127.0.0.1:3210/> and choose **Start or reopen $15,000 review**.
-Inspect the evidence and uncertainty, record Finance approval, review the refreshed
-packet, explicitly select Executive and approve, then reload. Opening the page
-initializes nothing. The CLI initialization only creates the local project manifest;
-the browser action creates the runtime Case/request. The appliance retains history
-across restart. [Full review walkthrough and retry behavior](apps/admin/README.md).
+Open <http://127.0.0.1:3210/>. Choose **Start or reopen $15,000 review**, explicitly
+prepare the original Case through the three shown steps, then **Create fresh
+$15,000 request**. Inspect uncertainty; record Finance then Executive approval.
+Choose **Record simulated credit**, then **Check simulated source**. Reload to
+reconstruct the same history. [Executable walkthrough and problem/retry guidance](apps/admin/README.md).
 
-For simulated action and, on this branch, independent verification, follow the
-[executable API guide](docs/guides/simulated-credit-api.md). It adds explicit
-`pnpm fr d7 enroll --demo`, Case preparation and **fresh review** before the effect;
-enrollment and Case changes invalidate older approvals. Its smoke demonstration
-requires an unused Orchid operation and never clears or silently rebases history.
+Initialization and enrollment are deliberate and idempotent. Case/catalog changes
+invalidate earlier approvals; no approvals transfer to fresh requests. Opening or
+refreshing creates nothing. Pending commands survive reopening in the same browser
+profile; retain site storage while a response is uncertain. For the merged APIs,
+use the [API walkthrough](docs/guides/simulated-credit-api.md). Neither walkthrough
+silently resets an occupied credit slot or moves a changed Case.
 
 The API and PostgreSQL are loopback-only. `fr up` builds the selected source and
 applies checksum-bound migrations; it refuses unsafe configuration. For an existing
@@ -97,8 +93,8 @@ CI also exercises real PostgreSQL/API, restart, Compose and Workbench browser pa
 
 **Persistent Orchid review:** the default page uses canonical runtime evidence,
 requests and human decisions. Finance/Executive progress is read from the API;
-browser state never grants authority. The action and verification APIs described
-above are separate from this review UI until D7-D connects their controls.
+browser state never grants authority. On this branch, explicit action and independent-check controls use those APIs;
+their receipts remain distinct from current authority.
 
 **Legacy Acme fixture simulation:** choose **Legacy action simulation** or open
 `/?view=legacy`. The six-action story illustrates a connector claiming success,
@@ -114,8 +110,8 @@ history. They remain isolated from Orchid, even on this review branch.
 - **D6 — Governed Case Session:** merged, within the synthetic environment:
   persistent Decision Packets, deterministic authority and human review.
 - **D7 — Controlled Action + Independent Verification:** bounded action merged;
-  independent verification implemented for review here. **D7-D Workbench action
-  and verification controls are next**, including explicit retry/problem guidance.
+  independent verification merged. **D7-D Workbench controls are implemented
+  for review here**, including explicit preparation, retries and problem guidance.
 - **D8:** future accepted-outcome/economics receipts and visible failure paths.
   Existing action/proof receipts do not supply those outcomes or economics.
 - **D9–D12:** future Case formation/import, Operational Legibility, reviewed runtime
@@ -150,7 +146,7 @@ Then follow the [tag-pinned guide](https://github.com/Mehtapozkan/fieldruntime-c
 after its clone step. Use a separate fresh appliance volume; do not downgrade an
 upgraded database. The tag-pinned page alone does not select the cloned revision.
 
-Merging source changes does not update that immutable tag or release. PR #24
+Merging source changes does not update that immutable tag or release. This D7-D PR
 publishes no new release or deployment. The source-clone appliance is the supported
 trial path; standalone installers, signed artifacts, SBOM/provenance and production
 operations remain future work. Workspace packages remain registry-private.

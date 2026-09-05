@@ -24,8 +24,8 @@ implementations for:
 The implemented inventory is in [README.md](README.md#what-works-today) and
 [STATUS.md](STATUS.md): canonical Case history, PostgreSQL persistence, synthetic
 Decision Packets and human review, deterministic authority, the bounded simulated
-credit API and the ECC evaluation. D7-C independent verification is implemented on
-the review branch; Workbench action/check controls remain pending. These current
+credit API and the ECC evaluation. D7-C independent verification is merged;
+D7-D Workbench action/check controls are implemented on the review branch. These current
 source capabilities are not all in the historical published prerelease. Listing a
 possible Core component above does not claim it is implemented today.
 

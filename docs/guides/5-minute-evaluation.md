@@ -53,9 +53,8 @@ D7 action/verification APIs. Merges to main do not update the release.
 
 The legacy story cannot prove that a runtime decision, source effect, independent
 check or accepted outcome occurred. Current main separately implements persistent
-synthetic review and the bounded credit API; PR #24 adds independent verification
-for review. [The API guide](simulated-credit-api.md) demonstrates those operations.
-Workbench action/check controls remain pending, and complete Case closure stays
+synthetic review, bounded credit and independent verification APIs. [The API guide](simulated-credit-api.md) demonstrates those operations.
+D7-D connects those controls on its review branch; complete Case closure stays
 blocked. No path provides production authentication, real connectors, external
 writes, customer-impact proof, recovered revenue or high-availability guarantees.
 

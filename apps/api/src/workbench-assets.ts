@@ -11,6 +11,7 @@ export interface WorkbenchAssets {
   readonly javascript: WorkbenchAsset;
   readonly authorityClient?: WorkbenchAsset;
   readonly authorityWorkbench?: WorkbenchAsset;
+  readonly creditClient?: WorkbenchAsset;
 }
 
 function asset(body: Buffer, contentType: string): WorkbenchAsset {
@@ -22,18 +23,25 @@ function asset(body: Buffer, contentType: string): WorkbenchAsset {
  * deliberately fixed: request paths never become filesystem paths.
  */
 export async function loadWorkbenchAssets(): Promise<WorkbenchAssets> {
-  const [html, css, javascript, authorityClient, authorityWorkbench] =
-    await Promise.all([
-      readFile(new URL("../../admin/public/index.html", import.meta.url)),
-      readFile(new URL("../../admin/public/workbench.css", import.meta.url)),
-      readFile(new URL("../../admin/public/workbench.js", import.meta.url)),
-      readFile(
-        new URL("../../admin/public/authority-client.js", import.meta.url),
-      ),
-      readFile(
-        new URL("../../admin/public/authority-workbench.js", import.meta.url),
-      ),
-    ]);
+  const [
+    html,
+    css,
+    javascript,
+    authorityClient,
+    authorityWorkbench,
+    creditClient,
+  ] = await Promise.all([
+    readFile(new URL("../../admin/public/index.html", import.meta.url)),
+    readFile(new URL("../../admin/public/workbench.css", import.meta.url)),
+    readFile(new URL("../../admin/public/workbench.js", import.meta.url)),
+    readFile(
+      new URL("../../admin/public/authority-client.js", import.meta.url),
+    ),
+    readFile(
+      new URL("../../admin/public/authority-workbench.js", import.meta.url),
+    ),
+    readFile(new URL("../../admin/public/credit-client.js", import.meta.url)),
+  ]);
 
   return Object.freeze({
     html: asset(html, "text/html; charset=utf-8"),
@@ -44,6 +52,7 @@ export async function loadWorkbenchAssets(): Promise<WorkbenchAssets> {
       authorityWorkbench,
       "text/javascript; charset=utf-8",
     ),
+    creditClient: asset(creditClient, "text/javascript; charset=utf-8"),
   });
 }
 
@@ -73,6 +82,8 @@ export function getWorkbenchAsset(
       return assets.authorityClient;
     case "/authority-workbench.js":
       return assets.authorityWorkbench;
+    case "/credit-client.js":
+      return assets.creditClient;
     default:
       return undefined;
   }

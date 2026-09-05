@@ -2061,6 +2061,30 @@ button {
   gap: 1rem;
   align-items: start;
 }
+.review-controls {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.review-recorded-approval,
+.review-prerequisite {
+  padding: 0.75rem;
+  border-left: 3px solid var(--forest);
+  background: var(--mint);
+  font-size: 0.85rem;
+}
+#credit-controls > .button {
+  margin: 0.5rem 0;
+}
+#credit-controls > small {
+  display: block;
+}
+.runtime-review .button:disabled {
+  background: #e8e8e1;
+  color: #666a63;
+  box-shadow: none;
+  cursor: not-allowed;
+}
 .review-current {
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--line);
@@ -2166,5 +2190,30 @@ button {
   }
   .review-refresh .button {
     width: auto;
+  }
+  .workbench--review .case-header h1 {
+    font-size: 1.7rem;
+  }
+  .review-overview .review-card,
+  .review-form {
+    padding: 0.85rem;
+  }
+  .review-form .review-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .review-issue,
+  .review-list {
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+  .review-current {
+    padding-bottom: 0.65rem;
+  }
+  .review-current h2 {
+    margin-bottom: 0.4rem;
+  }
+  .workbench-shell--review .stage-button__copy small {
+    display: none;
   }
 }

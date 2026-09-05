@@ -1,3 +1,14 @@
+import {
+  CREDIT_ROOT,
+  validateCredit,
+  validateCreditReceipt,
+  canExecuteCredit,
+  creditCommand,
+  verificationCommand,
+  latestInvocation,
+  creditReason,
+} from "./credit-client.js";
+
 // Public synthetic templates; the runtime selects retained evidence by reference and hash.
 export const DEMO_CASE = {
   type: "case.create",
@@ -76,6 +87,30 @@ export const CASE_ID = "case_d6_workbench";
 export const CASE_ROOT = `/v0/tenants/${TENANT}`;
 export const REVIEW_ROOT = `/v1/tenants/${TENANT}/authority-requests`;
 export const STORAGE_KEY = "fieldruntime.d6.review.v1";
+export const PENDING_PREFIX = "fieldruntime.d7.pending.v1:";
+export const PREPARATION_STATES = ["qualifying", "enriching", "needs_review"];
+export function preparationStep(record) {
+  const journal = record?.journal;
+  if (
+    !Array.isArray(journal) ||
+    journal.length < 1 ||
+    journal.length > 3 ||
+    journal[0].event_type !== "case.created" ||
+    record.document.case.version !== journal.length
+  )
+    return null;
+  if (
+    journal
+      .slice(1)
+      .some(
+        (entry, index) =>
+          entry.event_type !== "case.state_transitioned" ||
+          entry.payload.to_state !== PREPARATION_STATES[index],
+      )
+  )
+    return null;
+  return PREPARATION_STATES[journal.length - 1];
+}
 export const SEATS = Object.freeze({
   finance: "Finance",
   executive: "Executive",
@@ -411,7 +446,15 @@ export const explain = (code) =>
 function pendingCommand(value) {
   requireValue(
     value &&
-      ["case", "create", "decide", "evidence"].includes(value.kind) &&
+      [
+        "case",
+        "create",
+        "decide",
+        "evidence",
+        "prepare",
+        "execute",
+        "verify",
+      ].includes(value.kind) &&
       typeof value.body === "string",
     "Saved retry information is invalid.",
   );
@@ -423,11 +466,15 @@ function pendingCommand(value) {
     "Saved retry information is invalid.",
   );
   const expected =
-    value.kind === "create"
-      ? REVIEW_ROOT
-      : value.kind === "decide"
-        ? `${REVIEW_ROOT}/${command.authority_request_id}/decisions/${value.seat}`
-        : `${CASE_ROOT}/case-commands`;
+    value.kind === "execute"
+      ? `${CREDIT_ROOT}-attempts`
+      : value.kind === "verify"
+        ? `${CREDIT_ROOT}-attempts/${command.attempt_id}/verifications`
+        : value.kind === "create"
+          ? REVIEW_ROOT
+          : value.kind === "decide"
+            ? `${REVIEW_ROOT}/${command.authority_request_id}/decisions/${value.seat}`
+            : `${CASE_ROOT}/case-commands`;
   requireValue(
     value.path === expected &&
       (value.kind !== "decide" ||
@@ -444,6 +491,7 @@ export function createReviewClient({
   nextKey = () => globalThis.crypto.randomUUID(),
   onChange = () => {},
   timeoutMs = 30_000,
+  creditEnabled = false,
 }) {
   let state = {
     packet: null,
@@ -451,6 +499,10 @@ export function createReviewClient({
     requestId: null,
     pending: null,
     receipt: null,
+    credit: null,
+    creditReceipt: null,
+    creditNeedsRefresh: true,
+    creditError: null,
     needsRefresh: false,
     busy: false,
     error: null,
@@ -464,6 +516,32 @@ export function createReviewClient({
   function save(pending = state.pending, requestId = state.requestId) {
     // Never persist packets, eligibility, accepted receipts or simulated history.
     storage.setItem(STORAGE_KEY, JSON.stringify({ requestId, pending }));
+  }
+  function savedCommands() {
+    return (storage.keys?.() ?? [])
+      .filter((key) => key.startsWith(PENDING_PREFIX))
+      .sort()
+      .map((key) => pendingCommand(JSON.parse(storage.getItem(key))));
+  }
+  function retain(pending) {
+    if (creditEnabled) {
+      const key = PENDING_PREFIX + JSON.parse(pending.body).idempotency_key;
+      storage.setItem(key, JSON.stringify(pending));
+      requireValue(
+        storage.getItem(key) === JSON.stringify(pending),
+        "Retry storage is unavailable. No command was sent.",
+      );
+    }
+    save(pending);
+  }
+  function acknowledge(pending, id = state.requestId) {
+    if (creditEnabled)
+      storage.removeItem?.(
+        PENDING_PREFIX + JSON.parse(pending.body).idempotency_key,
+      );
+    const next = savedCommands()[0] ?? null;
+    save(next, id);
+    return next;
   }
   async function http(path, body) {
     const controller = new globalThis.AbortController();
@@ -545,6 +623,30 @@ export function createReviewClient({
         ? "A command is still unconfirmed. Retry its original bytes and key."
         : "Current review loaded. Inspect the proposal and history before your next decision.",
     });
+    if (creditEnabled) await loadCredit();
+  }
+  async function loadCredit() {
+    try {
+      const response = await http(CREDIT_ROOT);
+      requireValue(
+        response.status === 200,
+        "Simulated credit history could not be loaded.",
+      );
+      const credit = clone(validateCredit(response.data));
+      if (state.creditReceipt)
+        requireValue(
+          [...credit.attempts, ...credit.verifications].some(
+            (entry) => entry.event_hash === state.creditReceipt.event_hash,
+          ),
+          "The read does not yet include the confirmed receipt.",
+        );
+      emit({ credit, creditNeedsRefresh: false, creditError: null });
+    } catch (error) {
+      emit({
+        creditNeedsRefresh: true,
+        creditError: `${error.message} Any confirmed receipt remains recorded; do not resubmit it. Refresh or explicitly check the retained attempt again.`,
+      });
+    }
   }
   async function run(work) {
     if (state.busy) return;
@@ -563,51 +665,72 @@ export function createReviewClient({
   async function transmit(pending) {
     pendingCommand(pending);
     // Save exact retry bytes before sending a potentially accepted write.
-    save(pending);
-    emit({ pending, receipt: null, needsRefresh: true });
+    retain(pending);
+    const creditWrite = ["execute", "verify"].includes(pending.kind);
+    emit({
+      pending,
+      ...(creditWrite
+        ? { creditNeedsRefresh: true }
+        : { receipt: null, needsRefresh: true }),
+    });
     let response;
     try {
       response = await http(pending.path, pending.body);
       if (response.status >= 500) throw new Error("Uncertain server response");
-      if (response.status !== 200) {
+      if (
+        response.status !== 200 &&
+        !(creditWrite && response.status === 409 && response.data.receipt)
+      ) {
         const code =
           response.data.code ??
           response.data.error ??
           `HTTP ${response.status}`;
-        save(null);
+        const next = acknowledge(pending);
         emit({
-          pending: null,
-          error: explain(code),
+          pending: next,
+          error: creditWrite ? creditReason(code) : explain(code),
           message:
             "No decision acceptance is confirmed. Refresh and explicitly resubmit; the command will not be rebased.",
         });
         return;
       }
       const data = response.data;
-      requireValue(["applied", "duplicate"].includes(data.status));
-      if (["create", "decide"].includes(pending.kind)) {
-        const receipt = data.receipt,
-          command = JSON.parse(pending.body);
-        requireValue(
-          receipt?.historical === true &&
-            receipt.action_permission === false &&
-            ID.test(receipt.authority_request_id) &&
-            integer(receipt.review_revision) &&
-            HASH.test(receipt.request_binding_hash),
+      if (creditWrite) {
+        const command = JSON.parse(pending.body);
+        validateCreditReceipt(
+          data,
+          pending,
+          state.credit?.attempts.find((a) => a.id === command.attempt_id),
         );
-        if (pending.kind === "decide")
+      } else {
+        requireValue(["applied", "duplicate"].includes(data.status));
+        if (["create", "decide"].includes(pending.kind)) {
+          const receipt = data.receipt,
+            command = JSON.parse(pending.body);
           requireValue(
-            receipt.authority_request_id === command.authority_request_id &&
-              receipt.request_binding_hash === command.request_binding_hash &&
-              receipt.review_revision === command.expected_review_revision + 1,
+            receipt?.historical === true &&
+              receipt.action_permission === false &&
+              ID.test(receipt.authority_request_id) &&
+              integer(receipt.review_revision) &&
+              HASH.test(receipt.request_binding_hash),
           );
-      } else
-        requireValue(data.case_id === CASE_ID && integer(data.case_version, 1));
+          if (pending.kind === "decide")
+            requireValue(
+              receipt.authority_request_id === command.authority_request_id &&
+                receipt.request_binding_hash === command.request_binding_hash &&
+                receipt.review_revision ===
+                  command.expected_review_revision + 1,
+            );
+        } else
+          requireValue(
+            data.case_id === CASE_ID && integer(data.case_version, 1),
+          );
+      }
     } catch {
       emit({
         error:
-          "Result unconfirmed. The server may have recorded this command. Retry the exact saved command; do not submit a new decision.",
-        message: "No successful decision is being assumed.",
+          "Result unconfirmed. The server may have recorded this command. Retry the exact saved command; do not submit a new command.",
+        message: "No successful submission is being assumed.",
       });
       return;
     }
@@ -615,11 +738,13 @@ export function createReviewClient({
     const id = ["create", "decide"].includes(pending.kind)
       ? receipt.authority_request_id
       : state.requestId;
-    save(null, id);
+    const next = acknowledge(pending, id);
     emit({
-      pending: null,
+      pending: next,
       requestId: id,
-      receipt: clone(receipt),
+      ...(creditWrite
+        ? { creditReceipt: clone(receipt) }
+        : { receipt: clone(receipt) }),
       error: null,
       message: "The command was recorded. Checking the current review…",
     });
@@ -632,15 +757,22 @@ export function createReviewClient({
         emit({
           needsRefresh: true,
           error:
-            "The command was recorded, but the current packet could not be verified. Refresh to check progress; do not resubmit the recorded decision.",
+            "The command was recorded, but current review could not be refreshed. Refresh to inspect current state; do not resubmit the recorded command.",
         });
       }
     }
+    if (creditWrite && receipt.outcome === "denied")
+      emit({
+        needsRefresh: true,
+        creditNeedsRefresh: true,
+        error:
+          "The simulated credit was denied. Its historical receipt is retained. Refresh, inspect what changed and explicitly consent before any new attempt.",
+      });
     return response.data;
   }
   function ensureWritable() {
     requireValue(
-      !state.pending,
+      !state.pending && savedCommands().length === 0,
       "Resolve the unconfirmed command with an exact retry first.",
     );
   }
@@ -683,8 +815,13 @@ export function createReviewClient({
               saved.pending === null ? null : pendingCommand(saved.pending),
           });
         }
+        if (creditEnabled && savedCommands().length)
+          emit({ pending: savedCommands()[0] });
         if (id ?? state.requestId) await load(id ?? state.requestId);
-        else await context();
+        else {
+          await context();
+          if (creditEnabled) await loadCredit();
+        }
         if (state.pending)
           emit({
             error:
@@ -695,7 +832,10 @@ export function createReviewClient({
     refresh(id = state.requestId) {
       return run(async () => {
         if (id) await load(id);
-        else await context();
+        else {
+          await context();
+          if (creditEnabled) await loadCredit();
+        }
       });
     },
     initialize() {
@@ -709,6 +849,17 @@ export function createReviewClient({
         }
         const c = current.record.document.case.version,
           s = current.catalog.authority_state_revision;
+        if (creditEnabled) {
+          await loadCredit();
+          requireValue(
+            !state.creditNeedsRefresh,
+            "Load the existing operation history before initializing another request.",
+          );
+          if (state.credit.current?.bindings.authority_request_id) {
+            await load(state.credit.current.bindings.authority_request_id);
+            return;
+          }
+        }
         await submit("create", REVIEW_ROOT, {
           ...createCommand(c, s, `d6-workbench:initial:${c}:${s}`),
           proposal_key: "credit_15000",
@@ -745,6 +896,74 @@ export function createReviewClient({
           "There is no unconfirmed command to retry.",
         );
         await transmit(state.pending);
+      });
+    },
+    executeCredit() {
+      return run(async () => {
+        ensureWritable();
+        // run() has set busy; check the displayed, unrebased binding.
+        requireValue(
+          canExecuteCredit({ ...state, busy: false }),
+          "Refresh and inspect the current proposal, approvals and execution prerequisites first.",
+        );
+        await submit(
+          "execute",
+          `${CREDIT_ROOT}-attempts`,
+          creditCommand(
+            state.credit,
+            state.packet,
+            `d7-workbench:execute:${nextKey()}`,
+          ),
+        );
+      });
+    },
+    verifyCredit() {
+      return run(async () => {
+        ensureWritable();
+        // Verification is independent of current execution and review eligibility.
+        const loaded = latestInvocation(state.credit);
+        const confirmed =
+          state.creditReceipt?.outcome === "simulated_action_recorded"
+            ? state.creditReceipt
+            : null;
+        const attempt =
+          confirmed && (!loaded || confirmed.sequence > loaded.sequence)
+            ? confirmed
+            : loaded;
+        requireValue(
+          attempt,
+          "Load a committed action attempt before checking its source.",
+        );
+        await submit(
+          "verify",
+          `${CREDIT_ROOT}-attempts/${attempt.id}/verifications`,
+          verificationCommand(attempt, `d7-workbench:verify:${nextKey()}`),
+        );
+      });
+    },
+    prepareCase() {
+      return run(async () => {
+        ensureWritable();
+        requireValue(
+          !state.needsRefresh && state.caseRecord,
+          "Refresh before preparing the Case.",
+        );
+        const to = preparationStep(state.caseRecord);
+        requireValue(
+          to,
+          "This is no longer the original preparation sequence. The Workbench will not move a changed Case.",
+        );
+        await submit("prepare", `${CASE_ROOT}/case-commands`, {
+          type: "case.transition",
+          tenant_id: TENANT,
+          case_id: CASE_ID,
+          expected_case_version: state.caseRecord.document.case.version,
+          actor_identity_id: "identity_d6_operator",
+          idempotency_key: `d7-workbench:prepare:${to}`,
+          correlation_id: "d7-workbench",
+          to_state: to,
+          reason: `Explicit synthetic preparation for ${to}; no customer impact or closure is established.`,
+        });
       });
     },
     attachEvidence() {

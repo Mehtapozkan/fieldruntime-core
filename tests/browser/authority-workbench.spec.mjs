@@ -123,7 +123,9 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
   await expect(
     page.getByRole("heading", { name: "Orchid / $15,000 proposed credit" }),
   ).toBeVisible();
-  await expect(current(page)).toHaveText("Awaiting review");
+  await expect(current(page)).toHaveText(
+    "Prepare the synthetic Case before fresh review",
+  );
   await expect(
     page
       .getByText("Customer requests a service credit after an interruption.")
@@ -185,7 +187,7 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
   ).toBeVisible();
   await vote(page, "executive");
   await expect(current(page)).toHaveText(
-    "Approvals complete — execution unavailable",
+    "Approvals complete; credit not recorded",
   );
   await page.setViewportSize({ width: 390, height: 844 });
   expect(
@@ -205,10 +207,10 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
   const writeCount = writes.length;
   await page.reload();
   await expect(current(page)).toHaveText(
-    "Approvals complete — execution unavailable",
+    "Approvals complete; credit not recorded",
   );
   await refresh(page);
-  await page.getByRole("button", { name: /Review history/ }).click();
+  await page.locator('[data-stage="history"]').click();
   await expect(
     page.getByRole("heading", { name: "Finance · Approve", exact: true }),
   ).toBeVisible();
@@ -218,7 +220,7 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
   expect(writes).toHaveLength(writeCount);
   expect((await packet(request, primary)).history).toEqual(approved.history);
   const saved = await page.evaluate(
-    (key) => JSON.parse(globalThis.sessionStorage.getItem(key)),
+    (key) => JSON.parse(globalThis.localStorage.getItem(key)),
     STORAGE_KEY,
   );
   expect(Object.keys(saved).sort()).toEqual(["pending", "requestId"]);
@@ -274,7 +276,7 @@ test("concurrent review conflicts require refresh; lost response survives reload
       .getByText(/Result unconfirmed\. The server may/),
   ).toBeVisible();
   await expect(current(page)).not.toHaveText(
-    "Approvals complete — execution unavailable",
+    "Approvals complete; credit not recorded",
   );
   await expect(
     page.getByText("Last response · historical receipt", { exact: true }),
@@ -293,7 +295,7 @@ test("concurrent review conflicts require refresh; lost response survives reload
   expect((await packet(request, id)).review_revision).toBe(2);
   await refresh(page);
   await expect(current(page)).toHaveText(
-    "Approvals complete — execution unavailable",
+    "Approvals complete; credit not recorded",
   );
   await other.close();
 });
@@ -310,7 +312,7 @@ for (const decision of ["reject", "modify", "escalate"])
     await vote(page, "executive");
     await refresh(page);
     await expect(current(page)).toHaveText(
-      "Approvals complete — execution unavailable",
+      "Approvals complete; credit not recorded",
     );
     await page.getByLabel("Decision", { exact: true }).selectOption(decision);
     await submit(page, decision).click();
@@ -333,7 +335,7 @@ for (const decision of ["reject", "modify", "escalate"])
         escalate: "Request escalated",
       }[decision],
     );
-    await page.getByRole("button", { name: /Review history/ }).click();
+    await page.locator('[data-stage="history"]').click();
     await expect(
       page.getByRole("heading", {
         name: `Finance · ${decision[0].toUpperCase()}${decision.slice(1)}`,
@@ -367,7 +369,7 @@ test("retained evidence through Case API invalidates prior approvals; fresh requ
 }) => {
   await open(page, primary);
   await expect(current(page)).toHaveText(
-    "Approvals complete — execution unavailable",
+    "Approvals complete; credit not recorded",
   );
   await page.getByRole("button", { name: /Changed evidence/ }).click();
   await page
@@ -400,6 +402,7 @@ test("retained evidence through Case API invalidates prior approvals; fresh requ
   expect(replacement.review_revision).toBe(0);
   expect(replacement.current.authorized).toBe(false);
   expect(replacement.material.evidence).toHaveLength(2);
+  await page.locator('[data-stage="history"]').click();
   await expect(
     page.getByRole("button", {
       name: "Inspect predecessor history",
@@ -474,7 +477,7 @@ test("confirmed-write read failure keeps the receipt, requires refresh and never
   });
   await submit(page).click();
   await expect(page.getByRole("alert")).toContainText(
-    "The command was recorded, but the current packet could not be verified.",
+    "The command was recorded, but current review could not be refreshed.",
   );
   await expect(page.getByRole("alert")).toBeFocused();
   await expect(current(page)).toContainText("unconfirmed");

@@ -3,7 +3,7 @@
 D7-B/C implement the action and independent read-back portions of Accepted [D-033](../architecture/d7-simulated-credit-verification.md).
 It can record one **simulated $15,000 credit** for `tenant_orchid` /
 `case_d6_workbench` / `synthetic://accounts/orchid`. The Workbench remains the D6
-review experience; D7-D action/check controls are not implemented. A recorded or
+review experience; the D7-D review branch adds [action/check controls](../../apps/admin/README.md). A recorded or
 independently verified simulated credit does not verify the customer's impact
 claim, establish recovered revenue, resolve the Case or permit closure.
 
