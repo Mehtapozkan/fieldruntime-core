@@ -382,7 +382,9 @@ test("retained evidence through Case API invalidates prior approvals; fresh requ
   );
   await expect(current(page)).not.toContainText("unconfirmed");
   await expect(current(page)).toHaveText("Case changed — fresh review needed");
-  await expect(page.getByText(/Prior approvals no longer apply/)).toBeVisible();
+  await expect(
+    page.locator("#stage-content").getByText(/Prior approvals no longer apply/),
+  ).toBeVisible();
   const old = await packet(request, primary);
   expect(old.case_version).toBe(old.request.case_version + 1);
   expect(old.current.effective_approval_ids).toEqual([]);

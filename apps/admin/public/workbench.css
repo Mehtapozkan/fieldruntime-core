@@ -1895,6 +1895,10 @@ button {
 .review-notice .button {
   margin-top: 0.85rem;
 }
+.review-notice > small {
+  display: block;
+  margin-top: 0.65rem;
+}
 .review-warning-copy {
   color: #8f3d29;
 }
