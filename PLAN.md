@@ -3,12 +3,13 @@
 Each pull request must remain independently reviewable and leave the repository in
 a passing state.
 
-Delivery position: GitHub PRs #1–#6, #12, and #14 are merged. The public source
-preview and `v0.1.0-evaluation-preview.0` prerelease are published. PR #19 merged
-Accepted D-032. D6-C [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)
-is merged at `940462ec0a666975e3530763349bad89986cf457`. D6-D connects the existing
-Guided Workbench to that persistent synthetic review/API boundary and is implemented
-for review, not merged or released.
+Delivery position: GitHub PRs #1–#6, #12, #14 and #19 are merged. D6-C merged
+in PR #20 at `940462ec`; D6-D merged in PR #21 at
+`ba340cc5135343e12820992cf4a7542cf7cc9c29` with passing required checks. The human
+operator accepted [D-033](docs/architecture/d7-simulated-credit-verification.md)
+at `527cfb6f`. D7-A PR #22 is updated from that main, preserving the full D6-D
+implementation and coverage. No D7 runtime behavior is implemented. D7-B begins
+only after #22 passes its required checks and merges normally.
 
 ## Delivery labels and GitHub pull requests
 
@@ -75,12 +76,45 @@ Case-version invalidation and explicit fresh review. Reads cause no durable writ
 local state never grants authority. Legacy simulated action/receipt history stays
 separate, and execution/closure remain blocked.
 
-The D6-D PR must pass repository validation, real PostgreSQL/API, Compose and
-appliance/browser acceptance checks before human review/merge. It introduces no
+PR #21 passed repository validation, real PostgreSQL/API, Compose and
+appliance/browser acceptance checks before normal merge. It introduced no
 runtime contracts or migrations. Production authentication, identity history,
 external catalog sources and general workflows remain outside this synthetic step.
 Next is D7 controlled simulated action and independent verification; it and complete
 closure proof remain unimplemented and require a separate scoped implementation.
+
+The human operator accepted the desktop/390px presentation at `1561329858` on
+2026-09-05; no further UI redesign is a D6-D merge prerequisite. Keep two
+nonblocking follow-ups for the existing Workbench: acknowledge an already-recorded
+approval without suppressing permitted interventions, and reduce mobile scrolling
+before review controls. Preserve server authority, visible uncertainty and exact
+consent/retry behavior. These follow-ups do not gate D7-B/C. D-033 was separately
+accepted by the human operator.
+
+## D7-A accepted implementation boundary
+
+[D-033](docs/architecture/d7-simulated-credit-verification.md) is Accepted; its
+implementation is pending.
+The smallest operation is Orchid's exact $15,000 simulated credit, with a fresh
+D7-bound approval request, one atomic PostgreSQL effect/receipt commit, and a
+separate verifier read. This docs-only branch includes merged D6-D unchanged.
+
+Before PR #22 merges, rerun repository/PostgreSQL/API validation and all restored
+Workbench/browser coverage. Preserve the required PR, passing `validate`, strict
+up-to-date branch, force-push and deletion protections under the operator's revised
+solo-maintainer rules; no bypass. After #22 merges, deliver D7-B only in an open
+implementation PR. D7-C and D7-D remain later steps:
+
+1. D7-B: strict operation/envelope contracts, scoped synthetic catalog enrollment,
+   minimal migration, action API and atomic source/receipt persistence.
+2. D7-C: independent verifier identity/read path, immutable observations and
+   comparison/replay proof, including unavailable/mismatched read-back.
+3. D7-D: existing Workbench action/check controls with explicit conflict/retry and
+   historical/current labels, verified through the real appliance.
+
+Each PR carries the acceptance tests in D-033. External writes, production
+identity, connectors, a generic worker framework and D8 economics remain out of
+scope. A verified credit does not prove customer impact or permit Case closure.
 
 ## Operational Legibility Gate
 

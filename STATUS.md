@@ -12,10 +12,78 @@ at `76c9b472eabaff4e66ee4d5dd4ade6c144f95f7e`, including Accepted D-032 and its
 explicit human approval. **D6-C [PR #20](https://github.com/Mehtapozkan/fieldruntime-core/pull/20)
 is merged at `940462ec0a666975e3530763349bad89986cf457`**, from reviewed head
 `21298695ed47f3239105cb832ae80bbb72699325` with passing required CI. Its addressed
-reviewer-eligibility thread is resolved. **D6-D is implemented for review**:
-the Guided Workbench now uses persistent synthetic request review and the runtime
-Decision Packet API. The D6-D PR remains unmerged; no release, deployment, external
-writes or D7 execution is included.
+reviewer-eligibility thread is resolved. **D6-D merged in PR #21 at
+`ba340cc5135343e12820992cf4a7542cf7cc9c29`**, preserving reviewed head
+`1561329858d8340291dda505fdfe12291cece1c9` and its passing CI. The Guided Workbench
+now uses persistent synthetic request review and the runtime Decision Packet API.
+No release, deployment, external writes or D7 execution is included.
+
+The human operator accepted the supplied desktop/390px visual review for
+`1561329858d8340291dda505fdfe12291cece1c9` on 2026-09-05: “Accept the current
+presentation for this milestone; no further UI redesign is required before merge.”
+This records D6-D presentation acceptance, not a GitHub approving review or approval
+of D-033. No additional visual checks or UI changes are claimed by this docs pass.
+
+Two nonblocking UI follow-ups remain for the existing Workbench:
+
+- Acknowledge an already-recorded approval using validated server history while
+  preserving permitted reject/modify/escalate interventions. An old receipt must
+  not imply current authorization or override the server's reviewer checks.
+- Reduce mobile scrolling before the review controls while keeping the proposed
+  consequence, uncertainty and reviewer progress readable. Preserve explicit
+  consent, refresh and exact uncertain-response retries.
+
+Neither follow-up blocked D6-D's merge or expands the D7 trust boundary.
+
+## D7-A accepted design; implementation pending
+
+[D-033](docs/architecture/d7-simulated-credit-verification.md) is **Accepted** by
+explicit human approval on 2026-09-05 of PR #22 at
+`527cfb6f44dac61e495f45559d170d0bbb50e8f2`; the verbatim approval is retained in
+the decision record. **D7-B, D7-C and D7-D are not implemented.** The accepted
+design describes one Orchid $15,000 simulated credit, with
+server-recomputed exact authority/payload/state bindings, an atomic local source
+write and action receipt, business-key duplicate prevention, and a separately
+identified read-only verifier. It specifies two supporting tables in the existing
+PostgreSQL database; it does not change runtime contracts or migrations here.
+
+The design reuses D6 request/decision/catalog contracts and preserves C/R/S,
+terminal review decisions and immutable consent. Explicit D7 catalog enrollment
+and Case preparation require a fresh request and fresh approvals. Verification
+checks the simulated credit effect, not the customer's original impact claim;
+execution, verification and Case closure are still unavailable on main. D7-A is
+updated from that merged main with all D6-D implementation, tests and documentation
+preserved.
+
+The D6-D desktop/390px handoff is associated with full head `1561329858` above.
+Manual desktop/390px readability, keyboard/focus, evidence and error states were
+inspected against the local appliance. The downloadable task handoff contains nine
+screenshots, an offline gallery, walkthrough and file-hash manifest. No cross-browser
+or assistive-technology certification is claimed. [D6-D final CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33949784838)
+passes 250 repository tests, 63 PostgreSQL/API tests, eight browser scenarios,
+Compose and appliance/restart smokes. The same Workbench coverage is retained in
+this updated docs branch and must pass again before its merge.
+
+D7-A adds documentation only. The operator's updated solo-maintainer rules were
+verified through GitHub's effective main-branch rules on 2026-09-05: PRs and a
+passing `validate` check remain required, branches must be up to date, force pushes
+and deletion remain blocked, and required approving reviews are zero. PR #21
+merged through the normal endpoint without bypass. PR #22 is updated from that
+main and must pass its own required checks before normal merge. Only then begin
+D7-B; no D7 runtime behavior, release or deployment is included here.
+
+The docs clarify three PR #22 review findings: explicit idempotent enrollment on
+upgrades through a fixed local command, the scoped evaluator grant already required
+by the execution gate, and atomic verification clock updates. These mechanisms
+are documented acceptance criteria, not implemented features. D7-C remains the
+independent verifier step; D7-D remains the Workbench connection.
+
+D7-A validation is rerun on the combined branch: `pnpm validate`, frozen ECC and
+its intended-failure negative control, `git diff --check`, and CI's PostgreSQL/API,
+Compose, appliance/restart and eight Workbench browser scenarios. Docker is
+unavailable locally (exit 127); the PR description links actual final-commit CI
+evidence. Earlier D6-C-only counts are not substituted for restored D6-D coverage.
+No new D7 runtime tests or behavior are claimed by these existing-suite results.
 
 ## D6-D implementation
 
@@ -407,11 +475,14 @@ writes or D7 execution is included.
 
 ## Next
 
-Review the D6-D Workbench implementation and its final-commit PostgreSQL/API,
-Compose, appliance-smoke and browser evidence before merging. D7 is the next
-controlled simulated Action Gateway and independent verification milestone;
-incomplete proof still cannot close a Case. No later capability is enabled by a
-review approval. D6-D does not release or deploy the changes.
+Merge updated PR #22 only after its required checks pass under the verified
+solo-maintainer rules. D-033 is Accepted and D6-D is merged. Then implement D7-B
+only (bound operation, scoped enrollment, strict contracts, minimal migration and
+atomic simulated source/action evidence), leaving its implementation PR open.
+D7-C supplies independent verification; D7-D supplies Workbench action/check
+controls. Incomplete proof continues to block closure, and neither a credit nor
+its verification proves the original impact claim, accepted outcome or recovered
+revenue. D8 remains separate.
 
 The immediate engineering order remains D6 → D7 → D8 → D9 → D10 → D11 → D12.
 This roadmap alignment does not displace the trusted-kernel priority, add live
