@@ -10,9 +10,12 @@ import { PENDING_PREFIX } from "../../apps/admin/public/authority-client.js";
 
 const action = (page, name) => page.locator(`[data-review-action="${name}"]`);
 async function idle(page) {
+  // node:test does not load playwright.config.mjs. Match that suite's bounded
+  // wait instead of applying Playwright's default five-second performance limit.
   await expect(page.locator("#stage-content")).toHaveAttribute(
     "aria-busy",
     "false",
+    { timeout: 30_000 },
   );
 }
 async function click(page, name) {
@@ -324,7 +327,18 @@ export function registerCreditBrowserTests(fixture) {
     ).toBeVisible();
     await vote(reopened, "finance", "reject");
     await expect(action(reopened, "verify-credit")).toBeEnabled();
+    // A slow historical recheck remains pending; the browser must await the
+    // actual response, not confuse a five-second assertion deadline with failure.
+    let historicalChecks = 0;
+    const checkPath = "**/simulated-credit-attempts/*/verifications";
+    await reopened.route(checkPath, async (route) => {
+      historicalChecks++;
+      await new Promise((resolve) => globalThis.setTimeout(resolve, 6_000));
+      await route.continue();
+    });
     await click(reopened, "verify-credit");
+    await reopened.unroute(checkPath);
+    assert.equal(historicalChecks, 1, "no automatic recheck or effect retry");
     await expect(
       reopened.locator('[data-credit-result="verified_simulated_effect"]'),
     ).toBeVisible();

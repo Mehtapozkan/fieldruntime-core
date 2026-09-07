@@ -841,6 +841,14 @@ path. Final-commit CI supplies the pinned PostgreSQL 17, complete browser, Compo
 appliance and restart evidence in the implementation PR. Docker is unavailable
 locally (`docker compose config --quiet` exits 127); `git diff --check` passes.
 
+The first D8-C CI run passed repository/Compose checks and 114/115 action/check/API
+tests, but its historical-recheck browser wait expired at Playwright's default five
+seconds. A controlled six-second test-only delay reproduces that assertion failure.
+The `node:test` helper now uses the existing Workbench suite's bounded 30-second
+idle wait; the delayed recheck must still return the exact independent proof with
+one submission, false current execution eligibility and blocked closure. No runtime
+timeout or result assertion changed. The implementation PR records final CI results.
+
 Desktop (1440px) and 390px screenshots were inspected: proposal, uncertainty,
 reviewer progress and controls remain readable with no horizontal overflow. Mobile
 still needs vertical scrolling. Keyboard tests cover disclosures, review controls,
