@@ -849,6 +849,13 @@ idle wait; the delayed recheck must still return the exact independent proof wit
 one submission, false current execution eligibility and blocked closure. No runtime
 timeout or result assertion changed. The implementation PR records final CI results.
 
+The next CI run passed all 63 authority and 115 action/check/API tests plus
+appliance/restart checks, then exposed a retained desktop geometry assertion that
+sampled two viewport positions during keyboard-triggered smooth scrolling. A
+controlled scroll reproduces the false overlap. Both rectangles are now measured
+in one frame at two scroll positions, preserving the strict controls-before-evidence
+assertion. This is also test-only; final CI must still pass all retained browser groups.
+
 Desktop (1440px) and 390px screenshots were inspected: proposal, uncertainty,
 reviewer progress and controls remain readable with no horizontal overflow. Mobile
 still needs vertical scrolling. Keyboard tests cover disclosures, review controls,
