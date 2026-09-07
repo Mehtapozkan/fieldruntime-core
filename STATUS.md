@@ -911,6 +911,16 @@ no such behavior is implemented here. Twelve acceptance vectors specify renamed/
 reordered reimports, changed source/support, entities, ambiguous links, disappearing
 rows, errors, concurrency, rollback, restart, corrections and integrity.
 
+PR #29 review identified missing required adapter defaults: WorkEvent classification
+and initial Case severity. The proposal now binds `internal` classification and
+`medium` initial severity to the synthetic profile, and lists every required seed,
+actor, scope, identity/key, correlation and occurrence source. Attachments preserve
+existing severity/owner; client overrides remain denied in the future acceptance
+specification. An existing-engine compatibility check confirms those values are valid
+and missing classification/severity fail validation. This is a documentation repair,
+not implementation of the future adapter. Artifact reads also require the original
+artifact's full scope, even through a narrower Case citation.
+
 Technical synthetic approval is separate from real-data activation. Real customer,
 custodian, files, people, private location/access and retention/export arrangements
 remain unnamed and unapproved. The proposed deletion unit is the complete isolated
