@@ -17,7 +17,11 @@ and passing checks. D8-A merged in PR #26 at
 checks and its finding resolved. D8-B’s failure walkthrough and measurement-readiness
 note merged in PR #27 at `1039912ca7eaea2239366f5de8c07b0e44c7df81`, preserving
 reviewed head `d86b2a9e` and passing required checks. D8-C’s bounded operator-attention
-presentation is implemented for review. The September 7 documentation
+presentation merged in PR #28 at `555ac0214b006350b049d96567cb98b92ebc25f8` from
+reviewed head `1f2d9a2d`, with passing required checks and its finding resolved.
+D9-A’s minimum synthetic intake/provenance design is Accepted for synthetic
+implementation at reviewed head `e5e8273c`. The owner authorized D9-B; real customer
+activation remains unapproved. D9-B is not implemented by this approval update. The September 7 documentation
 reconciliation preserves the completed tests and adds the canonical MVP specification
 and requirement/gaps matrix. No release or deployment is included.
 
@@ -37,7 +41,8 @@ proposed contracts and implementation. Case stays atomic; no Loop Platform.
 The next customer assignment candidate is evidence-backed commercial invoice-dispute
 disposition, within Revenue/ECC, confirmed with one queue owner and operator before
 freezing its contract. [D-034](docs/architecture/d9-assisted-intake-boundary.md) is
-Proposed: customer data and any first-workflow change need explicit review; the
+Accepted for synthetic implementation: customer activation and any first-workflow
+change still need explicit review; the
 synthetic appliance is not an approved customer-data service. Baseline definitions
 come now; absent ROI does not block intake planning. Early assisted D9–D12 evaluations
 can run only within an approved data boundary, without waiting for every later module.
@@ -71,8 +76,8 @@ historical behavior alone never establishes business authority.
 | GitHub #14 — Automated Evaluation Prerelease                   | Merged      | Automate the evaluation prerelease while retaining the repository's explicit preview boundary                                                                                                                  | The published prerelease remains tied to validated source and release checks                                                                                                      |
 | D6 — Governed Case Session                                     | Merged      | Authoritative identity, delegation, and business authority; exact Case owner, delegated worker, authority owner, and verifier; payload-bound approvals; deterministic authority resolution                     | The Decision Packet is runtime-backed, approvals bind the exact payload, and authority resolution fails closed                                                                    |
 | D7 — Controlled Action + Independent Verification              | Merged      | Bounded Orchid credit, independent verification and Workbench action/check controls merged in PRs #23–#25                                                                                                      | Bypass, self-verification, unbound-payload, precondition, and duplicate-effect negative tests pass                                                                                |
-| D8 — Receipts + Measurement Readiness + Failure Demonstrations | In progress | D8-A/B merged; D8-C read-only attention presentation implemented for review                                                                                                                                    | Reconstruct evidence and assert unsafe paths; distinguish missing effort/outcomes/economics from measured results; no new closure permission                                      |
-| D9 — Intake + Case Formation                                   | Planned     | D9-A reviews minimal provenance/time/input contracts and permitted data boundary; D9-B implements one queue export plus supporting documents, coverage, reviewed matches and repeat imports                    | No duplicate Cases/events; uncertain links, source versions and missing population remain explicit; portable provenance; existing upstream Case ownership preserved               |
+| D8 — Receipts + Measurement Readiness + Failure Demonstrations | In progress | D8-A/B/C merged; accepted-outcome and measured-economics capabilities remain planned                                                                                                                           | Reconstruct evidence and assert unsafe paths; distinguish missing effort/outcomes/economics from measured results; no new closure permission                                      |
+| D9 — Intake + Case Formation                                   | Planned     | D9-A synthetic design Accepted; D9-B authorized, implementation pending for one synthetic export, support, coverage, reviewed matches and safe reimport                                                        | No duplicate Cases/events; uncertain links, source versions and missing population remain explicit; portable provenance; existing upstream Case ownership preserved               |
 | D10 — Discovery + Readiness + Redesign                         | Planned     | All seven Discovery records, guided interviews, baseline, bottleneck ranking and redesign before allocation; Trigger, Objective, recurring Population, Close Event, Human Intervention Map and Correction Path | One operator-reviewed workflow; every finding cited or labeled, preserved source/variant conflicts, valid measurement coverage and named controls/owners                          |
 | D11 — Reviewed Runtime Builder                                 | Planned     | One reviewed workflow template compiles a versioned Organization Runtime Pack with step, separate authorization, outcome, intervention, correction and evaluation requirements                                 | Reproducible pack; draft/contradictory rules cannot execute; approved diffs and rollback; any changed trust/closure boundary has human approval                                   |
 | D12 — One Useful Replaceable Worker                            | Planned     | Evidence gathering, reconciliation and drafts within reviewed read/propose scope; bounded execution, independent proof and minimum manual reviewed correction capture                                          | API-only scoped work/denial/abstention/exact retry/result inspection; replace worker without losing history; code-only and human-approved AI controls; no unsupported closure     |
@@ -192,7 +197,7 @@ D-013 and D-033 remain unchanged; measured economics stays unimplemented.
 
 ## Next bounded builds
 
-1. **D8-C — implemented for review:** the existing packet now shares History’s
+1. **D8-C — merged in PR #28:** the existing packet now shares History’s
    reconciliation check, distinguishes the recorded Case owner from required
    reviewers, and explains the selected synthetic seat’s bound policy. Existing
    reviewer badges and recorded action/check headings remain the compact milestones;
@@ -201,14 +206,19 @@ D-013 and D-033 remain unchanged; measured economics stays unimplemented.
    generic reviewer card is replaced by “Why you?” beside controls plus expandable
    policy evidence. No runtime contract, authority rule or persistence changes.
    [Workbench walkthrough and before/after captures](apps/admin/README.md#d8-c-operator-attention-and-visual-review).
-2. **D9-A — proposed intake/data contract review:** use synthetic examples to settle minimum source-byte/provenance,
-   activity/actor/role/source-status and business-object bindings, distinct
-   occurrence/ingestion/recording times, supported inputs and repeat/changed-import
-   semantics. Reuse Case/WorkEvent; propose versioned additions only where required.
-   Make D-034’s private access/retention/export boundary concrete for review; unknown
-   customer names/file sets do not block synthetic contract design. Real samples
-   require the approved named boundary. Deliver examples, validation/denial tests
-   and the exact amendment for human approval, not D9-B import implementation.
+2. **D9-A — accepted synthetic design:** [D-034](docs/architecture/d9-assisted-intake-boundary.md)
+   is the canonical intake proposal, with exact CSV/text/retention-only formats,
+   limits, field mapping, four time meanings, original/derived byte provenance,
+   identity/reimport/matching rules and per-record atomic commit. The recommended
+   adapter records explicit intake review as a real WorkEvent occurrence; source
+   snapshot times remain separate. No nullable WorkEvent v0 fields or importer code.
+   Synthetic technical approval and named real-data activation are separate gates.
+   Whole-dataset deletion ends that copy's replay; selective erasure is not promised.
+   **D9-B — authorized next implementation:** implement the specified versioned intake boundary,
+   bounded PostgreSQL source retention, existing-Case create/attach transaction,
+   inspectable Workbench candidates/coverage and exact retries. Use D-034's affected
+   files and A1–A12 acceptance vectors. No automatic Case selection, source-history
+   reconstruction, transferred approval or broader correction framework.
 3. **D10–D13:** keep the sequence in the table. Discovery includes interviews,
    self-assessment/support, all seven records and six loop outputs. Redesign precedes
    execution allocation; Builder publishes one reviewed template, and D12 uses one

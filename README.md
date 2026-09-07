@@ -11,17 +11,19 @@ PostgreSQL. The merged API records one bounded simulated credit and independentl
 checks its source through the Workbench, with explicit actions and recoverable
 retries. History provides a compact, inspectable Case progress and evidence receipt.
 The merged failure walkthrough demonstrates the safeguards with isolated test fixtures.
-This D8-C review branch clarifies current attention, Case ownership and the selected
-reviewer’s policy requirement in the same view; it adds no runtime capability.
+Merged D8-C clarifies current attention, Case ownership and the selected reviewer’s
+policy requirement in the same view. This D9-A branch documents the
+[Accepted synthetic intake contract](docs/architecture/d9-assisted-intake-boundary.md);
+it adds no importer or runtime capability.
 
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external writes.
 > Not production software. Selecting a synthetic reviewer seat is not authentication.
 
 ## What works today
 
-“Main” includes D8-B [PR #27](https://github.com/Mehtapozkan/fieldruntime-core/pull/27)
-at `1039912ca7eaea2239366f5de8c07b0e44c7df81`. **D8-C’s focused operator-attention
-presentation is implemented for review here.** The historical prerelease has
+“Main” includes D8-C [PR #28](https://github.com/Mehtapozkan/fieldruntime-core/pull/28)
+at `555ac0214b006350b049d96567cb98b92ebc25f8`. **D9-A is docs-only, accepted for synthetic implementation;
+D9-B intake is not implemented.** The historical prerelease has
 a smaller boundary described under [Distribution](#distribution).
 
 | Functionality                                    | Workbench                                                                                                | API / runtime                                                                             | Availability                                                                          |
@@ -123,7 +125,7 @@ history. They remain isolated from Orchid, even on this review branch.
 - **D8-B — Failure walkthrough and measurement readiness:** merged in PR #27.
   Remaining D8 accepted-outcome/economics work is planned. A read-only evidence
   receipt supplies neither accepted outcomes nor economic measurements.
-- **D8-C — Attention presentation:** implemented for review; selected-seat “Why you?”,
+- **D8-C — Attention presentation:** merged in PR #28; selected-seat “Why you?”,
   separate recorded Case owner and reconciled current attention. Existing milestones,
   uncertainty, permitted interventions and recovery remain. [Walkthrough and captures](apps/admin/README.md#d8-c-operator-attention-and-visual-review).
 - **D9–D12:** proposed intake contracts/data boundary, then one queue export and
@@ -172,7 +174,7 @@ Then follow the [tag-pinned guide](https://github.com/Mehtapozkan/fieldruntime-c
 after its clone step. Use a separate fresh appliance volume; do not downgrade an
 upgraded database. The tag-pinned page alone does not select the cloned revision.
 
-Merging source changes does not update that immutable tag or release. This D8-C PR
+Merging source changes does not update that immutable tag or release. This D9-A PR
 publishes no new release or deployment. The source-clone appliance is the supported
 trial path; standalone installers, signed artifacts, SBOM/provenance and production
 operations remain future work. Workspace packages remain registry-private.

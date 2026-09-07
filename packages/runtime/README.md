@@ -59,8 +59,22 @@ append-only. Readiness fails if state cannot be replayed or the writer lock is
 missing.
 
 The singleton writer and whole-state hydration are explicit PR4 local-appliance
-tradeoffs, not a high-availability or scale claim. Automatic ECC case matching,
-authority evaluation, closure proof, and action execution remain later milestones.
+tradeoffs, not a high-availability or scale claim. Automatic ECC case matching and
+complete closure proof remain unimplemented. Separate D6 authority-review and D7
+bounded simulated action/verification modules are now merged; their current
+behavior and limits are recorded in [STATUS](../../STATUS.md). They do not relax
+the Case engine's legacy execution or closure guards.
 
 See the [case engine architecture](../../docs/architecture/case-event-engine.md) for
 the trust, replay, and persistence boundaries.
+
+## Accepted synthetic intake adapter (implementation pending)
+
+[D9-A / D-034 — accepted synthetic scope](../../docs/architecture/d9-assisted-intake-boundary.md)
+reconciles bounded source-byte retention and explicit reviewed create/attach with
+this engine. Its per-record provenance+Case commit must use one transaction and
+validated append bundle; calling the transaction-owning store then saving provenance
+separately is not atomic. The proposed intake WorkEvent describes the actual review
+occurrence, preserving unknown source time in separate retained material. Existing
+v0 source uniqueness, exact retries, Case versions and replay remain unchanged.
+No importer or new transaction helper is implemented in this documentation step.

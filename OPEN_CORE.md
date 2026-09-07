@@ -28,7 +28,7 @@ credit API and the ECC evaluation. D7-C independent verification, D7-D Workbench
 action/check controls and D8-A's read-only Case receipt are merged into main.
 D8-B's failure walkthrough, measurement-readiness note and MVP planning
 reconciliation merged in PR #27. D8-C’s read-only operator-attention presentation
-is implemented on the review branch. These current
+merged in PR #28; D9-A records the accepted synthetic intake boundary in documentation only. These current
 source capabilities are not all in the historical published prerelease. Listing a
 possible Core component above does not claim it is implemented today.
 
