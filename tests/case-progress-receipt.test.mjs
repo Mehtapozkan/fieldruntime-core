@@ -59,6 +59,15 @@ test("D8-C attention uses reconciled ownership and reviewer-specific bound polic
   );
   for (const seat of ["business", "finance_delegate"])
     assert.match(view.reviewerExplanation(state, seat), /not listed/);
+  for (const invalid of [{}, [{ identity: null }]]) {
+    const incomplete = structuredClone(state);
+    incomplete.packet.historical_evaluations[0].result.resolution.authority_requirements[0].eligible_approvers =
+      invalid;
+    assert.match(
+      view.reviewerExplanation(incomplete, "finance"),
+      /explanation is unavailable/,
+    );
+  }
   assert.equal(h.snapshot(), before);
   assert.equal(JSON.stringify(state), bytes);
 });
@@ -67,6 +76,8 @@ test("D8-C mixed or interrupted reads keep recorded work but cannot assign curre
   for (const alter of [
     (s) => s.catalogRevision++,
     (s) => s.credit.current.bindings.expected_review_revision++,
+    (s) =>
+      (s.packet.historical_evaluations[0].inputs.resolution.identities = {}),
     (s) => {
       s.needsRefresh = true;
     },

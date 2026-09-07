@@ -298,10 +298,36 @@ export function registerCreditBrowserTests(fixture) {
         page.locator('[data-receipt-status="reconciled"]'),
       ).toBeVisible();
     }
+    const packetRead = "**/authority-requests/*/packet";
+    await page.route(packetRead, async (route) => {
+      const response = await route.fetch(),
+        body = await response.json();
+      body.historical_evaluations[0].inputs.resolution.identities = {};
+      body.historical_evaluations[0].result.resolution.authority_requirements[0].eligible_approvers =
+        {};
+      await route.fulfill({ response, json: body });
+    });
+    await click(page, "refresh");
+    await controls(page);
+    await expect(
+      page.locator('[data-attention-current="incomplete"]'),
+    ).toContainText("Case owner: Unconfirmed");
+    await expect(page.locator("[data-why-you]")).toContainText(
+      "explanation is unavailable",
+    );
+    await receiptView(page, {
+      status: "incomplete",
+      check: "independently checked",
+    });
+    await page.unroute(packetRead);
+    await click(page, "refresh");
+    await expect(
+      page.locator('[data-receipt-status="reconciled"]'),
+    ).toBeVisible();
     assert.deepEqual(
       await h.dump(),
       snapshot,
-      "altered Case reads never write or replace validated evidence",
+      "altered Case/identity reads never write or replace validated evidence",
     );
     await page.reload();
     await idle(page);

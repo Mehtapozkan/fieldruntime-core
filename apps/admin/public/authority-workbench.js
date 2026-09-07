@@ -211,6 +211,7 @@ export function operatorAttention(state) {
   const ownerId =
     receipt.reconciled && state.caseRecord.document.case.owner_identity_id;
   const identity =
+    receipt.reconciled &&
     packet.historical_evaluations[0].inputs.resolution?.identities?.find(
       (item) =>
         item.identity_id === ownerId && item.tenant_id === packet.tenant_id,
@@ -494,7 +495,18 @@ function policyExplanation(packet, seat) {
         item.policy_version === ref.policy_version,
     );
   const requirements = initial.result.resolution?.authority_requirements;
-  if (!policy || !Array.isArray(policy.rules) || !Array.isArray(requirements))
+  if (
+    !policy ||
+    !Array.isArray(policy.rules) ||
+    !Array.isArray(requirements) ||
+    !requirements.every(
+      (item) =>
+        Array.isArray(item?.eligible_approvers) &&
+        item.eligible_approvers.every(
+          (approver) => typeof approver?.identity?.identity_id === "string",
+        ),
+    )
+  )
     return "The bound policy's reviewer explanation is unavailable. Inspect the retained policy in technical details.";
   const selected = seat
     ? requirements.filter((item) =>

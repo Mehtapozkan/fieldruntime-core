@@ -856,6 +856,14 @@ controlled scroll reproduces the false overlap. Both rectangles are now measured
 in one frame at two scroll positions, preserving the strict controls-before-evidence
 assertion. This is also test-only; final CI must still pass all retained browser groups.
 
+Malformed retained identity evidence is also covered: the initial owner lookup
+threw after History had already marked that evidence unreconciled. The lookup now
+requires reconciliation, so ownership stays Unconfirmed and valid historical proof
+remains readable. Unit and PostgreSQL/browser regressions preserve the no-write and
+no-current-permission behavior while the malformed read is present. Malformed
+retained reviewer lists likewise show an unavailable policy explanation instead of
+throwing or inventing a reviewer assignment.
+
 Desktop (1440px) and 390px screenshots were inspected: proposal, uncertainty,
 reviewer progress and controls remain readable with no horizontal overflow. Mobile
 still needs vertical scrolling. Keyboard tests cover disclosures, review controls,
