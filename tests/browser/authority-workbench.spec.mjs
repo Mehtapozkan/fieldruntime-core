@@ -145,11 +145,20 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
   await expect(
     page.getByText("Independent impact verification remains outstanding."),
   ).toBeVisible();
+  await expect(page.locator('[data-why-you="finance"]')).toContainText(
+    "Finance is the named reviewer",
+  );
+  const policy = page.getByText("Bound reviewer policy · historical consent", {
+    exact: true,
+  });
+  await policy.focus();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByText(
       /bound policy requires Finance and Executive.*above \$10,000/,
     ),
   ).toBeVisible();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByText("Finance · Needed", { exact: true }),
   ).toBeVisible();
@@ -161,13 +170,23 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
   ).toBeHidden();
   await expect(page.getByText(/Case C1 · Review R0/)).toBeHidden();
   // Controls are beside the concise summary, before detailed evidence.
-  const form = await page
-    .getByRole("form", { name: "Record synthetic review" })
-    .boundingBox();
-  const evidence = await page
-    .getByRole("heading", { name: "Linked evidence", exact: true })
-    .boundingBox();
-  expect(form.y + form.height).toBeLessThan(evidence.y);
+  // Measure both viewport-relative rectangles in one frame: keyboard-triggered
+  // smooth scrolling can move the viewport between separate boundingBox calls.
+  for (const top of [0, 600]) {
+    await page.evaluate(
+      (top) => globalThis.scrollTo({ top, behavior: "instant" }),
+      top,
+    );
+    const layout = await page
+      .getByRole("form", { name: "Record synthetic review" })
+      .evaluate((form) => ({
+        formBottom: form.getBoundingClientRect().bottom,
+        evidenceTop: globalThis.document
+          .querySelector(".review-material > h3")
+          .getBoundingClientRect().top,
+      }));
+    expect(layout.formBottom).toBeLessThan(layout.evidenceTop);
+  }
   await page.getByText("Citation and provenance", { exact: true }).click();
   await expect(
     page.getByText("synthetic://d6/intake", { exact: true }),

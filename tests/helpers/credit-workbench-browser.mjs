@@ -10,9 +10,12 @@ import { PENDING_PREFIX } from "../../apps/admin/public/authority-client.js";
 
 const action = (page, name) => page.locator(`[data-review-action="${name}"]`);
 async function idle(page) {
+  // node:test does not load playwright.config.mjs. Match that suite's bounded
+  // wait instead of applying Playwright's default five-second performance limit.
   await expect(page.locator("#stage-content")).toHaveAttribute(
     "aria-busy",
     "false",
+    { timeout: 30_000 },
   );
 }
 async function click(page, name) {
@@ -115,6 +118,45 @@ export function registerCreditBrowserTests(fixture) {
     await idle(page);
     assert.deepEqual(await h.dump(), empty, "opening creates nothing");
     await prepare(page);
+    const inspected = await h.dump();
+    await expect(
+      page.locator('[data-attention-reason="AUTHORITY"]'),
+    ).toContainText("Case owner: Demo operator · synthetic");
+    await expect(page.locator('[data-why-you="finance"]')).toContainText(
+      "Finance is the named reviewer",
+    );
+    await page
+      .getByLabel("Reviewer", { exact: true })
+      .selectOption("executive");
+    await expect(page.locator('[data-why-you="executive"]')).toContainText(
+      "above $10,000",
+    );
+    await page.getByLabel("Reviewer", { exact: true }).selectOption("business");
+    await expect(page.locator('[data-why-you="business"]')).toContainText(
+      "not listed",
+    );
+    await page
+      .getByLabel("Reviewer", { exact: true })
+      .selectOption("finance_delegate");
+    await expect(
+      page.locator('[data-why-you="finance_delegate"]'),
+    ).toContainText("Finance delegate is not listed");
+    await page.getByLabel("Reviewer", { exact: true }).selectOption("finance");
+    const policy = page.getByText(
+      "Bound reviewer policy · historical consent",
+      { exact: true },
+    );
+    await policy.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByText(/The bound policy requires Finance and Executive/),
+    ).toBeVisible();
+    await page.keyboard.press("Enter");
+    assert.deepEqual(
+      await h.dump(),
+      inspected,
+      "attention/seat/policy inspection creates no durable changes",
+    );
     await page.getByLabel("Reviewer", { exact: true }).focus();
     await page.keyboard.press("Tab");
     await expect(page.getByLabel("Decision", { exact: true })).toBeFocused();
@@ -164,6 +206,12 @@ export function registerCreditBrowserTests(fixture) {
     ).toBeEnabled();
     await page.getByLabel("Decision", { exact: true }).selectOption("approve");
     await screenshot(page, "02-finance-approved");
+    await expect(page.locator(".review-next-action")).toHaveText(
+      "Executive: review the proposal and uncertainty, then record a decision.",
+    );
+    await expect(page.getByLabel("Reviewer", { exact: true })).toHaveValue(
+      "finance",
+    );
     await receiptView(page, { name: "02-finance-approved" });
     await expect(
       page.locator('[data-receipt-stage="decisions"] > summary'),
@@ -250,10 +298,36 @@ export function registerCreditBrowserTests(fixture) {
         page.locator('[data-receipt-status="reconciled"]'),
       ).toBeVisible();
     }
+    const packetRead = "**/authority-requests/*/packet";
+    await page.route(packetRead, async (route) => {
+      const response = await route.fetch(),
+        body = await response.json();
+      body.historical_evaluations[0].inputs.resolution.identities = {};
+      body.historical_evaluations[0].result.resolution.authority_requirements[0].eligible_approvers =
+        {};
+      await route.fulfill({ response, json: body });
+    });
+    await click(page, "refresh");
+    await controls(page);
+    await expect(
+      page.locator('[data-attention-current="incomplete"]'),
+    ).toContainText("Case owner: Unconfirmed");
+    await expect(page.locator("[data-why-you]")).toContainText(
+      "explanation is unavailable",
+    );
+    await receiptView(page, {
+      status: "incomplete",
+      check: "independently checked",
+    });
+    await page.unroute(packetRead);
+    await click(page, "refresh");
+    await expect(
+      page.locator('[data-receipt-status="reconciled"]'),
+    ).toBeVisible();
     assert.deepEqual(
       await h.dump(),
       snapshot,
-      "altered Case reads never write or replace validated evidence",
+      "altered Case/identity reads never write or replace validated evidence",
     );
     await page.reload();
     await idle(page);
@@ -279,7 +353,18 @@ export function registerCreditBrowserTests(fixture) {
     ).toBeVisible();
     await vote(reopened, "finance", "reject");
     await expect(action(reopened, "verify-credit")).toBeEnabled();
+    // A slow historical recheck remains pending; the browser must await the
+    // actual response, not confuse a five-second assertion deadline with failure.
+    let historicalChecks = 0;
+    const checkPath = "**/simulated-credit-attempts/*/verifications";
+    await reopened.route(checkPath, async (route) => {
+      historicalChecks++;
+      await new Promise((resolve) => globalThis.setTimeout(resolve, 6_000));
+      await route.continue();
+    });
     await click(reopened, "verify-credit");
+    await reopened.unroute(checkPath);
+    assert.equal(historicalChecks, 1, "no automatic recheck or effect retry");
     await expect(
       reopened.locator('[data-credit-result="verified_simulated_effect"]'),
     ).toBeVisible();
@@ -287,6 +372,22 @@ export function registerCreditBrowserTests(fixture) {
     assert.equal(view.verifications.length, 2);
     assert.equal(view.current.eligible, false);
     assert.equal(view.closure_permission, false);
+    await h.request(
+      `${CREDIT_ROOT}-attempts`,
+      await h.command(
+        view.current.bindings.authority_request_id,
+        "browser:latest-denial",
+      ),
+      409,
+    );
+    await click(reopened, "refresh");
+    await expect(reopened.locator("#review-current-status")).toHaveText(
+      "Latest simulated attempt denied",
+    );
+    await expect(
+      reopened.locator('[data-credit-result="verified_simulated_effect"]'),
+    ).toHaveCount(0);
+    await expect(action(reopened, "verify-credit")).toBeEnabled();
   });
 
   for (const kind of ["execute-credit", "verify-credit"])
@@ -468,6 +569,19 @@ export function registerCreditBrowserTests(fixture) {
       status: "incomplete",
       name: "09-inconsistent-reads",
     });
+    await controls(page);
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Current information incomplete",
+    );
+    await expect(
+      page.locator('[data-attention-current="incomplete"]'),
+    ).toContainText("Case owner: Unconfirmed");
+    await expect(
+      page.getByRole("list", { name: "Required reviewers" }),
+    ).not.toContainText("Approved");
+    await expect(action(page, "execute-credit")).toBeDisabled();
+    await screenshot(page, "09-inconsistent-reads");
+    await receiptView(page, { status: "incomplete" });
     await expect(
       page.locator('[data-receipt-stage="decisions"] > summary'),
     ).toContainText("Finance approved");
@@ -480,11 +594,42 @@ export function registerCreditBrowserTests(fixture) {
       page.locator('[data-receipt-status="reconciled"]'),
     ).toBeVisible();
     await controls(page);
+    const denied = (
+      await h.request(
+        `${CREDIT_ROOT}-attempts`,
+        await h.command(selected, "browser:stale-before-fresh"),
+        409,
+      )
+    ).receipt;
+    await click(page, "refresh");
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Latest simulated attempt denied",
+    );
     await click(page, "fresh");
     await expect(page.locator("#review-current-status")).toContainText(
       "Awaiting review",
     );
     await expect(action(page, "execute-credit")).toBeDisabled();
+    await expect(page.locator(".review-next-action")).toContainText(
+      "Finance and Executive",
+    );
+    await vote(page, "finance");
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Finance approved — Executive needed",
+    );
+    await page.reload();
+    await idle(page);
+    await expect(page.locator(".review-next-action")).toContainText(
+      "Executive:",
+    );
+    assert.equal((await h.request(CREDIT_ROOT)).attempts.at(-1).id, denied.id);
+    await vote(page, "executive");
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Approvals complete; credit not recorded",
+    );
+    const reviewed = await h.request(CREDIT_ROOT);
+    assert.equal(reviewed.source, null);
+    assert.equal(reviewed.closure_permission, false);
   });
 
   test("D7-D browser: a confirmed newer attempt and its check remain visible when refresh fails", async (t) => {

@@ -2154,6 +2154,15 @@ button {
 .review-form .review-muted {
   margin: 0.75rem 0;
 }
+.review-why-you {
+  margin: 0.5rem 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+.review-attention {
+  display: block;
+  color: var(--ink-soft);
+}
 .review-notice:focus,
 #review-current-status:focus,
 .review-material .review-card:focus {

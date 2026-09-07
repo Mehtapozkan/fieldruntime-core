@@ -1,15 +1,12 @@
 # Status
 
-Current milestone: D8-B reproducible failure walkthrough, measurement readiness
-and September 7 MVP documentation reconciliation,
-implemented for review on `feat/d8b-failure-walkthrough`. D8-A merged normally in
-PR #26 at `4ce7175556b2a0ecf954ec5a57677a591050db2c`, preserving reviewed head
-`e1caeb28f74fb66f0f5e6ebb69c370e476e50e40`, passing required checks and no unresolved
-findings. D7 is merged, including the Workbench controls.
-PR #25 merged normally at `f49dd71e3d1d8a393729690437d6f568b7473238` from reviewed
-head `2f3434fee20690dc19a4091409ee13f429551e89`, with passing required checks and no
-unresolved findings. Required PRs, up-to-date `validate`, force-push and deletion
-protections were preserved without bypass.
+Current milestone: D8-C focused operator-attention presentation, implemented for
+review on `feat/d8c-operator-attention`. D8-B PR #27 merged normally at
+`1039912ca7eaea2239366f5de8c07b0e44c7df81`, preserving reviewed head
+`d86b2a9e50efa546581e9abeac3f0d6907adeccc`. Required up-to-date `validate` passed;
+there were no review findings or subsequent changes. Required PRs, strict checks,
+force-push and deletion protections remain; no bypass was used. D8-A and D7 remain
+merged. This branch changes presentation, tests and documentation only.
 The published `v0.1.0-evaluation-preview.0` remains the September 1 snapshot at
 `3db1b4bf0304e67e1ef51be785d1f81b906016b3`, before D6/D7. Current source and this
 review branch are not a new release. [Operator functionality table](README.md#what-works-today).
@@ -727,7 +724,7 @@ Compose pass is claimed. Required final-head CI includes all PostgreSQL/API,
 Workbench, Compose and container appliance/restart checks. Earlier D7 validation
 above is historical and distinguished from this D8-A evidence.
 
-## D8-B implemented for review
+## D8-B merged baseline
 
 The [failure walkthrough and measurement-readiness note](docs/guides/d8-failure-walkthrough.md)
 select five existing real PostgreSQL/API tests: a legitimate independent match,
@@ -808,14 +805,99 @@ restart retry. All 100 checked local link targets and six anchors resolve;
 Final-head full PostgreSQL/API, browser, Compose and appliance/restart CI evidence
 is recorded in PR #27. No new visual inspection is claimed.
 
+## D8-C implemented for review
+
+The inspection retained existing proposal/uncertainty, reviewer badges, preparation
+facts, action/check headings and the five-stage History receipt. These already show
+compact evidenced milestones; no new dashboard, percentage or progress records were
+needed. Finance approval still leaves Executive attention; action recording remains
+separate from an independent check, customer impact and blocked closure.
+
+Two gaps were addressed in the same view. “Why you?” now uses the selected synthetic
+seat and the request’s bound policy, including named Finance and the Executive
+threshold; the generic reviewer card becomes expandable policy evidence. The recorded
+Case owner is separately attributed from reconciled Case/canonical identity records.
+Missing or mixed ownership stays Unconfirmed. Only supported authority, source-evidence
+or read/submission problems receive a reason; other reasons stay unconfirmed, with
+material conflicts/unknowns retained. No inferred judgment, knowledge or novelty.
+
+A real PostgreSQL/API regression reproduced an older approved packet combined with
+newer Case/operation reads: History was incomplete but the primary view said
+“Approvals complete; credit not recorded.” The primary view now reuses History’s
+reconciliation and labels current information incomplete, without effective approval
+badges or invented ownership. Confirmed mismatch still leads failed-refresh notices;
+newer denied attempts do not inherit earlier success, and earlier effects remain
+independently checkable. No command, exact retry, C/R/S, lifecycle, replacement,
+identity/authority, migration or closure behavior changed.
+
+Local validation on September 7 passes `pnpm validate` (274 tests, formatting,
+lint, typecheck and public-release audit), ECC 620/620, and the intended negative
+control (exit 1, 152/620; unchanged corpus/gold hashes). The first sandboxed run
+could not bind the five loopback HTTP tests; rerunning with local server access
+passes all tests. Real PostgreSQL 18.4 passes 63 authority and 115 action/check/API
+tests, including eight Chromium scenarios; all eight retained D6 Workbench browser
+tests also pass. Focused final captures cover the changed attention/reconciliation
+path. Final-commit CI supplies the pinned PostgreSQL 17, complete browser, Compose,
+appliance and restart evidence in the implementation PR. Docker is unavailable
+locally (`docker compose config --quiet` exits 127); `git diff --check` passes.
+
+The first D8-C CI run passed repository/Compose checks and 114/115 action/check/API
+tests, but its historical-recheck browser wait expired at Playwright's default five
+seconds. A controlled six-second test-only delay reproduces that assertion failure.
+The `node:test` helper now uses the existing Workbench suite's bounded 30-second
+idle wait; the delayed recheck must still return the exact independent proof with
+one submission, false current execution eligibility and blocked closure. No runtime
+timeout or result assertion changed. The implementation PR records final CI results.
+
+The next CI run passed all 63 authority and 115 action/check/API tests plus
+appliance/restart checks, then exposed a retained desktop geometry assertion that
+sampled two viewport positions during keyboard-triggered smooth scrolling. A
+controlled scroll reproduces the false overlap. Both rectangles are now measured
+in one frame at two scroll positions, preserving the strict controls-before-evidence
+assertion. This is also test-only; final CI must still pass all retained browser groups.
+
+Malformed retained identity evidence is also covered: the initial owner lookup
+threw after History had already marked that evidence unreconciled. The lookup now
+requires reconciliation, so ownership stays Unconfirmed and valid historical proof
+remains readable. Unit and PostgreSQL/browser regressions preserve the no-write and
+no-current-permission behavior while the malformed read is present. Malformed
+retained reviewer lists likewise show an unavailable policy explanation instead of
+throwing or inventing a reviewer assignment.
+
+PR #28 review also identified an older denial masking a fresh request's reviewers.
+The PostgreSQL reproduction created a new request after stale execution but still
+displayed “Latest simulated attempt denied.” Denial attention now requires the
+selected request hash and exact C/R/S command bindings; new requests or later review
+revisions show their own Finance/Executive progress. Earlier denials stay in History.
+API/restart and browser/reload coverage retains the denial while fresh approvals
+advance without executing a credit or transferring earlier consent.
+
+CI run 34161065499 passed all 63 authority and 115 action/check/API tests,
+appliance/restart checks and four retained review-browser scenarios before its
+20-minute job limit cancelled the remaining groups. The validation job now has a
+bounded 30-minute budget for the complete suite. Required checks, per-test deadlines,
+assertions, pinned dependencies and repository protections are unchanged; this is
+not a runtime performance or business-value claim.
+
+Desktop (1440px) and 390px screenshots were inspected: proposal, uncertainty,
+reviewer progress and controls remain readable with no horizontal overflow. Mobile
+still needs vertical scrolling. Keyboard tests cover disclosures, review controls,
+focus and unchanged seat selection; no screen-reader, Safari/Firefox or real-user
+effectiveness claim is made. The
+[Workbench handoff](apps/admin/README.md#d8-c-operator-attention-and-visual-review)
+links before/after desktop and 390px captures and the executable journey. D-034
+remains Proposed; no customer data, D9 implementation, release or deployment.
+
 ## Next
 
-Leave PR #27 open for review. The next proposed bounded build is D8-C: read-only
-“Why you?”, evidenced progress and blocker/owner/next action in the existing
-Workbench, preserving uncertainty, authority, all interventions and exact retries.
-Unsupported reasons/counts stay unconfirmed; no correction/closure records or
-new workload are invented. D9-A separately settles minimal intake/provenance/time
-contracts and its permitted data boundary before one queue-export implementation.
+Leave the D8-C PR open for review. D9-A is a bounded contract/design assignment:
+use synthetic queue-export/document examples to settle minimum intake/provenance,
+source activity/actor/role/status, object links, occurrence versus ingestion versus
+journal time, coverage and repeat/changed-import semantics. Identify the smallest
+versioned additions to Case/WorkEvent, with reconstruction/idempotency/ambiguity
+examples and acceptance tests. Make D-034’s private read/propose data boundary
+concrete for human review. Unknown customer details must not block synthetic contract
+design; real samples require the approved named boundary. Do not implement intake yet.
 
 Customer acceptance, real impact, active effort, comparable cohorts and full costs
 remain missing. Packet acceptance, simulated effect verification, business close

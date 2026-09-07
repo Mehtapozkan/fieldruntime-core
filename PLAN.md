@@ -15,7 +15,9 @@ at `f49dd71e3d1d8a393729690437d6f568b7473238`, preserving reviewed head `2f3434f
 and passing checks. D8-A merged in PR #26 at
 `4ce7175556b2a0ecf954ec5a57677a591050db2c` from reviewed head `e1caeb28`, with passing
 checks and its finding resolved. D8-B’s failure walkthrough and measurement-readiness
-note are implemented for review in PR #27. Its September 7 documentation
+note merged in PR #27 at `1039912ca7eaea2239366f5de8c07b0e44c7df81`, preserving
+reviewed head `d86b2a9e` and passing required checks. D8-C’s bounded operator-attention
+presentation is implemented for review. The September 7 documentation
 reconciliation preserves the completed tests and adds the canonical MVP specification
 and requirement/gaps matrix. No release or deployment is included.
 
@@ -69,7 +71,7 @@ historical behavior alone never establishes business authority.
 | GitHub #14 — Automated Evaluation Prerelease                   | Merged      | Automate the evaluation prerelease while retaining the repository's explicit preview boundary                                                                                                                  | The published prerelease remains tied to validated source and release checks                                                                                                      |
 | D6 — Governed Case Session                                     | Merged      | Authoritative identity, delegation, and business authority; exact Case owner, delegated worker, authority owner, and verifier; payload-bound approvals; deterministic authority resolution                     | The Decision Packet is runtime-backed, approvals bind the exact payload, and authority resolution fails closed                                                                    |
 | D7 — Controlled Action + Independent Verification              | Merged      | Bounded Orchid credit, independent verification and Workbench action/check controls merged in PRs #23–#25                                                                                                      | Bypass, self-verification, unbound-payload, precondition, and duplicate-effect negative tests pass                                                                                |
-| D8 — Receipts + Measurement Readiness + Failure Demonstrations | In progress | D8-A merged; D8-B failure demonstrations and documentation reconciliation under review; D8-C proposed read-only attention presentation                                                                         | Reconstruct evidence and assert unsafe paths; distinguish missing effort/outcomes/economics from measured results; no new closure permission                                      |
+| D8 — Receipts + Measurement Readiness + Failure Demonstrations | In progress | D8-A/B merged; D8-C read-only attention presentation implemented for review                                                                                                                                    | Reconstruct evidence and assert unsafe paths; distinguish missing effort/outcomes/economics from measured results; no new closure permission                                      |
 | D9 — Intake + Case Formation                                   | Planned     | D9-A reviews minimal provenance/time/input contracts and permitted data boundary; D9-B implements one queue export plus supporting documents, coverage, reviewed matches and repeat imports                    | No duplicate Cases/events; uncertain links, source versions and missing population remain explicit; portable provenance; existing upstream Case ownership preserved               |
 | D10 — Discovery + Readiness + Redesign                         | Planned     | All seven Discovery records, guided interviews, baseline, bottleneck ranking and redesign before allocation; Trigger, Objective, recurring Population, Close Event, Human Intervention Map and Correction Path | One operator-reviewed workflow; every finding cited or labeled, preserved source/variant conflicts, valid measurement coverage and named controls/owners                          |
 | D11 — Reviewed Runtime Builder                                 | Planned     | One reviewed workflow template compiles a versioned Organization Runtime Pack with step, separate authorization, outcome, intervention, correction and evaluation requirements                                 | Reproducible pack; draft/contradictory rules cannot execute; approved diffs and rollback; any changed trust/closure boundary has human approval                                   |
@@ -168,7 +170,7 @@ across equal timestamps. Historical evidence never grants current permission.
 
 ## D8-B delivery boundary
 
-Implemented for review: a [five-scenario failure walkthrough](docs/guides/d8-failure-walkthrough.md)
+Merged in PR #27: a [five-scenario failure walkthrough](docs/guides/d8-failure-walkthrough.md)
 using existing PostgreSQL/API fixtures, fault hooks and Node test selection. One
 legitimate match accompanies stale-consent denial, silent adapter failure caught
 by read-back, unavailable-read inconclusive proof and exact response-loss retry.
@@ -190,20 +192,23 @@ D-013 and D-033 remain unchanged; measured economics stays unimplemented.
 
 ## Next bounded builds
 
-1. **D8-C — proposed attention presentation:** inspect the existing Workbench and
-   website ownership. In the Workbench only, show evidenced progress, current blocker,
-   owner/next action and one supported “Why you?” reason; unknown remains unconfirmed.
-   Reuse validated reads and existing components. Preserve four review decisions,
-   terminal interventions, fresh consent, exact retries, read-only history and
-   mismatch/inconclusive visibility. No new durable intervention/correction state,
-   counts unsupported by API, autonomous workload, authority logic or closure.
-   Keyboard/390px, stale/mixed-read, failed-refresh and later-proof regressions gate
-   the build. Website copy/status correction is a separately scoped ownership audit,
-   not a deployment in this assignment.
-2. **D9-A — proposed intake/data contract review:** settle source-byte/provenance,
-   occurrence/ingestion/recording time, supported inputs, matching/version/re-import
-   and privacy/access/retention/export rules; reuse Case/WorkEvent. Review D-034
-   before real samples. D9-B then implements only one approved file-based path.
+1. **D8-C — implemented for review:** the existing packet now shares History’s
+   reconciliation check, distinguishes the recorded Case owner from required
+   reviewers, and explains the selected synthetic seat’s bound policy. Existing
+   reviewer badges and recorded action/check headings remain the compact milestones;
+   History retains the full five-stage evidence receipt. No second dashboard or
+   progress record. Mixed reads cannot display earlier approvals as current. The
+   generic reviewer card is replaced by “Why you?” beside controls plus expandable
+   policy evidence. No runtime contract, authority rule or persistence changes.
+   [Workbench walkthrough and before/after captures](apps/admin/README.md#d8-c-operator-attention-and-visual-review).
+2. **D9-A — proposed intake/data contract review:** use synthetic examples to settle minimum source-byte/provenance,
+   activity/actor/role/source-status and business-object bindings, distinct
+   occurrence/ingestion/recording times, supported inputs and repeat/changed-import
+   semantics. Reuse Case/WorkEvent; propose versioned additions only where required.
+   Make D-034’s private access/retention/export boundary concrete for review; unknown
+   customer names/file sets do not block synthetic contract design. Real samples
+   require the approved named boundary. Deliver examples, validation/denial tests
+   and the exact amendment for human approval, not D9-B import implementation.
 3. **D10–D13:** keep the sequence in the table. Discovery includes interviews,
    self-assessment/support, all seven records and six loop outputs. Redesign precedes
    execution allocation; Builder publishes one reviewed template, and D12 uses one

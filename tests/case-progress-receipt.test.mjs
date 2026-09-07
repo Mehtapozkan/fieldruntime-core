@@ -7,6 +7,7 @@ import {
 } from "./helpers/authority-browser-api.mjs";
 import { readCredit } from "../dist/packages/runtime/src/simulated-credit.js";
 import { sha256Json } from "../dist/packages/runtime/src/canonical-json.js";
+import * as view from "../apps/admin/public/authority-workbench.js";
 const at = new Date("2026-09-06T16:00:00.000Z");
 
 async function reviewed() {
@@ -40,6 +41,71 @@ function receipt(state) {
   );
   return clientModule.caseReceiptEvidence(state);
 }
+test("D8-C attention uses reconciled ownership and reviewer-specific bound policy, not seat assignment", async () => {
+  const { h, state } = await reviewed();
+  const before = h.snapshot(),
+    bytes = JSON.stringify(state);
+  const attention = view.operatorAttention(state);
+  assert.equal(attention.reconciled, true);
+  assert.equal(attention.owner, "Demo operator · synthetic");
+  assert.equal(attention.receipt.decisions.length, 2);
+  assert.match(
+    view.reviewerExplanation(state, "executive"),
+    /Executive review.*above \$10,000/,
+  );
+  assert.match(
+    view.reviewerExplanation(state, "finance"),
+    /Finance.*named reviewer/,
+  );
+  for (const seat of ["business", "finance_delegate"])
+    assert.match(view.reviewerExplanation(state, seat), /not listed/);
+  for (const invalid of [{}, [{ identity: null }]]) {
+    const incomplete = structuredClone(state);
+    incomplete.packet.historical_evaluations[0].result.resolution.authority_requirements[0].eligible_approvers =
+      invalid;
+    assert.match(
+      view.reviewerExplanation(incomplete, "finance"),
+      /explanation is unavailable/,
+    );
+  }
+  assert.equal(h.snapshot(), before);
+  assert.equal(JSON.stringify(state), bytes);
+});
+test("D8-C mixed or interrupted reads keep recorded work but cannot assign current reviewer attention", async () => {
+  const { state } = await reviewed();
+  for (const alter of [
+    (s) => s.catalogRevision++,
+    (s) => s.credit.current.bindings.expected_review_revision++,
+    (s) =>
+      (s.packet.historical_evaluations[0].inputs.resolution.identities = {}),
+    (s) => {
+      s.needsRefresh = true;
+    },
+  ]) {
+    const mixed = structuredClone(state);
+    alter(mixed);
+    const attention = view.operatorAttention(mixed);
+    assert.equal(attention.reconciled, false);
+    assert.match(attention.next, /Refresh/);
+    assert.equal(
+      attention.reason,
+      null,
+      "inconsistency alone does not establish a business reason",
+    );
+    assert.equal(attention.owner, "Unconfirmed");
+    assert.equal(attention.receipt.decisions.length, 2);
+    assert.match(
+      view.reviewerExplanation(mixed, "executive"),
+      /Historical policy only/,
+    );
+  }
+  const attention = view.operatorAttention({
+    ...state,
+    pending: { body: "saved" },
+  });
+  assert.match(attention.next, /exact retry/);
+  assert.equal(attention.reason, "SYSTEM_FAILURE");
+});
 test("D8-A receipt retains attributed decisions without writes or inferred economics", async () => {
   const { h, state } = await reviewed();
   const before = h.snapshot(),
