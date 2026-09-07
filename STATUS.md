@@ -1,6 +1,7 @@
 # Status
 
-Current milestone: D8-B reproducible failure walkthrough and measurement readiness,
+Current milestone: D8-B reproducible failure walkthrough, measurement readiness
+and September 7 MVP documentation reconciliation,
 implemented for review on `feat/d8b-failure-walkthrough`. D8-A merged normally in
 PR #26 at `4ce7175556b2a0ecf954ec5a57677a591050db2c`, preserving reviewed head
 `e1caeb28f74fb66f0f5e6ebb69c370e476e50e40`, passing required checks and no unresolved
@@ -765,10 +766,58 @@ human effort, comparable baseline, actual operating costs, customer acceptance a
 real impact. Missing values are unknown, not zero. Fixture times and runner durations
 measure neither labor nor savings; a simulated credit is not recovered revenue.
 
+## September 7 MVP documentation reconciliation
+
+PR #27 was rechecked open at `678582ffef65de3853c675a71bcd816750edd81c`, with main
+still `4ce7175556b2a0ecf954ec5a57677a591050db2c` and no uncommitted changes. Completed
+D8-B demonstrations were preserved. This pass changes only Markdown documents.
+
+The [canonical specification](docs/product/workflow-discovery.md) consolidates the
+revised Discovery source, recovered ten-point instruction, Business Loops handoff
+and reconciled roadmap. The [single requirement/gaps matrix](docs/product/requirements-implementation-matrix.md)
+retains R1–R7, L1–L4 and P1–P6 with file/test references, actual behavior, gaps,
+stages and unresolved questions. Intake and reviewed-pack prerequisites are explicit.
+Schema-only outcomes, corrections, learning and workers are not marked implemented;
+source occurrence/retrieval/recording do not establish ingestion or active effort.
+
+PLAN now carries proposed D8-C presentation, D9 contract/data review then one export,
+D10 records/interviews/baseline/redesign and six loop outputs, D11 one reviewed pack,
+D12 one useful replaceable worker/minimum proof and reviewed correction capture,
+and D13 customer comparison/Capacity Map. Assisted evaluations during D9–D12 need
+an approved data boundary; connected shadow work remains D17–D18 and writes D20.
+[D-034](docs/architecture/d9-assisted-intake-boundary.md) is **Proposed**, not Accepted:
+confirm the invoice-dispute assignment within ECC and approve the actual private
+sample/access boundary before customer data. D-013/D-033 and frozen v0/ECC stay intact.
+
+README/OPEN_CORE distinguish merged D6/D7/D8-A, active D8-B, the historical prerelease,
+legacy fixture screens, website simulation and future functionality. OPEN_CORE's
+obsolete D7-D review-branch statement is corrected; Apache-2.0 rights are unchanged.
+A separate website ownership/copy audit should address reported “proprietary core”
+and stale build wording; this pass neither reinspects nor changes/deploys the site.
+
+The prior [exact-head CI at 678582f](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/33993791657)
+is historical evidence for the unchanged implementation, including PostgreSQL/API,
+browser, Compose and restart checks; publishing was skipped. On September 7,
+`pnpm validate` passes 272 tests and the public-release audit. Its first run caught
+missing required “Operational Legibility” README wording; the wording was restored
+without weakening the check. ECC passes 620/620; the negative control exits 1 at
+152/620 from intended assertions with unchanged corpus/gold hashes. The five existing
+PostgreSQL/API demonstrations pass again, including source evidence and exact
+restart retry. All 100 checked local link targets and six anchors resolve;
+`git diff --check` passes. Docker remains unavailable locally (Compose exits 127).
+Final-head full PostgreSQL/API, browser, Compose and appliance/restart CI evidence
+is recorded in PR #27. No new visual inspection is claimed.
+
 ## Next
 
-Review D8-B and leave its implementation PR unmerged. Remaining D8 accepted-outcome
-and measured-economics work stays planned; it requires actual evidence and measurements. No credit or source check proves customer impact, acceptance or
-recovered revenue. Incomplete proof continues to block closure. Case formation/import
-and Operational Legibility (D9–D10) precede general workers. No live connectors,
-production authentication, external actions, release or deployment accompany D8-B.
+Leave PR #27 open for review. The next proposed bounded build is D8-C: read-only
+“Why you?”, evidenced progress and blocker/owner/next action in the existing
+Workbench, preserving uncertainty, authority, all interventions and exact retries.
+Unsupported reasons/counts stay unconfirmed; no correction/closure records or
+new workload are invented. D9-A separately settles minimal intake/provenance/time
+contracts and its permitted data boundary before one queue-export implementation.
+
+Customer acceptance, real impact, active effort, comparable cohorts and full costs
+remain missing. Packet acceptance, simulated effect verification, business close
+and Case resolution stay distinct. The two-returning-design-partners/one-paid
+continuation gate is a proposed experiment, not PMF. No release or deployment.

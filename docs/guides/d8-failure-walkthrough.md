@@ -104,6 +104,11 @@ evidence and uncertain outcomes. This change introduces no new UI or screenshots
 
 ## Measurement readiness
 
+The [canonical measurement definitions](../product/workflow-discovery.md#measurement-definitions-and-missing-evidence)
+retain denominator, event semantics, concurrent-work, uncertainty and baseline
+rules. The [single matrix](../product/requirements-implementation-matrix.md) assigns
+capture and customer-proof gaps to D9–D13; this walkthrough adds no telemetry.
+
 | Question                           | Facts available now                                                                                                      | Evidence required before reporting a metric                                                                                                                                                                            |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | What was recorded?                 | Decisions and synthetic identity attribution; attempts; independent observations; exact bindings and recorded timestamps | Real operational use and agreed interpretation of each event. Synthetic fixture records establish behavior only.                                                                                                       |
@@ -115,6 +120,15 @@ evidence and uncertain outcomes. This change introduces no new UI or screenshots
 Missing measurements are **unknown, not zero**. No cycle-time improvement, labor
 savings, cost per accepted outcome or ROI is reported here. Acceptance, real impact
 and complete closure proof remain unimplemented; D8 economics is not complete.
+
+Future human attention per verified business outcome divides all attributable
+active cohort effort (including failed/open work) by distinct verified business
+outcomes, with coverage and open-case age disclosed. Zero verified outcomes means
+unavailable. Measure preparation, review, correction and verification separately
+from waiting; include founder assistance and delivery/setup costs. Source occurrence,
+ingestion and journal recording time are distinct; no current timestamp pair proves
+labor time. Packet acceptance is an early preparation measure, not a business-outcome
+denominator. D9 may proceed with these gaps visible rather than invented ROI.
 
 See [STATUS](../../STATUS.md) and the implementation PR for actual local and
 final-commit CI results. Docker provisioning was unavailable locally; no local

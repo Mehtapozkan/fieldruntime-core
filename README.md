@@ -11,7 +11,8 @@ PostgreSQL. The merged API records one bounded simulated credit and independentl
 checks its source through the Workbench, with explicit actions and recoverable
 retries. History provides a compact, inspectable Case progress and evidence receipt.
 This D8-B review branch documents reproducible failure demonstrations and measurement
-readiness using the existing test fixtures. It adds no runtime capability.
+readiness using the existing test fixtures, and reconciles the next MVP stages.
+It adds no runtime capability.
 
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external writes.
 > Not production software. Selecting a synthetic reviewer seat is not authentication.
@@ -98,8 +99,9 @@ CI also exercises real PostgreSQL/API, restart, Compose and Workbench browser pa
 
 **Persistent Orchid review:** the default page uses canonical runtime evidence,
 requests and human decisions. Finance/Executive progress is read from the API;
-browser state never grants authority. Explicit action and independent-check controls use those APIs. This branch adds
-the read-only Case receipt; recorded history remains distinct from current authority.
+browser state never grants authority. Explicit action and independent-check controls
+use those APIs. Main includes the read-only Case receipt; recorded history remains
+distinct from current authority.
 
 **Legacy Acme fixture simulation:** choose **Legacy action simulation** or open
 `/?view=legacy`. The six-action story illustrates a connector claiming success,
@@ -121,9 +123,16 @@ history. They remain isolated from Orchid, even on this review branch.
 - **D8-B — Failure walkthrough and measurement readiness:** implemented for review here.
   Remaining D8 accepted-outcome/economics work is planned. A read-only evidence
   receipt supplies neither accepted outcomes nor economic measurements.
-- **D9–D12:** future Case formation/import, Operational Legibility, reviewed runtime
-  configuration and only then a general worker runtime. No automatic Case matching
-  or external Case import exists today.
+- **D8-C — Attention presentation:** proposed read-only progress, blockers and
+  “Why you?” using validated evidence in the existing Workbench. No implementation here.
+- **D9–D12:** proposed intake contracts/data boundary, then one queue export and
+  documents; all seven Discovery records, interviews, Operational Legibility and redesign; one reviewed
+  Runtime Pack; one useful replaceable worker and minimum reviewed proof/corrections.
+  No automatic Case matching, external Case import or customer-data permission exists today.
+- **D13 — Customer proof:** planned 25-Case Challenge and Operating Capacity Map.
+  Assisted evaluations may begin during D9–D12 within an approved data boundary;
+  measured quality, total effort and repeat use determine continuation. Connected
+  shadow operation and production writes retain their later gates.
 
 Production authentication, real connectors, provider adapters, general workers,
 external actions and complete Case closure remain unimplemented. Later distribution
@@ -133,6 +142,10 @@ Action Gateway is not supplied by the one-credit synthetic operation.
 Delivery labels are not GitHub pull request numbers. [PLAN.md](PLAN.md) retains the
 full sequence and exit criteria; [STATUS.md](STATUS.md) records what is implemented
 and validated. Planned functionality is not an available product or release promise.
+The [canonical specification](docs/product/workflow-discovery.md) and
+[single requirement/gaps matrix](docs/product/requirements-implementation-matrix.md)
+retain the Discovery, Business Loop and measurement requirements. Business Loops
+describe recurring Cases, not another runtime or a currently implemented platform.
 
 For this review branch’s [failure walkthrough and measurement-readiness note](docs/guides/d8-failure-walkthrough.md),
 select `feat/d8b-failure-walkthrough` and use disposable test fixtures. It covers a
@@ -162,6 +175,11 @@ Merging source changes does not update that immutable tag or release. This D8-B 
 publishes no new release or deployment. The source-clone appliance is the supported
 trial path; standalone installers, signed artifacts, SBOM/provenance and production
 operations remain future work. Workspace packages remain registry-private.
+
+The public website's synthetic queue story is a separate illustration, not this
+appliance's persistent population or a measured automation rate. Its wording/build
+status needs a separate ownership and copy audit; this PR does not edit or deploy
+the site. No simulated credit proves recovered revenue or an accepted business outcome.
 
 [OPEN_CORE.md](OPEN_CORE.md) describes a **potential** commercial offering, not an
 implemented product inventory. Its terms do not narrow the rights to published

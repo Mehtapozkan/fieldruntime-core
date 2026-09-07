@@ -84,3 +84,13 @@ engine/persistence split.
 
 `openapi/local-appliance.v0.yaml` defines the loopback-only evaluation API and
 keeps its non-production authority boundary explicit.
+
+## Future contract reconciliation
+
+The [canonical Discovery/MVP specification](../../docs/product/workflow-discovery.md)
+and [single requirement/gaps matrix](../../docs/product/requirements-implementation-matrix.md)
+map D9 intake/time/provenance and D11 step, outcome and correction requirements to
+these primitives. WorkEvent occurrence is not ingestion time; Case `Outcome`,
+`Correction` and `LearningCandidate` fields alone do not implement customer proof
+or learning. Preserve strict existing schemas and propose necessary versioned
+additions in the assigned slice. D8-B adds no contract or migration.
