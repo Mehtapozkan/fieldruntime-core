@@ -2,8 +2,9 @@
 
 The existing white/cream Workbench connects persistent review to the bounded
 simulated credit and independent-check APIs. D6, D7 and D8-A's read-only Case
-progress and evidence receipt are merged. This D8-B review branch adds only the
-[test-fixture failure walkthrough](../../docs/guides/d8-failure-walkthrough.md).
+progress and evidence receipt are merged. D8-B’s
+[test-fixture failure walkthrough](../../docs/guides/d8-failure-walkthrough.md)
+merged in PR #27. This D8-C branch clarifies operator attention in the existing view.
 Accepted [D-032](../../docs/architecture/d6-authority-request-lifecycle.md)
 and [D-033](../../docs/architecture/d7-simulated-credit-verification.md) are unchanged.
 Opening, refreshing or revisiting creates no durable records.
@@ -35,7 +36,9 @@ Do not discard existing history to reset this demo.
    conflicts and unknowns. The report does not independently establish customer
    impact or justify the amount. The bound policy requires named Finance plus
    Executive for credits above $10,000; Business and Finance delegate cannot fill
-   those seats in this demo. Technical bindings and source URIs are expandable.
+   those seats in this demo. “Why you?” explains the selected seat’s bound policy; the Case owner is
+   separately recorded, not inferred from the required reviewer. Technical bindings,
+   source URIs and the complete bound policy are expandable.
 4. Record **Finance · synthetic seat / Approve**. The confirmed response triggers
    a read-only refresh: **Finance approved — Executive needed**. Finance's recorded
    approval is acknowledged; reject/modify/escalate remain available when permitted.
@@ -161,3 +164,66 @@ PR for final commit evidence and local limitations. [Desktop/390px visual handof
 [Case receipt walkthrough, screenshots and limits](../../docs/guides/d8-case-receipt-handoff.md)
 covers the D8-A read-only presentation. Recorded elapsed intervals are not processing
 time or savings; no economics or accepted-outcome proof is supplied.
+
+## D8-C operator attention and visual review
+
+This is one presentation pass over the existing validated projections (requirements
+L2/P3). The proposal, material uncertainty, linked evidence, reviewer badges,
+recorded action/check headings and five-stage History receipt already supplied the
+milestones and remain. No duplicate progress component or completion percentage.
+The generic **Why these reviewers** card is replaced by concise **Why you?** beside
+the selected seat and expandable **Bound reviewer policy · historical consent**.
+
+Use the primary walkthrough above. Finance approval leaves **Executive** as the next
+reviewer without switching seats. Completed approvals expose the explicit credit
+command while **Review or intervene** retains all permitted decisions. Record and
+check are separate steps; even an independent match leaves impact, acceptance and
+Case closure unproven. “Case owner” comes from reconciled Case/identity evidence;
+unknown ownership is Unconfirmed. A required reviewer is not assigned ownership.
+
+**Current information incomplete** means independently loaded views did not
+reconcile. Earlier recorded decisions remain in History but cannot supply current
+approval badges or reviewer/owner claims. A confirmed mismatch remains prominent
+when refresh fails; inspect expected/observed evidence, then refresh current state.
+An uncertain submission still recovers its original command with **Retry exact
+command**. Reads, disclosures and seat selection cause no durable changes.
+
+Before captures below are from main `1039912ca7eaea2239366f5de8c07b0e44c7df81`
+(the merged reviewed D8-B source). After captures are from the D8-C implementation
+in the commit containing these files; the PR records its full final SHA and CI.
+Actual Chromium uses the appliance API/assets and isolated real PostgreSQL fixtures,
+with fixed synthetic timestamps. Each PNG is downloadable from its GitHub file page.
+
+| State                              | Desktop                                                                   | 390px                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Before: initial review             | [View](../../docs/assets/d8c/before-review-desktop.png)                   | [View](../../docs/assets/d8c/before-review-mobile.png)                   |
+| Before: Finance approved           | [View](../../docs/assets/d8c/before-finance-desktop.png)                  | [View](../../docs/assets/d8c/before-finance-mobile.png)                  |
+| After: initial review              | [View](../../docs/assets/d8c/01-review-desktop.png)                       | [View](../../docs/assets/d8c/01-review-mobile.png)                       |
+| After: Finance approved            | [View](../../docs/assets/d8c/02-finance-approved-desktop.png)             | [View](../../docs/assets/d8c/02-finance-approved-mobile.png)             |
+| After: approvals complete          | [View](../../docs/assets/d8c/03-approvals-complete-desktop.png)           | [View](../../docs/assets/d8c/03-approvals-complete-mobile.png)           |
+| After: credit recorded             | [View](../../docs/assets/d8c/04-credit-recorded-desktop.png)              | [View](../../docs/assets/d8c/04-credit-recorded-mobile.png)              |
+| After: independently checked       | [View](../../docs/assets/d8c/05-independently-checked-desktop.png)        | [View](../../docs/assets/d8c/05-independently-checked-mobile.png)        |
+| After: mismatch and failed refresh | [View](../../docs/assets/d8c/07-mismatch-refresh-unavailable-desktop.png) | [View](../../docs/assets/d8c/07-mismatch-refresh-unavailable-mobile.png) |
+| After: changed evidence            | [View](../../docs/assets/d8c/08-changed-evidence-desktop.png)             | [View](../../docs/assets/d8c/08-changed-evidence-mobile.png)             |
+| After: inconsistent reads          | [View](../../docs/assets/d8c/09-inconsistent-reads-desktop.png)           | [View](../../docs/assets/d8c/09-inconsistent-reads-mobile.png)           |
+
+To reproduce only the existing browser scenarios, after the documented build and
+Chromium install, use the same disposable test database setup as above:
+
+```sh
+D7_WORKBENCH_BROWSER=1 \
+D7_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime \
+D7_SCREENSHOT_DIR="$PWD/d8c-captures" \
+node --test --test-name-pattern='D7-D browser:' scripts/simulated-credit-postgres.test.mjs
+```
+
+The fixed test-host faults are not normal appliance endpoints. Tests assert the
+full review/action/check/reopen story, retained mismatch, later inconclusive result,
+newer denied attempt, mixed reads and exact uncertain retries. Keyboard assertions
+cover reviewer → decision → submit, Enter disclosures, focus retention and unchanged
+seat selection. Snapshots compare durable tables before/after read/expansion.
+Inspection at 1440px and 390px confirms readable proposal, material uncertainty,
+reviewer progress and controls without horizontal overflow. Mobile still requires
+vertical scrolling. Final validation results are recorded in STATUS/PR; no
+screen-reader, Safari/Firefox, real-user effectiveness or economic measurement is
+claimed.

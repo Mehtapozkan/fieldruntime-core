@@ -2397,6 +2397,10 @@ test("D7-D Workbench: explicit preparation, review, credit, independent check an
   assert.equal(afterDenial.reconciled, true, afterDenial.issues.join("; "));
   assert.equal(afterDenial.latestAttempt.id, denied.id);
   assert.equal(
+    reviewProgress(newViewer.state).heading,
+    "Latest simulated attempt denied",
+  );
+  assert.equal(
     afterDenial.latestCheck,
     null,
     "a newer denied attempt cannot inherit an older successful check",
@@ -2770,6 +2774,11 @@ test("D8-A independently loaded Case and review projections remain incomplete un
   await reader.start(client.state.requestId);
   const mixed = caseReceiptEvidence(reader.state);
   assert.equal(mixed.reconciled, false);
+  assert.equal(
+    reviewProgress(reader.state).heading,
+    "Current information incomplete",
+    "primary view must not present the earlier approvals as current",
+  );
   assert.ok(mixed.decisions.every((d) => d.applies === null));
   assert.ok(mixed.issues.some((s) => /Case or catalog/.test(s)));
   const before = await h.dump();

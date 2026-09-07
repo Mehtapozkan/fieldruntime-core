@@ -93,8 +93,16 @@ const sourceName = (value) =>
   })[value] ?? title(value);
 
 // Summarize validated server projections. This never decides reviewer eligibility.
-export function reviewProgress(state) {
+export function reviewProgress(
+  state,
+  receipt = state.credit ? caseReceiptEvidence(state) : null,
+) {
   const { packet } = state;
+  if (receipt?.latestAttempt?.outcome === "denied")
+    return {
+      heading: "Latest simulated attempt denied",
+      next: "Inspect the denied attempt in History. Earlier effects and their independent checks remain historical evidence.",
+    };
   const attempt = selectedInvocation(state);
   if (attempt) {
     const proof = selectedCheck(state, attempt);
@@ -123,6 +131,11 @@ export function reviewProgress(state) {
       next: state.pending
         ? "Recover the saved command with an exact retry before another decision."
         : "Refresh, inspect what changed, then choose whether to submit a new decision.",
+    };
+  if (receipt && !receipt.reconciled && packet.current.lifecycle === "open")
+    return {
+      heading: "Current information incomplete",
+      next: "Refresh the matching Case, review and operation views. Recorded history remains available; current applicability is unconfirmed.",
     };
   const lifecycle = packet.current.lifecycle;
   if (
@@ -188,6 +201,89 @@ export function reviewProgress(state) {
   };
 }
 
+// Read-only wording over the same reconciled evidence used by History. No reason,
+// selected seat or recorded milestone is an authorization calculation.
+export function operatorAttention(state) {
+  const receipt = caseReceiptEvidence(state);
+  const { packet } = state;
+  let reason = null;
+  let next = reviewProgress(state, receipt).next;
+  const ownerId =
+    receipt.reconciled && state.caseRecord.document.case.owner_identity_id;
+  const identity =
+    packet.historical_evaluations[0].inputs.resolution?.identities?.find(
+      (item) =>
+        item.identity_id === ownerId && item.tenant_id === packet.tenant_id,
+    );
+  const ownerName =
+    ownerId === "identity_d6_operator"
+      ? "Demo operator"
+      : SEATS[String(ownerId).replace("identity_d6_", "")];
+  const owner =
+    identity && ownerName ? `${ownerName} · synthetic` : "Unconfirmed";
+  const waiting =
+    receipt.reconciled && packet.current.eligible
+      ? packet.current.resolution.authority_requirements.filter(
+          (r) => r.status !== "satisfied",
+        )
+      : [];
+  const attempt = selectedInvocation(state),
+    proof = selectedCheck(state, attempt);
+  if (state.busy) {
+    next = "Wait for the runtime response; no new work is confirmed yet.";
+  } else if (state.pending) {
+    reason = "SYSTEM_FAILURE";
+    next =
+      "Recover the original command with an exact retry before another submission.";
+  } else if (!receipt.reconciled) {
+    if (refreshFailed(state)) reason = "SYSTEM_FAILURE";
+    next =
+      "Refresh the matching views; current attention and eligibility are unconfirmed. Retained history is still inspectable.";
+  } else if (receipt.latestAttempt?.outcome === "denied") {
+    next =
+      "Operator: inspect the latest denial in History before any new command. Earlier effects can still be checked independently.";
+  } else if (proof?.comparison.outcome === "mismatch") {
+    reason = "MISSING_EVIDENCE";
+    next =
+      "Operator: inspect expected versus observed credit, then choose a fresh source check. A mismatch is not successful verification.";
+  } else if (proof?.comparison.outcome === "inconclusive") {
+    const codes = proof.comparison.reason_codes;
+    reason = codes.some((code) =>
+      ["read_unavailable", "malformed_observation"].includes(code),
+    )
+      ? "SYSTEM_FAILURE"
+      : codes.includes("catalog_changed")
+        ? "AUTHORITY"
+        : null;
+    next =
+      "Operator: inspect the check problem, then explicitly check the source again. An inconclusive read does not prove absence.";
+  } else if (attempt && !proof) {
+    next =
+      "Operator: request an independent source check of this recorded attempt.";
+  } else if (preparationStep(state.caseRecord) && !attempt) {
+    next =
+      "Operator: use the explicit Case preparation steps, then create a fresh request before review.";
+  } else if (requestBlocked(packet)) {
+    reason = packet.current.lifecycle === "open" ? "AUTHORITY" : null;
+  } else if (waiting.length) {
+    reason = "AUTHORITY";
+    next = `${waiting
+      .sort((a, b) => reviewerOrder(a) - reviewerOrder(b))
+      .map((r) => reviewerName(r.authority_class))
+      .join(
+        " and ",
+      )}: review the proposal and uncertainty, then record a decision.`;
+  } else if (proof?.comparison.outcome === "verified_simulated_effect") {
+    next =
+      "Simulated effect checked. Customer impact and acceptance still need evidence; Case closure remains blocked.";
+  } else if (packet.current.authorized) {
+    next = canExecuteCredit({ ...state, busy: false })
+      ? "Operator: explicitly record the approved credit in the simulated source."
+      : "Operator: inspect the execution prerequisites below. Completed review alone does not permit an effect.";
+  }
+  return { receipt, reconciled: receipt.reconciled, reason, next, owner };
+}
+
 const checkLabel = (proof) =>
   ({
     verified_simulated_effect: "Simulated credit independently checked",
@@ -231,9 +327,12 @@ function checkEvidence(proof, includeMatch = false) {
 }
 const refreshFailed = (state) =>
   !!state.creditError || !!state.error?.includes("could not be refreshed");
-function eligibilityView(state) {
+function eligibilityView(state, reconciled = true) {
   const unknown =
-    state.pending || state.needsRefresh || state.creditNeedsRefresh;
+    !reconciled ||
+    state.pending ||
+    state.needsRefresh ||
+    state.creditNeedsRefresh;
   const reasons = state.packet.current.reason_codes;
   const text = unknown
     ? "Current eligibility unconfirmed."
@@ -355,7 +454,7 @@ function materialView(packet) {
     ),
   );
 }
-function requirementsView(state) {
+function requirementsView(state, reconciled = true) {
   const { packet } = state;
   const requirements = packet.current.resolution?.authority_requirements ?? [];
   const group = el("ul", undefined, "review-requirements", {
@@ -365,7 +464,10 @@ function requirementsView(state) {
     (a, b) => reviewerOrder(a) - reviewerOrder(b),
   )) {
     const verified =
-      !state.pending && !state.needsRefresh && packet.current.eligible;
+      reconciled &&
+      !state.pending &&
+      !state.needsRefresh &&
+      packet.current.eligible;
     const done = verified && requirement.status === "satisfied";
     const status = !verified ? "Check needed" : done ? "Approved" : "Needed";
     group.append(
@@ -378,7 +480,7 @@ function requirementsView(state) {
   }
   return group;
 }
-function policyExplanation(packet) {
+function policyExplanation(packet, seat) {
   const initial = packet.historical_evaluations[0];
   // The server-selected rule references come from the request's retained initial
   // evaluation. Show its bound policy explanation, never use it as current rights.
@@ -394,7 +496,16 @@ function policyExplanation(packet) {
   const requirements = initial.result.resolution?.authority_requirements;
   if (!policy || !Array.isArray(policy.rules) || !Array.isArray(requirements))
     return "The bound policy's reviewer explanation is unavailable. Inspect the retained policy in technical details.";
-  const refs = [...new Set(requirements.map((item) => item.policy_rule_ref))];
+  const selected = seat
+    ? requirements.filter((item) =>
+        item.eligible_approvers.some(
+          (approver) => approver.identity.identity_id === `identity_d6_${seat}`,
+        ),
+      )
+    : requirements;
+  if (seat && !selected.length)
+    return `${SEATS[seat] ?? "This seat"} is not listed for this request's bound review requirements. The server checks any permitted intervention.`;
+  const refs = [...new Set(selected.map((item) => item.policy_rule_ref))];
   const descriptions = refs.map((ref) => {
     const rule = policy.rules.find(
       (item) => `${policy.source_ref}#${item.rule_id}` === ref,
@@ -425,11 +536,29 @@ function policyExplanation(packet) {
         Array.isArray(item.named_approver_identity_ids) &&
         item.named_approver_identity_ids.includes("identity_d6_finance"),
     );
+    if (seat) {
+      if (namedFinance && seat === "finance")
+        return `Finance is the named reviewer for proposed credits ${range}${maximum === undefined ? "" : ` through ${money(maximum)}`}. Its delegate cannot fill this seat.`;
+      return `${selected
+        .filter((item) => item.policy_rule_ref === ref)
+        .map((item) => reviewerName(item.authority_class))
+        .join(
+          " and ",
+        )} review is required for proposed credits ${range}${maximum === undefined ? "" : ` through ${money(maximum)}`}.`;
+    }
     return `The bound policy requires ${names.join(" and ")} for proposed credits ${range}${maximum === undefined ? "" : ` through ${money(maximum)}`}.${namedFinance ? " Finance is a named reviewer; its delegate cannot fill that seat here." : ""}`;
   });
   return descriptions.length && descriptions.every(Boolean)
     ? descriptions.join(" ")
     : "Review requirements were identified by the bound policy. Inspect the retained policy in technical details.";
+}
+export function reviewerExplanation(
+  state,
+  seat,
+  attention = operatorAttention(state),
+) {
+  const historical = !attention.reconciled || !state.packet.current.eligible;
+  return `${historical ? "Historical policy only; current reviewer eligibility is unconfirmed. " : ""}${policyExplanation(state.packet, seat)}`;
 }
 function summaryView(packet) {
   const material = packet.material;
@@ -507,7 +636,7 @@ export function mountAuthorityWorkbench() {
     ["history", "History", "Case progress & evidence"],
     ["safeguard", "Changed evidence", "Fresh evidence, fresh review"],
   ];
-  function formView(state) {
+  function formView(state, attention) {
     const prior = state.packet.history.find(
       (entry) =>
         entry.decision?.decision === "approve" &&
@@ -552,13 +681,19 @@ export function mountAuthorityWorkbench() {
       el("h3", "Your review"),
       el(
         "p",
-        "Synthetic seats are for this local demo, not authentication. The server checks each reviewer.",
+        "Synthetic seats are not authentication. The server checks each submission.",
         "review-muted",
       ),
       box(
         "review-grid",
         label("Reviewer", "review-seat", seatSelect),
         label("Decision", "review-decision", decisionSelect),
+      ),
+      el(
+        "p",
+        `Why you? ${reviewerExplanation(state, seat, attention)}`,
+        "review-why-you",
+        { "data-why-you": seat },
       ),
     );
     if (prior)
@@ -1342,9 +1477,13 @@ export function mountAuthorityWorkbench() {
       );
     } else {
       const packet = state.packet;
-      const progress = reviewProgress(state);
+      const attention = operatorAttention(state);
+      const progress = reviewProgress(state, attention.receipt);
       const attempt = selectedInvocation(state);
-      const proof = selectedCheck(state, attempt);
+      const proof =
+        attention.receipt.latestAttempt?.outcome === "denied"
+          ? null
+          : selectedCheck(state, attempt);
       if (active !== "history")
         content.append(
           box(
@@ -1360,22 +1499,27 @@ export function mountAuthorityWorkbench() {
                 ? [
                     el(
                       "p",
-                      `Action recorded ${time(attempt.recorded_at)}.`,
+                      `Attempt recorded ${time((attention.receipt.latestAttempt ?? attempt).recorded_at)}.`,
                       "review-check-time",
                     ),
                   ]
                 : []),
-            el("p", progress.next, "review-next-action"),
-            requirementsView(state),
+            el("p", attention.next, "review-next-action"),
+            requirementsView(state, attention.reconciled),
+            el(
+              "small",
+              `Case owner: ${attention.owner}. ${attention.reason ? { AUTHORITY: "Attention: required authority.", MISSING_EVIDENCE: "Attention: missing or conflicting source evidence.", SYSTEM_FAILURE: "Attention: submission or read problem." }[attention.reason] : "Intervention reason unconfirmed."}`,
+              "review-attention",
+              {
+                "data-attention-reason": attention.reason ?? "unconfirmed",
+                "data-attention-current": attention.reconciled
+                  ? "reconciled"
+                  : "incomplete",
+              },
+            ),
             box(
               "review-refresh",
               button("Refresh packet", "refresh", state.busy),
-              el(
-                "small",
-                state.needsRefresh || state.pending
-                  ? "Previously loaded view"
-                  : `Review refreshed ${time(packet.evaluated_at)}`,
-              ),
             ),
           ),
         );
@@ -1384,7 +1528,7 @@ export function mountAuthorityWorkbench() {
           .querySelector(".review-current")
           .setAttribute("data-confirmed-credit", "");
       if (attempt && active !== "history")
-        content.append(eligibilityView(state));
+        content.append(eligibilityView(state, attention.reconciled));
       if (
         showNotice &&
         !(
@@ -1423,11 +1567,14 @@ export function mountAuthorityWorkbench() {
               ...(packet.current.authorized ||
               selectedInvocation(state) ||
               preparationStep(state.caseRecord)
-                ? [creditView(state), formView(state)]
-                : [formView(state), creditView(state)]),
+                ? [creditView(state), formView(state, attention)]
+                : [formView(state, attention), creditView(state)]),
             ),
           ),
-          card("Why these reviewers", el("p", policyExplanation(packet))),
+          details(
+            "Bound reviewer policy · historical consent",
+            el("p", policyExplanation(packet)),
+          ),
           materialView(packet),
         );
       if (active === "safeguard") content.append(creditView(state));

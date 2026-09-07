@@ -115,6 +115,45 @@ export function registerCreditBrowserTests(fixture) {
     await idle(page);
     assert.deepEqual(await h.dump(), empty, "opening creates nothing");
     await prepare(page);
+    const inspected = await h.dump();
+    await expect(
+      page.locator('[data-attention-reason="AUTHORITY"]'),
+    ).toContainText("Case owner: Demo operator · synthetic");
+    await expect(page.locator('[data-why-you="finance"]')).toContainText(
+      "Finance is the named reviewer",
+    );
+    await page
+      .getByLabel("Reviewer", { exact: true })
+      .selectOption("executive");
+    await expect(page.locator('[data-why-you="executive"]')).toContainText(
+      "above $10,000",
+    );
+    await page.getByLabel("Reviewer", { exact: true }).selectOption("business");
+    await expect(page.locator('[data-why-you="business"]')).toContainText(
+      "not listed",
+    );
+    await page
+      .getByLabel("Reviewer", { exact: true })
+      .selectOption("finance_delegate");
+    await expect(
+      page.locator('[data-why-you="finance_delegate"]'),
+    ).toContainText("Finance delegate is not listed");
+    await page.getByLabel("Reviewer", { exact: true }).selectOption("finance");
+    const policy = page.getByText(
+      "Bound reviewer policy · historical consent",
+      { exact: true },
+    );
+    await policy.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByText(/The bound policy requires Finance and Executive/),
+    ).toBeVisible();
+    await page.keyboard.press("Enter");
+    assert.deepEqual(
+      await h.dump(),
+      inspected,
+      "attention/seat/policy inspection creates no durable changes",
+    );
     await page.getByLabel("Reviewer", { exact: true }).focus();
     await page.keyboard.press("Tab");
     await expect(page.getByLabel("Decision", { exact: true })).toBeFocused();
@@ -164,6 +203,12 @@ export function registerCreditBrowserTests(fixture) {
     ).toBeEnabled();
     await page.getByLabel("Decision", { exact: true }).selectOption("approve");
     await screenshot(page, "02-finance-approved");
+    await expect(page.locator(".review-next-action")).toHaveText(
+      "Executive: review the proposal and uncertainty, then record a decision.",
+    );
+    await expect(page.getByLabel("Reviewer", { exact: true })).toHaveValue(
+      "finance",
+    );
     await receiptView(page, { name: "02-finance-approved" });
     await expect(
       page.locator('[data-receipt-stage="decisions"] > summary'),
@@ -287,6 +332,22 @@ export function registerCreditBrowserTests(fixture) {
     assert.equal(view.verifications.length, 2);
     assert.equal(view.current.eligible, false);
     assert.equal(view.closure_permission, false);
+    await h.request(
+      `${CREDIT_ROOT}-attempts`,
+      await h.command(
+        view.current.bindings.authority_request_id,
+        "browser:latest-denial",
+      ),
+      409,
+    );
+    await click(reopened, "refresh");
+    await expect(reopened.locator("#review-current-status")).toHaveText(
+      "Latest simulated attempt denied",
+    );
+    await expect(
+      reopened.locator('[data-credit-result="verified_simulated_effect"]'),
+    ).toHaveCount(0);
+    await expect(action(reopened, "verify-credit")).toBeEnabled();
   });
 
   for (const kind of ["execute-credit", "verify-credit"])
@@ -468,6 +529,19 @@ export function registerCreditBrowserTests(fixture) {
       status: "incomplete",
       name: "09-inconsistent-reads",
     });
+    await controls(page);
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Current information incomplete",
+    );
+    await expect(
+      page.locator('[data-attention-current="incomplete"]'),
+    ).toContainText("Case owner: Unconfirmed");
+    await expect(
+      page.getByRole("list", { name: "Required reviewers" }),
+    ).not.toContainText("Approved");
+    await expect(action(page, "execute-credit")).toBeDisabled();
+    await screenshot(page, "09-inconsistent-reads");
+    await receiptView(page, { status: "incomplete" });
     await expect(
       page.locator('[data-receipt-stage="decisions"] > summary'),
     ).toContainText("Finance approved");

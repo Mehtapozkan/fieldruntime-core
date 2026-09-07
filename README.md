@@ -10,18 +10,18 @@ can review Orchid's **proposed $15,000 credit** and retain its decisions in
 PostgreSQL. The merged API records one bounded simulated credit and independently
 checks its source through the Workbench, with explicit actions and recoverable
 retries. History provides a compact, inspectable Case progress and evidence receipt.
-This D8-B review branch documents reproducible failure demonstrations and measurement
-readiness using the existing test fixtures, and reconciles the next MVP stages.
-It adds no runtime capability.
+The merged failure walkthrough demonstrates the safeguards with isolated test fixtures.
+This D8-C review branch clarifies current attention, Case ownership and the selected
+reviewer’s policy requirement in the same view; it adds no runtime capability.
 
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external writes.
 > Not production software. Selecting a synthetic reviewer seat is not authentication.
 
 ## What works today
 
-“Main” includes D8-A [PR #26](https://github.com/Mehtapozkan/fieldruntime-core/pull/26)
-at `4ce7175556b2a0ecf954ec5a57677a591050db2c`. **D8-B’s failure walkthrough and
-measurement-readiness note are implemented for review here.** The historical prerelease has
+“Main” includes D8-B [PR #27](https://github.com/Mehtapozkan/fieldruntime-core/pull/27)
+at `1039912ca7eaea2239366f5de8c07b0e44c7df81`. **D8-C’s focused operator-attention
+presentation is implemented for review here.** The historical prerelease has
 a smaller boundary described under [Distribution](#distribution).
 
 | Functionality                                    | Workbench                                                                                                | API / runtime                                                                             | Availability                                                                          |
@@ -32,7 +32,7 @@ a smaller boundary described under [Distribution](#distribution).
 | Independently check credit                       | **Check simulated source**; match, mismatch or inconclusive result; exact retry after uncertain response | Separate verifier and source read; retained evidence and restart replay                   | Main (D7-C/D7-D)                                                                      |
 | ECC and legacy illustration                      | Separate Acme fixture story; illustrated action, verification and outcome screens                        | Thirty frozen synthetic cases and deterministic evaluation                                | Main and historical prerelease; legacy screens never invoke runtime action/check APIs |
 | Case progress and evidence receipt               | Expand proposal, attributed decisions, action, independent observation and unresolved gaps in History    | Reuses existing Case, review and action/check reads; no new records or permission         | Main (D8-A)                                                                           |
-| Failure walkthrough and measurement readiness    | Existing failure/result views remain unchanged                                                           | Five selected PostgreSQL/API control and failure fixtures with evidence output            | This review branch (D8-B)                                                             |
+| Failure walkthrough and measurement readiness    | Existing failure/result views remain unchanged                                                           | Five selected PostgreSQL/API control and failure fixtures with evidence output            | Main (D8-B)                                                                           |
 | Accepted outcome, economics and complete closure | Unavailable                                                                                              | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof            | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
@@ -120,11 +120,12 @@ history. They remain isolated from Orchid, even on this review branch.
   independent verification and Workbench controls merged, including explicit
   preparation, retries and problem guidance.
 - **D8-A — Case progress and evidence receipt:** merged in PR #26.
-- **D8-B — Failure walkthrough and measurement readiness:** implemented for review here.
+- **D8-B — Failure walkthrough and measurement readiness:** merged in PR #27.
   Remaining D8 accepted-outcome/economics work is planned. A read-only evidence
   receipt supplies neither accepted outcomes nor economic measurements.
-- **D8-C — Attention presentation:** proposed read-only progress, blockers and
-  “Why you?” using validated evidence in the existing Workbench. No implementation here.
+- **D8-C — Attention presentation:** implemented for review; selected-seat “Why you?”,
+  separate recorded Case owner and reconciled current attention. Existing milestones,
+  uncertainty, permitted interventions and recovery remain. [Walkthrough and captures](apps/admin/README.md#d8-c-operator-attention-and-visual-review).
 - **D9–D12:** proposed intake contracts/data boundary, then one queue export and
   documents; all seven Discovery records, interviews, Operational Legibility and redesign; one reviewed
   Runtime Pack; one useful replaceable worker and minimum reviewed proof/corrections.
@@ -171,7 +172,7 @@ Then follow the [tag-pinned guide](https://github.com/Mehtapozkan/fieldruntime-c
 after its clone step. Use a separate fresh appliance volume; do not downgrade an
 upgraded database. The tag-pinned page alone does not select the cloned revision.
 
-Merging source changes does not update that immutable tag or release. This D8-B PR
+Merging source changes does not update that immutable tag or release. This D8-C PR
 publishes no new release or deployment. The source-clone appliance is the supported
 trial path; standalone installers, signed artifacts, SBOM/provenance and production
 operations remain future work. Workspace packages remain registry-private.

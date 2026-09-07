@@ -145,11 +145,20 @@ test("explicit init → Finance → refresh → Executive → reload reconstruct
   await expect(
     page.getByText("Independent impact verification remains outstanding."),
   ).toBeVisible();
+  await expect(page.locator('[data-why-you="finance"]')).toContainText(
+    "Finance is the named reviewer",
+  );
+  const policy = page.getByText("Bound reviewer policy · historical consent", {
+    exact: true,
+  });
+  await policy.focus();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByText(
       /bound policy requires Finance and Executive.*above \$10,000/,
     ),
   ).toBeVisible();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByText("Finance · Needed", { exact: true }),
   ).toBeVisible();
