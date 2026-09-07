@@ -107,6 +107,48 @@ const tables = [
   "simulated_action_journal",
   "simulated_credit_source",
 ];
+// Human-inspectable excerpts from existing assertion-backed fixtures, not a
+// receipt producer, fault API or separate runner. Full entries remain in the
+// disposable fixture; hashes below bind those entries and their trusted inputs.
+function walkthroughEvidence(t, scenario, attempt, check, facts) {
+  t.diagnostic(
+    `D8-B ${JSON.stringify({
+      scenario,
+      attempt: {
+        id: attempt.id,
+        event_hash: attempt.event_hash,
+        recorded_at: attempt.recorded_at,
+        command: attempt.command,
+        envelope_hash: attempt.envelope_hash,
+        target: attempt.envelope.target,
+        payload: attempt.envelope.payload,
+        authorized_at_attempt: attempt.envelope.authorized,
+        reason_codes: attempt.envelope.reason_codes,
+        service_identities: attempt.envelope.service_grants.map(
+          (g) => g.identity,
+        ),
+        outcome: attempt.outcome,
+        adapter_report: attempt.adapter_report,
+        source: attempt.source,
+        closure_permission: attempt.closure_permission,
+      },
+      check: check
+        ? {
+            id: check.id,
+            event_hash: check.event_hash,
+            recorded_at: check.recorded_at,
+            command: check.command,
+            action_entry_hash: check.action_entry_hash,
+            verifier: check.authority.verifier_identity,
+            observation: check.observation,
+            comparison: check.comparison,
+            closure_permission: check.closure_permission,
+          }
+        : null,
+      ...facts,
+    })}`,
+  );
+}
 function transition(version, to) {
   return {
     type: "case.transition",
@@ -663,6 +705,23 @@ for (const scenario of [
     assert.equal(r.status, "denied");
     assert.equal(r.receipt.envelope.authorized, false);
     assert.equal((await h.request(view)).source, null);
+    if (scenario === "changed evidence") {
+      const packet = await h.read(id);
+      assert.equal(r.receipt.adapter_report, "not_invoked");
+      assert.ok(
+        r.receipt.envelope.reason_codes.includes("case_version_conflict"),
+      );
+      assert.equal(packet.current.authorized, false);
+      walkthroughEvidence(t, "changed_evidence", r.receipt, null, {
+        http_status: 409,
+        result: r.status,
+        current_case_version: packet.case_version,
+        review_revision: packet.review_revision,
+        catalog_revision: packet.authority_state_revision,
+        effective_approval_ids: packet.current.effective_approval_ids,
+        source_rows: (await h.dump()).simulated_credit_source.length,
+      });
+    }
   });
 
 for (const decision of ["reject", "modify", "escalate"])
@@ -1471,6 +1530,19 @@ test("D7-C exact independent source read, immutable proof, unchanged C/R/S, read
   assert.deepEqual((await h.verify(command)).receipt, verified.receipt);
   assert.equal(h.ids, count);
   assert.deepEqual(await h.dump(), after);
+  assert.equal(after.simulated_credit_source.length, 1);
+  walkthroughEvidence(
+    t,
+    "legitimate_success",
+    applied.receipt,
+    verified.receipt,
+    {
+      http_status: 200,
+      result: verified.status,
+      source_rows: after.simulated_credit_source.length,
+      restart_and_exact_retry_preserved_evidence: true,
+    },
+  );
 });
 
 test("D7-C migration of a committed v1 action preserves its evidence and permits independent verification", async (t) => {
@@ -1646,6 +1718,7 @@ test("D7-C adapter success without source is a mismatch; only latest independent
   const absence = await h.verify(command);
   assert.equal(absence.receipt.comparison.outcome, "mismatch");
   assert.equal(absence.receipt.comparison.absence_proven, true);
+  assert.deepEqual(absence.receipt.observation.raw.rows, []);
   await h.restart();
   const second = await h.request(
     action,
@@ -1679,9 +1752,28 @@ test("D7-C adapter success without source is a mismatch; only latest independent
     (await h.request(view)).source.origin_attempt_id,
     final.receipt.id,
   );
+  const afterRecovery = await h.dump();
+  assert.equal(afterRecovery.simulated_credit_source.length, 1);
+  walkthroughEvidence(
+    t,
+    "adapter_success_without_effect",
+    attempt,
+    absence.receipt,
+    {
+      http_status: 200,
+      result: absence.status,
+      premature_retry_result: premature.status,
+      recovery_attempt_id: final.receipt.id,
+      recovery_absence_binding:
+        final.receipt.envelope.absence_verification_hash,
+      latest_absence_hash: latest.receipt.event_hash,
+      source_after_explicit_recovery: final.receipt.source,
+      source_rows_after_recovery: afterRecovery.simulated_credit_source.length,
+    },
+  );
 });
 test("D7-C unavailable reads are inconclusive, survive restart, and cannot enable financial retries", async (t) => {
-  const { h, id, command } = await invocation(t, {
+  const { h, id, attempt, command } = await invocation(t, {
     adapter: async () => "uncertain",
   });
   h.setReaderHook((sql) => {
@@ -1693,13 +1785,27 @@ test("D7-C unavailable reads are inconclusive, survive restart, and cannot enabl
   assert.equal(failed.receipt.comparison.outcome, "inconclusive");
   assert.equal(failed.receipt.comparison.absence_proven, false);
   h.setReaderHook(undefined);
-  await h.request(action, await h.command(id, "error-is-not-absence"), 409);
+  const denied = await h.request(
+    action,
+    await h.command(id, "error-is-not-absence"),
+    409,
+  );
+  assert.equal(denied.status, "denied");
   await h.restart();
   assert.deepEqual((await h.verify(command)).receipt, failed.receipt);
   const fresh = await h.verify(
     h.verifyCommand((await h.request(view)).attempts[0]),
   );
   assert.equal(fresh.receipt.comparison.absence_proven, true);
+  assert.equal((await h.dump()).simulated_credit_source.length, 0);
+  walkthroughEvidence(t, "source_unavailable", attempt, failed.receipt, {
+    http_status: 200,
+    result: failed.status,
+    financial_retry_result: denied.status,
+    source_rows: 0,
+    fresh_check_after_read_restored: fresh.receipt.comparison,
+    fresh_check_hash: fresh.receipt.event_hash,
+  });
 });
 
 for (const variant of [
@@ -2340,12 +2446,22 @@ for (const kind of ["execute", "verify"])
     const original = uncertain.state.pending.body;
     assert.match(uncertain.state.error, /unconfirmed/);
     assert.equal(uncertain.state.creditReceipt, null);
+    const committed = await h.request(view),
+      beforeRetry = await h.dump();
+    assert.equal(beforeRetry.simulated_credit_source.length, 1);
     await h.restart();
+    let retryResult;
     const retry = workbench(h, {
       storage,
       fetcher: async (path, options) => {
         if (options.method === "POST") assert.equal(options.body, original);
-        return h.fetcher(path, options);
+        const response = await h.fetcher(path, options);
+        if (options.method === "POST") {
+          assert.equal(response.status, 200);
+          retryResult = await response.clone().json();
+          assert.equal(retryResult.status, "duplicate");
+        }
+        return response;
       },
     });
     await retry.start();
@@ -2369,6 +2485,34 @@ for (const kind of ["execute", "verify"])
       "exact retries never double count",
     );
     assert.equal(receipt.checks.length, kind === "verify" ? 1 : 0);
+    assert.equal(calls.length, 1);
+    assert.deepEqual(
+      await h.dump(),
+      beforeRetry,
+      "exact retry creates no durable changes",
+    );
+    assert.deepEqual(
+      retry.state.creditReceipt,
+      kind === "verify" ? committed.verifications[0] : committed.attempts[0],
+    );
+    walkthroughEvidence(
+      t,
+      `lost_${kind}_response`,
+      committed.attempts[0],
+      committed.verifications[0],
+      {
+        http_status: 200,
+        result: retryResult.status,
+        original_body: original,
+        pending_before_retry: true,
+        confirmed_before_retry: false,
+        recovered_receipt_hash: retry.state.creditReceipt.event_hash,
+        source_rows_before_retry: beforeRetry.simulated_credit_source.length,
+        source_rows_after_retry: (await h.dump()).simulated_credit_source
+          .length,
+        durable_state_unchanged_by_retry: true,
+      },
+    );
   });
 
 test("D7-D confirmed verification survives failed refresh; unavailable read is never success or absence", async (t) => {

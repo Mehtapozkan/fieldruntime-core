@@ -10,6 +10,12 @@
 6. Update `STATUS.md`; add a decision only when architecture or product intent
    changes.
 
+For Discovery/MVP work, use the [canonical specification](docs/product/workflow-discovery.md)
+and [single requirement/gaps matrix](docs/product/requirements-implementation-matrix.md).
+Each slice reports requirement IDs, changed contracts/files, actual behavior,
+validation, gaps and next dependency. Proposed schema fields or synthetic screens
+do not complete a requirement; D8-B's reconciliation is documentation only.
+
 ## Boundaries
 
 - `packages/domain` contains provider-neutral deterministic rules.

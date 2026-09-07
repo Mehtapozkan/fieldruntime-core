@@ -9,17 +9,19 @@ The working implementation is a local, credential-free synthetic appliance. You
 can review Orchid's **proposed $15,000 credit** and retain its decisions in
 PostgreSQL. The merged API records one bounded simulated credit and independently
 checks its source through the Workbench, with explicit actions and recoverable
-retries. This D8-A review branch consolidates History into a compact, inspectable
-Case progress and evidence receipt. It adds no writes or authority.
+retries. History provides a compact, inspectable Case progress and evidence receipt.
+This D8-B review branch documents reproducible failure demonstrations and measurement
+readiness using the existing test fixtures, and reconciles the next MVP stages.
+It adds no runtime capability.
 
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external writes.
 > Not production software. Selecting a synthetic reviewer seat is not authentication.
 
 ## What works today
 
-“Main” includes D7-D [PR #25](https://github.com/Mehtapozkan/fieldruntime-core/pull/25)
-at `f49dd71e3d1d8a393729690437d6f568b7473238`. **D8-A’s read-only Case receipt is
-implemented on this review branch, not yet merged or released.** The historical prerelease has
+“Main” includes D8-A [PR #26](https://github.com/Mehtapozkan/fieldruntime-core/pull/26)
+at `4ce7175556b2a0ecf954ec5a57677a591050db2c`. **D8-B’s failure walkthrough and
+measurement-readiness note are implemented for review here.** The historical prerelease has
 a smaller boundary described under [Distribution](#distribution).
 
 | Functionality                                    | Workbench                                                                                                | API / runtime                                                                             | Availability                                                                          |
@@ -29,7 +31,8 @@ a smaller boundary described under [Distribution](#distribution).
 | Record simulated credit                          | Explicit preparation and **Record simulated credit**                                                     | Scoped enrollment, one bound $15,000 Orchid credit, atomic source/action history          | Main (D7-B/D7-D)                                                                      |
 | Independently check credit                       | **Check simulated source**; match, mismatch or inconclusive result; exact retry after uncertain response | Separate verifier and source read; retained evidence and restart replay                   | Main (D7-C/D7-D)                                                                      |
 | ECC and legacy illustration                      | Separate Acme fixture story; illustrated action, verification and outcome screens                        | Thirty frozen synthetic cases and deterministic evaluation                                | Main and historical prerelease; legacy screens never invoke runtime action/check APIs |
-| Case progress and evidence receipt               | Expand proposal, attributed decisions, action, independent observation and unresolved gaps in History    | Reuses existing Case, review and action/check reads; no new records or permission         | This review branch (D8-A)                                                             |
+| Case progress and evidence receipt               | Expand proposal, attributed decisions, action, independent observation and unresolved gaps in History    | Reuses existing Case, review and action/check reads; no new records or permission         | Main (D8-A)                                                                           |
+| Failure walkthrough and measurement readiness    | Existing failure/result views remain unchanged                                                           | Five selected PostgreSQL/API control and failure fixtures with evidence output            | This review branch (D8-B)                                                             |
 | Accepted outcome, economics and complete closure | Unavailable                                                                                              | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof            | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
@@ -49,11 +52,10 @@ git clone https://github.com/Mehtapozkan/fieldruntime-core.git
 cd fieldruntime-core
 ```
 
-The clone opens main, which includes the complete synthetic review/action/check
-walkthrough. To also try this PR’s read-only receipt, select its branch before installing:
+The clone opens main, which includes the synthetic review/action/check walkthrough
+and read-only receipt:
 
 ```sh
-git switch --track origin/feat/d8a-case-progress-receipt
 pnpm install --frozen-lockfile
 pnpm fr init ecc --demo
 pnpm fr up
@@ -97,8 +99,9 @@ CI also exercises real PostgreSQL/API, restart, Compose and Workbench browser pa
 
 **Persistent Orchid review:** the default page uses canonical runtime evidence,
 requests and human decisions. Finance/Executive progress is read from the API;
-browser state never grants authority. Explicit action and independent-check controls use those APIs. This branch adds
-the read-only Case receipt; recorded history remains distinct from current authority.
+browser state never grants authority. Explicit action and independent-check controls
+use those APIs. Main includes the read-only Case receipt; recorded history remains
+distinct from current authority.
 
 **Legacy Acme fixture simulation:** choose **Legacy action simulation** or open
 `/?view=legacy`. The six-action story illustrates a connector claiming success,
@@ -116,12 +119,20 @@ history. They remain isolated from Orchid, even on this review branch.
 - **D7 — Controlled Action + Independent Verification:** bounded action merged;
   independent verification and Workbench controls merged, including explicit
   preparation, retries and problem guidance.
-- **D8-A — Case progress and evidence receipt:** implemented for review here.
+- **D8-A — Case progress and evidence receipt:** merged in PR #26.
+- **D8-B — Failure walkthrough and measurement readiness:** implemented for review here.
   Remaining D8 accepted-outcome/economics work is planned. A read-only evidence
   receipt supplies neither accepted outcomes nor economic measurements.
-- **D9–D12:** future Case formation/import, Operational Legibility, reviewed runtime
-  configuration and only then a general worker runtime. No automatic Case matching
-  or external Case import exists today.
+- **D8-C — Attention presentation:** proposed read-only progress, blockers and
+  “Why you?” using validated evidence in the existing Workbench. No implementation here.
+- **D9–D12:** proposed intake contracts/data boundary, then one queue export and
+  documents; all seven Discovery records, interviews, Operational Legibility and redesign; one reviewed
+  Runtime Pack; one useful replaceable worker and minimum reviewed proof/corrections.
+  No automatic Case matching, external Case import or customer-data permission exists today.
+- **D13 — Customer proof:** planned 25-Case Challenge and Operating Capacity Map.
+  Assisted evaluations may begin during D9–D12 within an approved data boundary;
+  measured quality, total effort and repeat use determine continuation. Connected
+  shadow operation and production writes retain their later gates.
 
 Production authentication, real connectors, provider adapters, general workers,
 external actions and complete Case closure remain unimplemented. Later distribution
@@ -131,6 +142,15 @@ Action Gateway is not supplied by the one-credit synthetic operation.
 Delivery labels are not GitHub pull request numbers. [PLAN.md](PLAN.md) retains the
 full sequence and exit criteria; [STATUS.md](STATUS.md) records what is implemented
 and validated. Planned functionality is not an available product or release promise.
+The [canonical specification](docs/product/workflow-discovery.md) and
+[single requirement/gaps matrix](docs/product/requirements-implementation-matrix.md)
+retain the Discovery, Business Loop and measurement requirements. Business Loops
+describe recurring Cases, not another runtime or a currently implemented platform.
+
+For this review branch’s [failure walkthrough and measurement-readiness note](docs/guides/d8-failure-walkthrough.md),
+select `feat/d8b-failure-walkthrough` and use disposable test fixtures. It covers a
+legitimate success control, stale consent, silent adapter failure, unavailable reads
+and exact lost-response retry. It does not measure labor savings or business value.
 
 ## Distribution
 
@@ -151,10 +171,15 @@ Then follow the [tag-pinned guide](https://github.com/Mehtapozkan/fieldruntime-c
 after its clone step. Use a separate fresh appliance volume; do not downgrade an
 upgraded database. The tag-pinned page alone does not select the cloned revision.
 
-Merging source changes does not update that immutable tag or release. This D8-A PR
+Merging source changes does not update that immutable tag or release. This D8-B PR
 publishes no new release or deployment. The source-clone appliance is the supported
 trial path; standalone installers, signed artifacts, SBOM/provenance and production
 operations remain future work. Workspace packages remain registry-private.
+
+The public website's synthetic queue story is a separate illustration, not this
+appliance's persistent population or a measured automation rate. Its wording/build
+status needs a separate ownership and copy audit; this PR does not edit or deploy
+the site. No simulated credit proves recovered revenue or an accepted business outcome.
 
 [OPEN_CORE.md](OPEN_CORE.md) describes a **potential** commercial offering, not an
 implemented product inventory. Its terms do not narrow the rights to published
