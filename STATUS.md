@@ -928,7 +928,7 @@ D6 browser scenarios, Compose and appliance/restart passed; publishing was skipp
 Local D9-A validation passes `pnpm validate` (274 tests, format/lint/typecheck and
 public-release audit), ECC 620/620 and its intended negative control (exit 1 at
 152/620, unchanged corpus/gold hashes). `git diff --check` passes. Documentation
-checks resolve 141 local links and nine anchors, parse two JSON fragments and
+checks resolve 142 local links and nine anchors, parse two JSON fragments and
 recompute the two original-byte hashes and CSV row locator. An existing pure-engine
 compatibility check applies the proposed v0 review-event shape at C4→C5, preserves
 unknown source occurrence/null owner, replays and exact-retries; nullable WorkEvent

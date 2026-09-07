@@ -59,8 +59,11 @@ append-only. Readiness fails if state cannot be replayed or the writer lock is
 missing.
 
 The singleton writer and whole-state hydration are explicit PR4 local-appliance
-tradeoffs, not a high-availability or scale claim. Automatic ECC case matching,
-authority evaluation, closure proof, and action execution remain later milestones.
+tradeoffs, not a high-availability or scale claim. Automatic ECC case matching and
+complete closure proof remain unimplemented. Separate D6 authority-review and D7
+bounded simulated action/verification modules are now merged; their current
+behavior and limits are recorded in [STATUS](../../STATUS.md). They do not relax
+the Case engine's legacy execution or closure guards.
 
 See the [case engine architecture](../../docs/architecture/case-event-engine.md) for
 the trust, replay, and persistence boundaries.
