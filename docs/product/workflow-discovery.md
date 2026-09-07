@@ -45,7 +45,7 @@ required decision, and follow the result to agreed evidence. Confirm one queue,
 buyer, accountable process owner, operator and close event with a design partner
 before freezing its operating contract. This is a planning candidate, not a second
 active pack or permission to feed real data into the current appliance. See
-[Proposed D-034](../architecture/d9-assisted-intake-boundary.md).
+[D-034 — accepted synthetic scope](../architecture/d9-assisted-intake-boundary.md).
 
 Case remains the atomic unit of accountable business state. A Business Loop
 describes recurring Cases sharing a trigger, objective, population, operating
@@ -315,8 +315,8 @@ refresh states. Inspect website ownership separately; record a separate copy/sta
 follow-up, with no website change, release or deployment in this assignment.
 
 D9-A specifies minimal intake/provenance/time semantics and the permitted data
-boundary in the single [Proposed D-034](../architecture/d9-assisted-intake-boundary.md).
-It implements no intake behavior; approval is required before D9-B implements one queue export plus supporting documents,
+boundary in the single [D-034 — accepted synthetic scope](../architecture/d9-assisted-intake-boundary.md).
+It implements no intake behavior; the owner authorized D9-B to implement one queue export plus supporting documents,
 reviewed matching and repeat-import handling. Proposed intake content must preserve
 Case/business-object references, source record and event IDs, activity, actor/role,
 source status, occurrence and ingestion times, timezone, content/provenance bindings

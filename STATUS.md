@@ -1,9 +1,11 @@
 # Status
 
 Current milestone: **D9-A minimum synthetic intake/provenance contract design**,
-prepared for review on `docs/d9a-synthetic-intake-contract`. This branch changes
-Markdown documentation only. D-034 remains Proposed; no D9-B importer, endpoint,
-active schema, migration or customer-data processing is implemented.
+accepted for synthetic implementation on `docs/d9a-synthetic-intake-contract`.
+The owner approved D-034 as reviewed at `e5e8273c210325b82635975a67af6b4e1ff55d16`
+and authorized D9-B. Real customer activation remains unapproved. This approval
+update changes Markdown only; no importer, endpoint, active schema or migration
+is implemented yet.
 
 D8-C PR #28 merged normally at `555ac0214b006350b049d96567cb98b92ebc25f8`, preserving
 reviewed head `1f2d9a2da9ae70273b0a6e057c05cf03cbfc2659`. There were no subsequent
@@ -892,10 +894,11 @@ effectiveness claim is made. The
 links before/after desktop and 390px captures and the executable journey. D-034
 remains Proposed; no customer data, D9 implementation, release or deployment.
 
-## D9-A design prepared for review
+## D9-A synthetic decision accepted
 
-The existing [Proposed D-034](docs/architecture/d9-assisted-intake-boundary.md)
-is the single intake proposal. It specifies one synthetic invoice-dispute CSV plus
+The existing [D-034](docs/architecture/d9-assisted-intake-boundary.md)
+is Accepted for synthetic implementation, with the owner's approval retained verbatim.
+It remains the single intake contract; real customer activation is unapproved. It specifies one synthetic invoice-dispute CSV plus
 bounded supporting documents, format/encoding limits, actual-byte versus declared
 hashes, source/entity identities, row/document locators, pinned derivation, explicit
 matching, coverage and measurement gaps. It maps required inputs to existing
@@ -921,7 +924,7 @@ and missing classification/severity fail validation. This is a documentation rep
 not implementation of the future adapter. Artifact reads also require the original
 artifact's full scope, even through a narrower Case citation.
 
-Technical synthetic approval is separate from real-data activation. Real customer,
+Technical synthetic approval is recorded separately from real-data activation. Real customer,
 custodian, files, people, private location/access and retention/export arrangements
 remain unnamed and unapproved. The proposed deletion unit is the complete isolated
 evaluation dataset, including its journals and controlled copies; after disposal
@@ -948,11 +951,15 @@ exit 127); the review PR records actual final-head CI, including retained full-s
 coverage. Future A1–A12 importer acceptance tests have not been executed: the importer
 does not exist. No new visual inspection is claimed.
 
+The approved design head passed [final-head CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34166987951):
+274 repository tests, 63 authority PostgreSQL tests, 115 action/check/API tests
+including eight D7 browser scenarios, eight D6 browser scenarios, Compose and
+appliance/restart. The approval update must pass its own required check before merge.
+
 ## Next
 
-Review the exact technical/synthetic recommendation in D-034. Leave the D9-A PR open;
-no approval is recorded. After that boundary is accepted and implementation is
-instructed, D9-B should build only prepare → inspect candidates/provenance/coverage →
+Validate this approval update and merge PR #29 through normal protections.
+The owner has authorized D9-B from updated main: build only prepare → inspect candidates/provenance/coverage →
 explicit create/attach → inspect receipt and safe reimport. The affected files and
 acceptance gates are listed in D-034. Keep existing Orchid review/action/check intact.
 No general matching, worker, new authority policy, external write or Case closure.

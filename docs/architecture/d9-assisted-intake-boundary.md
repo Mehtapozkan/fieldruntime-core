@@ -1,17 +1,18 @@
 # D-034 — Minimum synthetic invoice-dispute intake and provenance
 
-Status: **Proposed**. D9-A design only; no human approval, importer, endpoint,
-active schema, migration or customer-data processing is recorded. This updates the
-existing D-034, first prepared during D8-B. It is the **single intake proposal**;
+Status: **Accepted for synthetic implementation; real customer activation remains
+unapproved.** Human approval of PR #29 at `e5e8273c210325b82635975a67af6b4e1ff55d16`
+is recorded below. D9-B is authorized but not implemented by this approval update.
+This is the single intake contract, first proposed during D8-B;
 [the canonical specification](../product/workflow-discovery.md),
 [requirement/gaps matrix](../product/requirements-implementation-matrix.md) and
 [PLAN](../../PLAN.md) retain Discovery, Business Loops and delivery requirements.
 Primary coverage: I1; supporting R1/R2/R3/R5/R6, P2/P6 and L4. Examples below are
 synthetic design vectors, not passing importer tests or customer findings.
 
-## Recommended decision and one journey
+## Accepted synthetic decision and one journey
 
-Approve, separately from any real-data permission, one synthetic commercial
+The accepted synthetic scope, separate from any real-data permission, is one commercial
 invoice-dispute queue within Revenue/ECC: **choose export and documents → inspect
 coverage, source claims and proposed matches → review one candidate → explicitly
 create a Case or attach evidence → reopen the retained material and commit receipt**.
@@ -24,7 +25,7 @@ An explicit intake commit produces a **new operator-review occurrence**, represe
 as a WorkEvent whose source is Field Runtime intake. It does not pretend that a
 queue snapshot is a historical dispute event. Source times remain separately
 qualified in the retained material. This explicit adapter convention is part of
-what D-034 asks a human to approve; it is not already implemented.
+the accepted synthetic decision; it is not implemented by this approval update.
 
 Keep ECC shadow-only and the frozen corpus unchanged. Do not create another pack,
 extend Orchid's D-033 action enrollment to imported Cases, import approvals or
@@ -550,13 +551,23 @@ permission. No customer content in public repository fixtures, logs, screenshots
 website uploads or reusable templates. No connector credentials, external writes,
 provider requests, customer communication or automatic file fetching.
 
-## Approval points and compatibility
+## Human approval and compatibility
 
-1. **Technical/synthetic decision:** approve the bounded input profile, versioned
+On 2026-09-07, the repository owner approved the technical/synthetic decision
+as reviewed in PR #29 at `e5e8273c210325b82635975a67af6b4e1ff55d16` and authorized
+D9-B implementation. The instruction is retained verbatim:
+
+> I approve D-034’s technical/synthetic decision, as proposed in PR #29 at `e5e8273c210325b82635975a67af6b4e1ff55d16`, and authorize the subsequent D9-B implementation within that scope.
+
+> This approval covers the bounded synthetic input profile, versioned intake contracts, explicit review-occurrence adapter, deterministic bindings and reimports, per-record atomic Case/provenance persistence, and evidence retention for the isolated evaluation dataset’s lifetime.
+
+> Real customer activation remains unapproved. The separate named custody, access, classification, retention, deletion and export arrangements are still required.
+
+1. **Technical/synthetic decision — Accepted:** the bounded input profile, versioned
    intake material/selection/receipt, explicit review-occurrence v0 adapter, per-record
    atomic provenance+Case commit, deterministic reimport/binding rules and retention
-   for the evaluation dataset's life. This authorizes only a subsequent synthetic
-   D9-B implementation when separately instructed; it approves no real sample.
+   for the evaluation dataset's life. The human instruction above also authorizes the subsequent synthetic
+   D9-B implementation; it approves no real sample.
 2. **Real-data activation amendment:** name and approve the exact customer/files,
    people/access/location, redaction, retention/deletion/export arrangements above,
    and confirm the customer's ECC assignment. This remains unresolved and cannot be
@@ -564,7 +575,7 @@ provider requests, customer communication or automatic file fetching.
 
 D-001/D-007/D-027 keep one canonical Case and ECC; D-028 preserves upstream ownership.
 D-011/D-018/D-019 keep WorkEvent occurrence and timezone semantics: only the new,
-explicitly named review-occurrence adapter convention is proposed. D-012 stays
+explicitly named review-occurrence adapter convention is accepted for synthetic use. D-012 stays
 explicit-target; D-016 still returns already-processed for raw v0 fresh-key replays.
 Intake's separate no-op `ALREADY_COMMITTED` result never changes that engine rule.
 D-003/D-015/D-020/D-021 require atomic PostgreSQL persistence; the supporting byte
@@ -573,9 +584,9 @@ D-029/D-031 keep claims/derived text below authority. D-032/D-014 keep exact C/R
 and journal semantics. D-013/D-017/D-033 keep execution/closure guards unchanged.
 D-005/D-023 and the frozen constitution do **not** authorize real samples: item 2
 is the smallest explicit data-boundary amendment, not production authentication.
-No accepted decision is silently rewritten by this Proposed record.
+The recorded approval changes only the specified synthetic intake boundary.
 
-## Exact D9-B handoff after approval
+## Authorized D9-B implementation handoff
 
 One synthetic import, existing appliance/Workbench layout: explicit preparation,
 read-only coverage/provenance/candidates, review one target, commit through existing

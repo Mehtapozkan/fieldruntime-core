@@ -68,9 +68,9 @@ the Case engine's legacy execution or closure guards.
 See the [case engine architecture](../../docs/architecture/case-event-engine.md) for
 the trust, replay, and persistence boundaries.
 
-## Proposed synthetic intake adapter
+## Accepted synthetic intake adapter (implementation pending)
 
-[D9-A / Proposed D-034](../../docs/architecture/d9-assisted-intake-boundary.md)
+[D9-A / D-034 — accepted synthetic scope](../../docs/architecture/d9-assisted-intake-boundary.md)
 reconciles bounded source-byte retention and explicit reviewed create/attach with
 this engine. Its per-record provenance+Case commit must use one transaction and
 validated append bundle; calling the transaction-owning store then saving provenance

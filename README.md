@@ -13,7 +13,7 @@ retries. History provides a compact, inspectable Case progress and evidence rece
 The merged failure walkthrough demonstrates the safeguards with isolated test fixtures.
 Merged D8-C clarifies current attention, Case ownership and the selected reviewer’s
 policy requirement in the same view. This D9-A branch documents the
-[Proposed synthetic intake contract](docs/architecture/d9-assisted-intake-boundary.md);
+[Accepted synthetic intake contract](docs/architecture/d9-assisted-intake-boundary.md);
 it adds no importer or runtime capability.
 
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external writes.
@@ -22,7 +22,7 @@ it adds no importer or runtime capability.
 ## What works today
 
 “Main” includes D8-C [PR #28](https://github.com/Mehtapozkan/fieldruntime-core/pull/28)
-at `555ac0214b006350b049d96567cb98b92ebc25f8`. **D9-A is docs-only, for review;
+at `555ac0214b006350b049d96567cb98b92ebc25f8`. **D9-A is docs-only, accepted for synthetic implementation;
 D9-B intake is not implemented.** The historical prerelease has
 a smaller boundary described under [Distribution](#distribution).
 

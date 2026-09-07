@@ -95,7 +95,7 @@ these primitives. WorkEvent occurrence is not ingestion time; Case `Outcome`,
 or learning. Preserve strict existing schemas and propose necessary versioned
 additions in the assigned slice.
 
-[D9-A / Proposed D-034](../../docs/architecture/d9-assisted-intake-boundary.md)
+[D9-A / D-034 — accepted synthetic scope](../../docs/architecture/d9-assisted-intake-boundary.md)
 contains the single intake field mapping, format/time/identity rules and future
 acceptance vectors. It recommends separate versioned intake bundle/selection/commit
 and read contracts, with a validated adapter emitting a real `intake.material_reviewed`
@@ -104,4 +104,4 @@ material; review time must not be labelled dispute onset. EvidenceRef can cite t
 material but current Case commands do not append the Case's `evidence_refs` array.
 Byte custody and atomic supporting persistence are proposed additions, not supplied
 by `payload_ref` or a declared hash. No active schema, validator or migration changes
-are included in D9-A; D-034 is not Accepted.
+are included in D9-A; D-034 is Accepted for synthetic implementation; real activation is unapproved.
