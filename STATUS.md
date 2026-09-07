@@ -864,6 +864,14 @@ no-current-permission behavior while the malformed read is present. Malformed
 retained reviewer lists likewise show an unavailable policy explanation instead of
 throwing or inventing a reviewer assignment.
 
+PR #28 review also identified an older denial masking a fresh request's reviewers.
+The PostgreSQL reproduction created a new request after stale execution but still
+displayed “Latest simulated attempt denied.” Denial attention now requires the
+selected request hash and exact C/R/S command bindings; new requests or later review
+revisions show their own Finance/Executive progress. Earlier denials stay in History.
+API/restart and browser/reload coverage retains the denial while fresh approvals
+advance without executing a credit or transferring earlier consent.
+
 Desktop (1440px) and 390px screenshots were inspected: proposal, uncertainty,
 reviewer progress and controls remain readable with no horizontal overflow. Mobile
 still needs vertical scrolling. Keyboard tests cover disclosures, review controls,

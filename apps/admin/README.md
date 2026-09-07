@@ -180,6 +180,9 @@ command while **Review or intervene** retains all permitted decisions. Record an
 check are separate steps; even an independent match leaves impact, acceptance and
 Case closure unproven. “Case owner” comes from reconciled Case/identity evidence;
 unknown ownership is Unconfirmed. A required reviewer is not assigned ownership.
+A denial belongs to its exact request and reviewed revisions. A fresh request or
+later review revision shows its own required reviewers; earlier denials remain in
+History and cannot hide that next action.
 
 **Current information incomplete** means independently loaded views did not
 reconcile. Earlier recorded decisions remain in History but cannot supply current

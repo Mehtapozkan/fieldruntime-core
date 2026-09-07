@@ -92,13 +92,27 @@ const sourceName = (value) =>
     synthetic_operations_report: "Operations report",
   })[value] ?? title(value);
 
+function denialMatchesReview(receipt, packet) {
+  const attempt = receipt?.latestAttempt,
+    command = attempt?.command;
+  return (
+    attempt?.outcome === "denied" &&
+    command?.authority_request_id === packet.authority_request_id &&
+    command.request_binding_hash === packet.request_binding_hash &&
+    command.expected_case_version === packet.case_version &&
+    command.expected_review_revision === packet.review_revision &&
+    command.expected_authority_state_revision ===
+      packet.authority_state_revision
+  );
+}
+
 // Summarize validated server projections. This never decides reviewer eligibility.
 export function reviewProgress(
   state,
   receipt = state.credit ? caseReceiptEvidence(state) : null,
 ) {
   const { packet } = state;
-  if (receipt?.latestAttempt?.outcome === "denied")
+  if (denialMatchesReview(receipt, packet))
     return {
       heading: "Latest simulated attempt denied",
       next: "Inspect the denied attempt in History. Earlier effects and their independent checks remain historical evidence.",
@@ -240,7 +254,7 @@ export function operatorAttention(state) {
     if (refreshFailed(state)) reason = "SYSTEM_FAILURE";
     next =
       "Refresh the matching views; current attention and eligibility are unconfirmed. Retained history is still inspectable.";
-  } else if (receipt.latestAttempt?.outcome === "denied") {
+  } else if (denialMatchesReview(receipt, packet)) {
     next =
       "Operator: inspect the latest denial in History before any new command. Earlier effects can still be checked independently.";
   } else if (proof?.comparison.outcome === "mismatch") {

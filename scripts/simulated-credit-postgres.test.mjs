@@ -13,7 +13,10 @@ import {
   validateCredit,
 } from "../apps/admin/public/credit-client.js";
 import { memoryStorage } from "../tests/helpers/authority-browser-api.mjs";
-import { reviewProgress } from "../apps/admin/public/authority-workbench.js";
+import {
+  reviewProgress,
+  operatorAttention,
+} from "../apps/admin/public/authority-workbench.js";
 // Real PostgreSQL and HTTP; no skipped or in-memory substitute acceptance tests.
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -2687,6 +2690,58 @@ test("D7-D stale displayed bindings are submitted unchanged, denied and require 
   assert.equal(client.state.creditReceipt.outcome, "denied");
   assert.equal(client.state.credit.source, null);
   assert.equal(canExecuteCredit(client.state), false);
+  const previousRequest = client.state.requestId;
+  const staleDenial = client.state.creditReceipt;
+  await client.refresh();
+  await client.freshRequest();
+  assert.notEqual(client.state.requestId, previousRequest);
+  assert.equal(client.state.packet.review_revision, 0);
+  assert.equal(reviewProgress(client.state).heading, "Awaiting review");
+  assert.match(operatorAttention(client.state).next, /Finance and Executive/);
+  assert.equal(
+    caseReceiptEvidence(client.state).latestAttempt.id,
+    staleDenial.id,
+  );
+  // A denial for this request is current only until its reviewed revisions move.
+  const currentDenial = (
+    await h.request(
+      action,
+      await h.command(client.state.requestId, "no-votes"),
+      409,
+    )
+  ).receipt;
+  await client.refresh();
+  assert.equal(
+    reviewProgress(client.state).heading,
+    "Latest simulated attempt denied",
+  );
+  await client.decide("finance", "approve");
+  assert.equal(
+    reviewProgress(client.state).heading,
+    "Finance approved — Executive needed",
+  );
+  assert.match(operatorAttention(client.state).next, /^Executive:/);
+  await h.restart();
+  const reopened = workbench(h);
+  await reopened.start(client.state.requestId);
+  assert.equal(
+    reviewProgress(reopened.state).heading,
+    "Finance approved — Executive needed",
+  );
+  assert.equal(
+    caseReceiptEvidence(reopened.state).latestAttempt.id,
+    currentDenial.id,
+  );
+  const before = await h.dump();
+  await reopened.refresh();
+  assert.deepEqual(await h.dump(), before);
+  await reopened.decide("executive", "approve");
+  assert.equal(
+    reviewProgress(reopened.state).heading,
+    "Approvals complete; credit not recorded",
+  );
+  assert.equal(reopened.state.credit.source, null);
+  assert.equal(reopened.state.credit.closure_permission, false);
 });
 
 test("D7-D altered presentation cannot turn adapter success or an inconclusive check into verification", async (t) => {

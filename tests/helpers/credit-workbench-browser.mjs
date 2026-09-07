@@ -594,11 +594,42 @@ export function registerCreditBrowserTests(fixture) {
       page.locator('[data-receipt-status="reconciled"]'),
     ).toBeVisible();
     await controls(page);
+    const denied = (
+      await h.request(
+        `${CREDIT_ROOT}-attempts`,
+        await h.command(selected, "browser:stale-before-fresh"),
+        409,
+      )
+    ).receipt;
+    await click(page, "refresh");
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Latest simulated attempt denied",
+    );
     await click(page, "fresh");
     await expect(page.locator("#review-current-status")).toContainText(
       "Awaiting review",
     );
     await expect(action(page, "execute-credit")).toBeDisabled();
+    await expect(page.locator(".review-next-action")).toContainText(
+      "Finance and Executive",
+    );
+    await vote(page, "finance");
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Finance approved — Executive needed",
+    );
+    await page.reload();
+    await idle(page);
+    await expect(page.locator(".review-next-action")).toContainText(
+      "Executive:",
+    );
+    assert.equal((await h.request(CREDIT_ROOT)).attempts.at(-1).id, denied.id);
+    await vote(page, "executive");
+    await expect(page.locator("#review-current-status")).toHaveText(
+      "Approvals complete; credit not recorded",
+    );
+    const reviewed = await h.request(CREDIT_ROOT);
+    assert.equal(reviewed.source, null);
+    assert.equal(reviewed.closure_permission, false);
   });
 
   test("D7-D browser: a confirmed newer attempt and its check remain visible when refresh fails", async (t) => {
