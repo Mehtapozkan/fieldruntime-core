@@ -64,3 +64,14 @@ authority evaluation, closure proof, and action execution remain later milestone
 
 See the [case engine architecture](../../docs/architecture/case-event-engine.md) for
 the trust, replay, and persistence boundaries.
+
+## Proposed synthetic intake adapter
+
+[D9-A / Proposed D-034](../../docs/architecture/d9-assisted-intake-boundary.md)
+reconciles bounded source-byte retention and explicit reviewed create/attach with
+this engine. Its per-record provenance+Case commit must use one transaction and
+validated append bundle; calling the transaction-owning store then saving provenance
+separately is not atomic. The proposed intake WorkEvent describes the actual review
+occurrence, preserving unknown source time in separate retained material. Existing
+v0 source uniqueness, exact retries, Case versions and replay remain unchanged.
+No importer or new transaction helper is implemented in this documentation step.

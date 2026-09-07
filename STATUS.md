@@ -1,12 +1,16 @@
 # Status
 
-Current milestone: D8-C focused operator-attention presentation, implemented for
-review on `feat/d8c-operator-attention`. D8-B PR #27 merged normally at
-`1039912ca7eaea2239366f5de8c07b0e44c7df81`, preserving reviewed head
-`d86b2a9e50efa546581e9abeac3f0d6907adeccc`. Required up-to-date `validate` passed;
-there were no review findings or subsequent changes. Required PRs, strict checks,
-force-push and deletion protections remain; no bypass was used. D8-A and D7 remain
-merged. This branch changes presentation, tests and documentation only.
+Current milestone: **D9-A minimum synthetic intake/provenance contract design**,
+prepared for review on `docs/d9a-synthetic-intake-contract`. This branch changes
+Markdown documentation only. D-034 remains Proposed; no D9-B importer, endpoint,
+active schema, migration or customer-data processing is implemented.
+
+D8-C PR #28 merged normally at `555ac0214b006350b049d96567cb98b92ebc25f8`, preserving
+reviewed head `1f2d9a2da9ae70273b0a6e057c05cf03cbfc2659`. There were no subsequent
+changes; the denial-banner finding was resolved and required up-to-date `validate`
+passed. Required PR/check/force-push/deletion protections were inspected and
+preserved without bypass. D8-A/B/C and D7 are merged; their implementation and
+regression coverage remain intact.
 The published `v0.1.0-evaluation-preview.0` remains the September 1 snapshot at
 `3db1b4bf0304e67e1ef51be785d1f81b906016b3`, before D6/D7. Current source and this
 review branch are not a new release. [Operator functionality table](README.md#what-works-today).
@@ -805,7 +809,7 @@ restart retry. All 100 checked local link targets and six anchors resolve;
 Final-head full PostgreSQL/API, browser, Compose and appliance/restart CI evidence
 is recorded in PR #27. No new visual inspection is claimed.
 
-## D8-C implemented for review
+## D8-C merged baseline
 
 The inspection retained existing proposal/uncertainty, reviewer badges, preparation
 facts, action/check headings and the five-stage History receipt. These already show
@@ -888,18 +892,63 @@ effectiveness claim is made. The
 links before/after desktop and 390px captures and the executable journey. D-034
 remains Proposed; no customer data, D9 implementation, release or deployment.
 
+## D9-A design prepared for review
+
+The existing [Proposed D-034](docs/architecture/d9-assisted-intake-boundary.md)
+is the single intake proposal. It specifies one synthetic invoice-dispute CSV plus
+bounded supporting documents, format/encoding limits, actual-byte versus declared
+hashes, source/entity identities, row/document locators, pinned derivation, explicit
+matching, coverage and measurement gaps. It maps required inputs to existing
+Case/WorkEvent/EvidenceRef/journal fields before proposing versioned intake material,
+selection, receipt and derived-read contracts.
+
+Snapshots retain separate reported occurrence/export times and actual ingestion/
+recording times. The recommended v0 adapter records the real operator intake-review
+occurrence, never a fabricated dispute start. Explicit per-record create/attach
+reuses Case versioning, source identity and replay. Proposed same-PostgreSQL byte
+retention and atomic provenance/Case commit require an additive D9-B migration;
+no such behavior is implemented here. Twelve acceptance vectors specify renamed/
+reordered reimports, changed source/support, entities, ambiguous links, disappearing
+rows, errors, concurrency, rollback, restart, corrections and integrity.
+
+Technical synthetic approval is separate from real-data activation. Real customer,
+custodian, files, people, private location/access and retention/export arrangements
+remain unnamed and unapproved. The proposed deletion unit is the complete isolated
+evaluation dataset, including its journals and controlled copies; after disposal
+that copy cannot be replayed. Selective journal erasure and indefinite byte retention
+are not promised. No customer samples or private data were used.
+
+Requirements I1, R1/R2/R3/R5/R6, P2/P6 and L4 are reconciled in the existing matrix;
+none is marked implemented by this design. D-013/D-033, frozen ECC, strict v0,
+Discovery's seven records and the six loop-readiness outputs remain unchanged.
+The [D8-C final-head CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34163021487)
+is the verified merged implementation baseline: 274 repository tests, 63 authority
+and 115 action/check/API tests including eight D7 browser scenarios, eight retained
+D6 browser scenarios, Compose and appliance/restart passed; publishing was skipped.
+Local D9-A validation passes `pnpm validate` (274 tests, format/lint/typecheck and
+public-release audit), ECC 620/620 and its intended negative control (exit 1 at
+152/620, unchanged corpus/gold hashes). `git diff --check` passes. Documentation
+checks resolve 141 local links and nine anchors, parse two JSON fragments and
+recompute the two original-byte hashes and CSV row locator. An existing pure-engine
+compatibility check applies the proposed v0 review-event shape at C4→C5, preserves
+unknown source occurrence/null owner, replays and exact-retries; nullable WorkEvent
+occurrence and fresh-key source replay remain denied. This exercises existing v0
+primitives, not an intake implementation. Docker is unavailable locally (Compose
+exit 127); the review PR records actual final-head CI, including retained full-suite
+coverage. Future A1–A12 importer acceptance tests have not been executed: the importer
+does not exist. No new visual inspection is claimed.
+
 ## Next
 
-Leave the D8-C PR open for review. D9-A is a bounded contract/design assignment:
-use synthetic queue-export/document examples to settle minimum intake/provenance,
-source activity/actor/role/status, object links, occurrence versus ingestion versus
-journal time, coverage and repeat/changed-import semantics. Identify the smallest
-versioned additions to Case/WorkEvent, with reconstruction/idempotency/ambiguity
-examples and acceptance tests. Make D-034’s private read/propose data boundary
-concrete for human review. Unknown customer details must not block synthetic contract
-design; real samples require the approved named boundary. Do not implement intake yet.
+Review the exact technical/synthetic recommendation in D-034. Leave the D9-A PR open;
+no approval is recorded. After that boundary is accepted and implementation is
+instructed, D9-B should build only prepare → inspect candidates/provenance/coverage →
+explicit create/attach → inspect receipt and safe reimport. The affected files and
+acceptance gates are listed in D-034. Keep existing Orchid review/action/check intact.
+No general matching, worker, new authority policy, external write or Case closure.
+Unknown customer details do not block synthetic design; real samples require the
+separate completed customer-scoped approval.
 
 Customer acceptance, real impact, active effort, comparable cohorts and full costs
 remain missing. Packet acceptance, simulated effect verification, business close
-and Case resolution stay distinct. The two-returning-design-partners/one-paid
-continuation gate is a proposed experiment, not PMF. No release or deployment.
+and Case resolution stay distinct. No D9-B implementation, release or deployment.

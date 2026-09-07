@@ -4,7 +4,9 @@ The existing white/cream Workbench connects persistent review to the bounded
 simulated credit and independent-check APIs. D6, D7 and D8-A's read-only Case
 progress and evidence receipt are merged. D8-B’s
 [test-fixture failure walkthrough](../../docs/guides/d8-failure-walkthrough.md)
-merged in PR #27. This D8-C branch clarifies operator attention in the existing view.
+merged in PR #27. D8-C operator-attention presentation merged in PR #28.
+[D9-A intake design](../../docs/architecture/d9-assisted-intake-boundary.md) is
+Proposed; upload, intake candidates and import controls are not implemented.
 Accepted [D-032](../../docs/architecture/d6-authority-request-lifecycle.md)
 and [D-033](../../docs/architecture/d7-simulated-credit-verification.md) are unchanged.
 Opening, refreshing or revisiting creates no durable records.
