@@ -872,6 +872,13 @@ revisions show their own Finance/Executive progress. Earlier denials stay in His
 API/restart and browser/reload coverage retains the denial while fresh approvals
 advance without executing a credit or transferring earlier consent.
 
+CI run 34161065499 passed all 63 authority and 115 action/check/API tests,
+appliance/restart checks and four retained review-browser scenarios before its
+20-minute job limit cancelled the remaining groups. The validation job now has a
+bounded 30-minute budget for the complete suite. Required checks, per-test deadlines,
+assertions, pinned dependencies and repository protections are unchanged; this is
+not a runtime performance or business-value claim.
+
 Desktop (1440px) and 390px screenshots were inspected: proposal, uncertainty,
 reviewer progress and controls remain readable with no horizontal overflow. Mobile
 still needs vertical scrolling. Keyboard tests cover disclosures, review controls,
