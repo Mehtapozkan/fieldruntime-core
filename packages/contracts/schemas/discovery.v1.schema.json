@@ -3,23 +3,47 @@
   "$id": "https://fieldruntime.dev/schemas/discovery.v1.schema.json",
   "$defs": {
     "versions": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "projection": {
-          "const": "discovery.invoice-dispute.v1"
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "projection": {
+              "const": "discovery.invoice-dispute.v1"
+            },
+            "template": {
+              "const": "discovery.questions.v1"
+            },
+            "interpretation": {
+              "const": "discovery.source-claims.v1"
+            }
+          },
+          "required": [
+            "projection",
+            "template",
+            "interpretation"
+          ]
         },
-        "template": {
-          "const": "discovery.questions.v1"
-        },
-        "interpretation": {
-          "const": "discovery.source-claims.v1"
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "projection": {
+              "const": "discovery.invoice-dispute.v2"
+            },
+            "template": {
+              "const": "discovery.questions.v2"
+            },
+            "interpretation": {
+              "const": "discovery.source-claims.v2"
+            }
+          },
+          "required": [
+            "projection",
+            "template",
+            "interpretation"
+          ]
         }
-      },
-      "required": [
-        "projection",
-        "template",
-        "interpretation"
       ]
     },
     "manifest": {
@@ -692,7 +716,14 @@
         "source_claims": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/source_claim"
+            "oneOf": [
+              {
+                "$ref": "#/$defs/source_claim"
+              },
+              {
+                "$ref": "#/$defs/scoped_source_claim"
+              }
+            ]
           }
         },
         "findings": {
@@ -755,6 +786,50 @@
         "annotations",
         "measurement_note",
         "model_calls"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "manifest": {
+                "properties": {
+                  "versions": {
+                    "properties": {
+                      "projection": {
+                        "const": "discovery.invoice-dispute.v1"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "source_claims": {
+                "items": {
+                  "$ref": "#/$defs/source_claim"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "else": {
+            "properties": {
+              "source_claims": {
+                "items": {
+                  "$ref": "#/$defs/scoped_source_claim"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          }
+        }
       ]
     },
     "command": {
@@ -1294,6 +1369,90 @@
         "entries",
         "versions",
         "hash"
+      ]
+    },
+    "scoped_source_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "value": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 16000
+        },
+        "meaning": {
+          "enum": [
+            "parsed_source_value",
+            "source_reports_confirmation",
+            "source_reports_missing",
+            "ambiguous_excerpt",
+            "retained_only"
+          ]
+        },
+        "citation_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "uniqueItems": true
+        },
+        "independently_verified": {
+          "const": false
+        },
+        "subject": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "entity": {
+              "enum": [
+                "entity_north",
+                "entity_south"
+              ]
+            },
+            "kind": {
+              "enum": [
+                "record",
+                "delivery"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "entity",
+            "kind",
+            "id"
+          ]
+        },
+        "applicable_record_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source_associations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/intake.v1.schema.json#/$defs/association"
+          }
+        }
+      },
+      "required": [
+        "field",
+        "value",
+        "meaning",
+        "citation_ids",
+        "independently_verified",
+        "subject",
+        "applicable_record_key",
+        "source_associations"
       ]
     }
   }

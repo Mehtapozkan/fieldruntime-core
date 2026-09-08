@@ -448,10 +448,15 @@ function structuredCloneSafe(v) {
   return JSON.parse(JSON.stringify(v));
 }
 
-const discoveryVersions = {
+const legacyDiscoveryVersions = {
   projection: "discovery.invoice-dispute.v1",
   template: "discovery.questions.v1",
   interpretation: "discovery.source-claims.v1",
+};
+const discoveryVersions = {
+  projection: "discovery.invoice-dispute.v2",
+  template: "discovery.questions.v2",
+  interpretation: "discovery.source-claims.v2",
 };
 const equal = (a, b) =>
   JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
@@ -463,7 +468,9 @@ export async function validateDiscoveryEntry(e) {
       e.actor?.identity_id === "identity_intake_operator" &&
       e.actor.status === "active" &&
       e.actor.identity_kind === "human" &&
-      equal(e.versions, discoveryVersions) &&
+      (equal(e.versions, discoveryVersions) ||
+        equal(e.versions, legacyDiscoveryVersions)) &&
+      equal(e.material?.manifest.versions, e.versions) &&
       e.case_id === e.command?.case_id &&
       e.sequence === e.command.expected_discovery_revision + 1 &&
       e.previous_entry_hash === e.command.expected_previous_entry_hash &&

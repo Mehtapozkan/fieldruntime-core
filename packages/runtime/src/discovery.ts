@@ -21,11 +21,18 @@ import {
   requireIntake as require,
   type IntakeObject as Obj,
 } from "./intake.js";
-export const DISCOVERY_VERSIONS = {
+// Preserve v1 interpretation for immutable reviews; only new preparation uses v2.
+const LEGACY_DISCOVERY_VERSIONS = {
   projection: "discovery.invoice-dispute.v1",
   template: "discovery.questions.v1",
   interpretation: "discovery.source-claims.v1",
 };
+export const DISCOVERY_VERSIONS = {
+  projection: "discovery.invoice-dispute.v2",
+  template: "discovery.questions.v2",
+  interpretation: "discovery.source-claims.v2",
+};
+type Versions = typeof DISCOVERY_VERSIONS;
 export interface DiscoveryState {
   readonly intake: IntakeState;
   readonly entries: readonly Obj[];
@@ -81,6 +88,7 @@ function manifest(
   bundle: Obj,
   record: Obj,
   caseId: string | null,
+  versions: Versions,
 ): Obj {
   const aggregate =
     caseId === null ? undefined : getCase(state.cases, INTAKE_TENANT, caseId);
@@ -113,18 +121,60 @@ function manifest(
     business_bundle_hashes: sorted(state.bundles.map((b) => String(b.hash))),
     business_commit_hashes: sorted(state.commits.map((c) => String(c.hash))),
     intake_versions: bundle.versions,
-    versions: DISCOVERY_VERSIONS,
+    versions,
   };
 }
 function sourceMaterial(
   state: IntakeState,
   selectedBundle: Obj,
   record: Obj,
+  legacy: boolean,
 ): { sources: Obj[]; claims: Obj[]; related: Obj[] } {
   const sources = new Map<string, Obj>(),
     claims: Obj[] = [],
     related: Obj[] = [],
     cells = object(record.cells);
+  const associated = (a: Obj, r: Obj): Obj[] =>
+    list(a.associations).filter(
+      (assoc) =>
+        assoc.entity === r.entity &&
+        ((assoc.kind === "record" && assoc.id === r.source_record_id) ||
+          list(r.business_objects).some(
+            (o) => o.kind === assoc.kind && o.id === assoc.id,
+          )),
+    );
+  const relatedRecord = (r: Obj): boolean =>
+    r.valid === true &&
+    (r.record_key === record.record_key ||
+      (object(r.cells).customer_ref === cells.customer_ref &&
+        object(r.cells).invoice_id === cells.invoice_id) ||
+      (!legacy &&
+        r.entity === record.entity &&
+        list(r.business_objects).some(
+          (o) =>
+            o.kind === "delivery" &&
+            list(record.business_objects).some(
+              (selected) => selected.kind === o.kind && selected.id === o.id,
+            ),
+        )));
+  const targets = state.bundles.flatMap((b) =>
+    list(b.records).filter(relatedRecord),
+  );
+  const scope = (
+    r: Obj,
+    kind: string,
+    id: unknown,
+    associations: Obj[] = [],
+  ): Obj =>
+    legacy
+      ? {}
+      : {
+          subject: { entity: r.entity, kind, id },
+          applicable_record_key: r.record_key,
+          source_associations: [...associations].sort((a, b) =>
+            canonicalJson(a).localeCompare(canonicalJson(b)),
+          ),
+        };
   const cite = (b: Obj, a: Obj, r: Obj | null, rawLocator: Obj): string => {
     const bytes = state.artifacts.get(String(a.byte_hash));
     require(bytes, "DISCOVERY_INTEGRITY", "Cited original bytes are missing");
@@ -172,13 +222,7 @@ function sourceMaterial(
   for (const b of [...state.bundles].sort((a, b) =>
     String(a.hash).localeCompare(String(b.hash)),
   )) {
-    const rs = list(b.records).filter(
-      (r) =>
-        r.valid === true &&
-        (r.record_key === record.record_key ||
-          (object(r.cells).customer_ref === cells.customer_ref &&
-            object(r.cells).invoice_id === cells.invoice_id)),
-    );
+    const rs = list(b.records).filter(relatedRecord);
     for (const r of rs) {
       related.push(r);
       const queue = list(b.artifacts).find((a) => a.role === "queue");
@@ -195,24 +239,21 @@ function sourceMaterial(
         "order_ids",
       ])
         claims.push({
+          ...scope(r, "record", r.source_record_id),
           field: `${String(r.entity)}.${field}`,
           value: String(object(r.cells)[field]),
           meaning: "parsed_source_value",
           citation_ids: refs,
           independently_verified: false,
         });
+    }
+    // V2 evaluates explicit associations against retained record subjects, even when
+    // the source arrived in a different bundle. Invoice-label context alone is never a link.
+    for (const r of legacy ? rs : targets) {
       for (const a of list(b.artifacts).filter(
-        (a) =>
-          a.role === "support" &&
-          list(a.associations).some(
-            (assoc) =>
-              assoc.entity === r.entity &&
-              ((assoc.kind === "record" && assoc.id === r.source_record_id) ||
-                list(r.business_objects).some(
-                  (o) => o.kind === assoc.kind && o.id === assoc.id,
-                )),
-          ),
+        (a) => a.role === "support" && associated(a, r).length,
       )) {
+        const links = associated(a, r);
         const locator =
           a.derived_from === null
             ? {
@@ -231,28 +272,41 @@ function sourceMaterial(
         const deliveries = String(object(r.cells).delivery_ids)
           .split(";")
           .filter(Boolean);
+        let deliveryId: string | undefined;
         let meaning =
           a.interpretation === "retained_only"
             ? "retained_only"
             : "ambiguous_excerpt";
         // Whole-excerpt equality is intentional: no substring inference from arbitrary prose,
         // nested negation, quotations or source instructions. These are source reports only.
-        if (
-          deliveries.some(
-            (d) => text === `Delivery confirmation for ${d} is supplied.`,
+        for (const d of deliveries) {
+          // An explicit DEL-5 association cannot establish a DEL-4 claim merely
+          // because both occur on one record. Preserve uncertain applicability instead.
+          if (
+            !legacy &&
+            !links.some((link) => link.kind !== "delivery" || link.id === d)
           )
-        )
-          meaning = "source_reports_confirmation";
-        if (
-          deliveries.some(
-            (d) =>
-              text === `Delivery confirmation for ${d} is not supplied.` ||
-              text ===
-                `Customer disputes delivery ${d}. Delivery confirmation is not supplied.`,
-          )
-        )
-          meaning = "source_reports_missing";
+            continue;
+          if (text === `Delivery confirmation for ${d} is supplied.`) {
+            meaning = "source_reports_confirmation";
+            deliveryId = d;
+          }
+          if (
+            text === `Delivery confirmation for ${d} is not supplied.` ||
+            text ===
+              `Customer disputes delivery ${d}. Delivery confirmation is not supplied.`
+          ) {
+            meaning = "source_reports_missing";
+            deliveryId = d;
+          }
+        }
         claims.push({
+          ...scope(
+            r,
+            deliveryId ? "delivery" : "record",
+            deliveryId ?? r.source_record_id,
+            links,
+          ),
           field: `${String(r.entity)}.delivery_evidence`,
           value:
             text === null
@@ -286,16 +340,65 @@ export function projectDiscovery(
   recordKey: string,
   caseId: string | null,
 ): Obj {
+  return projectAtVersions(
+    state,
+    bundleId,
+    recordKey,
+    caseId,
+    DISCOVERY_VERSIONS,
+  );
+}
+function projectAtVersions(
+  state: IntakeState,
+  bundleId: string,
+  recordKey: string,
+  caseId: string | null,
+  versions: Versions,
+): Obj {
+  const legacy = same(versions, LEGACY_DISCOVERY_VERSIONS);
+  require(legacy ||
+    same(
+      versions,
+      DISCOVERY_VERSIONS,
+    ), "DISCOVERY_INTEGRITY", "Unsupported Discovery implementation versions");
   const { bundle, record } = selected(state, bundleId, recordKey),
     cells = object(record.cells),
-    { sources, claims, related } = sourceMaterial(state, bundle, record),
-    m = manifest(state, bundle, record, caseId);
-  const ownClaims = claims.filter((c) =>
-      String(c.field).startsWith(`${String(record.entity)}.`),
+    { sources, claims, related } = sourceMaterial(
+      state,
+      bundle,
+      record,
+      legacy,
     ),
-    delivery = ownClaims.filter((c) =>
-      String(c.field).endsWith(".delivery_evidence"),
+    m = manifest(state, bundle, record, caseId, versions);
+  const deliveries = sorted(
+    String(cells.delivery_ids).split(";").filter(Boolean),
+  );
+  const ownClaims = claims.filter((c) =>
+      legacy
+        ? String(c.field).startsWith(`${String(record.entity)}.`)
+        : c.applicable_record_key === record.record_key,
+    ),
+    delivery = ownClaims.filter(
+      (c) =>
+        String(c.field).endsWith(".delivery_evidence") &&
+        (legacy ||
+          object(c.subject).kind === "record" ||
+          deliveries.includes(String(object(c.subject).id))),
     );
+  const groups = deliveries.map((id) => ({
+    id,
+    claims: delivery.filter(
+      (c) =>
+        !legacy &&
+        object(c.subject).kind === "delivery" &&
+        object(c.subject).id === id,
+    ),
+  }));
+  const conflicts = groups.filter(
+    (g) =>
+      g.claims.some((c) => c.meaning === "source_reports_confirmation") &&
+      g.claims.some((c) => c.meaning === "source_reports_missing"),
+  );
   const positive = delivery.some(
       (c) => c.meaning === "source_reports_confirmation",
     ),
@@ -303,8 +406,9 @@ export function projectDiscovery(
     ambiguous = delivery.some((c) =>
       ["ambiguous_excerpt", "retained_only"].includes(String(c.meaning)),
     );
-  const gap =
-    positive && negative
+  const conflict = legacy ? positive && negative : conflicts.length > 0;
+  const gap = legacy
+    ? positive && negative
       ? "Supplied sources disagree about delivery confirmation."
       : ambiguous
         ? "The supplied delivery material needs interpretation; inspect its cited excerpt or original bytes."
@@ -312,10 +416,39 @@ export function projectDiscovery(
           ? "A supplied source reports delivery confirmation. The underlying proof and customer impact remain unverified."
           : negative
             ? "A supplied note reports that delivery confirmation is not supplied. This does not prove non-delivery."
-            : "No associated delivery support is supplied for this record. Absence from this upload does not prove non-delivery.";
+            : "No associated delivery support is supplied for this record. Absence from this upload does not prove non-delivery."
+    : [
+        ...groups.map((g) => {
+          const yes = g.claims.some(
+              (c) => c.meaning === "source_reports_confirmation",
+            ),
+            no = g.claims.some((c) => c.meaning === "source_reports_missing");
+          return (
+            `${g.id}: ` +
+            (yes && no
+              ? "Supplied sources disagree about delivery confirmation for this delivery."
+              : yes
+                ? "A supplied source reports delivery confirmation."
+                : no
+                  ? "A supplied note reports that delivery confirmation is not supplied."
+                  : "No associated delivery support establishes a confirmation claim for this delivery.")
+          );
+        }),
+        ...(ambiguous
+          ? [
+              "The supplied delivery material needs interpretation; applicability remains uncertain. Inspect its cited excerpt or original bytes.",
+            ]
+          : []),
+        ...(groups.length
+          ? []
+          : [
+              "No delivery identity is supplied for this record; evidence applicability needs clarification.",
+            ]),
+        "Source reports are not independent verification. Absence from this upload does not prove non-delivery; underlying proof and customer impact remain unverified.",
+      ].join(" ");
   const refs = (field?: string): string[] =>
     sorted(
-      claims
+      (legacy ? claims : field === "delivery_evidence" ? delivery : ownClaims)
         .filter((c) => !field || String(c.field).endsWith(`.${field}`))
         .flatMap((c) => strings(c.citation_ids)),
     );
@@ -386,27 +519,54 @@ export function projectDiscovery(
       "R3",
       "Dependencies and evidence",
       gap,
-      positive && negative ? "disputed" : "unknown",
+      conflict ? "disputed" : "unknown",
       "observed",
-      refs("delivery_evidence").length ? refs("delivery_evidence") : ownRefs,
+      legacy
+        ? refs("delivery_evidence").length
+          ? refs("delivery_evidence")
+          : ownRefs
+        : sorted([
+            ...refs("delivery_evidence"),
+            ...(groups.some((g) => !g.claims.length) || !groups.length
+              ? ownRefs
+              : []),
+          ]),
     ),
     finding(
       "R4",
       "Field-level source precedence",
       fieldConflicts.length
-        ? `Competing source values for ${fieldConflicts.join(", ")}; inspect both citations and source times. No governing field rule selects a winner.`
+        ? `Competing source values for ${fieldConflicts.join(", ")}${legacy ? "" : ` on ${String(record.source_record_id)} (${String(record.entity)})`}; inspect both citations and source times. No governing field rule selects a winner.`
         : "No reviewed field-level precedence is supplied. Amount, delivery status and terms need governing sources, scope, effective periods and accountable approvers.",
       fieldConflicts.length ? "disputed" : "unknown",
       "observed",
-      refs(),
+      legacy
+        ? refs()
+        : sorted(
+            ownClaims
+              .filter((c) =>
+                fieldConflicts.some((f) => String(c.field).endsWith(`.${f}`)),
+              )
+              .flatMap((c) => strings(c.citation_ids)),
+          ),
     ),
     finding(
       "R5",
       "Entity and regional variants",
-      `${variants.join(", ")} remain distinct source entities. Matching invoice labels do not merge work. Regional, subsidiary, acquisition and policy applicability are unknown.`,
+      `${variants.join(", ")} remain distinct source entities. Matching invoice labels do not merge work.${legacy ? "" : " Distinct record identities retain their own amounts and support; related records are context, not transferred proof."} Regional, subsidiary, acquisition and policy applicability are unknown.`,
       "unknown",
       "observed",
-      refs(),
+      legacy
+        ? refs()
+        : sorted(
+            claims
+              .filter((c) =>
+                ["invoice_id", "customer_ref"].some((f) =>
+                  String(c.field).endsWith(`.${f}`),
+                ),
+              )
+              .flatMap((c) => strings(c.citation_ids)),
+          ),
     ),
     finding(
       "R6",
@@ -425,13 +585,34 @@ export function projectDiscovery(
     question(
       "Q1",
       "R3",
-      positive && negative
-        ? "Which delivery claims conflict, and which governing evidence can clarify them?"
+      conflict
+        ? `Which delivery claims conflict${legacy ? "" : ` for ${conflicts.map((g) => g.id).join(", ")}`}, and which governing evidence can clarify them?`
         : ambiguous
           ? "What does this cited delivery material actually establish, and what remains unknown?"
-          : positive
+          : positive &&
+              (legacy ||
+                groups.every((g) =>
+                  g.claims.some(
+                    (c) => c.meaning === "source_reports_confirmation",
+                  ),
+                ))
             ? "Who can supply and inspect the underlying delivery confirmation reported by this source?"
-            : "Who can supply delivery evidence, by what agreed date, and what cannot proceed without it?",
+            : `Who can supply delivery evidence${
+                legacy
+                  ? ""
+                  : ` for ${
+                      groups
+                        .filter(
+                          (g) =>
+                            !g.claims.some(
+                              (c) =>
+                                c.meaning === "source_reports_confirmation",
+                            ),
+                        )
+                        .map((g) => g.id)
+                        .join(", ") || "the unidentified delivery"
+                    }`
+              }, by what agreed date, and what cannot proceed without it?`,
       "A disposition may depend on delivery proof; source wording alone cannot settle the claim.",
       "Delivery record, applicable terms, attributed read-back and evidence-owner response",
       "Delivery evidence owner / AR operator",
@@ -616,8 +797,15 @@ function materialAt(
   bundleId: string,
   key: string,
   caseId: string | null,
+  versions: Versions,
 ): Obj {
-  let material = projectDiscovery(state.intake, bundleId, key, caseId);
+  let material = projectAtVersions(
+    state.intake,
+    bundleId,
+    key,
+    caseId,
+    versions,
+  );
   for (const entry of historyFor(state, caseId))
     if (
       entry.operation === "annotate" &&
@@ -632,7 +820,16 @@ export function readDiscovery(
   key: string,
   caseId: string | null,
 ): Obj {
-  const material = materialAt(state, bundleId, key, caseId),
+  return readAtVersions(state, bundleId, key, caseId, DISCOVERY_VERSIONS);
+}
+function readAtVersions(
+  state: DiscoveryState,
+  bundleId: string,
+  key: string,
+  caseId: string | null,
+  versions: Versions,
+): Obj {
+  const material = materialAt(state, bundleId, key, caseId, versions),
     m = object(material.manifest),
     hash = sha256Json(material),
     history = historyFor(state, caseId),
@@ -709,12 +906,21 @@ export function appendDiscovery(
   input: unknown,
   at: string,
 ): Obj {
+  return appendAtVersions(state, input, at, DISCOVERY_VERSIONS);
+}
+function appendAtVersions(
+  state: DiscoveryState,
+  input: unknown,
+  at: string,
+  versions: Versions,
+): Obj {
   const command = normalizeDiscoveryCommand(input),
-    view = readDiscovery(
+    view = readAtVersions(
       state,
       String(command.bundle_id),
       String(command.record_key),
       String(command.case_id),
+      versions,
     ),
     binding = object(view.binding),
     material = object(view.material),
@@ -811,7 +1017,7 @@ export function appendDiscovery(
         authority_granted: false,
         closure_permission: false,
       },
-      versions: DISCOVERY_VERSIONS,
+      versions,
     }),
   );
 }
@@ -905,10 +1111,11 @@ export function assertDiscoveryState(state: DiscoveryState): void {
     keys.add(key);
     const intake = historicalInputs(state.intake, entry),
       sameCase = previous.filter((p) => p.case_id === entry.case_id);
-    const rebuilt = appendDiscovery(
+    const rebuilt = appendAtVersions(
       { intake, entries: sameCase },
       entry.command,
       String(entry.recorded_at),
+      object(entry.versions) as Versions,
     );
     require(same(
       entry,

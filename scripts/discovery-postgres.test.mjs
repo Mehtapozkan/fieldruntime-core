@@ -36,6 +36,7 @@ import {
   discoveryPath,
   discoveryCommand,
   variation,
+  scopedDeliveries,
 } from "../tests/helpers/discovery.mjs";
 import {
   assertValidDiscoveryContract,
@@ -60,6 +61,339 @@ const business = (s) =>
       ([k]) => !["runtime_writer_lock", "discovery_review_journal"].includes(k),
     ),
   );
+
+test("D10-B scoped evidence A: different delivery subjects do not contradict each other", async (t) => {
+  const h = await intakeHost(t),
+    v = await h.prepare(await scopedDeliveries("scope-a"));
+  const b = await h.ok(discoveryPath(v)),
+    f = b.material.findings.find((f) => f.id === "R3");
+  t.diagnostic(
+    JSON.stringify({
+      scenario: "A",
+      finding: f,
+      claims: b.material.source_claims.filter((c) =>
+        c.field.endsWith(".delivery_evidence"),
+      ),
+    }),
+  );
+  assert.notEqual(f.claim_state, "disputed");
+  assert.match(f.text, /DEL-4/);
+  assert.match(f.text, /DEL-5/);
+  assert.match(f.text, /not supplied/);
+});
+test("D10-B scoped evidence B: same invoice labels do not transfer another dispute's support or amounts", async (t) => {
+  const h = await intakeHost(t),
+    v = await h.prepare(await scopedDeliveries("scope-b", "distinct-records"));
+  const b = await h.ok(discoveryPath(v)),
+    f = b.material.findings.find((f) => f.id === "R3"),
+    p = b.material.findings.find((f) => f.id === "R4");
+  t.diagnostic(JSON.stringify({ scenario: "B", dependency: f, precedence: p }));
+  assert.match(f.text, /No associated delivery support/);
+  assert.notEqual(p.claim_state, "disputed");
+  assert.ok(
+    !f.citation_ids.some(
+      (id) =>
+        b.material.sources.find((s) => s.id === id).name ===
+        "dispute-18-only.txt",
+    ),
+  );
+  assert.ok(
+    b.material.sources.some((s) => s.name === "dispute-18-only.txt"),
+    "related evidence remains inspectable context",
+  );
+  const other = await h.ok(discoveryPath(v, null, 1));
+  assert.equal(other.material.assignment.amount_minor, 250000);
+  assert.match(
+    other.material.findings[2].text,
+    /DEL-5: A supplied source reports delivery confirmation/,
+  );
+  assert.notEqual(other.material.findings[3].claim_state, "disputed");
+  assert.deepEqual(
+    other.material.findings[2].citation_ids.map(
+      (id) => other.material.sources.find((s) => s.id === id).name,
+    ),
+    ["dispute-18-only.txt"],
+  );
+});
+test("D10-B scoped evidence control: opposing claims about the same delivery still conflict", async (t) => {
+  const h = await intakeHost(t),
+    v = await h.prepare(
+      await scopedDeliveries("scope-positive", "same-delivery"),
+    );
+  const b = await h.ok(discoveryPath(v)),
+    f = b.material.findings.find((f) => f.id === "R3");
+  assert.equal(f.claim_state, "disputed");
+  assert.match(f.text, /DEL-4: Supplied sources disagree/);
+  assert.match(f.text, /DEL-5: No associated delivery support/);
+  assert.deepEqual(
+    f.citation_ids
+      .map((id) => b.material.sources.find((s) => s.id === id).name)
+      .sort(),
+    ["del-4-present.txt", "delivery-gap.txt", "orchid.csv"],
+  );
+  assert.ok(
+    b.material.source_claims
+      .filter((c) => c.field.endsWith(".delivery_evidence"))
+      .every((c) => c.subject.id === "DEL-4"),
+  );
+});
+
+test("D10-B scoped evidence: explicit many-to-many associations retain delivery proof without transferring record values", async (t) => {
+  for (const kind of ["delivery", "record", "invoice"]) {
+    const h = await intakeHost(t),
+      input = await scopedDeliveries(`shared-${kind}`, "shared-delivery");
+    input.artifacts[1].associations =
+      kind === "record"
+        ? ["dispute-17", "dispute-18"].map((id) => ({
+            entity: "entity_north",
+            kind,
+            id,
+          }))
+        : [
+            {
+              entity: "entity_north",
+              kind,
+              id: kind === "delivery" ? "DEL-4" : "INV-101",
+            },
+          ];
+    const v = await h.prepare(input);
+    for (const index of [0, 1]) {
+      const b = await h.ok(discoveryPath(v, null, index)),
+        f = b.material.findings.find((f) => f.id === "R3");
+      assert.match(
+        f.text,
+        /DEL-4: A supplied source reports delivery confirmation/,
+      );
+      assert.notEqual(
+        b.material.findings.find((f) => f.id === "R4").claim_state,
+        "disputed",
+      );
+      const claim = b.material.source_claims.find(
+        (c) =>
+          c.meaning === "source_reports_confirmation" &&
+          c.applicable_record_key === v.candidates[index].record_key,
+      );
+      assert.deepEqual(claim.subject, {
+        entity: "entity_north",
+        kind: "delivery",
+        id: "DEL-4",
+      });
+      assert.ok(claim.source_associations.every((a) => a.kind === kind));
+      assert.equal(f.citation_ids.length, 1);
+      assert.equal(
+        b.material.sources.find((s) => s.id === f.citation_ids[0]).name,
+        "shared-delivery.txt",
+      );
+    }
+  }
+});
+
+test("D10-B scoped evidence: cross-bundle object association applies explicitly; incompatible delivery association remains ambiguous", async (t) => {
+  const h = await intakeHost(t),
+    original = await scopedDeliveries("original", "distinct-records");
+  original.artifacts = original.artifacts.slice(0, 1);
+  const v = await h.prepare(original);
+  const shared = editQueue(
+    await scopedDeliveries("cross-bundle", "shared-delivery"),
+    (rows, headers) => {
+      rows[1].customer_ref = "Cedar";
+      rows[1].invoice_id = "INV-908";
+      return { rows: [rows[1]], headers };
+    },
+  );
+  await h.prepare(shared);
+  const b = await h.ok(discoveryPath(v));
+  assert.match(
+    b.material.findings[2].text,
+    /DEL-4: A supplied source reports delivery confirmation/,
+  );
+  assert.ok(b.material.sources.some((s) => s.name === "shared-delivery.txt"));
+  assert.notEqual(b.material.findings[3].claim_state, "disputed");
+  const other = await intakeHost(t),
+    input = await scopedDeliveries("wrong-association");
+  input.artifacts = input.artifacts.slice(0, 2);
+  input.artifacts[1].associations = [
+    { entity: "entity_north", kind: "delivery", id: "DEL-5" },
+  ];
+  const wrong = await other.ok(discoveryPath(await other.prepare(input)));
+  assert.match(
+    wrong.material.findings[2].text,
+    /applicability remains uncertain/,
+  );
+  assert.ok(
+    !wrong.material.source_claims.some(
+      (c) => c.meaning === "source_reports_confirmation",
+    ),
+  );
+  assert.ok(
+    wrong.material.source_claims.some(
+      (c) =>
+        c.meaning === "ambiguous_excerpt" &&
+        c.source_associations[0].id === "DEL-5",
+    ),
+  );
+});
+
+test("D10-B scoped evidence: changed delivery membership retains other delivery claims as context without irrelevant finding citations", async (t) => {
+  const h = await intakeHost(t),
+    input = await scopedDeliveries("membership-original", "shared-delivery");
+  await h.prepare(input);
+  const changed = editQueue(
+    await scopedDeliveries("membership-updated", "distinct-records"),
+    (rows, headers) => {
+      rows[0].source_version = "r2";
+      rows[0].delivery_ids = "DEL-5";
+      return { rows: [rows[0]], headers };
+    },
+  );
+  changed.artifacts = changed.artifacts.slice(0, 1);
+  const v = await h.prepare(changed),
+    b = await h.ok(discoveryPath(v)),
+    f = b.material.findings[2];
+  assert.match(f.text, /DEL-5: No associated delivery support/);
+  assert.ok(
+    b.material.source_claims.some(
+      (c) =>
+        c.meaning === "source_reports_confirmation" && c.subject.id === "DEL-4",
+    ),
+  );
+  assert.ok(
+    !f.citation_ids.some(
+      (id) =>
+        b.material.sources.find((s) => s.id === id).name ===
+        "shared-delivery.txt",
+    ),
+  );
+});
+
+test("D10-B scoped evidence: row, artifact and association ordering preserve subjects, findings and relevant citations", async (t) => {
+  const semantic = (material) => ({
+    findings: material.findings.map(({ citation_ids, ...f }) => ({
+      ...f,
+      excerpts: citation_ids
+        .map((id) => material.sources.find((s) => s.id === id).excerpt)
+        .sort(),
+    })),
+    claims: material.source_claims
+      .map(({ citation_ids, ...c }) => ({
+        ...c,
+        excerpts: citation_ids
+          .map((id) => material.sources.find((s) => s.id === id).excerpt)
+          .sort(),
+      }))
+      .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))),
+  });
+  for (const scenario of [
+    "different-deliveries",
+    "distinct-records",
+    "same-delivery",
+    "shared-delivery",
+  ]) {
+    const a = await intakeHost(t),
+      b = await intakeHost(t),
+      input = await scopedDeliveries(`order-${scenario}`, scenario);
+    if (scenario === "shared-delivery")
+      input.artifacts[1].associations.push({
+        entity: "entity_north",
+        kind: "record",
+        id: "dispute-17",
+      });
+    const shuffled = editQueue(structuredClone(input), (rows) => {
+      rows.reverse();
+    });
+    shuffled.artifacts.reverse();
+    for (const artifact of shuffled.artifacts) artifact.associations.reverse();
+    const va = await a.prepare(input),
+      vb = await b.prepare(shuffled),
+      key = va.candidates[0].record_key;
+    const left = await a.ok(discoveryPath(va)),
+      right = await b.ok(
+        discoveryPath(
+          vb,
+          null,
+          vb.candidates.findIndex((c) => c.record_key === key),
+        ),
+      );
+    assert.deepEqual(semantic(left.material), semantic(right.material));
+  }
+});
+
+test("D10-B scoped evidence: immutable v1 review/export survives restart; only current v2 material can receive fresh confirmation", async (t) => {
+  const { readFile } = await import("node:fs/promises");
+  const original = JSON.parse(
+      await readFile(
+        new URL(
+          "../tests/fixtures/discovery/scoped-v1-export.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    ),
+    state = validateDiscoveryExport(original);
+  const h = await intakeHost(t);
+  await restoreIntakeFixture(h, state.intake);
+  for (const e of state.entries)
+    await h.pg.query(
+      "INSERT INTO discovery_review_journal SELECT * FROM jsonb_populate_record(NULL::discovery_review_journal,$1)",
+      [discoveryColumns(e)],
+    );
+  const e = state.entries[1],
+    command = e.command,
+    path = `/v1/intake/bundles/${command.bundle_id}/discovery?record_key=${command.record_key}&case_id=${command.case_id}`,
+    post = `/v1/intake/bundles/${command.bundle_id}/discovery-reviews`;
+  const before = await h.snapshot();
+  await h.restart();
+  assert.equal((await h.call("/readyz")).status, 200);
+  const b = await h.ok(path);
+  assert.deepEqual(b.history, JSON.parse(JSON.stringify(state.entries)));
+  assert.equal(b.history[1].material.findings[2].claim_state, "disputed");
+  assert.equal(
+    b.material.manifest.versions.projection,
+    "discovery.invoice-dispute.v2",
+  );
+  assert.equal(b.material.findings[2].claim_state, "unknown");
+  assert.equal(b.material.annotations.length, 0);
+  assert.equal(b.current.requires_fresh_review, true);
+  assert.deepEqual(b.current.confirmed_purposes, []);
+  assert.equal(b.binding.expected_discovery_revision, 2);
+  assert.deepEqual(
+    (await h.ok(post, command)).entry,
+    JSON.parse(JSON.stringify(e)),
+  );
+  assert.deepEqual(await h.snapshot(), before);
+  assert.equal(
+    (await h.call(post, { ...command, idempotency_key: "stale-v1-preview" }))
+      .data.error,
+    "DISCOVERY_CONFLICT",
+  );
+  assert.equal(
+    (await h.call(post, { ...command, reason: "changed retry" })).data.error,
+    "IDEMPOTENCY_CONFLICT",
+  );
+  await h.ok(post, discoveryCommand(b, "fresh-v2-answer"));
+  assert.deepEqual((await h.ok(path)).current.confirmed_purposes, []);
+  await h.ok(
+    post,
+    discoveryCommand(await h.ok(path), "fresh-v2-confirm", "confirm"),
+  );
+  const exported = await h.ok(path + "&representation=export");
+  assert.deepEqual(exported.entries.slice(0, 2), original.entries);
+  assert.equal(validateDiscoveryExport(exported).entries.length, 4);
+  assert.deepEqual(business(await h.snapshot()), business(before));
+  await h.restart();
+  assert.deepEqual(await h.ok(path + "&representation=export"), exported);
+  assert.deepEqual((await h.ok(path)).current.confirmed_purposes, [
+    "discovery_description",
+  ]);
+  for (const version of [
+    "discovery.invoice-dispute.v3",
+    "discovery.invoice-dispute.v2",
+  ]) {
+    const bad = structuredClone(original);
+    bad.entries[0].versions.projection = version;
+    assert.throws(() => validateDiscoveryExport(bad));
+  }
+});
 
 test("D10-B T1–T3 variation: missing, source-reported confirmation, conflicts and ambiguous prose derive distinct cited agendas", async (t) => {
   for (const condition of ["none", "reported", "conflicting", "ambiguous"]) {
@@ -149,6 +483,15 @@ test("D10-B T2/T4/T10/T12: opaque support, source variants and conflicting value
   assert.equal(
     next.material.findings.find((f) => f.id === "R4").claim_state,
     "disputed",
+  );
+  assert.ok(
+    next.material.findings
+      .find((f) => f.id === "R4")
+      .citation_ids.every(
+        (id) =>
+          next.material.sources.find((s) => s.id === id).record_key ===
+          v.candidates[0].record_key,
+      ),
   );
   assert.ok(
     next.material.source_claims.some(

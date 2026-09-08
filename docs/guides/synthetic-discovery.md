@@ -69,13 +69,77 @@ $4,200 and one row; no Orchid-specific conclusion or fixed count controls the pr
 | Ambiguous, conditional or instruction-bearing prose                          | Show the cited excerpt and an interpretation question; do not infer confirmation or automatically assert a gap. |
 | PDF/image retained without parsing                                           | Original bytes remain downloadable; no parsed-content claim.                                                    |
 
-Interpretation v1 recognizes only whole trimmed plain-text statements matching the
+Interpretation v2 recognizes only whole trimmed plain-text statements matching the
 selected record's delivery ID, including the original sample's two-sentence missing-
 confirmation note. It does not classify arbitrary prose. Source excerpts are bounded;
 full original bytes remain available. Additional activity records, scoped SOPs, approved
 field/variant rules, owner responses, cohort/effort/cost evidence and customer acceptance
 are still needed. Queue snapshots and ingestion/review times do not establish a route,
 waiting duration, active effort or savings. D10 creates no independently verified fact.
+
+## Delivery and record evidence scoping repair
+
+Current briefs use the exact implementation tuple `discovery.invoice-dispute.v2`,
+`discovery.questions.v2`, `discovery.source-claims.v2`. Each source claim retains its
+entity-qualified record or delivery subject, applicable record key and matching explicit
+source associations. Related customer/invoice records remain inspectable context; labels
+alone cannot transfer evidence or make two dispute amounts contradictory. Explicit shared
+record, invoice, order or delivery associations remain supported, including delivery
+support retained in another bundle. Association is still reported, not independent proof.
+
+| Synthetic input                                                                                                           | Before repair at `964bb722`                                        | Corrected current result                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| A: dispute-17 references DEL-4 and DEL-5; associated notes report DEL-4 confirmation and DEL-5 confirmation not supplied  | R3 incorrectly disputed the two deliveries                         | DEL-4 has reported confirmation; DEL-5 retains its reported gap. No cross-delivery conflict.                          |
+| B: separate North disputes share Orchid/INV-101; $15,000/DEL-4 has no support, $2,500/DEL-5 has its own confirmation note | dispute-17 inherited the confirmation and an amount/owner conflict | dispute-17 keeps its evidence gap and own values. dispute-18 and its note remain context, not support for dispute-17. |
+| Opposing notes concern DEL-4 on the same applicable record                                                                | Genuine conflict appeared                                          | DEL-4 remains disputed, with both notes cited; DEL-5's lack of support remains separate.                              |
+| Two records explicitly share DEL-4 evidence                                                                               | Shared object association was permitted                            | Both records can cite the shared delivery note; their different dispute amounts remain distinct.                      |
+
+An association to DEL-5 cannot establish a DEL-4 claim merely because both appear on a
+record. Incompatible or uninterpretable content stays ambiguous. Finding citations cover
+the asserted subject; all related source material remains expandable. Reordering rows,
+artifacts or declared associations preserves the conclusions and applicability while
+hashes and byte locators continue to identify the exact supplied bytes.
+
+The wire envelopes remain v1; their strict schema now recognizes exactly the historical
+v1 and corrected v2 implementation tuples. V1 claims keep their original shape, while
+v2 requires scoped claim metadata. Unknown or mixed tuples fail closed. Replay dispatches
+the retained tuple internally; clients cannot choose an interpreter. The pre-repair
+[v1 export fixture](../../tests/fixtures/discovery/scoped-v1-export.json) contains an actual
+API-recorded answer and confirmation. It reconstructs its original (incorrect) conflict
+verbatim as historical material. Current v2 reads do not reuse that answer or confirmation.
+Fresh review requires an explicit new annotation and separate confirmation. Original-key
+retries still return the exact old receipt without writes; an unsent stale v1 preview
+cannot become a new confirmation. Mixed v1/v2 histories reconstruct after restart/export.
+
+This repair adds no migration and changes no applied checksum, including 0007. Existing
+Case-wide concurrency, record-specific applicability, conservative business-input
+invalidation, clock guards, read-only reads and closure/authority denial remain intact.
+
+Focused reproduction/verification (the test host uses disposable synthetic schemas only):
+
+```sh
+pnpm build
+D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime \
+  node --test --test-name-pattern='scoped evidence|scoped history' \
+  scripts/discovery-postgres.test.mjs scripts/discovery-browser.test.mjs
+node scripts/check-discovery-export.mjs tests/fixtures/discovery/scoped-v1-export.json
+```
+
+Before repair, A and B failed their expected assertions and the genuine-conflict control
+passed (2 failures / 1 pass). The corrected regressions include both record inspections,
+shared associations, ordering, changed delivery membership, historical exact retry and
+mixed-version restart/export. Full validation and final-commit CI evidence are in PR #32.
+
+These actual browser captures show the corrected summaries with their cited evidence
+expanded; desktop and 390px were inspected. They demonstrate synthetic evidence scoping,
+not customer usability or verified business outcomes.
+
+| Corrected case           | Desktop                                                                | 390px                                                                 |
+| ------------------------ | ---------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| A — separate deliveries  | [Open](../assets/d10b/scoping/desktop-scoped-different-deliveries.png) | [Open](../assets/d10b/scoping/mobile-scoped-different-deliveries.png) |
+| B — distinct disputes    | [Open](../assets/d10b/scoping/desktop-scoped-distinct-records.png)     | [Open](../assets/d10b/scoping/mobile-scoped-distinct-records.png)     |
+| Same-delivery conflict   | [Open](../assets/d10b/scoping/desktop-scoped-same-delivery.png)        | [Open](../assets/d10b/scoping/mobile-scoped-same-delivery.png)        |
+| Explicit shared delivery | [Open](../assets/d10b/scoping/desktop-scoped-shared-delivery.png)      | [Open](../assets/d10b/scoping/mobile-scoped-shared-delivery.png)      |
 
 ## Explicit API commands and portable evidence
 

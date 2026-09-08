@@ -887,6 +887,10 @@ export function mountIntakeWorkbench() {
     const evidence = el("details", undefined, "review-card");
     evidence.append(
       el("summary", "Complete cited sources and competing claims"),
+      el(
+        "p",
+        "Related records remain context. A shared customer or invoice label does not make their evidence apply to this dispute; inspect the record and explicit delivery associations.",
+      ),
     );
     for (const c of m.sources) {
       const part = el("details", undefined, "intake-source");

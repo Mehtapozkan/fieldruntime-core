@@ -1146,6 +1146,41 @@ The actual API-process smoke sequence passes D6/D7/Discovery restart and portabl
 reconstruction locally. No health deadline or integrity assertion was weakened; CI now
 retains container/health diagnostics on failure. Final hosted evidence is linked in the PR.
 
+## D10-B evidence scoping correction (PR #32)
+
+At `964bb7224987d9d50ea4a565f4122ddc93e7d820`, two valid runtime/API reproductions
+failed before repair: DEL-4 confirmation versus DEL-5's reported gap became a false
+conflict; a separate same-entity/same-invoice dispute transferred its confirmation and
+amount/owner differences to the selected record. The genuine same-delivery conflict
+control passed. [Before/after inputs, commands and screenshots](docs/guides/synthetic-discovery.md#delivery-and-record-evidence-scoping-repair).
+
+V2 now retains each claim's record/delivery subject and explicit source association.
+Related records remain inspectable context; only comparable claims about the same
+applicable subject can conflict. Explicit shared-object and multi-record links remain
+valid, including across bundles. Ambiguous associations stay visible. The primary summary
+names each delivery and cites its support or the selected record's missing support.
+
+Projection, question template and interpreter use explicit v2 identifiers. The retained
+v1 interpreter reconstructs original material, annotations, confirmations and export
+semantics; it is not available as a caller-selected permission. An actual pre-repair
+v1 API export is a regression fixture. Current v2 material requires fresh review; old
+exact retries return their original historical receipt, while stale new submissions
+fail. Mixed-version restart/export retains both versions in the same immutable chain.
+No migration/checksum, Case/review/catalog semantics or accepted boundary changes.
+
+The prior head's [required CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34188719441).
+Local repair checks pass **297 repository tests**, **62 intake/Discovery PostgreSQL/API/browser tests**
+(23 Discovery API/replay + 7 Discovery browser, 26 intake API + 6 intake browser),
+and **63 authority PostgreSQL/API tests**. ECC remains **620/620**, with the intended
+negative control at **152/620**, exit **1**. Documentation checks preserve all 19
+matrix entries and validate 216 local links; `git diff --check` passes. The initial
+sandbox-only repository run could not bind HTTP listeners; rerunning with local
+listener access passed without changing assertions. The retained D7/D8 and final
+hosted evidence are recorded in PR #32; local Docker
+remains unavailable, so pinned PostgreSQL/Compose/container restart evidence comes from
+CI. Actual desktop/390px scope captures and the existing review-state captures were
+refreshed and inspected. No D11, real-data, release or deployment work is included.
+
 ## Next
 
 Review D10-B without merging it in this task. D11 retains one reviewed Runtime Pack and

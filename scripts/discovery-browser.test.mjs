@@ -1,12 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { chromium, expect } from "@playwright/test";
-import { intakeHost } from "../tests/helpers/intake-postgres.mjs";
+import {
+  intakeHost,
+  restoreIntakeFixture,
+} from "../tests/helpers/intake-postgres.mjs";
+import { validateDiscoveryExport } from "../dist/packages/runtime/src/discovery.js";
+import { discoveryColumns } from "../dist/packages/runtime/src/postgres-discovery-store.js";
 import {
   preparedDiscovery,
   discoveryCommand,
   variation,
+  scopedDeliveries,
 } from "../tests/helpers/discovery.mjs";
 const screenshotDir = process.env.D10_SCREENSHOT_DIR;
 async function capture(page, name) {
@@ -92,6 +98,157 @@ async function widths(page) {
     ),
   );
 }
+
+test("D10-B browser scoped history: v1 receipt retry remains historical beside current v2 delivery findings", async (t) => {
+  const { h, page, errors } = await host(t);
+  const exported = JSON.parse(
+    await readFile(
+      new URL(
+        "../tests/fixtures/discovery/scoped-v1-export.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  const state = validateDiscoveryExport(exported);
+  await restoreIntakeFixture(h, state.intake);
+  for (const e of state.entries)
+    await h.pg.query(
+      "INSERT INTO discovery_review_journal SELECT * FROM jsonb_populate_record(NULL::discovery_review_journal,$1)",
+      [discoveryColumns(e)],
+    );
+  await h.restart();
+  const before = await h.snapshot();
+  await open(page, h);
+  await expect(page.locator(".discovery-focus")).toContainText(
+    "Earlier answers and confirmations are historical",
+  );
+  await expect(page.locator(".discovery-focus")).toContainText(
+    "DEL-5: A supplied note reports",
+  );
+  await expect(page.locator(".discovery-focus")).not.toContainText(
+    "Supplied sources disagree",
+  );
+  await page
+    .getByText("Descriptive review history (2 entries)", { exact: true })
+    .click();
+  await expect(
+    page
+      .getByText("historical material; no current confirmation inferred", {
+        exact: false,
+      })
+      .first(),
+  ).toBeVisible();
+  const command = exported.entries[1].command;
+  assert.equal(
+    await page.evaluate(async (command) => {
+      const { pendingIntakeStorage } = await import("/intake-client.js");
+      return pendingIntakeStorage().set({
+        path: `/v1/intake/bundles/${command.bundle_id}/discovery-reviews`,
+        body: JSON.stringify(command),
+      });
+    }, command),
+    true,
+  );
+  await page.reload();
+  await page
+    .getByRole("button", { name: "Recover original submission" })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Descriptive confirmation recorded" }),
+  ).toBeVisible();
+  await expect(page.locator(".discovery-focus")).toContainText(
+    "Earlier answers and confirmations are historical",
+  );
+  await expect(page.locator(".discovery-focus")).not.toContainText(
+    "Descriptions recorded",
+  );
+  assert.deepEqual(await h.snapshot(), before);
+  assert.deepEqual(errors, []);
+});
+
+test("D10-B browser scoped evidence: delivery-specific summary and citations preserve distinct disputes and genuine conflicts", async (t) => {
+  for (const scenario of [
+    "different-deliveries",
+    "distinct-records",
+    "same-delivery",
+    "shared-delivery",
+  ]) {
+    const { h, page, errors } = await host(t);
+    const v = await h.prepare(
+      await scopedDeliveries(`browser-${scenario}`, scenario),
+    );
+    const before = await h.snapshot();
+    await open(page, h);
+    const summary = page.locator(".discovery-focus");
+    if (scenario === "different-deliveries") {
+      await expect(summary).toContainText(
+        "DEL-4: A supplied source reports delivery confirmation",
+      );
+      await expect(summary).toContainText(
+        "DEL-5: A supplied note reports that delivery confirmation is not supplied",
+      );
+      await expect(summary).not.toContainText("sources disagree");
+    } else if (scenario === "distinct-records") {
+      await expect(summary).toContainText(
+        "DEL-4: No associated delivery support",
+      );
+      await expect(summary).not.toContainText(
+        "source reports delivery confirmation",
+      );
+      await expect(summary).not.toContainText("Competing source values");
+    } else if (scenario === "same-delivery") {
+      await expect(summary).toContainText("DEL-4: Supplied sources disagree");
+      await expect(summary).toContainText(
+        "DEL-5: No associated delivery support",
+      );
+    } else
+      await expect(summary).toContainText(
+        "DEL-4: A supplied source reports delivery confirmation",
+      );
+    await page
+      .getByText("Cited evidence for this finding", { exact: true })
+      .click();
+    if (scenario === "distinct-records") {
+      await expect(summary).not.toContainText("dispute-18-only.txt");
+      await expect(summary).not.toContainText(
+        "Delivery confirmation for DEL-5 is supplied.",
+      );
+      await page
+        .getByText("Complete cited sources and competing claims", {
+          exact: true,
+        })
+        .click();
+      await expect(
+        page.getByText("dispute-18-only.txt", { exact: true }),
+      ).toBeVisible();
+      await page
+        .getByText("Complete cited sources and competing claims", {
+          exact: true,
+        })
+        .click();
+    } else {
+      await expect(summary).toContainText(
+        "Delivery confirmation for DEL-4 is supplied.",
+      );
+      if (scenario !== "shared-delivery")
+        await expect(summary).toContainText(
+          `Delivery confirmation for ${scenario === "same-delivery" ? "DEL-4" : "DEL-5"} is not supplied.`,
+        );
+    }
+    await capture(page, `desktop-scoped-${scenario}`);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await widths(page);
+    await capture(page, `mobile-scoped-${scenario}`);
+    await page.reload();
+    await expect(page.locator(".discovery-focus")).toContainText(
+      "$15,000.00 reported dispute",
+    );
+    assert.deepEqual(await h.snapshot(), before);
+    assert.deepEqual(errors, []);
+    assert.equal(v.candidates[0].record.source_record_id, "dispute-17");
+  }
+});
 
 test("D10-B browser T1/T5/T9/T12: explicit Case preparation, cited brief, correction, confirmation and restart at desktop/390px", async (t) => {
   const { h, page, errors } = await host(t);

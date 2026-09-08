@@ -7,7 +7,7 @@ import {
   normalizeDiscoveryCommand,
 } from "../dist/packages/runtime/src/discovery.js";
 import { INTAKE_START, intakeInput } from "./helpers/intake.mjs";
-import { variation } from "./helpers/discovery.mjs";
+import { variation, scopedDeliveries } from "./helpers/discovery.mjs";
 const hash = `sha256:${"a".repeat(64)}`;
 const command = {
   schema_version: "discovery-review-command.v1",
@@ -178,3 +178,80 @@ test("D10-B cited excerpt truncation preserves UTF-8 byte boundaries", async () 
     c.excerpt,
   );
 });
+
+for (const scenario of [
+  "different-deliveries",
+  "distinct-records",
+  "same-delivery",
+  "shared-delivery",
+])
+  test(`D10-B scoped projection and contract: ${scenario}`, async () => {
+    const { bundle, bytes } = prepareIntake(
+      await scopedDeliveries(`unit-${scenario}`, scenario),
+      INTAKE_START,
+      INTAKE_START,
+    );
+    const m = projectDiscovery(
+      {
+        cases: { cases: [], idempotency_records: [], source_event_records: [] },
+        artifacts: bytes,
+        bundles: [bundle],
+        commits: [],
+        clockFloor: INTAKE_START,
+      },
+      bundle.id,
+      bundle.records[0].record_key,
+      null,
+    );
+    const own = m.source_claims.filter(
+      (c) => c.applicable_record_key === bundle.records[0].record_key,
+    );
+    assert.equal(
+      m.manifest.versions.projection,
+      "discovery.invoice-dispute.v2",
+    );
+    assert.ok(
+      m.source_claims.every(
+        (c) =>
+          c.subject.entity &&
+          c.subject.id &&
+          c.independently_verified === false,
+      ),
+    );
+    assert.equal(
+      m.findings[2].claim_state,
+      scenario === "same-delivery" ? "disputed" : "unknown",
+    );
+    assert.notEqual(m.findings[3].claim_state, "disputed");
+    if (scenario === "different-deliveries") {
+      assert.deepEqual(
+        own
+          .filter((c) => c.field.endsWith(".delivery_evidence"))
+          .map((c) => [c.subject.id, c.meaning])
+          .sort(),
+        [
+          ["DEL-4", "source_reports_confirmation"],
+          ["DEL-5", "source_reports_missing"],
+        ],
+      );
+      assert.match(m.questions[0].prompt, /DEL-5/);
+    }
+    if (scenario === "distinct-records") {
+      assert.ok(!own.some((c) => c.meaning === "source_reports_confirmation"));
+      assert.ok(m.sources.some((c) => c.name === "dispute-18-only.txt"));
+    }
+    for (const c of m.source_claims)
+      for (const id of c.citation_ids) {
+        const source = m.sources.find((s) => s.id === id);
+        assert.ok(source);
+        if (c.meaning === "parsed_source_value")
+          assert.equal(source.record_key, c.applicable_record_key);
+        else assert.ok(c.source_associations.length > 0);
+      }
+    const missing = JSON.parse(JSON.stringify(m));
+    delete missing.source_claims[0].subject;
+    assert.throws(() => assertValidDiscoveryContract("material", missing));
+    const wrongVersion = JSON.parse(JSON.stringify(m));
+    wrongVersion.manifest.versions.projection = "discovery.invoice-dispute.v1";
+    assert.throws(() => assertValidDiscoveryContract("material", wrongVersion));
+  });
