@@ -124,7 +124,6 @@ export async function intakeHost(t, { upgrade = false } = {}) {
       {
         intake: iw,
         isReady: async () => {
-          await intake.assertReady();
           await new PostgresDiscoveryStore(pool).assertReady();
           return true;
         },

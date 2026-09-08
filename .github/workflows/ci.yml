@@ -32,7 +32,17 @@ jobs:
       - name: Smoke-test the documented local appliance
         run: |
           set -euo pipefail
-          trap 'docker compose down --volumes' EXIT
+          cleanup() {
+            local check_status=$?
+            if [ "$check_status" -ne 0 ]; then
+              docker compose ps --all
+              docker compose logs --no-color --tail=120 core postgres
+              docker inspect --format '{{json .State.Health}}' "$(docker compose ps --all --quiet core)" || true
+            fi
+            docker compose down --volumes
+            return "$check_status"
+          }
+          trap cleanup EXIT
           pnpm fr init ecc --demo
           pnpm fr up
           D6_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/authority-postgres.test.mjs

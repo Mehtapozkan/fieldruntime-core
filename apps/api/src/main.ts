@@ -269,8 +269,8 @@ async function start(): Promise<void> {
     undefined,
     discoveryStore,
   );
+  // Discovery readiness includes the complete intake integrity check.
   await discoveryStore.assertReady();
-  await intakeStore.assertReady();
   const workbenchAssets = await loadWorkbenchAssets();
   const server = createApiServer(
     {
@@ -279,7 +279,6 @@ async function start(): Promise<void> {
         if (!(await applianceIsReady(pool, migrations, fixture))) return false;
         await creditStore.assertReady();
         await store.assertReady();
-        await intakeStore.assertReady();
         await discoveryStore.assertReady();
         await authorityStore.assertReady(SYNTHETIC_AUTHORITY_TENANT);
         return true;

@@ -1138,6 +1138,14 @@ shared-revision conflicts and genuine later input invalidation. Browser tests as
 focus on successful result headings and on failed-refresh alerts; correction captures
 were refreshed. The authority and persistence boundaries are unchanged.
 
+The first implementation CI passed its PostgreSQL/API/browser groups and initial
+appliance restart checks, then reported an unhealthy core after D7 restart. Readiness
+had replayed intake twice: directly and through Discovery. The duplicate direct check
+is removed; Discovery still validates all intake evidence before its own journal.
+The actual API-process smoke sequence passes D6/D7/Discovery restart and portable
+reconstruction locally. No health deadline or integrity assertion was weakened; CI now
+retains container/health diagnostics on failure. Final hosted evidence is linked in the PR.
+
 ## Next
 
 Review D10-B without merging it in this task. D11 retains one reviewed Runtime Pack and
