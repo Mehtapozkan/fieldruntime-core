@@ -135,6 +135,9 @@ Unrelated new business intake therefore conservatively invalidates the descripti
 Successful no-op intake-key metadata does not. Confirming unchanged material advances
 its own revision without changing its material hash. Reads are never proof of human
 screen inspection; entries record submitted consent material, not eyeball tracking.
+The concurrency revision spans the Case, but applicability is checked against the
+selected bundle/record's latest review. Reviewing another record on that Case cannot
+make unchanged material stale or transfer its confirmation.
 
 Same scoped operation/key/body returns the original result even when historical;
 changed bodies return `IDEMPOTENCY_CONFLICT`. Fresh no-change annotations and already-

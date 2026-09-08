@@ -1110,7 +1110,7 @@ redesign comes before allocation; no model/agent/worker or business value is fab
 
 Initial positive/strict-input API tests failed on merged main with **404 instead of
 200/400** before implementation. Local `pnpm validate` passes **293/293** plus format,
-lint, typecheck and the public-release check. Real PostgreSQL 18.4 passes **14 Discovery
+lint, typecheck and the public-release check. Real PostgreSQL 18.4 passes **15 Discovery
 API/replay tests**, **5 Discovery browser scenarios**, retained **26 intake API + 6 intake
 browser**, **63 authority** and **115 action/verification/receipt tests** (including eight
 D7 browser scenarios). Fresh/0006 upgrade, portable reconstruction, restart, cross-tab
@@ -1128,6 +1128,15 @@ Actual Chromium desktop/390px captures cover initial review, correction, confirm
 stale inputs, uncertain submission and a confirmed receipt with failed refresh. Keyboard
 focus, readable source disclosures and horizontal bounds are exercised. These are
 synthetic operator checks, not customer usefulness or performance measurements.
+
+PR review found two focused defects at `ce01c97`: another selected record on the same
+Case could falsely mark unchanged material stale, and successful saves focused the
+brief instead of the retained-result heading. Both reproduced before correction.
+Applicability now uses the selected bundle/record's latest review while concurrency
+retains the Case-wide revision. PostgreSQL tests cover both review orderings, restart,
+shared-revision conflicts and genuine later input invalidation. Browser tests assert
+focus on successful result headings and on failed-refresh alerts; correction captures
+were refreshed. The authority and persistence boundaries are unchanged.
 
 ## Next
 

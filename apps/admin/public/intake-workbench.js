@@ -520,9 +520,10 @@ export function mountIntakeWorkbench() {
   }
   let discoveryDraft = null;
   function discoveryFocus() {
-    const n = stage.querySelector(
-      ".discovery-result h2, [role=alert], .discovery-brief h2",
-    );
+    const n =
+      stage.querySelector("[role=alert]") ??
+      stage.querySelector(".discovery-result h2") ??
+      stage.querySelector(".discovery-brief h2");
     n?.setAttribute("tabindex", "-1");
     n?.focus();
   }

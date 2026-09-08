@@ -286,6 +286,87 @@ test("D10-B T6: changed Case including rejected transition, new business intake,
   await h.restart();
   assert.equal((await h.call("/readyz")).status, 200);
 });
+test("D10-B review correction: two selected records on one Case retain independent applicability and a shared concurrency revision", async (t) => {
+  for (const reverse of [false, true]) {
+    const h = await intakeHost(t),
+      a = await preparedDiscovery(h);
+    const second = editQueue(await intakeInput("second-record"), (rows) => {
+      rows[0].source_record_id = "dispute-99";
+      rows[0].invoice_id = "INV-202";
+    });
+    const v = await h.prepare(second),
+      caseId = a.receipt.case_id;
+    await h.ok(
+      "/v1/intake/commits",
+      await h.selection(v, 0, {
+        target: {
+          mode: "attach",
+          case_id: caseId,
+          expected_case_version: (await a.get()).binding.expected_case_version,
+        },
+      }),
+    );
+    const b = {
+      path: discoveryPath(v, caseId),
+      post: `/v1/intake/bundles/${v.bundle.id}/discovery-reviews`,
+    };
+    const [first, next] = reverse ? [b, a] : [a, b];
+    const command = discoveryCommand(
+      await h.ok(first.path),
+      "first",
+      "confirm",
+    );
+    const receipt = await h.ok(first.post, command);
+    const reviewed = await h.ok(first.path);
+    await h.ok(
+      next.post,
+      discoveryCommand(await h.ok(next.path), "second", "confirm"),
+    );
+    const before = await h.snapshot(),
+      current = await h.ok(first.path);
+    assert.equal(current.current.requires_fresh_review, false);
+    assert.deepEqual(current.current.confirmed_purposes, [
+      "discovery_description",
+    ]);
+    assert.equal(current.binding.expected_discovery_revision, 2);
+    assert.equal(current.material_hash, reviewed.material_hash);
+    assert.equal(
+      (
+        await h.call(
+          first.post,
+          discoveryCommand(current, "already", "confirm"),
+        )
+      ).data.error,
+      "ALREADY_REVIEWED",
+    );
+    assert.equal(
+      (
+        await h.call(first.post, {
+          ...discoveryCommand(reviewed, "stale-revision", "confirm"),
+          purpose: "improvement_discussion",
+        })
+      ).data.error,
+      "DISCOVERY_CONFLICT",
+    );
+    assert.deepEqual(await h.snapshot(), before);
+    await h.restart();
+    assert.deepEqual(await h.ok(first.path), current);
+    assert.deepEqual(await h.ok(first.post, command), receipt);
+    const changed = editQueue(
+      await intakeInput("new-business-input"),
+      (rows) => {
+        rows[0].source_version = "changed";
+      },
+    );
+    h.setTime("2026-09-07T16:06:00.000Z");
+    await h.prepare(changed);
+    for (const selected of [first, next]) {
+      const stale = await h.ok(selected.path);
+      assert.equal(stale.current.requires_fresh_review, true);
+      assert.deepEqual(stale.current.confirmed_purposes, []);
+    }
+  }
+});
 test("D10-B T7: exact key races, revision races, changed bodies, no-change and already-reviewed never double append", async (t) => {
   const h = await intakeHost(t),
     d = await preparedDiscovery(h),

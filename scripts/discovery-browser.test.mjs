@@ -81,6 +81,7 @@ async function confirm(page, purpose = "discovery_description") {
     "data-revision",
     String(previous + 1),
   );
+  await expect(page.locator(".discovery-result h2")).toBeFocused();
 }
 async function widths(page) {
   assert.ok(
@@ -160,6 +161,7 @@ test("D10-B browser T1/T5/T9/T12: explicit Case preparation, cited brief, correc
   await expect(
     page.getByRole("heading", { name: "Descriptive answer recorded" }),
   ).toBeVisible();
+  await expect(page.locator(".discovery-result h2")).toBeFocused();
   await expect(page.locator(".discovery-focus")).toContainText(
     "Operator-reported correction (disputed)",
   );
@@ -356,6 +358,7 @@ test("D10-B browser T9: confirmed result survives failed refresh and altered/mix
   await expect(page.getByRole("alert")).toContainText(
     "Confirmed descriptive review retained",
   );
+  await expect(page.getByRole("alert")).toBeFocused();
   await expect(page.locator(".discovery-brief")).toContainText(
     "current applicability has not been refreshed",
   );

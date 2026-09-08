@@ -642,7 +642,15 @@ export function readDiscovery(
       .filter((e) => e.operation === "confirm" && e.material_hash === hash)
       .map((e) => String(object(e.command).purpose)),
   );
-  const stale = last !== undefined && !same(object(last.material).manifest, m);
+  // Concurrency is Case-wide; applicability belongs to this selected material.
+  const selectedLast = history.findLast(
+    (e) =>
+      object(e.command).bundle_id === bundleId &&
+      object(e.command).record_key === key,
+  );
+  const stale =
+    selectedLast !== undefined &&
+    !same(object(selectedLast.material).manifest, m);
   const reasons =
     caseId === null
       ? [
