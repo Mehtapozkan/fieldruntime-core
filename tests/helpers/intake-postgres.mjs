@@ -1,3 +1,4 @@
+import { PostgresDiscoveryStore } from "../../dist/packages/runtime/src/postgres-discovery-store.js";
 // Disposable test host only. Fault hooks never enter the appliance API.
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
@@ -21,6 +22,7 @@ export const migrationNames = [
   "0004_credit_verification",
   "0005_synthetic_intake",
   "0006_intake_request_bindings",
+  "0007_discovery_review",
 ];
 export const migrations = await Promise.all(
   migrationNames.map(async (name) =>
@@ -113,12 +115,16 @@ export async function intakeHost(t, { upgrade = false } = {}) {
   const dependencies = () => ({ now, nextId: (kind) => `${kind}_${++ids}` });
   async function start() {
     const worker = new TransactionalCaseWorker(store, { create: dependencies }),
-      iw = new TransactionalIntakeWorker(intake, dependencies);
+      iw = new TransactionalIntakeWorker(
+        intake,
+        dependencies,
+        new PostgresDiscoveryStore(pool),
+      );
     server = createApiServer(
       {
         intake: iw,
         isReady: async () => {
-          await intake.assertReady();
+          await new PostgresDiscoveryStore(pool).assertReady();
           return true;
         },
         executeCaseCommand: (_tenant, cmd) => worker.execute(cmd),
@@ -233,6 +239,7 @@ export async function intakeHost(t, { upgrade = false } = {}) {
         "intake_bundles",
         "intake_commits",
         "intake_request_bindings",
+        "discovery_review_journal",
       ];
       const out = {};
       for (const table of tables)
@@ -295,4 +302,104 @@ export async function intakeHost(t, { upgrade = false } = {}) {
       await start();
     },
   };
+}
+
+export async function restoreIntakeFixture(fresh, source) {
+  const { executeCaseCommand } =
+      await import("../../dist/packages/runtime/src/case-engine.js"),
+    { persistCaseCommandResult } =
+      await import("../../dist/packages/runtime/src/postgres-store.js");
+  const c = await fresh.pool.connect();
+  try {
+    await c.query("BEGIN");
+    await c.query(
+      "SELECT revision FROM runtime_writer_lock WHERE singleton_id=1 FOR UPDATE",
+    );
+    for (const [hash, bytes] of source.artifacts)
+      await c.query("INSERT INTO intake_artifacts VALUES ($1,$2,$3)", [
+        "tenant_intake_demo",
+        hash,
+        bytes,
+      ]);
+    for (const b of source.bundles)
+      await c.query(
+        "INSERT INTO intake_bundles SELECT * FROM jsonb_populate_record(NULL::intake_bundles,$1)",
+        [
+          {
+            tenant_id: b.tenant_id,
+            id: b.id,
+            bundle_hash: b.hash,
+            preparation_key: b.preparation_key,
+            preparation_fingerprint: b.preparation_fingerprint,
+            ingested_at: b.ingested_at,
+            retained_at: b.retained_at,
+            bundle: b,
+          },
+        ],
+      );
+    let state = {
+      cases: [],
+      idempotency_records: [],
+      source_event_records: [],
+    };
+    for (const receipt of source.commits) {
+      const entry = source.cases.cases.find(
+          (c) => c.case_id === receipt.case_id,
+        ).journal[receipt.case_version - 1],
+        audit =
+          entry.payload.audit_entry ?? entry.payload.document.audit_entries[0];
+      const applied = executeCaseCommand(state, receipt.adapted_command, {
+        now: () => new Date(receipt.recorded_at),
+        nextId: (kind) => (kind === "audit_entry" ? audit.id : entry.id),
+      });
+      assert.equal(applied.status, "applied");
+      assert.deepEqual(applied.entry, entry);
+      await persistCaseCommandResult(c, state, applied);
+      state = applied.state;
+      const row = {
+        tenant_id: receipt.tenant_id,
+        id: receipt.id,
+        sequence: receipt.sequence,
+        receipt_hash: receipt.hash,
+        bundle_id: receipt.selection.bundle_id,
+        record_key: receipt.record_key,
+        material_key: receipt.material_key,
+        case_root: receipt.case_root,
+        upstream_key: receipt.upstream_key,
+        case_id: receipt.case_id,
+        case_version: receipt.case_version,
+        journal_entry_id: receipt.journal_entry_id,
+        journal_entry_hash: receipt.journal_entry_hash,
+        previous_intake_hash: receipt.previous_intake_hash,
+        idempotency_key: receipt.idempotency_key,
+        command_fingerprint: receipt.command_fingerprint,
+        recorded_at: receipt.recorded_at,
+        receipt,
+      };
+      await c.query(
+        "INSERT INTO intake_commits SELECT * FROM jsonb_populate_record(NULL::intake_commits,$1)",
+        [row],
+      );
+    }
+    for (const b of source.requestBindings ?? [])
+      await c.query(
+        "INSERT INTO intake_request_bindings VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+        [
+          b.tenant_id,
+          b.intake_scope_id,
+          b.operation,
+          b.idempotency_key,
+          b.request_fingerprint,
+          b.recorded_at,
+          b.hash,
+          b,
+        ],
+      );
+    await c.query("COMMIT");
+  } catch (e) {
+    await c.query("ROLLBACK");
+    throw e;
+  } finally {
+    c.release();
+  }
 }

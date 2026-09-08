@@ -22,7 +22,8 @@ jobs:
           version: 11.24.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 24
+          # Historical intake replay binds tzdata 2026b; do not silently change its interpreter.
+          node-version: 24.19.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm validate
@@ -32,12 +33,23 @@ jobs:
       - name: Smoke-test the documented local appliance
         run: |
           set -euo pipefail
-          trap 'docker compose down --volumes' EXIT
+          cleanup() {
+            local check_status=$?
+            if [ "$check_status" -ne 0 ]; then
+              docker compose ps --all
+              docker compose logs --no-color --tail=120 core postgres
+              docker inspect --format '{{json .State.Health}}' "$(docker compose ps --all --quiet core)" || true
+            fi
+            docker compose down --volumes
+            return "$check_status"
+          }
+          trap cleanup EXIT
           pnpm fr init ecc --demo
           pnpm fr up
           D6_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/authority-postgres.test.mjs
           D7_WORKBENCH_BROWSER=1 D7_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/simulated-credit-postgres.test.mjs
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/intake-postgres.test.mjs scripts/intake-browser.test.mjs
+          D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/discovery-postgres.test.mjs scripts/discovery-browser.test.mjs
           node scripts/smoke-local-appliance.mjs applied
           node scripts/smoke-authority-api.mjs applied
           docker compose restart postgres

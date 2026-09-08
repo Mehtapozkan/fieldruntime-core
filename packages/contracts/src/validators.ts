@@ -1,3 +1,4 @@
+import discoverySchema from "../schemas/discovery.v1.schema.json" with { type: "json" };
 import intakeSchema from "../schemas/intake.v1.schema.json" with { type: "json" };
 import simulatedCreditSchema from "../schemas/simulated-credit.v1.schema.json" with { type: "json" };
 import simulatedCreditV2Schema from "../schemas/simulated-credit.v2.schema.json" with { type: "json" };
@@ -125,6 +126,25 @@ const intakeValidators = Object.fromEntries(
   | "request_binding",
   ValidateFunction
 >;
+ajv.addSchema(discoverySchema);
+const discoveryValidators = Object.fromEntries(
+  (["command", "material", "journal", "read", "result", "export"] as const).map(
+    (kind) => [
+      kind,
+      ajv.compile({ $ref: `${discoverySchema.$id}#/$defs/${kind}` }),
+    ],
+  ),
+) as Record<
+  "command" | "material" | "journal" | "read" | "result" | "export",
+  ValidateFunction
+>;
+export function assertValidDiscoveryContract(
+  kind: keyof typeof discoveryValidators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(discoveryValidators[kind], value, `discovery.v1/${kind}`);
+}
+
 export function assertValidIntakeContract(
   kind: keyof typeof intakeValidators,
   value: unknown,

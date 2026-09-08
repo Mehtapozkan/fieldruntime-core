@@ -3,7 +3,7 @@
   "info": {
     "title": "Synthetic intake API",
     "version": "1",
-    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input. Every successful request key, including no-ops, binds its normalized request fingerprint and original outcome/reference. First no-op key retention is metadata only; exact retries return the original status and cause no durable changes. Exports use intake-export.v2; the conformance reader also accepts strict historical v1 exports without no-op key history."
+    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input. Every successful request key, including no-ops, binds its normalized request fingerprint and original outcome/reference. First no-op key retention is metadata only; exact retries return the original status and cause no durable changes. Exports use intake-export.v2; the conformance reader also accepts strict historical v1 exports without no-op key history. Accepted D-035 adds versioned, Case-linked descriptive Discovery review with zero model calls. Confirmation grants no business authority, outcome acceptance or closure."
   },
   "servers": [
     {
@@ -232,6 +232,126 @@
           },
           "500": {
             "description": "Integrity failure is not absence evidence"
+          }
+        }
+      }
+    },
+    "/v1/intake/bundles/{id}/discovery": {
+      "get": {
+        "description": "One repeatable-read, read-only snapshot; no writer lock, clocks or durable changes. record_key selects the row; case_id is optional for inspection and required for saving. representation=export returns the complete synthetic namespace as a nested intake-export.v2 plus immutable Discovery history. No live restore endpoint.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "record_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            }
+          },
+          {
+            "name": "case_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "representation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": ["export"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current source-derived material and historical reviews, or portable evidence export",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "../schemas/discovery.v1.schema.json#/$defs/read"
+                    },
+                    {
+                      "$ref": "../schemas/discovery.v1.schema.json#/$defs/export"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input or citation rejected"
+          },
+          "404": {
+            "description": "Selected retained material not found"
+          },
+          "409": {
+            "description": "Stale Case/material/review, key conflict, clock regression, NO_CHANGE or ALREADY_REVIEWED; no new receipt"
+          },
+          "500": {
+            "description": "Integrity or persistence unavailable; retain the original command for explicit exact recovery"
+          }
+        }
+      }
+    },
+    "/v1/intake/bundles/{id}/discovery-reviews": {
+      "post": {
+        "description": "128 KiB maximum. Explicit annotate or confirm, with exact Case, intake, material and descriptive revision bindings. Server selects the synthetic operator and scope. Atomic per-Case append under the existing writer lock; advances only descriptive sequence and writer metadata. No new Case, authority, source rank or action.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/discovery.v1.schema.json#/$defs/command"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validated canonical descriptive response; exact retries return the original receipt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/discovery.v1.schema.json#/$defs/result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input or citation rejected"
+          },
+          "404": {
+            "description": "Selected retained material not found"
+          },
+          "409": {
+            "description": "Stale Case/material/review, key conflict, clock regression, NO_CHANGE or ALREADY_REVIEWED; no new receipt"
+          },
+          "500": {
+            "description": "Integrity or persistence unavailable; retain the original command for explicit exact recovery"
           }
         }
       }

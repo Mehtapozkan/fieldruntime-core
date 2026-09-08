@@ -1,0 +1,2057 @@
+{
+  "entries": [
+    {
+      "actor": {
+        "identity_id": "identity_intake_operator",
+        "identity_kind": "human",
+        "schema_version": "identity-reference.v0",
+        "status": "active",
+        "tenant_id": "tenant_intake_demo"
+      },
+      "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+      "command": {
+        "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "changes": [
+          {
+            "citation_ids": [
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "reason": "The supplied note does not identify an accountable evidence owner",
+            "state": "unknown",
+            "target_id": "Q1",
+            "text": "Delivery evidence owner is not yet confirmed"
+          }
+        ],
+        "expected_case_version": 1,
+        "expected_discovery_revision": 0,
+        "expected_intake_receipt_hash": "sha256:8c5f33e708b42dd642bb2a734a800bb5dd7a6d8da16a891592fd4d4f8647ce51",
+        "expected_material_hash": "sha256:f5cebbfc88cbab477b387380fee2d7500ef63fb84dc3192a2c86720c9bdca1ef",
+        "expected_previous_entry_hash": null,
+        "idempotency_key": "legacy-answer",
+        "operation": "annotate",
+        "reason": "Synthetic descriptive review preserves uncertainty; no business authority",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "schema_version": "discovery-review-command.v1"
+      },
+      "command_fingerprint": "sha256:49e2c3b58e5d6265f9813cc86a7dd077591d4887fda7e8dad4afdd9f7112280f",
+      "hash": "sha256:de3a3fc892bde384390065ff4497428dfcf944323d52f0055357333705fd46f7",
+      "id": "discovery_review_49e2c3b58e5d6265f9813cc86a7dd077591d4887fda7e8dad4afdd9f7112280f",
+      "idempotency_key": "legacy-answer",
+      "intake_scope_id": "scope_invoice_disputes",
+      "material": {
+        "annotations": [
+          {
+            "citation_ids": [
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "command_fingerprint": "sha256:49e2c3b58e5d6265f9813cc86a7dd077591d4887fda7e8dad4afdd9f7112280f",
+            "evidence_type": "operator-reported",
+            "reason": "The supplied note does not identify an accountable evidence owner",
+            "state": "unknown",
+            "submitted_revision": 1,
+            "target_id": "Q1",
+            "text": "Delivery evidence owner is not yet confirmed"
+          }
+        ],
+        "assignment": {
+          "accountable_owner": null,
+          "amount_minor": 1500000,
+          "currency": "USD",
+          "customer_ref": "Orchid",
+          "entity": "entity_north",
+          "independently_verified": false,
+          "invoice_id": "INV-101",
+          "objective": "Prepare an evidence-backed disposition for Orchid / INV-101 in entity_north.",
+          "reported_owner": "Taylor"
+        },
+        "committed_records": 1,
+        "coverage": {
+          "distinct_records": 1,
+          "duplicate_records": 0,
+          "invalid_records": 0,
+          "measurement_gaps": [
+            "population_unconfirmed",
+            "active_effort_unmeasured",
+            "population_window_unknown"
+          ],
+          "physical_records": 1,
+          "source_coverage_claim": "unknown",
+          "source_population_claim": null,
+          "valid_records": 1
+        },
+        "findings": [
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "observed",
+            "id": "R1",
+            "process_view": "observed",
+            "text": "The queue reports queue_snapshot / open. Documented route: not established by the supplied material. Observed route: a queue snapshot cannot establish historical transitions. Proposed route: inspect and clarify evidence before disposition review; this remains a hypothesis. Trigger and acceptance criterion remain unknown.",
+            "title": "Boundary and normal route"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "observed",
+            "id": "R2",
+            "process_view": "observed",
+            "text": "1 distinct retained records; 0 invalid. Population completeness, normal/exception routes and error exposure are unconfirmed. Reported dispute principal is not savings.",
+            "title": "Exceptions, population and exposure"
+          },
+          {
+            "citation_ids": [
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "claim_state": "disputed",
+            "evidence_type": "observed",
+            "id": "R3",
+            "process_view": "observed",
+            "text": "Supplied sources disagree about delivery confirmation.",
+            "title": "Dependencies and evidence"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537",
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "observed",
+            "id": "R4",
+            "process_view": "observed",
+            "text": "No reviewed field-level precedence is supplied. Amount, delivery status and terms need governing sources, scope, effective periods and accountable approvers.",
+            "title": "Field-level source precedence"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537",
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "observed",
+            "id": "R5",
+            "process_view": "observed",
+            "text": "entity_north remain distinct source entities. Matching invoice labels do not merge work. Regional, subsidiary, acquisition and policy applicability are unknown.",
+            "title": "Entity and regional variants"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "observed",
+            "id": "R6",
+            "process_view": "observed",
+            "text": "Source occurrence and export timestamps retain their stated meanings. Intake and review times do not establish business start/end, active effort, waiting duration or historical handoffs.",
+            "title": "Elapsed work, effort, waits and handoffs"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "inferred",
+            "id": "R7",
+            "process_view": "proposed",
+            "text": "Task-specific understanding, preferred assistance and support ownership remain unconfirmed. An operator correction records reported understanding, not a skill score or legal authority.",
+            "title": "Task readiness and support"
+          }
+        ],
+        "improvements": [
+          {
+            "allocation": "Deterministic code reuses parsed cells; a person checks meaning.",
+            "change": "remove",
+            "control": "Preserve original bytes, entity keys and operator discrepancy review.",
+            "hypothesis": true,
+            "measurement_needed": "Attributable preparation/rework effort and error coverage before/after.",
+            "proposal": "Hypothesis: remove duplicate copying of source values into a second summary."
+          },
+          {
+            "allocation": "Code lists gaps; people obtain and interpret evidence. No model calls.",
+            "change": "combine",
+            "control": "A person confirms questions and accountable recipients; no automatic messages.",
+            "hypothesis": true,
+            "measurement_needed": "Missed questions, review/support effort and quality baseline.",
+            "proposal": "Hypothesis: combine repeated evidence requests into one consequential agenda."
+          },
+          {
+            "allocation": "People collect evidence. An adaptive agent is not needed for this retained bundle.",
+            "change": "parallelize",
+            "control": "Confirm dependencies, permitted access and disposition authorization.",
+            "hypothesis": true,
+            "measurement_needed": "Critical-path waits as interval unions; never sum overlapping waits as savings.",
+            "proposal": "Hypothesis: gather delivery evidence and governing terms in parallel where independent."
+          },
+          {
+            "allocation": "Code prepares differences; people correct meaning. Bounded model/agent work remains later.",
+            "change": "simplify",
+            "control": "Separate source interpretation, business authorization and independent proof.",
+            "hypothesis": true,
+            "measurement_needed": "Comparable cohort, review/correction/verification effort and missed findings.",
+            "proposal": "Hypothesis: focus review on consequential discrepancies while preserving full citations."
+          }
+        ],
+        "loop_outputs": [
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Trigger",
+            "process_view": "proposed",
+            "text": "An entity-qualified reported invoice dispute is received; actual business start semantics need confirmation."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Objective",
+            "process_view": "proposed",
+            "text": "Prepare an evidence-backed disposition for Orchid / INV-101 in entity_north."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Population",
+            "process_view": "proposed",
+            "text": "1 distinct records in this upload; recurring eligible cohort, coverage and window remain unconfirmed."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Close Event",
+            "process_view": "proposed",
+            "text": "Candidate: accountable owner/customer accepts an agreed disposition independently evidenced in its governing source. Settlement versus matched cash remains unresolved. No Case closure is granted."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Human Intervention Map",
+            "process_view": "proposed",
+            "text": "Supplied sources disagree about delivery confirmation. Evidence owner and governing terms need confirmation. Financial authority is absent; no automatic owner assignment."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Correction Path",
+            "process_view": "proposed",
+            "text": "Append a cited descriptive correction and reason; preserve the original. Promotion to rules, evaluation or worker behavior requires later reviewed work."
+          }
+        ],
+        "manifest": {
+          "bundle_hash": "sha256:ab940902639e6fa48e0f41b8e0c51ec33bdcb467177db0e544cca83d2c761359",
+          "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+          "business_bundle_hashes": [
+            "sha256:ab940902639e6fa48e0f41b8e0c51ec33bdcb467177db0e544cca83d2c761359"
+          ],
+          "business_commit_hashes": [
+            "sha256:8c5f33e708b42dd642bb2a734a800bb5dd7a6d8da16a891592fd4d4f8647ce51"
+          ],
+          "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "case_journal_hash": "sha256:72c585b27fa30260f0d19189c6f75481205791449d848ef76323609df6630201",
+          "case_version": 1,
+          "intake_receipt_hash": "sha256:8c5f33e708b42dd642bb2a734a800bb5dd7a6d8da16a891592fd4d4f8647ce51",
+          "intake_versions": {
+            "csv": "csv.invoice-dispute.v1",
+            "mapping": "mapping.invoice-dispute.v1",
+            "text": "text.utf8.v1",
+            "timezone": "iana-offset.v1:2026b"
+          },
+          "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+          "scope_ids": ["scope_entity_north", "scope_entity_south"],
+          "source_revision": "sha256:607167384c187aad10aeb6a66b600261a9ddba6d9c6b04f8f9d26c5adbf1616e",
+          "tenant_id": "tenant_intake_demo",
+          "versions": {
+            "interpretation": "discovery.source-claims.v1",
+            "projection": "discovery.invoice-dispute.v1",
+            "template": "discovery.questions.v1"
+          }
+        },
+        "measurement_note": "Baseline before intervention: agree cohort, normal route, variants, event meanings and comparison method. Preserve failed, human-only, reopened and unresolved Cases. Active effort needs person, method and coverage; union overlapping intervals per person and overlapping waits. Include human preparation/review/correction/verification, support, model/tool/compute and attributable setup/operating costs. Missing effort, population, baseline, costs, acceptance and impact are unknown, not zero. Dispute amounts are not savings. Zero model calls do not mean zero operating cost. No verified business outcomes or measured improvement are established.",
+        "model_calls": 0,
+        "questions": [
+          {
+            "consequence": "A disposition may depend on delivery proof; source wording alone cannot settle the claim.",
+            "id": "Q1",
+            "needed_evidence": "Delivery record, applicable terms, attributed read-back and evidence-owner response",
+            "owner_confirmed": false,
+            "prompt": "Which delivery claims conflict, and which governing evidence can clarify them?",
+            "proposed_owner": "Delivery evidence owner / AR operator",
+            "record_id": "R3"
+          },
+          {
+            "consequence": "A snapshot is not an observed sequence.",
+            "id": "Q2",
+            "needed_evidence": "Scoped SOP, actual activity/control records and owner confirmation",
+            "owner_confirmed": false,
+            "prompt": "What starts and ends this assignment? Supply a dated normal Case route separately from the documented SOP and proposed route.",
+            "proposed_owner": "Process owner",
+            "record_id": "R1"
+          },
+          {
+            "consequence": "Missing denominator prevents defensible exception rates or exposure totals.",
+            "id": "Q3",
+            "needed_evidence": "Cohort rules, export manifest, exception classifications and loss evidence",
+            "owner_confirmed": false,
+            "prompt": "Is the export the full eligible population for a defined window? Include typical exceptions, failed, human-only and still-open work.",
+            "proposed_owner": "Queue / measurement owner",
+            "record_id": "R2"
+          },
+          {
+            "consequence": "Reported ownership and object links do not establish responsibility or causal waiting.",
+            "id": "Q4",
+            "needed_evidence": "Owner confirmation, handoff acknowledgment and upstream/downstream dependencies",
+            "owner_confirmed": false,
+            "prompt": "Who confirms accountability for reported owner Taylor, which work happens off-system, and who receives the disposition?",
+            "proposed_owner": "AR / upstream / downstream owners",
+            "record_id": "R3"
+          },
+          {
+            "consequence": "An operator description cannot install a precedence or authorization rule.",
+            "id": "Q5",
+            "needed_evidence": "Scoped field rules with policy references, freshness and named approver",
+            "owner_confirmed": false,
+            "prompt": "Which source governs each disputed field and terms, for which entity and effective period? Preserve competing values.",
+            "proposed_owner": "Data / policy owners",
+            "record_id": "R4"
+          },
+          {
+            "consequence": "Entity labels alone cannot select policy variants.",
+            "id": "Q6",
+            "needed_evidence": "Entity mapping and dated local policies with overlap rules",
+            "owner_confirmed": false,
+            "prompt": "Which regional, entity, subsidiary or acquisition controls differ, and since when?",
+            "proposed_owner": "Entity policy owner",
+            "record_id": "R5"
+          },
+          {
+            "consequence": "Elapsed intervals cannot substitute for person-effort or summed overlapping waits.",
+            "id": "Q7",
+            "needed_evidence": "Activity semantics, timezone/calendar, effort method/coverage, reopen and handoff evidence",
+            "owner_confirmed": false,
+            "prompt": "What do the source timestamps mean? Who actively worked, waited or handed off; what was reopened?",
+            "proposed_owner": "Operator / measurement owner",
+            "record_id": "R6"
+          },
+          {
+            "consequence": "Readiness is specific to this task; no inferred score or authentication.",
+            "id": "Q8",
+            "needed_evidence": "Voluntary self-assessment, demonstrated correction, preferred support and support owner",
+            "owner_confirmed": false,
+            "prompt": "Using these citations, distinguish missing proof from non-delivery and describe what you would retain, review or delegate. What help is needed?",
+            "proposed_owner": "Operator / support owner",
+            "record_id": "R7"
+          }
+        ],
+        "schema_version": "discovery-material.v1",
+        "source_claims": [
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.upstream_owner",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "Taylor"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.source_status",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "open"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.invoice_id",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "INV-101"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.amount_minor",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "1500000"
+          },
+          {
+            "citation_ids": [
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "field": "entity_north.delivery_evidence",
+            "independently_verified": false,
+            "meaning": "source_reports_confirmation",
+            "value": "Delivery confirmation for DEL-4 is supplied."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.delivery_ids",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "DEL-4;DEL-5"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.order_ids",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "PO-9"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.currency",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "USD"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.customer_ref",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "Orchid"
+          },
+          {
+            "citation_ids": [
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0"
+            ],
+            "field": "entity_north.delivery_evidence",
+            "independently_verified": false,
+            "meaning": "source_reports_missing",
+            "value": "Delivery confirmation for DEL-5 is not supplied."
+          }
+        ],
+        "sources": [
+          {
+            "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+            "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+            "excerpt": "dispute-17,r1,entity_north,Orchid,INV-101,1500000,USD,open,queue_snapshot,Alex,AR analyst,AR-77,Taylor,PO-9,DEL-4;DEL-5,,\n",
+            "id": "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537",
+            "interpretation": "csv",
+            "locator": {
+              "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+              "byte_end": 358,
+              "byte_start": 236,
+              "field": null,
+              "line_end": 3,
+              "line_start": 2,
+              "record": 1
+            },
+            "name": "orchid.csv",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "reported_source_version": "r1",
+            "retained_at": "2026-09-07T16:05:00.000Z",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"],
+            "source_time": null
+          },
+          {
+            "artifact_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+            "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+            "excerpt": "Delivery confirmation for DEL-5 is not supplied.\n",
+            "id": "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+            "interpretation": "text",
+            "locator": {
+              "artifact_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+              "byte_end": 49,
+              "byte_start": 0,
+              "field": null,
+              "line_end": 2,
+              "line_start": 1,
+              "record": null
+            },
+            "name": "delivery-gap.txt",
+            "record_key": null,
+            "reported_source_version": null,
+            "retained_at": "2026-09-07T16:05:00.000Z",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"],
+            "source_time": null
+          },
+          {
+            "artifact_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+            "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+            "excerpt": "Delivery confirmation for DEL-4 is supplied.\n",
+            "id": "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6",
+            "interpretation": "text",
+            "locator": {
+              "artifact_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+              "byte_end": 45,
+              "byte_start": 0,
+              "field": null,
+              "line_end": 2,
+              "line_start": 1,
+              "record": null
+            },
+            "name": "del-4-present.txt",
+            "record_key": null,
+            "reported_source_version": null,
+            "retained_at": "2026-09-07T16:05:00.000Z",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"],
+            "source_time": null
+          }
+        ]
+      },
+      "material_hash": "sha256:60e28cbbdcb13929df2a2f4402fa854f4fc1c626392115571ab340c54104d896",
+      "operation": "annotate",
+      "previous_entry_hash": null,
+      "recorded_at": "2026-09-07T16:05:00.000Z",
+      "result": {
+        "authority_granted": false,
+        "closure_permission": false,
+        "discovery_revision": 1,
+        "material_hash": "sha256:60e28cbbdcb13929df2a2f4402fa854f4fc1c626392115571ab340c54104d896",
+        "operation": "annotate",
+        "status": "recorded"
+      },
+      "schema_version": "discovery-review-entry.v1",
+      "sequence": 1,
+      "tenant_id": "tenant_intake_demo",
+      "versions": {
+        "interpretation": "discovery.source-claims.v1",
+        "projection": "discovery.invoice-dispute.v1",
+        "template": "discovery.questions.v1"
+      }
+    },
+    {
+      "actor": {
+        "identity_id": "identity_intake_operator",
+        "identity_kind": "human",
+        "schema_version": "identity-reference.v0",
+        "status": "active",
+        "tenant_id": "tenant_intake_demo"
+      },
+      "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+      "command": {
+        "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "expected_case_version": 1,
+        "expected_discovery_revision": 1,
+        "expected_intake_receipt_hash": "sha256:8c5f33e708b42dd642bb2a734a800bb5dd7a6d8da16a891592fd4d4f8647ce51",
+        "expected_material_hash": "sha256:60e28cbbdcb13929df2a2f4402fa854f4fc1c626392115571ab340c54104d896",
+        "expected_previous_entry_hash": "sha256:de3a3fc892bde384390065ff4497428dfcf944323d52f0055357333705fd46f7",
+        "idempotency_key": "legacy-confirm",
+        "operation": "confirm",
+        "purpose": "discovery_description",
+        "reason": "Synthetic descriptive review preserves uncertainty; no business authority",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "schema_version": "discovery-review-command.v1"
+      },
+      "command_fingerprint": "sha256:9af12e9ade7cab95e5400725cfdc945e242e5674ee117067dd9e47d49e998280",
+      "hash": "sha256:23c839d8d08b2f3be91835599e10119fa931661bc2c20efc8259ce5143b0a0ee",
+      "id": "discovery_review_9af12e9ade7cab95e5400725cfdc945e242e5674ee117067dd9e47d49e998280",
+      "idempotency_key": "legacy-confirm",
+      "intake_scope_id": "scope_invoice_disputes",
+      "material": {
+        "annotations": [
+          {
+            "citation_ids": [
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "command_fingerprint": "sha256:49e2c3b58e5d6265f9813cc86a7dd077591d4887fda7e8dad4afdd9f7112280f",
+            "evidence_type": "operator-reported",
+            "reason": "The supplied note does not identify an accountable evidence owner",
+            "state": "unknown",
+            "submitted_revision": 1,
+            "target_id": "Q1",
+            "text": "Delivery evidence owner is not yet confirmed"
+          }
+        ],
+        "assignment": {
+          "accountable_owner": null,
+          "amount_minor": 1500000,
+          "currency": "USD",
+          "customer_ref": "Orchid",
+          "entity": "entity_north",
+          "independently_verified": false,
+          "invoice_id": "INV-101",
+          "objective": "Prepare an evidence-backed disposition for Orchid / INV-101 in entity_north.",
+          "reported_owner": "Taylor"
+        },
+        "committed_records": 1,
+        "coverage": {
+          "distinct_records": 1,
+          "duplicate_records": 0,
+          "invalid_records": 0,
+          "measurement_gaps": [
+            "population_unconfirmed",
+            "active_effort_unmeasured",
+            "population_window_unknown"
+          ],
+          "physical_records": 1,
+          "source_coverage_claim": "unknown",
+          "source_population_claim": null,
+          "valid_records": 1
+        },
+        "findings": [
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "observed",
+            "id": "R1",
+            "process_view": "observed",
+            "text": "The queue reports queue_snapshot / open. Documented route: not established by the supplied material. Observed route: a queue snapshot cannot establish historical transitions. Proposed route: inspect and clarify evidence before disposition review; this remains a hypothesis. Trigger and acceptance criterion remain unknown.",
+            "title": "Boundary and normal route"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "observed",
+            "id": "R2",
+            "process_view": "observed",
+            "text": "1 distinct retained records; 0 invalid. Population completeness, normal/exception routes and error exposure are unconfirmed. Reported dispute principal is not savings.",
+            "title": "Exceptions, population and exposure"
+          },
+          {
+            "citation_ids": [
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "claim_state": "disputed",
+            "evidence_type": "observed",
+            "id": "R3",
+            "process_view": "observed",
+            "text": "Supplied sources disagree about delivery confirmation.",
+            "title": "Dependencies and evidence"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537",
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "observed",
+            "id": "R4",
+            "process_view": "observed",
+            "text": "No reviewed field-level precedence is supplied. Amount, delivery status and terms need governing sources, scope, effective periods and accountable approvers.",
+            "title": "Field-level source precedence"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537",
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "observed",
+            "id": "R5",
+            "process_view": "observed",
+            "text": "entity_north remain distinct source entities. Matching invoice labels do not merge work. Regional, subsidiary, acquisition and policy applicability are unknown.",
+            "title": "Entity and regional variants"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "observed",
+            "id": "R6",
+            "process_view": "observed",
+            "text": "Source occurrence and export timestamps retain their stated meanings. Intake and review times do not establish business start/end, active effort, waiting duration or historical handoffs.",
+            "title": "Elapsed work, effort, waits and handoffs"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "evidence_type": "inferred",
+            "id": "R7",
+            "process_view": "proposed",
+            "text": "Task-specific understanding, preferred assistance and support ownership remain unconfirmed. An operator correction records reported understanding, not a skill score or legal authority.",
+            "title": "Task readiness and support"
+          }
+        ],
+        "improvements": [
+          {
+            "allocation": "Deterministic code reuses parsed cells; a person checks meaning.",
+            "change": "remove",
+            "control": "Preserve original bytes, entity keys and operator discrepancy review.",
+            "hypothesis": true,
+            "measurement_needed": "Attributable preparation/rework effort and error coverage before/after.",
+            "proposal": "Hypothesis: remove duplicate copying of source values into a second summary."
+          },
+          {
+            "allocation": "Code lists gaps; people obtain and interpret evidence. No model calls.",
+            "change": "combine",
+            "control": "A person confirms questions and accountable recipients; no automatic messages.",
+            "hypothesis": true,
+            "measurement_needed": "Missed questions, review/support effort and quality baseline.",
+            "proposal": "Hypothesis: combine repeated evidence requests into one consequential agenda."
+          },
+          {
+            "allocation": "People collect evidence. An adaptive agent is not needed for this retained bundle.",
+            "change": "parallelize",
+            "control": "Confirm dependencies, permitted access and disposition authorization.",
+            "hypothesis": true,
+            "measurement_needed": "Critical-path waits as interval unions; never sum overlapping waits as savings.",
+            "proposal": "Hypothesis: gather delivery evidence and governing terms in parallel where independent."
+          },
+          {
+            "allocation": "Code prepares differences; people correct meaning. Bounded model/agent work remains later.",
+            "change": "simplify",
+            "control": "Separate source interpretation, business authorization and independent proof.",
+            "hypothesis": true,
+            "measurement_needed": "Comparable cohort, review/correction/verification effort and missed findings.",
+            "proposal": "Hypothesis: focus review on consequential discrepancies while preserving full citations."
+          }
+        ],
+        "loop_outputs": [
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Trigger",
+            "process_view": "proposed",
+            "text": "An entity-qualified reported invoice dispute is received; actual business start semantics need confirmation."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Objective",
+            "process_view": "proposed",
+            "text": "Prepare an evidence-backed disposition for Orchid / INV-101 in entity_north."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Population",
+            "process_view": "proposed",
+            "text": "1 distinct records in this upload; recurring eligible cohort, coverage and window remain unconfirmed."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Close Event",
+            "process_view": "proposed",
+            "text": "Candidate: accountable owner/customer accepts an agreed disposition independently evidenced in its governing source. Settlement versus matched cash remains unresolved. No Case closure is granted."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Human Intervention Map",
+            "process_view": "proposed",
+            "text": "Supplied sources disagree about delivery confirmation. Evidence owner and governing terms need confirmation. Financial authority is absent; no automatic owner assignment."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "claim_state": "unknown",
+            "id": "Correction Path",
+            "process_view": "proposed",
+            "text": "Append a cited descriptive correction and reason; preserve the original. Promotion to rules, evaluation or worker behavior requires later reviewed work."
+          }
+        ],
+        "manifest": {
+          "bundle_hash": "sha256:ab940902639e6fa48e0f41b8e0c51ec33bdcb467177db0e544cca83d2c761359",
+          "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+          "business_bundle_hashes": [
+            "sha256:ab940902639e6fa48e0f41b8e0c51ec33bdcb467177db0e544cca83d2c761359"
+          ],
+          "business_commit_hashes": [
+            "sha256:8c5f33e708b42dd642bb2a734a800bb5dd7a6d8da16a891592fd4d4f8647ce51"
+          ],
+          "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "case_journal_hash": "sha256:72c585b27fa30260f0d19189c6f75481205791449d848ef76323609df6630201",
+          "case_version": 1,
+          "intake_receipt_hash": "sha256:8c5f33e708b42dd642bb2a734a800bb5dd7a6d8da16a891592fd4d4f8647ce51",
+          "intake_versions": {
+            "csv": "csv.invoice-dispute.v1",
+            "mapping": "mapping.invoice-dispute.v1",
+            "text": "text.utf8.v1",
+            "timezone": "iana-offset.v1:2026b"
+          },
+          "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+          "scope_ids": ["scope_entity_north", "scope_entity_south"],
+          "source_revision": "sha256:607167384c187aad10aeb6a66b600261a9ddba6d9c6b04f8f9d26c5adbf1616e",
+          "tenant_id": "tenant_intake_demo",
+          "versions": {
+            "interpretation": "discovery.source-claims.v1",
+            "projection": "discovery.invoice-dispute.v1",
+            "template": "discovery.questions.v1"
+          }
+        },
+        "measurement_note": "Baseline before intervention: agree cohort, normal route, variants, event meanings and comparison method. Preserve failed, human-only, reopened and unresolved Cases. Active effort needs person, method and coverage; union overlapping intervals per person and overlapping waits. Include human preparation/review/correction/verification, support, model/tool/compute and attributable setup/operating costs. Missing effort, population, baseline, costs, acceptance and impact are unknown, not zero. Dispute amounts are not savings. Zero model calls do not mean zero operating cost. No verified business outcomes or measured improvement are established.",
+        "model_calls": 0,
+        "questions": [
+          {
+            "consequence": "A disposition may depend on delivery proof; source wording alone cannot settle the claim.",
+            "id": "Q1",
+            "needed_evidence": "Delivery record, applicable terms, attributed read-back and evidence-owner response",
+            "owner_confirmed": false,
+            "prompt": "Which delivery claims conflict, and which governing evidence can clarify them?",
+            "proposed_owner": "Delivery evidence owner / AR operator",
+            "record_id": "R3"
+          },
+          {
+            "consequence": "A snapshot is not an observed sequence.",
+            "id": "Q2",
+            "needed_evidence": "Scoped SOP, actual activity/control records and owner confirmation",
+            "owner_confirmed": false,
+            "prompt": "What starts and ends this assignment? Supply a dated normal Case route separately from the documented SOP and proposed route.",
+            "proposed_owner": "Process owner",
+            "record_id": "R1"
+          },
+          {
+            "consequence": "Missing denominator prevents defensible exception rates or exposure totals.",
+            "id": "Q3",
+            "needed_evidence": "Cohort rules, export manifest, exception classifications and loss evidence",
+            "owner_confirmed": false,
+            "prompt": "Is the export the full eligible population for a defined window? Include typical exceptions, failed, human-only and still-open work.",
+            "proposed_owner": "Queue / measurement owner",
+            "record_id": "R2"
+          },
+          {
+            "consequence": "Reported ownership and object links do not establish responsibility or causal waiting.",
+            "id": "Q4",
+            "needed_evidence": "Owner confirmation, handoff acknowledgment and upstream/downstream dependencies",
+            "owner_confirmed": false,
+            "prompt": "Who confirms accountability for reported owner Taylor, which work happens off-system, and who receives the disposition?",
+            "proposed_owner": "AR / upstream / downstream owners",
+            "record_id": "R3"
+          },
+          {
+            "consequence": "An operator description cannot install a precedence or authorization rule.",
+            "id": "Q5",
+            "needed_evidence": "Scoped field rules with policy references, freshness and named approver",
+            "owner_confirmed": false,
+            "prompt": "Which source governs each disputed field and terms, for which entity and effective period? Preserve competing values.",
+            "proposed_owner": "Data / policy owners",
+            "record_id": "R4"
+          },
+          {
+            "consequence": "Entity labels alone cannot select policy variants.",
+            "id": "Q6",
+            "needed_evidence": "Entity mapping and dated local policies with overlap rules",
+            "owner_confirmed": false,
+            "prompt": "Which regional, entity, subsidiary or acquisition controls differ, and since when?",
+            "proposed_owner": "Entity policy owner",
+            "record_id": "R5"
+          },
+          {
+            "consequence": "Elapsed intervals cannot substitute for person-effort or summed overlapping waits.",
+            "id": "Q7",
+            "needed_evidence": "Activity semantics, timezone/calendar, effort method/coverage, reopen and handoff evidence",
+            "owner_confirmed": false,
+            "prompt": "What do the source timestamps mean? Who actively worked, waited or handed off; what was reopened?",
+            "proposed_owner": "Operator / measurement owner",
+            "record_id": "R6"
+          },
+          {
+            "consequence": "Readiness is specific to this task; no inferred score or authentication.",
+            "id": "Q8",
+            "needed_evidence": "Voluntary self-assessment, demonstrated correction, preferred support and support owner",
+            "owner_confirmed": false,
+            "prompt": "Using these citations, distinguish missing proof from non-delivery and describe what you would retain, review or delegate. What help is needed?",
+            "proposed_owner": "Operator / support owner",
+            "record_id": "R7"
+          }
+        ],
+        "schema_version": "discovery-material.v1",
+        "source_claims": [
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.upstream_owner",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "Taylor"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.source_status",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "open"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.invoice_id",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "INV-101"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.amount_minor",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "1500000"
+          },
+          {
+            "citation_ids": [
+              "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6"
+            ],
+            "field": "entity_north.delivery_evidence",
+            "independently_verified": false,
+            "meaning": "source_reports_confirmation",
+            "value": "Delivery confirmation for DEL-4 is supplied."
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.delivery_ids",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "DEL-4;DEL-5"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.order_ids",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "PO-9"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.currency",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "USD"
+          },
+          {
+            "citation_ids": [
+              "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537"
+            ],
+            "field": "entity_north.customer_ref",
+            "independently_verified": false,
+            "meaning": "parsed_source_value",
+            "value": "Orchid"
+          },
+          {
+            "citation_ids": [
+              "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0"
+            ],
+            "field": "entity_north.delivery_evidence",
+            "independently_verified": false,
+            "meaning": "source_reports_missing",
+            "value": "Delivery confirmation for DEL-5 is not supplied."
+          }
+        ],
+        "sources": [
+          {
+            "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+            "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+            "excerpt": "dispute-17,r1,entity_north,Orchid,INV-101,1500000,USD,open,queue_snapshot,Alex,AR analyst,AR-77,Taylor,PO-9,DEL-4;DEL-5,,\n",
+            "id": "sha256:2120d2f91677048d24983e10d75a2a3bee333154d8b7f74cef14cc58c9a2c537",
+            "interpretation": "csv",
+            "locator": {
+              "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+              "byte_end": 358,
+              "byte_start": 236,
+              "field": null,
+              "line_end": 3,
+              "line_start": 2,
+              "record": 1
+            },
+            "name": "orchid.csv",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "reported_source_version": "r1",
+            "retained_at": "2026-09-07T16:05:00.000Z",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"],
+            "source_time": null
+          },
+          {
+            "artifact_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+            "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+            "excerpt": "Delivery confirmation for DEL-5 is not supplied.\n",
+            "id": "sha256:c92a883e33c57c61d2f644329d4f59069de3d447f798a64ca4bf4575b4a266a0",
+            "interpretation": "text",
+            "locator": {
+              "artifact_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+              "byte_end": 49,
+              "byte_start": 0,
+              "field": null,
+              "line_end": 2,
+              "line_start": 1,
+              "record": null
+            },
+            "name": "delivery-gap.txt",
+            "record_key": null,
+            "reported_source_version": null,
+            "retained_at": "2026-09-07T16:05:00.000Z",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"],
+            "source_time": null
+          },
+          {
+            "artifact_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+            "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+            "excerpt": "Delivery confirmation for DEL-4 is supplied.\n",
+            "id": "sha256:fdbc5087dd5b7ac27ef97b8883aa72d547dc8b02dd529150ddca2b6e56560ca6",
+            "interpretation": "text",
+            "locator": {
+              "artifact_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+              "byte_end": 45,
+              "byte_start": 0,
+              "field": null,
+              "line_end": 2,
+              "line_start": 1,
+              "record": null
+            },
+            "name": "del-4-present.txt",
+            "record_key": null,
+            "reported_source_version": null,
+            "retained_at": "2026-09-07T16:05:00.000Z",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"],
+            "source_time": null
+          }
+        ]
+      },
+      "material_hash": "sha256:60e28cbbdcb13929df2a2f4402fa854f4fc1c626392115571ab340c54104d896",
+      "operation": "confirm",
+      "previous_entry_hash": "sha256:de3a3fc892bde384390065ff4497428dfcf944323d52f0055357333705fd46f7",
+      "recorded_at": "2026-09-07T16:05:00.000Z",
+      "result": {
+        "authority_granted": false,
+        "closure_permission": false,
+        "discovery_revision": 2,
+        "material_hash": "sha256:60e28cbbdcb13929df2a2f4402fa854f4fc1c626392115571ab340c54104d896",
+        "operation": "confirm",
+        "status": "recorded"
+      },
+      "schema_version": "discovery-review-entry.v1",
+      "sequence": 2,
+      "tenant_id": "tenant_intake_demo",
+      "versions": {
+        "interpretation": "discovery.source-claims.v1",
+        "projection": "discovery.invoice-dispute.v1",
+        "template": "discovery.questions.v1"
+      }
+    }
+  ],
+  "hash": "sha256:8ac985fd5c5bb8af71d1a45ac45e676e947433b87339cf38688d9925eb80d9c5",
+  "intake": {
+    "artifacts": [
+      {
+        "byte_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+        "bytes_base64": "c291cmNlX3JlY29yZF9pZCxzb3VyY2VfdmVyc2lvbixsZWdhbF9lbnRpdHlfaWQsY3VzdG9tZXJfcmVmLGludm9pY2VfaWQsYW1vdW50X21pbm9yLGN1cnJlbmN5LHNvdXJjZV9zdGF0dXMsYWN0aXZpdHkscmVwb3J0ZWRfYWN0b3IscmVwb3J0ZWRfcm9sZSx1cHN0cmVhbV9jYXNlX2lkLHVwc3RyZWFtX293bmVyLG9yZGVyX2lkcyxkZWxpdmVyeV9pZHMsc291cmNlX29jY3VycmVkX2F0LHNvdXJjZV90aW1lem9uZQpkaXNwdXRlLTE3LHIxLGVudGl0eV9ub3J0aCxPcmNoaWQsSU5WLTEwMSwxNTAwMDAwLFVTRCxvcGVuLHF1ZXVlX3NuYXBzaG90LEFsZXgsQVIgYW5hbHlzdCxBUi03NyxUYXlsb3IsUE8tOSxERUwtNDtERUwtNSwsCg=="
+      },
+      {
+        "byte_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+        "bytes_base64": "RGVsaXZlcnkgY29uZmlybWF0aW9uIGZvciBERUwtNCBpcyBzdXBwbGllZC4K"
+      },
+      {
+        "byte_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+        "bytes_base64": "RGVsaXZlcnkgY29uZmlybWF0aW9uIGZvciBERUwtNSBpcyBub3Qgc3VwcGxpZWQuCg=="
+      }
+    ],
+    "bundles": [
+      {
+        "artifacts": [
+          {
+            "associations": [],
+            "byte_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+            "byte_length": 358,
+            "declared_hash": null,
+            "derived_from": {
+              "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+              "byte_end": 358,
+              "byte_start": 0,
+              "field": null,
+              "line_end": null,
+              "line_start": null,
+              "record": null
+            },
+            "derived_hash": "sha256:305bb0ff772cfdc070b1f32b0de3c28d12ed269da94dc3be823ed161568ade68",
+            "derived_text": null,
+            "document_id": "queue",
+            "interpretation": "csv",
+            "media_type": "text/csv",
+            "name": "orchid.csv",
+            "parser_version": "csv.invoice-dispute.v1",
+            "role": "queue",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"]
+          },
+          {
+            "associations": [
+              {
+                "entity": "entity_north",
+                "id": "dispute-17",
+                "kind": "record"
+              }
+            ],
+            "byte_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+            "byte_length": 45,
+            "declared_hash": null,
+            "derived_from": {
+              "artifact_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+              "byte_end": 45,
+              "byte_start": 0,
+              "field": null,
+              "line_end": 2,
+              "line_start": 1,
+              "record": null
+            },
+            "derived_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+            "derived_text": "Delivery confirmation for DEL-4 is supplied.\n",
+            "document_id": "del-4-present",
+            "interpretation": "text",
+            "media_type": "text/plain",
+            "name": "del-4-present.txt",
+            "parser_version": "text.utf8.v1",
+            "role": "support",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"]
+          },
+          {
+            "associations": [
+              {
+                "entity": "entity_north",
+                "id": "dispute-17",
+                "kind": "record"
+              }
+            ],
+            "byte_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+            "byte_length": 49,
+            "declared_hash": null,
+            "derived_from": {
+              "artifact_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+              "byte_end": 49,
+              "byte_start": 0,
+              "field": null,
+              "line_end": 2,
+              "line_start": 1,
+              "record": null
+            },
+            "derived_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+            "derived_text": "Delivery confirmation for DEL-5 is not supplied.\n",
+            "document_id": "delivery-gap",
+            "interpretation": "text",
+            "media_type": "text/plain",
+            "name": "delivery-gap.txt",
+            "parser_version": "text.utf8.v1",
+            "role": "support",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"]
+          }
+        ],
+        "claims": {
+          "coverage": "unknown",
+          "population_count": null,
+          "population_window": null,
+          "snapshot_at": null,
+          "snapshot_timezone": null
+        },
+        "coverage": {
+          "distinct_records": 1,
+          "duplicate_records": 0,
+          "invalid_records": 0,
+          "measurement_gaps": [
+            "population_unconfirmed",
+            "active_effort_unmeasured",
+            "population_window_unknown"
+          ],
+          "physical_records": 1,
+          "source_coverage_claim": "unknown",
+          "source_population_claim": null,
+          "valid_records": 1
+        },
+        "hash": "sha256:ab940902639e6fa48e0f41b8e0c51ec33bdcb467177db0e544cca83d2c761359",
+        "id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+        "identity_hash": "sha256:6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+        "ingested_at": "2026-09-07T16:05:00.000Z",
+        "preparation_fingerprint": "sha256:2f0d0bb99acee41b540ccb4c00f017bf20d0163cb85bde85361843eff476e58d",
+        "preparation_key": "legacy-scoped-history",
+        "profile_id": "invoice-dispute-intake.v1",
+        "profile_version": "1",
+        "records": [
+          {
+            "business_objects": [
+              {
+                "citation": {
+                  "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                  "byte_end": 358,
+                  "byte_start": 236,
+                  "field": "customer_ref",
+                  "line_end": 2,
+                  "line_start": 2,
+                  "record": 1
+                },
+                "entity": "entity_north",
+                "id": "Orchid",
+                "kind": "customer",
+                "qualification": "reported",
+                "source": "synthetic_ar_queue"
+              },
+              {
+                "citation": {
+                  "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                  "byte_end": 358,
+                  "byte_start": 236,
+                  "field": "delivery_ids",
+                  "line_end": 2,
+                  "line_start": 2,
+                  "record": 1
+                },
+                "entity": "entity_north",
+                "id": "DEL-4",
+                "kind": "delivery",
+                "qualification": "reported",
+                "source": "synthetic_ar_queue"
+              },
+              {
+                "citation": {
+                  "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                  "byte_end": 358,
+                  "byte_start": 236,
+                  "field": "delivery_ids",
+                  "line_end": 2,
+                  "line_start": 2,
+                  "record": 1
+                },
+                "entity": "entity_north",
+                "id": "DEL-5",
+                "kind": "delivery",
+                "qualification": "reported",
+                "source": "synthetic_ar_queue"
+              },
+              {
+                "citation": {
+                  "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                  "byte_end": 358,
+                  "byte_start": 236,
+                  "field": "invoice_id",
+                  "line_end": 2,
+                  "line_start": 2,
+                  "record": 1
+                },
+                "entity": "entity_north",
+                "id": "INV-101",
+                "kind": "invoice",
+                "qualification": "reported",
+                "source": "synthetic_ar_queue"
+              },
+              {
+                "citation": {
+                  "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                  "byte_end": 358,
+                  "byte_start": 236,
+                  "field": "order_ids",
+                  "line_end": 2,
+                  "line_start": 2,
+                  "record": 1
+                },
+                "entity": "entity_north",
+                "id": "PO-9",
+                "kind": "order",
+                "qualification": "reported",
+                "source": "synthetic_ar_queue"
+              }
+            ],
+            "cells": {
+              "activity": "queue_snapshot",
+              "amount_minor": "1500000",
+              "currency": "USD",
+              "customer_ref": "Orchid",
+              "delivery_ids": "DEL-4;DEL-5",
+              "invoice_id": "INV-101",
+              "legal_entity_id": "entity_north",
+              "order_ids": "PO-9",
+              "reported_actor": "Alex",
+              "reported_role": "AR analyst",
+              "source_occurred_at": "",
+              "source_record_id": "dispute-17",
+              "source_status": "open",
+              "source_timezone": "",
+              "source_version": "r1",
+              "upstream_case_id": "AR-77",
+              "upstream_owner": "Taylor"
+            },
+            "entity": "entity_north",
+            "findings": [],
+            "ingested_at": "2026-09-07T16:05:00.000Z",
+            "locators": [
+              {
+                "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                "byte_end": 358,
+                "byte_start": 236,
+                "field": null,
+                "line_end": 2,
+                "line_start": 2,
+                "record": 1
+              }
+            ],
+            "measurement_gaps": [
+              "active_effort_unmeasured",
+              "population_unconfirmed",
+              "relationships_unconfirmed",
+              "source_occurrence_unknown",
+              "source_snapshot_unknown"
+            ],
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "relationships": [
+              {
+                "entity": "entity_north",
+                "from": "invoice:INV-101",
+                "qualification": "reported",
+                "to": "delivery:DEL-4"
+              },
+              {
+                "entity": "entity_north",
+                "from": "invoice:INV-101",
+                "qualification": "reported",
+                "to": "delivery:DEL-5"
+              },
+              {
+                "entity": "entity_north",
+                "from": "invoice:INV-101",
+                "qualification": "reported",
+                "to": "order:PO-9"
+              }
+            ],
+            "reported_activity": "queue_snapshot",
+            "reported_actor": "Alex",
+            "reported_owner": "Taylor",
+            "reported_role": "AR analyst",
+            "reported_source_version": "r1",
+            "reported_status": "open",
+            "source_occurrence": {
+              "instant": null,
+              "quality": "unknown",
+              "raw": null,
+              "timezone": null
+            },
+            "source_record_id": "dispute-17",
+            "source_revision": "sha256:607167384c187aad10aeb6a66b600261a9ddba6d9c6b04f8f9d26c5adbf1616e",
+            "source_snapshot": {
+              "instant": null,
+              "quality": "unknown",
+              "raw": null,
+              "timezone": null
+            },
+            "source_system": "synthetic_ar_queue",
+            "upstream_case_ref": {
+              "entity": "entity_north",
+              "id": "AR-77",
+              "source": "synthetic_ar_queue"
+            },
+            "valid": true
+          }
+        ],
+        "retained_at": "2026-09-07T16:05:00.000Z",
+        "schema_version": "intake-bundle.v1",
+        "scope_ids": ["scope_entity_north", "scope_entity_south"],
+        "tenant_id": "tenant_intake_demo",
+        "versions": {
+          "csv": "csv.invoice-dispute.v1",
+          "mapping": "mapping.invoice-dispute.v1",
+          "text": "text.utf8.v1",
+          "timezone": "iana-offset.v1:2026b"
+        }
+      }
+    ],
+    "case_state": {
+      "cases": [
+        {
+          "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "document": {
+            "audit_entries": [
+              {
+                "actor_identity_id": "identity_intake_operator",
+                "after_hash": "sha256:c293749805c2c4eb76ad155129bd7a61cb4f87659c07adc653c6287414517c39",
+                "before_hash": null,
+                "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+                "id": "audit_entry_2",
+                "metadata": {
+                  "case_version": 1,
+                  "command_fingerprint": "sha256:a52988939c4852e9e5bd0e6422dedcc0b9149ece4be75ffbe380b041a876b934",
+                  "idempotency_key": "intake-command:3d96064fcfe27caa4a5aafd9d7a4539835ea73c6f79a7eaa30392e81af27bbb3",
+                  "journal_entry_id": "journal_entry_1",
+                  "journal_sequence": 1
+                },
+                "occurred_at": "2026-09-07T16:05:00.000Z",
+                "operation": "case.created",
+                "target_ref": "case://case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+                "tenant_id": "tenant_intake_demo",
+                "trace_id": "intake-correlation:3d96064fcfe27caa4a5aafd9d7a4539835ea73c6f79a7eaa30392e81af27bbb3"
+              }
+            ],
+            "case": {
+              "created_at": "2026-09-07T16:05:00.000Z",
+              "customer_ref": "Orchid",
+              "id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "issue_fingerprint": "sha256:6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "owner_identity_id": null,
+              "scope_ids": ["scope_entity_north"],
+              "severity": "medium",
+              "state": "detected",
+              "tenant_id": "tenant_intake_demo",
+              "updated_at": "2026-09-07T16:05:00.000Z",
+              "version": 1,
+              "workflow_version_id": "workflow_ecc_v0_1_0"
+            },
+            "events": [
+              {
+                "actor_identity_id": "identity_intake_operator",
+                "classification": "internal",
+                "content_hash": "sha256:2b6c1c815dfd178afb1f8b88504045ce27d5e6c9463a2aaab32f479e0b903d3c",
+                "event_type": "intake.material_reviewed",
+                "id": "work_event_c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+                "idempotency_key": "intake-event:c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+                "occurred_at": "2026-09-07T16:05:00.000Z",
+                "payload_ref": "intake://2b6c1c815dfd178afb1f8b88504045ce27d5e6c9463a2aaab32f479e0b903d3c",
+                "scope_ids": ["scope_entity_north"],
+                "source": "fieldruntime_intake",
+                "source_event_id": "intake:c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+                "source_timezone": "UTC",
+                "tenant_id": "tenant_intake_demo"
+              }
+            ],
+            "tenant": {
+              "data_region": "local",
+              "id": "tenant_intake_demo",
+              "name": "Invoice intake synthetic evaluation",
+              "retention_policy_id": "retention_intake_synthetic_v1",
+              "status": "active"
+            },
+            "workflow_version": {
+              "decision_graph_id": "ecc_decision_graph_v0",
+              "effective_from": "2026-08-26T00:00:00.000Z",
+              "effective_from_source_timezone": "UTC",
+              "eval_suite_version": "0.1.0",
+              "id": "workflow_ecc_v0_1_0",
+              "policy_version_ids": ["policy_customer_comms_v3"],
+              "status": "shadow",
+              "version": "0.1.0",
+              "workflow_id": "customer_escalation_commitment_control"
+            }
+          },
+          "journal": [
+            {
+              "actor_identity_id": "identity_intake_operator",
+              "after_hash": "sha256:c293749805c2c4eb76ad155129bd7a61cb4f87659c07adc653c6287414517c39",
+              "before_hash": null,
+              "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "case_version": 1,
+              "command_fingerprint": "sha256:a52988939c4852e9e5bd0e6422dedcc0b9149ece4be75ffbe380b041a876b934",
+              "correlation_id": "intake-correlation:3d96064fcfe27caa4a5aafd9d7a4539835ea73c6f79a7eaa30392e81af27bbb3",
+              "event_hash": "sha256:72c585b27fa30260f0d19189c6f75481205791449d848ef76323609df6630201",
+              "event_type": "case.created",
+              "id": "journal_entry_1",
+              "idempotency_key": "intake-command:3d96064fcfe27caa4a5aafd9d7a4539835ea73c6f79a7eaa30392e81af27bbb3",
+              "payload": {
+                "document": {
+                  "audit_entries": [
+                    {
+                      "actor_identity_id": "identity_intake_operator",
+                      "after_hash": "sha256:c293749805c2c4eb76ad155129bd7a61cb4f87659c07adc653c6287414517c39",
+                      "before_hash": null,
+                      "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+                      "id": "audit_entry_2",
+                      "metadata": {
+                        "case_version": 1,
+                        "command_fingerprint": "sha256:a52988939c4852e9e5bd0e6422dedcc0b9149ece4be75ffbe380b041a876b934",
+                        "idempotency_key": "intake-command:3d96064fcfe27caa4a5aafd9d7a4539835ea73c6f79a7eaa30392e81af27bbb3",
+                        "journal_entry_id": "journal_entry_1",
+                        "journal_sequence": 1
+                      },
+                      "occurred_at": "2026-09-07T16:05:00.000Z",
+                      "operation": "case.created",
+                      "target_ref": "case://case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+                      "tenant_id": "tenant_intake_demo",
+                      "trace_id": "intake-correlation:3d96064fcfe27caa4a5aafd9d7a4539835ea73c6f79a7eaa30392e81af27bbb3"
+                    }
+                  ],
+                  "case": {
+                    "created_at": "2026-09-07T16:05:00.000Z",
+                    "customer_ref": "Orchid",
+                    "id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+                    "issue_fingerprint": "sha256:6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+                    "owner_identity_id": null,
+                    "scope_ids": ["scope_entity_north"],
+                    "severity": "medium",
+                    "state": "detected",
+                    "tenant_id": "tenant_intake_demo",
+                    "updated_at": "2026-09-07T16:05:00.000Z",
+                    "version": 1,
+                    "workflow_version_id": "workflow_ecc_v0_1_0"
+                  },
+                  "events": [
+                    {
+                      "actor_identity_id": "identity_intake_operator",
+                      "classification": "internal",
+                      "content_hash": "sha256:2b6c1c815dfd178afb1f8b88504045ce27d5e6c9463a2aaab32f479e0b903d3c",
+                      "event_type": "intake.material_reviewed",
+                      "id": "work_event_c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+                      "idempotency_key": "intake-event:c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+                      "occurred_at": "2026-09-07T16:05:00.000Z",
+                      "payload_ref": "intake://2b6c1c815dfd178afb1f8b88504045ce27d5e6c9463a2aaab32f479e0b903d3c",
+                      "scope_ids": ["scope_entity_north"],
+                      "source": "fieldruntime_intake",
+                      "source_event_id": "intake:c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+                      "source_timezone": "UTC",
+                      "tenant_id": "tenant_intake_demo"
+                    }
+                  ],
+                  "tenant": {
+                    "data_region": "local",
+                    "id": "tenant_intake_demo",
+                    "name": "Invoice intake synthetic evaluation",
+                    "retention_policy_id": "retention_intake_synthetic_v1",
+                    "status": "active"
+                  },
+                  "workflow_version": {
+                    "decision_graph_id": "ecc_decision_graph_v0",
+                    "effective_from": "2026-08-26T00:00:00.000Z",
+                    "effective_from_source_timezone": "UTC",
+                    "eval_suite_version": "0.1.0",
+                    "id": "workflow_ecc_v0_1_0",
+                    "policy_version_ids": ["policy_customer_comms_v3"],
+                    "status": "shadow",
+                    "version": "0.1.0",
+                    "workflow_id": "customer_escalation_commitment_control"
+                  }
+                }
+              },
+              "previous_event_hash": null,
+              "recorded_at": "2026-09-07T16:05:00.000Z",
+              "schema_version": "case-journal-entry.v0",
+              "sequence": 1,
+              "tenant_id": "tenant_intake_demo"
+            }
+          ],
+          "tenant_id": "tenant_intake_demo"
+        }
+      ],
+      "idempotency_records": [
+        {
+          "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "command_fingerprint": "sha256:a52988939c4852e9e5bd0e6422dedcc0b9149ece4be75ffbe380b041a876b934",
+          "idempotency_key": "intake-command:3d96064fcfe27caa4a5aafd9d7a4539835ea73c6f79a7eaa30392e81af27bbb3",
+          "journal_entry_id": "journal_entry_1",
+          "result_status": "applied",
+          "tenant_id": "tenant_intake_demo"
+        }
+      ],
+      "source_event_records": [
+        {
+          "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "create_binding_fingerprint": "sha256:ef5bd6769efc1df27d19a76fffe2bdc4073f093effedf5453a8517de9c3b8bdd",
+          "source": "fieldruntime_intake",
+          "source_event_id": "intake:c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+          "tenant_id": "tenant_intake_demo",
+          "work_event_fingerprint": "sha256:1dcc97f04930c11d422d0e6fd4fe2f7608e5e4d8012305f989beae628bff9f45"
+        }
+      ]
+    },
+    "commits": [
+      {
+        "actor": {
+          "identity_id": "identity_intake_operator",
+          "identity_kind": "human",
+          "schema_version": "identity-reference.v0",
+          "status": "active",
+          "tenant_id": "tenant_intake_demo"
+        },
+        "adapted_command": {
+          "actor_identity_id": "identity_intake_operator",
+          "case_seed": {
+            "case": {
+              "customer_ref": "Orchid",
+              "id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "issue_fingerprint": "sha256:6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "owner_identity_id": null,
+              "scope_ids": ["scope_entity_north"],
+              "severity": "medium",
+              "tenant_id": "tenant_intake_demo",
+              "workflow_version_id": "workflow_ecc_v0_1_0"
+            },
+            "tenant": {
+              "data_region": "local",
+              "id": "tenant_intake_demo",
+              "name": "Invoice intake synthetic evaluation",
+              "retention_policy_id": "retention_intake_synthetic_v1",
+              "status": "active"
+            },
+            "workflow_version": {
+              "decision_graph_id": "ecc_decision_graph_v0",
+              "effective_from": "2026-08-26T00:00:00.000Z",
+              "effective_from_source_timezone": "UTC",
+              "eval_suite_version": "0.1.0",
+              "id": "workflow_ecc_v0_1_0",
+              "policy_version_ids": ["policy_customer_comms_v3"],
+              "status": "shadow",
+              "version": "0.1.0",
+              "workflow_id": "customer_escalation_commitment_control"
+            }
+          },
+          "correlation_id": "intake-correlation:3d96064fcfe27caa4a5aafd9d7a4539835ea73c6f79a7eaa30392e81af27bbb3",
+          "expected_case_version": 0,
+          "idempotency_key": "intake-command:3d96064fcfe27caa4a5aafd9d7a4539835ea73c6f79a7eaa30392e81af27bbb3",
+          "tenant_id": "tenant_intake_demo",
+          "trigger_event": {
+            "actor_identity_id": "identity_intake_operator",
+            "classification": "internal",
+            "content_hash": "sha256:2b6c1c815dfd178afb1f8b88504045ce27d5e6c9463a2aaab32f479e0b903d3c",
+            "event_type": "intake.material_reviewed",
+            "id": "work_event_c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+            "idempotency_key": "intake-event:c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+            "occurred_at": "2026-09-07T16:05:00.000Z",
+            "payload_ref": "intake://2b6c1c815dfd178afb1f8b88504045ce27d5e6c9463a2aaab32f479e0b903d3c",
+            "scope_ids": ["scope_entity_north"],
+            "source": "fieldruntime_intake",
+            "source_event_id": "intake:c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+            "source_timezone": "UTC",
+            "tenant_id": "tenant_intake_demo"
+          },
+          "type": "case.create"
+        },
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "case_root": "sha256:6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "case_version": 1,
+        "command_fingerprint": "sha256:e3fe56cf05d3005da7ca69a88eb60549ad51107c4b05522e4c8eef215fb0673a",
+        "hash": "sha256:8c5f33e708b42dd642bb2a734a800bb5dd7a6d8da16a891592fd4d4f8647ce51",
+        "id": "intake_commit_e3fe56cf05d3005da7ca69a88eb60549ad51107c4b05522e4c8eef215fb0673a",
+        "idempotency_key": "commit-a0413f4b-009b-4119-ba05-dbe41ce3afd0",
+        "journal_entry_hash": "sha256:72c585b27fa30260f0d19189c6f75481205791449d848ef76323609df6630201",
+        "journal_entry_id": "journal_entry_1",
+        "material_key": "sha256:c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+        "previous_intake_hash": null,
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "recorded_at": "2026-09-07T16:05:00.000Z",
+        "review_material": {
+          "acknowledgments": [
+            "active_effort_unmeasured",
+            "population_unconfirmed",
+            "population_window_unknown",
+            "relationships_unconfirmed",
+            "source_occurrence_unknown",
+            "source_snapshot_unknown",
+            "support_unconfirmed",
+            "target_reviewed"
+          ],
+          "bundle_hash": "sha256:ab940902639e6fa48e0f41b8e0c51ec33bdcb467177db0e544cca83d2c761359",
+          "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+          "case_root": "sha256:6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "citations": [
+            {
+              "authority_rank": 5,
+              "content_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+              "freshness_status": "unknown",
+              "id": "evidence_0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+              "resource_uri": "intake://artifacts/0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+              "scope_ids": ["scope_entity_north", "scope_entity_south"],
+              "source": "fieldruntime_intake",
+              "tenant_id": "tenant_intake_demo"
+            },
+            {
+              "authority_rank": 5,
+              "content_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+              "freshness_status": "unknown",
+              "id": "evidence_1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+              "resource_uri": "intake://artifacts/1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+              "scope_ids": ["scope_entity_north", "scope_entity_south"],
+              "source": "fieldruntime_intake",
+              "tenant_id": "tenant_intake_demo"
+            },
+            {
+              "authority_rank": 5,
+              "content_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+              "freshness_status": "unknown",
+              "id": "evidence_8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+              "resource_uri": "intake://artifacts/8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+              "scope_ids": ["scope_entity_north", "scope_entity_south"],
+              "source": "fieldruntime_intake",
+              "tenant_id": "tenant_intake_demo"
+            }
+          ],
+          "expected_prior_intake_binding": null,
+          "material_key": "sha256:c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+          "prior_selection_hash": null,
+          "profile_id": "invoice-dispute-intake.v1",
+          "profile_version": "1",
+          "reason": "Synthetic operator reviewed source claims and target; impact is unconfirmed",
+          "record": {
+            "business_objects": [
+              {
+                "citation": {
+                  "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                  "byte_end": 358,
+                  "byte_start": 236,
+                  "field": "customer_ref",
+                  "line_end": 2,
+                  "line_start": 2,
+                  "record": 1
+                },
+                "entity": "entity_north",
+                "id": "Orchid",
+                "kind": "customer",
+                "qualification": "reported",
+                "source": "synthetic_ar_queue"
+              },
+              {
+                "citation": {
+                  "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                  "byte_end": 358,
+                  "byte_start": 236,
+                  "field": "delivery_ids",
+                  "line_end": 2,
+                  "line_start": 2,
+                  "record": 1
+                },
+                "entity": "entity_north",
+                "id": "DEL-4",
+                "kind": "delivery",
+                "qualification": "reported",
+                "source": "synthetic_ar_queue"
+              },
+              {
+                "citation": {
+                  "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                  "byte_end": 358,
+                  "byte_start": 236,
+                  "field": "delivery_ids",
+                  "line_end": 2,
+                  "line_start": 2,
+                  "record": 1
+                },
+                "entity": "entity_north",
+                "id": "DEL-5",
+                "kind": "delivery",
+                "qualification": "reported",
+                "source": "synthetic_ar_queue"
+              },
+              {
+                "citation": {
+                  "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                  "byte_end": 358,
+                  "byte_start": 236,
+                  "field": "invoice_id",
+                  "line_end": 2,
+                  "line_start": 2,
+                  "record": 1
+                },
+                "entity": "entity_north",
+                "id": "INV-101",
+                "kind": "invoice",
+                "qualification": "reported",
+                "source": "synthetic_ar_queue"
+              },
+              {
+                "citation": {
+                  "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                  "byte_end": 358,
+                  "byte_start": 236,
+                  "field": "order_ids",
+                  "line_end": 2,
+                  "line_start": 2,
+                  "record": 1
+                },
+                "entity": "entity_north",
+                "id": "PO-9",
+                "kind": "order",
+                "qualification": "reported",
+                "source": "synthetic_ar_queue"
+              }
+            ],
+            "cells": {
+              "activity": "queue_snapshot",
+              "amount_minor": "1500000",
+              "currency": "USD",
+              "customer_ref": "Orchid",
+              "delivery_ids": "DEL-4;DEL-5",
+              "invoice_id": "INV-101",
+              "legal_entity_id": "entity_north",
+              "order_ids": "PO-9",
+              "reported_actor": "Alex",
+              "reported_role": "AR analyst",
+              "source_occurred_at": "",
+              "source_record_id": "dispute-17",
+              "source_status": "open",
+              "source_timezone": "",
+              "source_version": "r1",
+              "upstream_case_id": "AR-77",
+              "upstream_owner": "Taylor"
+            },
+            "entity": "entity_north",
+            "findings": [],
+            "ingested_at": "2026-09-07T16:05:00.000Z",
+            "locators": [
+              {
+                "artifact_hash": "sha256:0a0cdd6b524b229c2e9e0eb2af6647cb12205aaa6d57f23858b9a484a7c3a1f6",
+                "byte_end": 358,
+                "byte_start": 236,
+                "field": null,
+                "line_end": 2,
+                "line_start": 2,
+                "record": 1
+              }
+            ],
+            "measurement_gaps": [
+              "active_effort_unmeasured",
+              "population_unconfirmed",
+              "relationships_unconfirmed",
+              "source_occurrence_unknown",
+              "source_snapshot_unknown"
+            ],
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "relationships": [
+              {
+                "entity": "entity_north",
+                "from": "invoice:INV-101",
+                "qualification": "reported",
+                "to": "delivery:DEL-4"
+              },
+              {
+                "entity": "entity_north",
+                "from": "invoice:INV-101",
+                "qualification": "reported",
+                "to": "delivery:DEL-5"
+              },
+              {
+                "entity": "entity_north",
+                "from": "invoice:INV-101",
+                "qualification": "reported",
+                "to": "order:PO-9"
+              }
+            ],
+            "reported_activity": "queue_snapshot",
+            "reported_actor": "Alex",
+            "reported_owner": "Taylor",
+            "reported_role": "AR analyst",
+            "reported_source_version": "r1",
+            "reported_status": "open",
+            "source_occurrence": {
+              "instant": null,
+              "quality": "unknown",
+              "raw": null,
+              "timezone": null
+            },
+            "source_record_id": "dispute-17",
+            "source_revision": "sha256:607167384c187aad10aeb6a66b600261a9ddba6d9c6b04f8f9d26c5adbf1616e",
+            "source_snapshot": {
+              "instant": null,
+              "quality": "unknown",
+              "raw": null,
+              "timezone": null
+            },
+            "source_system": "synthetic_ar_queue",
+            "upstream_case_ref": {
+              "entity": "entity_north",
+              "id": "AR-77",
+              "source": "synthetic_ar_queue"
+            },
+            "valid": true
+          },
+          "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+          "reviewed_links": [
+            {
+              "entity": "entity_north",
+              "from": "invoice:INV-101",
+              "qualification": "reported",
+              "to": "delivery:DEL-4"
+            },
+            {
+              "entity": "entity_north",
+              "from": "invoice:INV-101",
+              "qualification": "reported",
+              "to": "delivery:DEL-5"
+            },
+            {
+              "entity": "entity_north",
+              "from": "invoice:INV-101",
+              "qualification": "reported",
+              "to": "order:PO-9"
+            }
+          ],
+          "schema_version": "intake-material.v1",
+          "source_revision": "sha256:607167384c187aad10aeb6a66b600261a9ddba6d9c6b04f8f9d26c5adbf1616e",
+          "support": [
+            {
+              "associations": [
+                {
+                  "entity": "entity_north",
+                  "id": "dispute-17",
+                  "kind": "record"
+                }
+              ],
+              "byte_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+              "byte_length": 45,
+              "declared_hash": null,
+              "derived_from": {
+                "artifact_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+                "byte_end": 45,
+                "byte_start": 0,
+                "field": null,
+                "line_end": 2,
+                "line_start": 1,
+                "record": null
+              },
+              "derived_hash": "sha256:1e39ab9e87373830d49cda28fed71aa4d2e0894aed8347f01c7173e15d0e1326",
+              "derived_text": "Delivery confirmation for DEL-4 is supplied.\n",
+              "document_id": "del-4-present",
+              "interpretation": "text",
+              "media_type": "text/plain",
+              "name": "del-4-present.txt",
+              "parser_version": "text.utf8.v1",
+              "role": "support",
+              "scope_ids": ["scope_entity_north", "scope_entity_south"]
+            },
+            {
+              "associations": [
+                {
+                  "entity": "entity_north",
+                  "id": "dispute-17",
+                  "kind": "record"
+                }
+              ],
+              "byte_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+              "byte_length": 49,
+              "declared_hash": null,
+              "derived_from": {
+                "artifact_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+                "byte_end": 49,
+                "byte_start": 0,
+                "field": null,
+                "line_end": 2,
+                "line_start": 1,
+                "record": null
+              },
+              "derived_hash": "sha256:8455c9342af2b77f810d95759c71795cd39f125c761a6d95f817e7f148d7a20a",
+              "derived_text": "Delivery confirmation for DEL-5 is not supplied.\n",
+              "document_id": "delivery-gap",
+              "interpretation": "text",
+              "media_type": "text/plain",
+              "name": "delivery-gap.txt",
+              "parser_version": "text.utf8.v1",
+              "role": "support",
+              "scope_ids": ["scope_entity_north", "scope_entity_south"]
+            }
+          ],
+          "target": {
+            "expected_case_version": 0,
+            "mode": "create"
+          },
+          "target_case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "versions": {
+            "csv": "csv.invoice-dispute.v1",
+            "mapping": "mapping.invoice-dispute.v1",
+            "text": "text.utf8.v1",
+            "timezone": "iana-offset.v1:2026b"
+          }
+        },
+        "review_material_hash": "sha256:2b6c1c815dfd178afb1f8b88504045ce27d5e6c9463a2aaab32f479e0b903d3c",
+        "schema_version": "intake-commit.v1",
+        "selection": {
+          "acknowledgments": [
+            "active_effort_unmeasured",
+            "population_unconfirmed",
+            "population_window_unknown",
+            "relationships_unconfirmed",
+            "source_occurrence_unknown",
+            "source_snapshot_unknown",
+            "support_unconfirmed",
+            "target_reviewed"
+          ],
+          "bundle_id": "intake_bundle_6d90d9ca3396499ede5620f5ae341449b4f75349e408aa6a800a9584248c61e4",
+          "expected_bundle_hash": "sha256:ab940902639e6fa48e0f41b8e0c51ec33bdcb467177db0e544cca83d2c761359",
+          "expected_consent_hash": "sha256:2b6c1c815dfd178afb1f8b88504045ce27d5e6c9463a2aaab32f479e0b903d3c",
+          "expected_material_key": "sha256:c8772334718427086b3996023be24bd303ed470af710897c53dfa59fa6a8c7cc",
+          "expected_prior_intake_binding": null,
+          "expected_source_revision": "sha256:607167384c187aad10aeb6a66b600261a9ddba6d9c6b04f8f9d26c5adbf1616e",
+          "idempotency_key": "commit-a0413f4b-009b-4119-ba05-dbe41ce3afd0",
+          "prior_selection_hash": null,
+          "reason": "Synthetic operator reviewed source claims and target; impact is unconfirmed",
+          "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+          "reviewed_links": [
+            {
+              "entity": "entity_north",
+              "from": "invoice:INV-101",
+              "qualification": "reported",
+              "to": "delivery:DEL-4"
+            },
+            {
+              "entity": "entity_north",
+              "from": "invoice:INV-101",
+              "qualification": "reported",
+              "to": "delivery:DEL-5"
+            },
+            {
+              "entity": "entity_north",
+              "from": "invoice:INV-101",
+              "qualification": "reported",
+              "to": "order:PO-9"
+            }
+          ],
+          "schema_version": "intake-selection.v1",
+          "support_document_ids": ["del-4-present", "delivery-gap"],
+          "target": {
+            "expected_case_version": 0,
+            "mode": "create"
+          }
+        },
+        "sequence": 1,
+        "tenant_id": "tenant_intake_demo",
+        "upstream_key": "sha256:6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf"
+      }
+    ],
+    "hash": "sha256:ce6c2c4930a21a66727e82ba6b8dfe2ad5ec6bfd60d7e4632614212fcdcba181",
+    "request_bindings": [],
+    "schema_version": "intake-export.v2",
+    "scope_ids": ["scope_entity_north", "scope_entity_south"],
+    "tenant_id": "tenant_intake_demo"
+  },
+  "schema_version": "discovery-export.v1",
+  "versions": {
+    "interpretation": "discovery.source-claims.v1",
+    "projection": "discovery.invoice-dispute.v1",
+    "template": "discovery.questions.v1"
+  }
+}

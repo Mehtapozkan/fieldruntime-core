@@ -193,6 +193,57 @@ export async function handleApiRequest(
     const intake = dependencies.intake;
     try {
       if (
+        segments.length === 5 &&
+        segments[2] === "bundles" &&
+        CANONICAL_ID.test(segments[3] ?? "") &&
+        ["discovery", "discovery-reviews"].includes(segments[4] ?? "")
+      ) {
+        const id = segments[3] ?? "";
+        const params = new URL(request.path, "http://localhost").searchParams;
+        if (method === "POST" && segments[4] === "discovery-reviews") {
+          if (params.size) return response(400, { error: "invalid_query" });
+          const parsed = parseCommand(request, 131072);
+          if ("error" in parsed) return parsed.error;
+          return response(
+            200,
+            await intake.reviewDiscovery(id, parsed.command),
+          );
+        }
+        if (method === "GET" && segments[4] === "discovery") {
+          if (
+            [...params.keys()].some(
+              (key) =>
+                !["record_key", "case_id", "representation"].includes(key) ||
+                params.getAll(key).length !== 1,
+            ) ||
+            (params.has("representation") &&
+              params.get("representation") !== "export")
+          )
+            return response(400, { error: "invalid_query" });
+          const key = params.get("record_key"),
+            caseId = params.get("case_id");
+          if (
+            !key ||
+            !/^sha256:[a-f0-9]{64}$/.test(key) ||
+            (caseId !== null && !CANONICAL_ID.test(caseId))
+          )
+            return response(400, { error: "invalid_query" });
+          if (params.get("representation") === "export") {
+            // Validate the selected context before returning the complete scoped export.
+            // Export itself is reconstructed in one read-only snapshot.
+            return {
+              ...response(200, await intake.exportDiscovery(id, key, caseId)),
+              headers: {
+                ...JSON_HEADERS,
+                "content-disposition":
+                  "attachment; filename=synthetic-discovery-export.json",
+              },
+            };
+          }
+          return response(200, await intake.readDiscovery(id, key, caseId));
+        }
+      }
+      if (
         method === "GET" &&
         segments.length === 3 &&
         segments[2] === "bundles"
@@ -269,7 +320,9 @@ export async function handleApiRequest(
         return response(
           error.code === "NOT_FOUND"
             ? 404
-            : /CONFLICT|REQUIRED|REGRESSION/.test(error.code)
+            : /CONFLICT|REQUIRED|REGRESSION|NO_CHANGE|ALREADY_REVIEWED/.test(
+                  error.code,
+                )
               ? 409
               : 400,
           { error: error.code, message: error.message },

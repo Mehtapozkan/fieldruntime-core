@@ -1,8 +1,10 @@
 # D-035 — Bounded Discovery preparation and descriptive review
 
 Status: **Accepted for narrow synthetic implementation. Real-customer activation remains unapproved.**
-D10-A is documentation only. D10-B is authorized after PR #31 merges normally;
-the records, APIs and screen below are not implemented by this approval update.
+D10-A was documentation only and merged normally in PR #31 at `222b2842b44efc1da219c1409d5111a55e62641a`.
+The approval update did not implement the records, APIs or screen. D10-B implements
+this accepted scope on its review branch; [the implementation guide](../guides/synthetic-discovery.md)
+records actual behavior, validation and limits. The design and approval history below remain intact.
 
 ## Human approval and proposal history
 
@@ -18,7 +20,8 @@ and [consent/stale-answer clarification](https://github.com/Mehtapozkan/fieldrun
 remain immutable proposal history. The same instruction requires the T1–T3 input-
 variation clarification below. This approval adds no customer-data permission, policy,
 outcome acceptance, Runtime Pack publication, worker integration or closure boundary.
-The remaining design examples describe the accepted scope, not implemented APIs.
+The remaining design examples preserve the accepted scope; the linked implementation
+guide distinguishes delivered behavior from outstanding product requirements.
 The [canonical specification](../product/workflow-discovery.md) remains the product
 specification; the [single 19-entry matrix](../product/requirements-implementation-matrix.md)
 remains the requirement/gaps record. This is its bounded design, not another roadmap.

@@ -1,3 +1,4 @@
+import { PostgresDiscoveryStore } from "../../../packages/runtime/src/postgres-discovery-store.js";
 import { randomUUID } from "node:crypto";
 import {
   CanonicalJsonError,
@@ -28,6 +29,7 @@ export class TransactionalIntakeWorker {
       now: (): Date => new Date(),
       nextId: (kind): string => `${kind}_${randomUUID().replaceAll("-", "_")}`,
     }),
+    readonly discovery?: PostgresDiscoveryStore,
   ) {}
   private async json(
     operation: () => Promise<IntakeObject>,
@@ -67,6 +69,35 @@ export class TransactionalIntakeWorker {
   }
   export(): Promise<JsonObject> {
     return this.json(() => this.store.export());
+  }
+  readDiscovery(
+    id: string,
+    key: string,
+    caseId: string | null,
+  ): Promise<JsonObject> {
+    return this.json(() => {
+      if (!this.discovery)
+        throw new IntakeInputError("NOT_FOUND", "Discovery is unavailable");
+      return this.discovery.read(id, key, caseId);
+    });
+  }
+  reviewDiscovery(id: string, command: unknown): Promise<JsonObject> {
+    return this.json(() => {
+      if (!this.discovery)
+        throw new IntakeInputError("NOT_FOUND", "Discovery is unavailable");
+      return this.discovery.submit(id, command, this.dependencies().now);
+    });
+  }
+  exportDiscovery(
+    id: string,
+    key: string,
+    caseId: string | null,
+  ): Promise<JsonObject> {
+    return this.json(() => {
+      if (!this.discovery)
+        throw new IntakeInputError("NOT_FOUND", "Discovery is unavailable");
+      return this.discovery.export(id, key, caseId);
+    });
   }
   async artifact(hash: string): Promise<Buffer> {
     try {

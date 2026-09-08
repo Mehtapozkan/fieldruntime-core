@@ -77,7 +77,7 @@ no-op status), not a new business receipt. A changed valid body under that key r
 only writer metadata, never C/R/S, source versions, Cases, WorkEvents or business
 receipts. Later exact retries write nothing. Inspection and exports stay read-only.
 
-One outstanding intake command is shared across tabs. IndexedDB atomically claims
+One outstanding intake or Discovery command is shared across tabs. IndexedDB atomically claims
 the slot before sending and clears only the exact completed command. If another tab
 holds it, the new command is not sent: **Recover original submission** exposes the
 saved bytes/key. Reload the other tab after completion to refresh its recovery state.
@@ -175,10 +175,11 @@ Actual local/final-head CI results are recorded in [STATUS](../../STATUS.md) and
 PR. These tests establish synthetic behavior, not customer outcomes or all Discovery requirements.
 [Screenshots and visual/keyboard scope](../evidence/d9b/README.md).
 
-[D10-A's proposed design](../architecture/d10-discovery-preparation-review.md) uses
-these retained claims for a cited brief, missing-evidence questions and seven records/
-six outputs. The snapshot does not establish a normal historical route; that stays
-unknown until separately evidenced. D10-B is not implemented. No worker allocation, new authority,
+[D10-A / Accepted D-035](../architecture/d10-discovery-preparation-review.md) merged
+in PR #31. This review branch implements the [D10-B cited brief and descriptive
+review](synthetic-discovery.md), reusing these bytes, citations, Case anchors and atomic
+recovery. Routes, active effort, population, governing rules and customer outcomes
+remain unknown until separately evidenced. No worker allocation, new authority,
 closure rule or real-data activation follows automatically from successful intake.
 
 The PR #30 retry repair adds focused checks for both operations: fresh no-op key →
@@ -188,4 +189,4 @@ forged request/result references and 0005→0006 upgrade fail closed or preserve
 expected result. Six browser scenarios include atomic competing tab claims,
 completion in one tab, conditional clearing after a late response and reload recovery.
 [Final-head validation](../../STATUS.md#d9-b-implementation-and-validation) and the PR
-record actual local versus CI results. D10-A is docs-only; D-035 is Accepted; D10-B follows normal PR #31 merge.
+record actual local versus CI results. D10-A is merged design; D10-B is implemented for review, with actual results in its guide and PR.

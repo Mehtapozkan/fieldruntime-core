@@ -323,8 +323,10 @@ source status, occurrence and ingestion times, timezone, content/provenance bind
 and matching uncertainty. These are contract-reconciliation requirements, not new
 fields silently added to strict WorkEvent v0. [D10-A / Accepted D-035](../architecture/d10-discovery-preparation-review.md)
 now makes one bounded preparation/review design concrete; its narrow synthetic review
-boundary is approved and D10-B is authorized after normal PR #31 merge, not implemented. Documentation does not complete R1–R7 or the six
-outputs. D10 supplies all records, interviews,
+boundary is approved and merged in PR #31. D10-B now implements the bounded synthetic
+brief, all seven record views/six outputs and descriptive review on its review branch;
+[actual scope and evidence](../guides/synthetic-discovery.md) do not complete the broader
+R1–R7 requirements or establish business outcomes. D10 supplies all records, interviews,
 baseline and redesign; D11 reviews one template/pack; D12 supplies one useful
 replaceable worker, bounded proof and minimum reviewed correction capture; D13
 packages customer proof. Assisted D9–D12 evaluations need not wait for every later
