@@ -34,12 +34,12 @@ Case-linked descriptive review with exact retry/stale-input/replay controls. The
 [walkthrough](docs/guides/synthetic-discovery.md) states the actual scope and gaps.
 The canonical specification and all 19 matrix entries remain the product plan.
 D11-A / corrected Accepted D-036 merged normally in PR #33 at `940a95bf` after
-approval-head CI passed. **D11-B is implemented for review on this branch**: one fixed
+approval-head CI passed. **D11-B merged normally in PR #34 at `6bfc94e24d2a2980b369fc0aea487e32313b5f78`**, from reviewed `b284279c` with passing required checks and no open findings: one fixed
 preparation template, separate publication profile, immutable selection history,
 current-basis publication/rollback and eligible stale-pack withdrawal. Its compact
 intake panel reuses current descriptive review and exposes correction → fresh review →
 separate publication. [Walkthrough and acceptance evidence](docs/guides/synthetic-preparation-pack.md).
-No worker execution, consequential-rule activation, real data, release or deployment.
+[D12-A / Proposed D-037](docs/architecture/d12-bounded-preparation-worker.md) now specifies one zero-model preparation worker and minimum proof/correction capture. It is design only, pending approval. No worker execution, consequential-rule activation, real data, release or deployment.
 
 The published `v0.1.0-evaluation-preview.0` is a historical snapshot at `3db1b4bf`,
 before D6/D7; merges do not update it. This plan describes current source and future
@@ -95,8 +95,8 @@ historical behavior alone never establishes business authority.
 | D8 — Receipts + Measurement Readiness + Failure Demonstrations | In progress | D8-A/B/C merged; accepted-outcome and measured-economics capabilities remain planned                                                                                                       | Reconstruct evidence and assert unsafe paths; distinguish missing effort/outcomes/economics from measured results; no new closure permission                                      |
 | D9 — Intake + Case Formation                                   | Merged      | D9-A/B merged; synthetic preparation, source retention, reviewed create/attach, successful-key bindings, cross-tab recovery and portable replay                                            | No duplicate Cases/events; uncertain links, source versions and missing population remain explicit; portable provenance; existing upstream Case ownership preserved               |
 | D10 — Discovery + Readiness + Redesign                         | Incomplete  | D10-B merged: bounded seven-record/six-output descriptive review; full route, baseline, interview and redesign evidence still incomplete                                                   | One operator-reviewed workflow; every finding cited or labeled, preserved source/variant conflicts, valid measurement coverage and named controls/owners                          |
-| D11 — Reviewed Runtime Builder                                 | In review   | D11-A / Accepted D-036 merged; D11-B implements one preparation pack and separate publication/withdrawal/rollback with replay                                                              | Reproducible pack; draft/contradictory rules cannot execute; approved diffs and rollback; any changed trust/closure boundary has human approval                                   |
-| D12 — One Useful Replaceable Worker                            | Planned     | Evidence gathering, reconciliation and drafts within reviewed read/propose scope; bounded execution, independent proof and minimum manual reviewed correction capture                      | API-only scoped work/denial/abstention/exact retry/result inspection; replace worker without losing history; code-only and human-approved AI controls; no unsupported closure     |
+| D11 — Reviewed Runtime Builder                                 | Merged      | D11-A/B merged; Accepted D-036 implements one preparation pack and separate publication/withdrawal/rollback with replay                                                                    | Reproducible pack; draft/contradictory rules cannot execute; approved diffs and rollback; any changed trust/closure boundary has human approval                                   |
+| D12 — One Useful Replaceable Worker                            | Proposed    | Evidence gathering, reconciliation and drafts within reviewed read/propose scope; bounded execution, independent proof and minimum manual reviewed correction capture                      | API-only scoped work/denial/abstention/exact retry/result inspection; replace worker without losing history; code-only and human-approved AI controls; no unsupported closure     |
 | D13 — 25-Case Challenge + Customer Proof                       | Planned     | Operating Capacity Map, valid manual/generic-agent comparison, total human attention and delivery costs, paid continuation experiment; bounded 30-day evaluation when ready                | Report coverage, quality, failed/open Cases and uncertainty; two partners return with a second batch and one paid continuation is a proposed target, not PMF or a measured result |
 | D14 — One-Command / Self-Serve Distribution                    | Planned     | Zero-install or one-command try path and polished `/try` experience for Case Formation and the Challenge                                                                                   | A new evaluator can reach the bounded experience through a documented, low-friction distribution path                                                                             |
 | D15 — Worker / Model Routing + Intelligence Receipts           | Planned     | Route by task, risk, authority, cost, capability, warm state, and verified outcomes while keeping provider and model replaceable                                                           | Routing choices are receipted, policy-bounded, evaluated, and independent of canonical Case ownership                                                                             |
@@ -240,7 +240,7 @@ D-013 and D-033 remain unchanged; measured economics stays unimplemented.
    annotation and confirmation. [T1–T12 walkthrough and limits](docs/guides/synthetic-discovery.md).
    Full normal/exception routes, governing source/variant rules, population/effort/cost
    coverage, customer acceptance and measured usefulness remain incomplete.
-5. **D11-A merged; D11-B implemented for review:** [Accepted D-036](docs/architecture/d11-reviewed-runtime-pack.md)
+5. **D11-A/B merged in PRs #33/#34:** [Accepted D-036](docs/architecture/d11-reviewed-runtime-pack.md)
    supplies a populated four-step preparation pack, separately scoped publication role,
    exact input/version bindings, selection/supersession/rollback and T1–T9 gates.
    The corrected example derives claim-level citations, keeps withdrawal independent of
@@ -250,10 +250,26 @@ D-013 and D-033 remain unchanged; measured economics stays unimplemented.
    later must preserve recorded v1/v2 interpretation. No extra planning stage is added.
    The owner approved corrected local `100b6818` (published as identical-tree `3ba7f800`).
    D11-B implements one pack review/publication path with T1–T9 evidence; no worker
-   or consequential-rule execution. Then D12 integrates one useful bounded
-   replaceable worker and minimum approved proof/correction capture. A Discovery
-   confirmation never installs policy or authorizes execution. Hermes remains a candidate,
-   not a dependency mandate; broad correction/replay tooling stays D16.
+   or consequential-rule execution. A Discovery confirmation never installs policy or
+   authorizes execution.
+6. **D12-A — design proposed, no implementation:** [D-037](docs/architecture/d12-bounded-preparation-worker.md)
+   and its [worked example](docs/guides/d12-preparation-worker-design.md) propose a scoped
+   checklist, reconciliation, gap agenda and unsent draft from S1–S4. Smallest D12-B,
+   after approval: explicit template/pack v2, fixed zero-model worker/profile, one supporting
+   journal, exact start/result fences and retries, task review, reviewed correction/evaluation
+   candidate and manual synthetic proof notes in the existing intake view. Existing v1 packs
+   do not permit dispatch; new publication is required, with current D10 review reused.
+   W1–W10 cover useful output, truth/scope, races, replay/replacement, proof/closure and UI.
+   Completed review/publication details become expandable while withdrawal/correction/recovery
+   stay accessible. No scheduler, provider or general agent framework. Broader tooling stays D16.
+
+The [five proof measures](docs/product/workflow-discovery.md#five-separate-proof-measures)
+are defined now: matched cash, accepted dispute dispositions, posted credits, newly
+attended work and signed human attention released. They retain separate evidence,
+units/cohorts/coverage, reversals/reopens and uncertainty. Minimum synthetic capture
+requires D-037 approval; D13 comparisons include failed/open work and all attributable
+human/model/tool/infrastructure/support/setup costs. Unknown is not zero; overlapping
+measures never become one value score. No measured customer benefit is claimed.
 
 Customer learning accompanies D9–D12: assisted packet sessions, then a comparable
 fresh batch against manual and generic-agent alternatives with equal input/tool/

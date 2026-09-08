@@ -25,10 +25,9 @@ Real customer activation remains unapproved.
 Main includes D9-B and D10-B (PR #32, merged at `953d49ec`): a cited synthetic
 workflow brief, consequential questions and persistent descriptive answers/corrections/
 confirmations. It uses zero model calls. See the [Discovery walkthrough](docs/guides/synthetic-discovery.md).
-**D11-A / corrected Accepted D-036 merged in PR #33 at `940a95bf`. This review branch
-implements D11-B:** one fixed preparation pack, separate synthetic publication, withdrawal,
+**D11-A/B and corrected Accepted D-036 are merged (PRs #33/#34, main `6bfc94e2`):** one fixed preparation pack, separate synthetic publication, withdrawal,
 guarded rollback and portable history. [Try the pack walkthrough](docs/guides/synthetic-preparation-pack.md).
-Worker execution remains pending (D12).
+[D12-A](docs/guides/d12-preparation-worker-design.md) is a docs-only proposal on this review branch; worker execution and proof/correction capture remain pending approval and implementation.
 The historical prerelease has the smaller boundary described under [Distribution](#distribution).
 
 | Functionality                                     | Workbench                                                                                                | API / runtime                                                                                           | Availability                                                                          |
@@ -42,7 +41,7 @@ The historical prerelease has the smaller boundary described under [Distribution
 | Failure walkthrough and measurement readiness     | Existing failure/result views remain unchanged                                                           | Five selected PostgreSQL/API control and failure fixtures with evidence output                          | Main (D8-B)                                                                           |
 | Synthetic file intake                             | Explicit prepare, review target, commit and reopen; source citations and gaps                            | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay                 | Main (D9-B); real data unapproved                                                     |
 | Cited workflow preparation and descriptive review | Open retained intake, inspect seven records/six outputs, answer/correct/confirm and reopen history       | Deterministic brief, exact Case/material/review bindings, one immutable journal and portable provenance | Main (D10-B); not in historical prerelease; complete Discovery remains pending        |
-| Reviewed preparation pack                         | Compact intake panel: inspect, publish, compare, withdraw, roll back and export                          | Strict fixed template, scoped publication profile, exact current basis and immutable selection replay   | D11-B review branch; not in historical prerelease; no worker execution                |
+| Reviewed preparation pack                         | Compact intake panel: inspect, publish, compare, withdraw, roll back and export                          | Strict fixed template, scoped publication profile, exact current basis and immutable selection replay   | Main (D11-B); not in historical prerelease; no worker execution                       |
 | Accepted outcome, economics and complete closure  | Unavailable                                                                                              | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof                          | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
@@ -92,7 +91,7 @@ For **merged synthetic Discovery**, open the existing intake entry at
 commit, then **Open workflow brief**. Save a descriptive answer and confirm its
 stated purpose separately. [Executable API steps, migration and desktop/390px captures](docs/guides/synthetic-discovery.md).
 Descriptive confirmation does not enroll intake Cases for financial actions or publish a pack.
-On the D11-B review branch, the separate **Preparation pack** panel provides explicit
+The merged **Preparation pack** panel provides explicit
 publication after that review; [its guide](docs/guides/synthetic-preparation-pack.md) covers
 changes, stale withdrawal and exact recovery.
 
@@ -114,8 +113,7 @@ These commands alone do not start persistent review or test PostgreSQL. Reposito
 CI also exercises real PostgreSQL/API, restart, Compose and Workbench browser paths.
 [Validation evidence and remaining limits](STATUS.md).
 
-To try this branch’s intake, switch to `feat/d9b-synthetic-intake` before building,
-then open `/?view=intake`. Use **Use synthetic sample → Prepare selected synthetic
+To try merged synthetic intake, open `/?view=intake` on current main. Use **Use synthetic sample → Prepare selected synthetic
 files → Review this candidate → Inspect exact commit → Commit reviewed material**.
 [Exact API/retry/export walkthrough and migration limits](docs/guides/synthetic-intake.md).
 Intake does not enroll imported Cases for credit review or execution.
@@ -154,12 +152,14 @@ history. They remain isolated from Orchid.
 - **D9 — Synthetic intake:** merged in PR #30, including retained bytes, explicit
   Case create/attach, successful-key bindings and cross-tab recovery. [Try intake](docs/guides/synthetic-intake.md).
 - **D10–D12:** [D10-A / Accepted D-035](docs/architecture/d10-discovery-preparation-review.md)
-  is merged. This review branch implements the bounded D10-B cited brief and descriptive
+  and D10-B are merged, providing a bounded cited brief and descriptive
   review with seven record views, six outputs, gap-driven questions and redesign.
   The broader Operational Legibility requirements remain incomplete.
   [Try Discovery](docs/guides/synthetic-discovery.md). Full evidenced routes, governing
-  rules and measurement coverage remain incomplete. D11 supplies a reviewed Runtime
-  Pack; D12 supplies a bounded worker. Real-data activation remains unapproved.
+  rules and measurement coverage remain incomplete. D11-B publication is merged;
+  [D12-A / Proposed D-037](docs/architecture/d12-bounded-preparation-worker.md) designs
+  a bounded worker and separate proof/correction capture. No D12 implementation exists.
+  Real-data activation remains unapproved.
 - **D13 — Customer proof:** planned 25-Case Challenge and Operating Capacity Map.
   Assisted evaluations may begin during D9–D12 within an approved data boundary;
   measured quality, total effort and repeat use determine continuation. Connected

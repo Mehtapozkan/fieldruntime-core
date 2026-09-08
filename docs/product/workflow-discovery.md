@@ -242,6 +242,51 @@ measurements; it adds no telemetry. Missing economics must not indefinitely bloc
 | Cost per accepted or verified outcome         | State the exact denominator; packet acceptance cannot silently replace business acceptance. Include model/tool/compute, operator preparation/review/correction/verification, support, founder assistance and attributable delivery/setup costs. Separate one-time setup and incremental recurring costs with allocation/rate assumptions, failed/reworked Cases and coverage.                                                                                                                                       |
 | Quality and economic value                    | Track false approvals, missed exceptions, abstention/fallback, mismatch, downstream consequences and rework. Separate direct loss/penalties, realized value, accelerated cash, protected-value estimates and opportunity hypotheses. Invoice principal, delayed cash and credit value are not automatically revenue, loss or savings.                                                                                                                                                                               |
 
+### Five separate proof measures
+
+The owner explicitly required these distinctions in the D12-A instruction on
+2026-09-08. They extend the existing measurement requirements; **no capture,
+customer result or telemetry is implemented by these definitions**. Proposed capture
+uses definition version `invoice-dispute-proof.v1` under [D-037](../architecture/d12-bounded-preparation-worker.md).
+They are separate from the four achievements above: one business resolution can
+involve a credit, cash, neither or both, without satisfying runtime closure.
+
+Every observation names tenant/Case/entity-qualified record and source object/event,
+definition version, cohort inclusion rule, period with timezone, observed/source and
+recorded times, coverage numerator/denominator, method, accountable measurement owner,
+evidence locators and uncertainty. Separate **measured, estimated, hypothesis and
+synthetic demonstration**; unknown is null/unavailable, never measured zero.
+
+| Measure and unit                                                                                                        | Required source evidence                                                                                                                                                                                                                                               | Cohort, period and baseline                                                                                                                                                                                                                                                              | Coverage, exclusions, uncertainty and later changes                                                                                                                                                                                                                                                                                                                                                            |
+| ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cash collected** — currency minor units, reported by currency; receipt/obligation counts separately                   | Actual posted cash receipts matched to obligations using authoritative receipt, allocation and obligation IDs/statuses; accountable source and read method. A dispute balance, promise, invoice principal or credit is not cash.                                       | Pre-agreed eligible obligations/records and receipt-occurrence window; distinguish pre-existing receipts and collections outside the window. Baseline collection/aging comparison is required before claiming improvement, with comparable cohorts and terms.                            | State allocation and source coverage; unallocated or ambiguous matches remain unknown. No silent currency conversion or double counting across split allocations. Show gross receipts, refunds/reversals and net separately. Append reversals/restatements linked to original receipts; disclose late-arriving evidence and as-of cutoff.                                                                      |
+| **Disputes resolved** — distinct dispute records meeting an agreed disposition definition; reopen count/rate separately | Governing source disposition plus evidenced acceptance by the identified accountable recipient, exact rule/version and reopen semantics. Runtime status, worker completion and task acceptance alone are insufficient.                                                 | All eligible disputes opened/active in the defined cohort/window, including failed, open and human-only work. Define partial dispositions and end/censoring window before comparison. Compare resolution rate/elapsed time only against comparable baseline mix and observation windows. | Report accepted, still-open, failed, partially disposed and reopened counts with coverage. Reopened work is not a new success; retain original event and current status, and show restated net count as-of time. Resolution need not mean payment or runtime Case closure.                                                                                                                                     |
+| **Credits issued** — posted currency minor units and distinct credit IDs, separated by real/synthetic source            | Credit actually posted in the relevant source, linked to exact account/obligation/Case, amount/currency, source status and independent observation; a proposal or adapter acknowledgment is insufficient. D7 source proof establishes only synthetic issuance.         | Defined eligible cohort and posting-occurrence window, including reversals posted later and pre-existing credits explicitly excluded. Baseline needed for any improvement/avoidance claim, not to state a substantiated posting.                                                         | Report source/identity coverage, gross posted credits, reversals and net by currency and simulation status. Pending/failed/unavailable observations are not issued credits; ambiguous attribution stays unknown. Append linked reversals; never call issued credit collected cash or savings.                                                                                                                  |
+| **Work newly attended to** — distinct previously unattended eligible records receiving substantive evidenced progress   | Evidence of prior coverage over a defined lookback (queue history/ownership/activity or explicitly qualified operator report) **and** an inspectable new finding, usable packet/intervention or completed bounded work under an agreed substantive-progress criterion. | Fix eligible population, lookback and progress window before intervention, including records already attended, open and failed. Establish baseline coverage before claiming newly attended work; missing prior history cannot prove unattended status.                                   | Publish known prior coverage/unknown counts and the substantiated numerator; no extrapolation from unknowns. Import, selection, reads, clicks or retries alone never count. Deduplicate repeated packets for the same record/window. Retracted findings or evidence that work was already attended append corrections and remove the claim from the current numerator. No inferred autonomy.                   |
+| **Human attention released** — signed person-minutes/hours, capacity only                                               | Comparable baseline active effort minus actual preparation, review, correction, verification and attributable support effort at comparable quality, with method, people/roles, intervals or explicit estimates and coverage. Include founder/operator help.            | Same scoped task/cohort/quality and observation window; record mix, staffing/process/tool changes and all failed/open/human-only work. Baseline before intervention. Packet-accepted and business-outcome denominators remain separate.                                                  | Deduplicate a person's overlapping active intervals; different people's effort can add. Waiting/elapsed time remain separate. Missing effort is not zero; incomplete coverage makes release unavailable or explicitly bounded/estimated. Retain negative results when actual effort exceeds baseline. Rework/reopened effort restates the observation. Released capacity is not automatically payroll savings. |
+
+Link overlaps by Case/record identity and underlying source IDs: a dispute may appear
+in several measures, and a receipt can allocate across obligations. Disclose those
+intersections and allocation rules; **never sum the five into one “value generated”
+number**. Monetary measures are not commensurate with counts or effort. A hypothetical
+baseline of 12 person-minutes and actual total of 17 means **−5 minutes released**, not
+zero or a gain; this arithmetic example is not a Field Runtime measurement.
+
+Retain costs separately: model/tool usage and rates, infrastructure allocation, direct
+human preparation/review/correction/verification, support/founder assistance, and setup/
+integration/training. Each names currency or effort unit, evidence/method/coverage,
+allocation/rate assumptions and **recurring versus one-time** treatment. Do not count
+the same person-minutes again as support or turn amortization assumptions into observed
+cost. Zero model calls is an execution fact; it does not establish zero infrastructure,
+human, tool, support or setup cost. Any cost per outcome must disclose its exact accepted
+or verified denominator; with no qualifying outcomes the ratio is unavailable.
+
+Definitions belong here now. Minimum manual, synthetic evidence/attention/cost capture
+is proposed for separately approved D12 work in the existing supporting-history pattern;
+it is not a telemetry platform, payroll model or ROI dashboard. D13 owns customer
+comparison/reporting, including failed/open work and all attributable human effort,
+only after the custody/access/deletion boundary is approved.
+
 All estimates retain method and owner. Distinguish measured, observed, estimated,
 inferred and hypothetical results; unknown is not measured zero. Compare like-for-like
 cohorts with counts and uncertainty. Lower attention or faster review cannot
@@ -324,7 +369,7 @@ and matching uncertainty. These are contract-reconciliation requirements, not ne
 fields silently added to strict WorkEvent v0. [D10-A / Accepted D-035](../architecture/d10-discovery-preparation-review.md)
 now makes one bounded preparation/review design concrete; its narrow synthetic review
 boundary is approved and merged in PR #31. D10-B now implements the bounded synthetic
-brief, all seven record views/six outputs and descriptive review on its review branch;
+brief, all seven record views/six outputs and descriptive review, merged in PR #32;
 [actual scope and evidence](../guides/synthetic-discovery.md) do not complete the broader
 R1–R7 requirements or establish business outcomes. D10 supplies all records, interviews,
 baseline and redesign; D11 reviews one template/pack; D12 supplies one useful
@@ -334,6 +379,11 @@ module. D14 distribution, D15 broad routing, D16 Operational CI, D17 connectors,
 D18 connected shadow operation, D19 enterprise controls and D20 production writes
 remain gated future work. No enterprise-wide process mining, workforce scoring,
 novelty engine, general attention allocator, nested loops or autonomous policy.
+
+D11-B is merged in PR #34: one fixed preparation publication path. D12-A now proposes
+one bounded zero-model worker, exact task/result/correction proof and the five separate
+measures under [D-037](../architecture/d12-bounded-preparation-worker.md). This remains
+design only; v1 packs do not authorize worker dispatch. [Worked operator result](../guides/d12-preparation-worker-design.md).
 
 Every implementation handoff must report requirement IDs, changed files/contracts,
 actual user behavior, validation evidence, gaps and next dependencies. Update the

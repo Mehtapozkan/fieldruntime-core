@@ -1,29 +1,41 @@
 # Status
 
-Current milestone: **D11-A merged; D11-B implemented on this review branch.**
-Corrected Accepted D-036 and the explicit owner approval merged normally in PR #33
-at `940a95bf62463ba3c42a0e6221b9e6849f523410`. Approval-recording head `3c93f6f6`
-passed [required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34270252563);
-both findings were resolved. Main's required PR, strict up-to-date `validate` and
-force-push/deletion protections were preserved without bypass. The corrected local
-`100b6818` was published as identical-tree `3ba7f800`, without reapplying its patch.
+Current milestone: **D11-B merged; D12-A design proposed on this branch. No D12
+worker, task review or proof/correction capture is implemented.**
 
-D11-B adds one strict, fixed synthetic preparation template, claim-relevant pack
+PR #34 merged normally at `6bfc94e24d2a2980b369fc0aea487e32313b5f78`, preserving
+reviewed head `b284279c0445121fe9eb1494fa926a48af22c8df` and its
+[passing required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34279140329).
+No open review findings remained. The effective main rules required a PR, strict
+up-to-date `validate` and force-push/deletion protection; normal merge used no bypass.
+Accepted D-036, migration 0008 and all 0001–0007 checksums, replay and exact retries remain intact.
+
+D11-B supplies one strict synthetic preparation template, claim-relevant pack
 projection, separate server-controlled publication profile and immutable PostgreSQL
-selection history. Explicit publish/withdraw/guarded rollback use operation-specific
-basis, reviewer, expiry and exact-head checks. Stale or expired packs remain withdrawable
-by a currently eligible reviewer. Selection advances P, not Case C, Discovery D or R/S.
-Reads/diffs/exports use a consistent read-only snapshot. Accepted command evidence and
-historical input anchors reconstruct after restart; exact retries do not renew permission.
-[Executable API/Workbench walkthrough, T1–T9 coverage and captures](docs/guides/synthetic-preparation-pack.md).
+selection history. Publish/withdraw/guarded rollback have operation-specific checks;
+stale or expired packs remain withdrawable by a currently eligible reviewer. P changes,
+not Case C, Discovery D or R/S. Reads/diffs/exports are read-only; historical receipts
+reconstruct after restart and exact retries do not renew permission.
+[API/Workbench walkthrough, T1–T9 coverage and captures](docs/guides/synthetic-preparation-pack.md).
 
-The existing intake Workbench now exposes a compact pack panel with uncertainty,
-current selection, exact changes, separate publication and technical provenance.
-Current descriptive review is reused without another confirmation write. Genuine
-corrections make the old pack stale; fresh descriptive review and separate publication
-are required. The atomic IndexedDB slot also protects pack commands across tabs.
-Confirmed receipts survive failed refresh; mixed projections show unavailable.
-Migration 0008 is additive; every 0001–0007 checksum and successful intake key survives.
+The intake panel reuses current descriptive review without another confirmation.
+Genuine corrections stale the old pack until fresh descriptive review and separate
+publication. Atomic IndexedDB claims protect commands across tabs; confirmed receipts
+survive failed refresh and mixed projections show unavailable. Two nonblocking UI
+observations carry into D12: completed descriptive review competes with the next action,
+and a published pack retains an inactive publication form. Proposed consolidation
+keeps completed details expandable and correction/withdrawal/recovery accessible.
+
+[Proposed D-037](docs/architecture/d12-bounded-preparation-worker.md) defines one
+zero-model worker assembling a cited evidence checklist, reconciliation, gap agenda and
+unsent follow-up. The [worked example](docs/guides/d12-preparation-worker-design.md)
+separates reproduced D11 material from hypothetical worker records. Existing pack v1
+explicitly forbids dispatch; proposed v2 needs fresh publication. One proposed supporting
+journal retains start/result, task review, correction/evaluation review and synthetic
+proof notes, without changing Case/review/selection history or granting business authority.
+The [five separate proof measures](docs/product/workflow-discovery.md#five-separate-proof-measures)
+are now defined in the canonical specification and existing matrix. Capture awaits
+D-037 approval/implementation; customer comparisons remain D13 and real data unapproved.
 
 D10-B merged in PR #32 at `953d49ece70f7828935bb0f4636299d7601f16d5`.
 Historical Discovery v1/v2 retains its original loop-helper semantics; the new pack
@@ -32,8 +44,8 @@ The old helper remains a documented upstream gap, not silently repaired. Node 24
 tzdata 2026b is still required. All 19 canonical matrix entries remain; complete Discovery,
 source/variant rules, customer evidence and measurements remain incomplete.
 
-**Next: D12 useful bounded worker integration and separately reviewed minimum proof/
-correction capture.** D11-B does not execute the four-step assignment, invoke models,
+**Next: human review of Proposed D-037, then one bounded D12-B implementation PR
+using its W1–W10 gates.** D11-B does not execute the four-step assignment, invoke models,
 activate consequential rules, authorize a credit or allow Case closure. Real customer
 activation remains unapproved. No release or deployment is included.
 
@@ -1292,7 +1304,7 @@ check). Required hosted validation must pass on this approval-recording head bef
 normal merge. Docker is still unavailable locally. D11-B is authorized but not yet
 implemented and must start from merged main. No D12 or release/deployment work began.
 
-## D11-B implementation validation
+## D11-B implementation validation (PR #34 checkpoint)
 
 Local `pnpm validate` passes **307/307** tests plus formatting, lint, types and
 public-release audit. ECC passes **620/620**; its negative control exits **1 at 152/620**
@@ -1324,13 +1336,33 @@ The expanded full-suite job has a 45-minute budget; all assertions remain requir
 Final corrected-head CI is reported on the PR. Historical archives from other interpreter
 versions must retain their original image/volume; no silent timezone conversion is added.
 
+## D12-A design validation
+
+This branch changes documentation and one proposed JSON example only. No runtime,
+registered schema, migration, fixture or UI behavior changes. D-037 remains Proposed.
+Local Node 24.19.0/tzdata 2026b `pnpm validate` passes **307/307** plus formatting,
+lint, types and release checks. ECC passes **620/620**; negative control exits **1**
+with **152/620**, from intended failed safety assertions, not a crash.
+The documented disposable PostgreSQL 18.4/API example reproduces D11 source/selection
+hashes, checks proposed pack/start/result/review hashes and scoped citations, confirms
+strict v1 rejection of the proposed v2 pack, and preserves byte-identical export and
+database state after restart/read. This is existing D11 and document-consistency evidence,
+not a D12 W1–W10 implementation pass. All five example measures remain unknown.
+Local link checks cover **162 Markdown targets** and all **19 original matrix IDs**;
+`git diff --check` passes. Applied migration and frozen ECC bytes remain unchanged.
+
+`docker compose config --quiet` is unavailable locally: Docker is not installed
+(exit 127). Final-head repository CI on the PR remains required for the retained real
+PostgreSQL/API/browser/Compose/appliance suites. This docs-only change adds no browser
+screenshots or visual checks; its layout is a proposal. Existing D11 captures remain
+available in the implementation guide. No measured customer result is claimed.
+
 ## Next
 
-Review and merge D11-B separately. D12 remains the next useful worker integration;
-no worker execution or extra planning stage is added here. Business
-source/variant/authority rules remain disabled; D12 retains one bounded replaceable
-worker and separately reviewed minimum proof/correction integration. Descriptive
-confirmation is not permission for either.
+D11-B is merged. Review Proposed D-037 before implementing its bounded D12-B worker,
+task/proof/correction history and explicit pack v2 publication. The W1–W10 design gates
+are not passing worker tests yet. Business source/variant/authority rules remain
+disabled; descriptive confirmation is not permission for worker execution or closure.
 Representative normal/exception routes, governing field/variant rules, baseline/effort/
 cost collection, operator usefulness/support and customer acceptance remain incomplete.
 Measured economics and complete Case closure are not implemented.

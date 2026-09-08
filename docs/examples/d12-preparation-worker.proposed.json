@@ -1,0 +1,779 @@
+{
+  "status": "Proposed design only: D11 basis was reproduced; pack v2, worker, result and review records below were not submitted to any runtime.",
+  "baseline": {
+    "main_commit": "6bfc94e24d2a2980b369fc0aea487e32313b5f78",
+    "fixture_inputs": [
+      {
+        "path": "tests/fixtures/intake/orchid.csv",
+        "hash": "sha256:e03a128dc0e3e022eda175f197de6b8dd463d87ea5da1a196d80f2aa6c05d0b3"
+      },
+      {
+        "path": "tests/fixtures/intake/note-17.txt",
+        "hash": "sha256:16c8f0c2de6a68e220ea5588703d6e382ab75a03d4aa278190b9a0fd482863e3"
+      }
+    ],
+    "prepare_key": "d12-example-prepare",
+    "commit_key": "d12-example-commit",
+    "confirm_key": "d12-example-confirm",
+    "publish_v1_key": "d12-example-publish-v1",
+    "actual_artifact_hash": "sha256:aab2b9af7374b6f50bc6547627c03e6f2cbfc1e64acfab0258c71c4dcf50d011",
+    "actual_selection_head": "sha256:0e3d27b9c999fc58105d58d86f87966771f946e582b2231125f061d96a2848bc",
+    "actual_export_hash": "sha256:dac80013e747930f09296070482b3e62d796a975bf117c81aeab9208b5badc41"
+  },
+  "citation_catalog": [
+    {
+      "artifact_hash": "sha256:e03a128dc0e3e022eda175f197de6b8dd463d87ea5da1a196d80f2aa6c05d0b3",
+      "bundle_id": "intake_bundle_6761cd54f15da32600bf634d0f526255c4afa474e09f8756ecf5b272c7daee99",
+      "excerpt": "dispute-17,r1,entity_north,Orchid,INV-101,1500000,USD,open,queue_snapshot,Alex,AR analyst,AR-77,Taylor,PO-9,DEL-4,,\n",
+      "id": "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81",
+      "interpretation": "csv",
+      "locator": {
+        "artifact_hash": "sha256:e03a128dc0e3e022eda175f197de6b8dd463d87ea5da1a196d80f2aa6c05d0b3",
+        "byte_end": 352,
+        "byte_start": 236,
+        "field": null,
+        "line_end": 3,
+        "line_start": 2,
+        "record": 1
+      },
+      "name": "orchid.csv",
+      "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+      "reported_source_version": "r1",
+      "retained_at": "2026-09-07T16:05:00.000Z",
+      "scope_ids": ["scope_entity_north", "scope_entity_south"],
+      "source_time": null
+    },
+    {
+      "artifact_hash": "sha256:16c8f0c2de6a68e220ea5588703d6e382ab75a03d4aa278190b9a0fd482863e3",
+      "bundle_id": "intake_bundle_6761cd54f15da32600bf634d0f526255c4afa474e09f8756ecf5b272c7daee99",
+      "excerpt": "Customer disputes delivery DEL-4. Delivery confirmation is not supplied.\n",
+      "id": "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975",
+      "interpretation": "text",
+      "locator": {
+        "artifact_hash": "sha256:16c8f0c2de6a68e220ea5588703d6e382ab75a03d4aa278190b9a0fd482863e3",
+        "byte_end": 73,
+        "byte_start": 0,
+        "field": null,
+        "line_end": 2,
+        "line_start": 1,
+        "record": null
+      },
+      "name": "note-17.txt",
+      "record_key": null,
+      "reported_source_version": null,
+      "retained_at": "2026-09-07T16:05:00.000Z",
+      "scope_ids": ["scope_entity_north", "scope_entity_south"],
+      "source_time": null
+    },
+    {
+      "artifact_hash": "sha256:e03a128dc0e3e022eda175f197de6b8dd463d87ea5da1a196d80f2aa6c05d0b3",
+      "bundle_id": "intake_bundle_6761cd54f15da32600bf634d0f526255c4afa474e09f8756ecf5b272c7daee99",
+      "excerpt": "dispute-18,r1,entity_south,Orchid,INV-101,250000,USD,open,queue_snapshot,Sam,AR analyst,,,PO-10,DEL-5,,\n",
+      "id": "sha256:d2bb5dfa3905c9f8f2d101bf856fac5a076c15f68f01df26e3663eda856198dd",
+      "interpretation": "csv",
+      "locator": {
+        "artifact_hash": "sha256:e03a128dc0e3e022eda175f197de6b8dd463d87ea5da1a196d80f2aa6c05d0b3",
+        "byte_end": 456,
+        "byte_start": 352,
+        "field": null,
+        "line_end": 4,
+        "line_start": 3,
+        "record": 2
+      },
+      "name": "orchid.csv",
+      "record_key": "sha256:e946bd6a33d742946ccef716212515964feecf5891450c5aef3fca82ffbf727c",
+      "reported_source_version": "r1",
+      "retained_at": "2026-09-07T16:05:00.000Z",
+      "scope_ids": ["scope_entity_north", "scope_entity_south"],
+      "source_time": null
+    }
+  ],
+  "worker_profile": {
+    "schema_version": "synthetic-preparation-worker.v1",
+    "tenant_id": "tenant_intake_demo",
+    "profile_id": "synthetic_preparation_worker.v1",
+    "implementation_id": "disposition-code.v1",
+    "identities": [
+      {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_disposition_worker_demo",
+        "tenant_id": "tenant_intake_demo",
+        "identity_kind": "service",
+        "status": "active"
+      },
+      {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_intake_operator",
+        "tenant_id": "tenant_intake_demo",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_pack_reviewer_demo",
+        "tenant_id": "tenant_intake_demo",
+        "identity_kind": "human",
+        "status": "active"
+      }
+    ],
+    "read_scope_ids": ["scope_entity_north", "scope_entity_south"],
+    "work_scope_ids": ["scope_entity_north"],
+    "grants": [
+      {
+        "identity_id": "identity_disposition_worker_demo",
+        "purpose": "prepare_disposition_packet",
+        "status": "active",
+        "effective_from": "2026-01-01T00:00:00.000Z",
+        "effective_until": "2027-01-01T00:00:00.000Z"
+      },
+      {
+        "identity_id": "identity_intake_operator",
+        "purpose": "review_preparation_task",
+        "status": "active",
+        "effective_from": "2026-01-01T00:00:00.000Z",
+        "effective_until": "2027-01-01T00:00:00.000Z"
+      },
+      {
+        "identity_id": "identity_pack_reviewer_demo",
+        "purpose": "review_synthetic_evaluation_candidate",
+        "status": "active",
+        "effective_from": "2026-01-01T00:00:00.000Z",
+        "effective_until": "2027-01-01T00:00:00.000Z"
+      }
+    ]
+  },
+  "worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa",
+  "worker_limits": {
+    "selected_records": 1,
+    "retained_bundles": 1,
+    "coverage_rows": 200,
+    "associated_support_artifacts": 20,
+    "parsed_utf8_bytes": 2097152,
+    "questions": 64,
+    "result_bytes": 262144,
+    "steps": 4,
+    "computation_ms": 5000
+  },
+  "proposed_pack_recipe": {
+    "base": "baseline actual D11 candidate",
+    "template_id": "invoice-dispute-preparation.v2",
+    "artifact_hash": "sha256:8e1766615116c6cd85114d30a4ee0fa570477a5b3fc303c3d777f42b72e679c5",
+    "version": "pack-v2-6d04240aeae77d0bd38ea804e9d47c0c7c2460ddbca450da02f04d6f211a01c1",
+    "patches": {
+      "schema_version": "preparation-pack.v2",
+      "template.resource_limits.worker_dispatch": true,
+      "template.resource_limits.worker_execution": "fixed_in_process_preparation_only",
+      "template.resource_limits.worker_limits": "worker_limits",
+      "template.outcome_requirements.packet_acceptance.implemented_capture": true,
+      "template.outcome_requirements.packet_acceptance.current_status": "requires_exact_task_review",
+      "template.intervention_requirements.durable_capture": "preparation_work_journal under Proposed D-037",
+      "template.correction_requirements.minimum_capture": "purpose_limited_preparation_correction.v1",
+      "binding.worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa"
+    }
+  },
+  "proposed_publication": {
+    "entry_without_artifact": {
+      "actor": {
+        "identity_id": "identity_pack_reviewer_demo",
+        "identity_kind": "human",
+        "schema_version": "identity-reference.v0",
+        "status": "active",
+        "tenant_id": "tenant_intake_demo"
+      },
+      "artifact_hash": "sha256:8e1766615116c6cd85114d30a4ee0fa570477a5b3fc303c3d777f42b72e679c5",
+      "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+      "command": {
+        "artifact_hash": "sha256:8e1766615116c6cd85114d30a4ee0fa570477a5b3fc303c3d777f42b72e679c5",
+        "effective_until": "2026-09-07T17:00:00.000Z",
+        "effective_until_source_timezone": "UTC",
+        "expected_basis": {
+          "confirmation_entry_hash": "sha256:529d307d35d8e36041639364866fef6c17e5e918823256ef8cc77cf3127880f5",
+          "discovery": {
+            "bundle_id": "intake_bundle_6761cd54f15da32600bf634d0f526255c4afa474e09f8756ecf5b272c7daee99",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "expected_case_version": 1,
+            "expected_discovery_revision": 1,
+            "expected_intake_receipt_hash": "sha256:8d32382f38587a13b8aca59f0feb863e3d2a434e3d7ce90ad498397a85ef7a75",
+            "expected_material_hash": "sha256:02b8938b8b8a824c5d56cafab5c2a5591bead079443d99fe657d0ce7edeb3368",
+            "expected_previous_entry_hash": "sha256:529d307d35d8e36041639364866fef6c17e5e918823256ef8cc77cf3127880f5",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4"
+          },
+          "manifest": {
+            "bundle_hash": "sha256:71bdd346dcd50b41aef80b2b12badb65ba22bd82bcc46c0415aa2ff0b7cb11af",
+            "bundle_id": "intake_bundle_6761cd54f15da32600bf634d0f526255c4afa474e09f8756ecf5b272c7daee99",
+            "business_bundle_hashes": [
+              "sha256:71bdd346dcd50b41aef80b2b12badb65ba22bd82bcc46c0415aa2ff0b7cb11af"
+            ],
+            "business_commit_hashes": [
+              "sha256:8d32382f38587a13b8aca59f0feb863e3d2a434e3d7ce90ad498397a85ef7a75"
+            ],
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "case_journal_hash": "sha256:fb744baff6ec4601d3e7b0b3fe98dddaac5c00f27d0ccc81da10e9c29b9726d8",
+            "case_version": 1,
+            "intake_receipt_hash": "sha256:8d32382f38587a13b8aca59f0feb863e3d2a434e3d7ce90ad498397a85ef7a75",
+            "intake_versions": {
+              "csv": "csv.invoice-dispute.v1",
+              "mapping": "mapping.invoice-dispute.v1",
+              "text": "text.utf8.v1",
+              "timezone": "iana-offset.v1:2026b"
+            },
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"],
+            "source_revision": "sha256:a17fc0a1b8d566df7d9ee617cfa35e899b79c571a759d03a5782e3c7881806b7",
+            "tenant_id": "tenant_intake_demo",
+            "versions": {
+              "interpretation": "discovery.source-claims.v2",
+              "projection": "discovery.invoice-dispute.v2",
+              "template": "discovery.questions.v2"
+            }
+          },
+          "publication_profile_hash": "sha256:649ad0fd2fbba91583452b3e04e896b0b9d6b738607b184eeb8a4f098c32eac5",
+          "worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa"
+        },
+        "expected_publication_profile_hash": "sha256:649ad0fd2fbba91583452b3e04e896b0b9d6b738607b184eeb8a4f098c32eac5",
+        "expected_selection_head": "sha256:0e3d27b9c999fc58105d58d86f87966771f946e582b2231125f061d96a2848bc",
+        "expected_selection_revision": 1,
+        "idempotency_key": "d12-example-publish-v2-proposed",
+        "operation": "publish",
+        "pack_id": "pack_synthetic_invoice_dispute_north",
+        "reason": "Proposed separate approval for the fixed deterministic preparation worker; no business authority",
+        "schema_version": "pack-selection-command.v2"
+      },
+      "command_fingerprint": "sha256:91e6a66bfef92b664f5f35e47ce7c4319572bdbc09c92ef18b49821a29fc6e65",
+      "id": "pack_selection_91e6a66bfef92b664f5f35e47ce7c4319572bdbc09c92ef18b49821a29fc6e65",
+      "idempotency_key": "d12-example-publish-v2-proposed",
+      "input_manifest": {
+        "bundle_hashes": [
+          "sha256:71bdd346dcd50b41aef80b2b12badb65ba22bd82bcc46c0415aa2ff0b7cb11af"
+        ],
+        "cases": [
+          {
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "head": "sha256:fb744baff6ec4601d3e7b0b3fe98dddaac5c00f27d0ccc81da10e9c29b9726d8",
+            "version": 1
+          }
+        ],
+        "commit_hashes": [
+          "sha256:8d32382f38587a13b8aca59f0feb863e3d2a434e3d7ce90ad498397a85ef7a75"
+        ],
+        "discovery_hashes": [
+          "sha256:529d307d35d8e36041639364866fef6c17e5e918823256ef8cc77cf3127880f5"
+        ],
+        "request_binding_hashes": []
+      },
+      "operation": "publish",
+      "pack_id": "pack_synthetic_invoice_dispute_north",
+      "previous_entry_hash": "sha256:0e3d27b9c999fc58105d58d86f87966771f946e582b2231125f061d96a2848bc",
+      "profile": {
+        "grant": {
+          "effective_from": "2026-01-01T00:00:00.000Z",
+          "effective_until": "2027-01-01T00:00:00.000Z",
+          "identity_id": "identity_pack_reviewer_demo",
+          "purpose": "publish_preparation_config_only",
+          "scope_ids": ["scope_entity_north"],
+          "status": "active"
+        },
+        "identities": [
+          {
+            "identity_id": "identity_intake_operator",
+            "identity_kind": "human",
+            "schema_version": "identity-reference.v0",
+            "status": "active",
+            "tenant_id": "tenant_intake_demo"
+          },
+          {
+            "identity_id": "identity_pack_reviewer_demo",
+            "identity_kind": "human",
+            "schema_version": "identity-reference.v0",
+            "status": "active",
+            "tenant_id": "tenant_intake_demo"
+          }
+        ],
+        "profile_id": "synthetic_pack_publication.v1",
+        "read_scope_ids": ["scope_entity_north", "scope_entity_south"],
+        "reader_identity_id": "identity_intake_operator",
+        "reviewer_identity_id": "identity_pack_reviewer_demo",
+        "schema_version": "synthetic-pack-publication.v1",
+        "tenant_id": "tenant_intake_demo"
+      },
+      "recorded_at": "2026-09-07T16:06:00.000Z",
+      "result": {
+        "authority_granted": false,
+        "closure_permission": false,
+        "operation": "publish",
+        "selected_artifact_hash": "sha256:8e1766615116c6cd85114d30a4ee0fa570477a5b3fc303c3d777f42b72e679c5",
+        "selection_revision": 2
+      },
+      "schema_version": "pack-selection-entry.v2",
+      "sequence": 2,
+      "tenant_id": "tenant_intake_demo",
+      "versions": {
+        "projection": "preparation-pack.v2",
+        "selection": "pack-selection.v2"
+      }
+    },
+    "entry_hash": "sha256:8945b5ae51b41800f7e983d89dd616d76a794d3fba1ec7cc47954841191276a2"
+  },
+  "start_command": {
+    "schema_version": "preparation-work-command.v1",
+    "operation": "start",
+    "binding": {
+      "tenant_id": "tenant_intake_demo",
+      "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+      "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+      "entity_id": "entity_north",
+      "source_revision": "sha256:a17fc0a1b8d566df7d9ee617cfa35e899b79c571a759d03a5782e3c7881806b7",
+      "pack_id": "pack_synthetic_invoice_dispute_north",
+      "pack_version": "pack-v2-6d04240aeae77d0bd38ea804e9d47c0c7c2460ddbca450da02f04d6f211a01c1",
+      "artifact_hash": "sha256:8e1766615116c6cd85114d30a4ee0fa570477a5b3fc303c3d777f42b72e679c5",
+      "selection_revision": 2,
+      "selection_head": "sha256:8945b5ae51b41800f7e983d89dd616d76a794d3fba1ec7cc47954841191276a2",
+      "basis": {
+        "confirmation_entry_hash": "sha256:529d307d35d8e36041639364866fef6c17e5e918823256ef8cc77cf3127880f5",
+        "discovery": {
+          "bundle_id": "intake_bundle_6761cd54f15da32600bf634d0f526255c4afa474e09f8756ecf5b272c7daee99",
+          "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "expected_case_version": 1,
+          "expected_discovery_revision": 1,
+          "expected_intake_receipt_hash": "sha256:8d32382f38587a13b8aca59f0feb863e3d2a434e3d7ce90ad498397a85ef7a75",
+          "expected_material_hash": "sha256:02b8938b8b8a824c5d56cafab5c2a5591bead079443d99fe657d0ce7edeb3368",
+          "expected_previous_entry_hash": "sha256:529d307d35d8e36041639364866fef6c17e5e918823256ef8cc77cf3127880f5",
+          "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4"
+        },
+        "manifest": {
+          "bundle_hash": "sha256:71bdd346dcd50b41aef80b2b12badb65ba22bd82bcc46c0415aa2ff0b7cb11af",
+          "bundle_id": "intake_bundle_6761cd54f15da32600bf634d0f526255c4afa474e09f8756ecf5b272c7daee99",
+          "business_bundle_hashes": [
+            "sha256:71bdd346dcd50b41aef80b2b12badb65ba22bd82bcc46c0415aa2ff0b7cb11af"
+          ],
+          "business_commit_hashes": [
+            "sha256:8d32382f38587a13b8aca59f0feb863e3d2a434e3d7ce90ad498397a85ef7a75"
+          ],
+          "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "case_journal_hash": "sha256:fb744baff6ec4601d3e7b0b3fe98dddaac5c00f27d0ccc81da10e9c29b9726d8",
+          "case_version": 1,
+          "intake_receipt_hash": "sha256:8d32382f38587a13b8aca59f0feb863e3d2a434e3d7ce90ad498397a85ef7a75",
+          "intake_versions": {
+            "csv": "csv.invoice-dispute.v1",
+            "mapping": "mapping.invoice-dispute.v1",
+            "text": "text.utf8.v1",
+            "timezone": "iana-offset.v1:2026b"
+          },
+          "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+          "scope_ids": ["scope_entity_north", "scope_entity_south"],
+          "source_revision": "sha256:a17fc0a1b8d566df7d9ee617cfa35e899b79c571a759d03a5782e3c7881806b7",
+          "tenant_id": "tenant_intake_demo",
+          "versions": {
+            "interpretation": "discovery.source-claims.v2",
+            "projection": "discovery.invoice-dispute.v2",
+            "template": "discovery.questions.v2"
+          }
+        },
+        "publication_profile_hash": "sha256:649ad0fd2fbba91583452b3e04e896b0b9d6b738607b184eeb8a4f098c32eac5",
+        "worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa"
+      },
+      "worker_implementation_id": "disposition-code.v1",
+      "worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa"
+    },
+    "expected_work_revision": 0,
+    "expected_work_head": null,
+    "replaces_invocation": null,
+    "idempotency_key": "d12-example-start"
+  },
+  "started_entry": {
+    "schema_version": "preparation-work-entry.v1",
+    "event": "started",
+    "sequence": 1,
+    "previous_entry_hash": null,
+    "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+    "command": {
+      "schema_version": "preparation-work-command.v1",
+      "operation": "start",
+      "binding": {
+        "tenant_id": "tenant_intake_demo",
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "entity_id": "entity_north",
+        "source_revision": "sha256:a17fc0a1b8d566df7d9ee617cfa35e899b79c571a759d03a5782e3c7881806b7",
+        "pack_id": "pack_synthetic_invoice_dispute_north",
+        "pack_version": "pack-v2-6d04240aeae77d0bd38ea804e9d47c0c7c2460ddbca450da02f04d6f211a01c1",
+        "artifact_hash": "sha256:8e1766615116c6cd85114d30a4ee0fa570477a5b3fc303c3d777f42b72e679c5",
+        "selection_revision": 2,
+        "selection_head": "sha256:8945b5ae51b41800f7e983d89dd616d76a794d3fba1ec7cc47954841191276a2",
+        "basis": {
+          "confirmation_entry_hash": "sha256:529d307d35d8e36041639364866fef6c17e5e918823256ef8cc77cf3127880f5",
+          "discovery": {
+            "bundle_id": "intake_bundle_6761cd54f15da32600bf634d0f526255c4afa474e09f8756ecf5b272c7daee99",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "expected_case_version": 1,
+            "expected_discovery_revision": 1,
+            "expected_intake_receipt_hash": "sha256:8d32382f38587a13b8aca59f0feb863e3d2a434e3d7ce90ad498397a85ef7a75",
+            "expected_material_hash": "sha256:02b8938b8b8a824c5d56cafab5c2a5591bead079443d99fe657d0ce7edeb3368",
+            "expected_previous_entry_hash": "sha256:529d307d35d8e36041639364866fef6c17e5e918823256ef8cc77cf3127880f5",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4"
+          },
+          "manifest": {
+            "bundle_hash": "sha256:71bdd346dcd50b41aef80b2b12badb65ba22bd82bcc46c0415aa2ff0b7cb11af",
+            "bundle_id": "intake_bundle_6761cd54f15da32600bf634d0f526255c4afa474e09f8756ecf5b272c7daee99",
+            "business_bundle_hashes": [
+              "sha256:71bdd346dcd50b41aef80b2b12badb65ba22bd82bcc46c0415aa2ff0b7cb11af"
+            ],
+            "business_commit_hashes": [
+              "sha256:8d32382f38587a13b8aca59f0feb863e3d2a434e3d7ce90ad498397a85ef7a75"
+            ],
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "case_journal_hash": "sha256:fb744baff6ec4601d3e7b0b3fe98dddaac5c00f27d0ccc81da10e9c29b9726d8",
+            "case_version": 1,
+            "intake_receipt_hash": "sha256:8d32382f38587a13b8aca59f0feb863e3d2a434e3d7ce90ad498397a85ef7a75",
+            "intake_versions": {
+              "csv": "csv.invoice-dispute.v1",
+              "mapping": "mapping.invoice-dispute.v1",
+              "text": "text.utf8.v1",
+              "timezone": "iana-offset.v1:2026b"
+            },
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "scope_ids": ["scope_entity_north", "scope_entity_south"],
+            "source_revision": "sha256:a17fc0a1b8d566df7d9ee617cfa35e899b79c571a759d03a5782e3c7881806b7",
+            "tenant_id": "tenant_intake_demo",
+            "versions": {
+              "interpretation": "discovery.source-claims.v2",
+              "projection": "discovery.invoice-dispute.v2",
+              "template": "discovery.questions.v2"
+            }
+          },
+          "publication_profile_hash": "sha256:649ad0fd2fbba91583452b3e04e896b0b9d6b738607b184eeb8a4f098c32eac5",
+          "worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa"
+        },
+        "worker_implementation_id": "disposition-code.v1",
+        "worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa"
+      },
+      "expected_work_revision": 0,
+      "expected_work_head": null,
+      "replaces_invocation": null,
+      "idempotency_key": "d12-example-start"
+    },
+    "command_fingerprint": "sha256:c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+    "actor": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_disposition_worker_demo",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "service",
+      "status": "active"
+    },
+    "worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa",
+    "recorded_at": "2026-09-07T16:06:01.000Z",
+    "deadline": "2026-09-07T16:06:06.000Z",
+    "versions": {
+      "worker": "disposition-code.v1",
+      "validator": "preparation-result-validator.v1",
+      "journal": "preparation-work.v1"
+    },
+    "input_manifest_hash": "sha256:4fdb3a2d6769340520b4a9a384a93c62c66838a3ef47e055f6396dac9456ab4e",
+    "hash": "sha256:435fe09537ff7d428019b6e5faf18217876cee5a0863adf0d975edf60f090993"
+  },
+  "expected_result": {
+    "schema_version": "disposition-preparation-result.v1",
+    "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+    "started_entry_hash": "sha256:435fe09537ff7d428019b6e5faf18217876cee5a0863adf0d975edf60f090993",
+    "binding_hash": "sha256:daa910f23ad1ee6d4b690250e012182ef45e2fb5a0ab9121aac7512df8eeef16",
+    "outcome": "prepared_gap_packet",
+    "title": "Orchid / North dispute-17 — evidence request ready for task review",
+    "subject": {
+      "entity_id": "entity_north",
+      "record_id": "dispute-17",
+      "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+      "customer": "Orchid",
+      "invoice": "INV-101",
+      "disputed_amount_minor": 1500000,
+      "currency": "USD",
+      "citation_ids": [
+        "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81"
+      ]
+    },
+    "coverage": {
+      "distinct_upload_records": 2,
+      "record_keys": [
+        "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "sha256:e946bd6a33d742946ccef716212515964feecf5891450c5aef3fca82ffbf727c"
+      ],
+      "citation_ids": [
+        "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81",
+        "sha256:d2bb5dfa3905c9f8f2d101bf856fac5a076c15f68f01df26e3663eda856198dd"
+      ],
+      "recurring_population": "unknown"
+    },
+    "steps": [
+      {
+        "id": "S1",
+        "result": "Retained row and associated note indexed; full upload coverage retained.",
+        "citation_ids": [
+          "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81",
+          "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975",
+          "sha256:d2bb5dfa3905c9f8f2d101bf856fac5a076c15f68f01df26e3663eda856198dd"
+        ]
+      },
+      {
+        "id": "S2",
+        "result": "DEL-4 note reports missing supplied confirmation; no governing terms established. Related South record is context only.",
+        "citation_ids": [
+          "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975",
+          "sha256:d2bb5dfa3905c9f8f2d101bf856fac5a076c15f68f01df26e3663eda856198dd"
+        ],
+        "proposal_citations": []
+      },
+      {
+        "id": "S3",
+        "result": "Reused the existing applicable descriptive confirmation; no new human decision manufactured.",
+        "confirmation_entry_hash": "sha256:529d307d35d8e36041639364866fef6c17e5e918823256ef8cc77cf3127880f5"
+      },
+      {
+        "id": "S4",
+        "result": "Prepared this cited gap checklist and unsent follow-up; abstained from a business disposition."
+      }
+    ],
+    "evidence_checklist": [
+      {
+        "subject": {
+          "entity_id": "entity_north",
+          "kind": "delivery",
+          "id": "DEL-4",
+          "applicable_record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4"
+        },
+        "finding": "The associated note reports that delivery confirmation is not supplied.",
+        "evidence_type": "source_report",
+        "status": "reported_gap",
+        "citation_ids": [
+          "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975"
+        ],
+        "independently_verified": false
+      },
+      {
+        "subject": {
+          "entity_id": "entity_north",
+          "kind": "record",
+          "id": "dispute-17",
+          "applicable_record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4"
+        },
+        "finding": "The queue reports Taylor as upstream owner; accountable evidence and business acceptance owners are unconfirmed.",
+        "evidence_type": "source_report_with_limit",
+        "status": "owner_unconfirmed",
+        "citation_ids": [
+          "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81"
+        ],
+        "independently_verified": false
+      },
+      {
+        "subject": {
+          "entity_id": "entity_north",
+          "kind": "record",
+          "id": "dispute-17",
+          "applicable_record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4"
+        },
+        "finding": "Governing terms and a disposition rule are not established by these inputs.",
+        "evidence_type": "bounded_input_limit",
+        "status": "unknown",
+        "citation_ids": [],
+        "template_reference": "rules.business_field_precedence"
+      }
+    ],
+    "related_context": [
+      {
+        "record_key": "sha256:e946bd6a33d742946ccef716212515964feecf5891450c5aef3fca82ffbf727c",
+        "entity_id": "entity_south",
+        "record_id": "dispute-18",
+        "disputed_amount_minor": 250000,
+        "currency": "USD",
+        "delivery_id": "DEL-5",
+        "applicable_to_selected_record": false,
+        "citation_ids": [
+          "sha256:d2bb5dfa3905c9f8f2d101bf856fac5a076c15f68f01df26e3663eda856198dd"
+        ]
+      }
+    ],
+    "follow_up": {
+      "sent": false,
+      "draft_citation_ids": [
+        "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81",
+        "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975"
+      ],
+      "recipients": [
+        {
+          "role": "delivery evidence owner",
+          "identity_id": null,
+          "status": "unconfirmed"
+        },
+        {
+          "role": "governing terms owner",
+          "identity_id": null,
+          "status": "unconfirmed"
+        }
+      ],
+      "requests": [
+        {
+          "id": "Q-DEL-4",
+          "subject": "entity_north/dispute-17/DEL-4",
+          "text": "Please provide DEL-4 confirmation or identify the evidence owner.",
+          "citation_ids": [
+            "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975"
+          ]
+        },
+        {
+          "id": "Q-TERMS",
+          "subject": "entity_north/dispute-17",
+          "text": "Please identify the governing terms and the person accountable for reviewing a disposition.",
+          "citation_ids": [],
+          "basis": "proposed follow-up for an unconfirmed rule"
+        }
+      ],
+      "draft": "For North dispute-17 (Orchid, INV-101), please provide delivery confirmation for DEL-4 or identify the evidence contact. Please also identify the governing terms and disposition owner. The supplied note reports missing confirmation; this does not establish non-delivery or justify a credit. No due date or recipient has been assumed."
+    },
+    "disposition": {
+      "status": "abstain_pending_evidence",
+      "recommended_credit_minor": null,
+      "options": [
+        {
+          "proposal": "Collect scoped delivery evidence and governing terms for review",
+          "available_for_preparation": true
+        },
+        {
+          "proposal": "Choose payment, settlement or credit",
+          "available_for_preparation": false,
+          "missing": [
+            "underlying proof",
+            "governing rule",
+            "accountable business owner",
+            "separate financial authority"
+          ]
+        }
+      ],
+      "independent_business_verification": false
+    },
+    "intervention": {
+      "primary_reason": "MISSING_EVIDENCE",
+      "citation_ids": [
+        "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975"
+      ],
+      "step_id": "S2",
+      "other_blockers": [
+        {
+          "reason": "MISSING_KNOWLEDGE",
+          "basis": "Governing disposition rule is unconfirmed"
+        },
+        {
+          "reason": "AUTHORITY",
+          "basis": "Template permits no financial action"
+        }
+      ],
+      "task_recipient_identity": "identity_intake_operator",
+      "business_owner_identity": null
+    },
+    "proof_readiness": [
+      {
+        "measure": "cash_collected",
+        "status": "unknown",
+        "value": null,
+        "basis": "No supporting outcome, prior-coverage or comparable-effort evidence; this is synthetic preparation."
+      },
+      {
+        "measure": "disputes_resolved",
+        "status": "unknown",
+        "value": null,
+        "basis": "No supporting outcome, prior-coverage or comparable-effort evidence; this is synthetic preparation."
+      },
+      {
+        "measure": "credits_issued",
+        "status": "unknown",
+        "value": null,
+        "basis": "No supporting outcome, prior-coverage or comparable-effort evidence; this is synthetic preparation."
+      },
+      {
+        "measure": "work_newly_attended_to",
+        "status": "unknown",
+        "value": null,
+        "basis": "No supporting outcome, prior-coverage or comparable-effort evidence; this is synthetic preparation."
+      },
+      {
+        "measure": "human_attention_released",
+        "status": "unknown",
+        "value": null,
+        "basis": "No supporting outcome, prior-coverage or comparable-effort evidence; this is synthetic preparation."
+      }
+    ],
+    "execution_facts": {
+      "model_calls": 0,
+      "external_tool_calls": 0,
+      "messages_sent": 0
+    },
+    "cost_evidence": {
+      "model_tool_amount": null,
+      "infrastructure_amount": null,
+      "human_effort_minutes": null,
+      "support_effort_minutes": null,
+      "setup_effort_minutes": null,
+      "status": "unmeasured; zero calls is not a complete cost estimate"
+    },
+    "financial_authority": false,
+    "case_closure_permission": false
+  },
+  "result_hash": "sha256:e9170992f323ad0528fd052517d31ebc6fd623f1e8ecb802eb0d7d0e1538d336",
+  "terminal_entry_recipe": {
+    "entry_without_result": {
+      "schema_version": "preparation-work-entry.v1",
+      "event": "terminal_result",
+      "sequence": 2,
+      "previous_entry_hash": "sha256:435fe09537ff7d428019b6e5faf18217876cee5a0863adf0d975edf60f090993",
+      "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+      "started_entry_hash": "sha256:435fe09537ff7d428019b6e5faf18217876cee5a0863adf0d975edf60f090993",
+      "binding_hash": "sha256:daa910f23ad1ee6d4b690250e012182ef45e2fb5a0ab9121aac7512df8eeef16",
+      "outcome": "prepared_gap_packet",
+      "result_hash": "sha256:e9170992f323ad0528fd052517d31ebc6fd623f1e8ecb802eb0d7d0e1538d336",
+      "recorded_at": "2026-09-07T16:06:02.000Z",
+      "versions": {
+        "worker": "disposition-code.v1",
+        "validator": "preparation-result-validator.v1",
+        "journal": "preparation-work.v1"
+      },
+      "conformance": "passed_in_proposed_example_only",
+      "authority_granted": false,
+      "closure_permission": false
+    },
+    "entry_hash": "sha256:251e5861240d3cf98fcd194c0c01135e7bbd32e5d2fa051dcb55b22e0eed92c3"
+  },
+  "task_review_command": {
+    "schema_version": "preparation-task-review.v1",
+    "operation": "task_review",
+    "purpose": "preparation_usefulness",
+    "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+    "result_hash": "sha256:e9170992f323ad0528fd052517d31ebc6fd623f1e8ecb802eb0d7d0e1538d336",
+    "expected_work_revision": 2,
+    "expected_work_head": "sha256:251e5861240d3cf98fcd194c0c01135e7bbd32e5d2fa051dcb55b22e0eed92c3",
+    "decision": "approve",
+    "reason": "The scoped gap checklist and unsent request are useful for the next evidence-gathering conversation; dispute and Case remain unresolved.",
+    "idempotency_key": "d12-example-task-review"
+  },
+  "task_review_attribution": {
+    "server_selected_identity_id": "identity_intake_operator",
+    "synthetic": true,
+    "not_in_client_command": true
+  },
+  "correction_example": {
+    "operation": "correction",
+    "original_result_hash": "sha256:e9170992f323ad0528fd052517d31ebc6fd623f1e8ecb802eb0d7d0e1538d336",
+    "target": "/follow_up/requests/0/text",
+    "before": "Please provide DEL-4 confirmation or identify the evidence owner.",
+    "after": "Please identify who can supply DEL-4 confirmation and the permitted retrieval route; this request assigns no owner.",
+    "classification": "knowledge_bearing",
+    "reason": "Make the unconfirmed evidence owner and access path explicit in the proposed request.",
+    "citation_ids": [
+      "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81",
+      "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975"
+    ],
+    "candidate": {
+      "status": "not_reviewed",
+      "expected_behavior": "Draft asks for an evidence contact without assigning Taylor ownership; source report never becomes independent delivery proof.",
+      "test_input_hash": "sha256:4fdb3a2d6769340520b4a9a384a93c62c66838a3ef47e055f6396dac9456ab4e",
+      "promotion_status": "not_promoted"
+    },
+    "next": "Explicit human evaluation-candidate review, normal tested code/profile change, fresh compatible pack publication and new invocation/task review; no automatic promotion or transferred acceptance."
+  }
+}
