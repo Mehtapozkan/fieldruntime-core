@@ -11,7 +11,8 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Full retained PostgreSQL/browser suites plus pack upgrade/restart acceptance.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -46,6 +47,7 @@ jobs:
           trap cleanup EXIT
           pnpm fr init ecc --demo
           pnpm fr up
+          docker compose exec -T core node -e "const a=require('node:assert/strict');a.equal(process.versions.node,'24.19.0');a.equal(process.versions.tz,'2026b');console.log(process.versions.node, process.versions.tz)"
           D6_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/authority-postgres.test.mjs
           D7_WORKBENCH_BROWSER=1 D7_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/simulated-credit-postgres.test.mjs
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/intake-postgres.test.mjs scripts/intake-browser.test.mjs

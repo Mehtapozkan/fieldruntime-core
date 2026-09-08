@@ -124,6 +124,14 @@ selection commands; only selection P and the existing internal writer coordinato
 Existing preview databases upgrade additively. Follow the existing backup instructions;
 there is no destructive down-migration or export-restore endpoint.
 
+The container is now pinned to Node 24.19.0 / tzdata 2026b, matching the already-required
+fixture and native replay environment. The previous Docker digest actually selected
+24.20.0; the cross-process appliance export check exposed that mismatch. Before upgrading
+a locally built preview, export and inspect its retained timezone-version marker using
+its original image. Archives made with another interpreter are **not silently converted**:
+keep that image and volume for reconstruction. The tested additive upgrade covers 2026b
+Discovery v1/v2 histories; mixed or unavailable timezone interpreters remain fail-closed.
+
 Published entries retain the artifact, exact command/result, canonical input references,
 profile/identity snapshot, evaluation time and implementation versions in one transaction.
 Rollback/withdraw reference retained artifacts. Original bytes are reused, not duplicated.

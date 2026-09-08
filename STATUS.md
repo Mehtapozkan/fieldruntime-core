@@ -1314,6 +1314,16 @@ CI retains PostgreSQL 17.11, Compose, appliance and all Workbench checks, adding
 fresh/upgrade/fault/replay/browser tests and a real container restart smoke. Local
 PostgreSQL test-host evidence is not a local Docker pass.
 
+The first full D11-B CI at `e6328a3` passed 307 repository, 63 D6, 115 D7/D8,
+32 intake, 30 Discovery and 33 new pack tests, plus Compose configuration and the
+existing appliance/restart controls. Its new cross-process pack export check correctly
+rejected a timezone-interpreter mismatch: the old Docker digest selected Node 24.20.0
+while native validation was pinned to 24.19.0. The container now uses the verified
+24.19.0 image and an early node/tz fingerprint assertion; no replay check was weakened.
+The expanded full-suite job has a 45-minute budget; all assertions remain required.
+Final corrected-head CI is reported on the PR. Historical archives from other interpreter
+versions must retain their original image/volume; no silent timezone conversion is added.
+
 ## Next
 
 Review and merge D11-B separately. D12 remains the next useful worker integration;
