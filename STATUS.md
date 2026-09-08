@@ -1297,9 +1297,10 @@ implemented and must start from merged main. No D12 or release/deployment work b
 Local `pnpm validate` passes **307/307** tests plus formatting, lint, types and
 public-release audit. ECC passes **620/620**; its negative control exits **1 at 152/620**
 for intended failed safety assertions. Real local PostgreSQL 18.4/API passes the
-new **26 persistence/API + 6 browser** scenarios, including the executable appliance
+new **26 persistence/API + 7 browser** scenarios, including the executable appliance
 walkthrough and restart retry; retained intake/Discovery passes **62/62**.
-The retained D6–D8 suite and required final-head hosted CI are reported on the PR.
+The retained D6–D8 suite passes **178/178**, including authority, obsolete-Case replay,
+action/verification and Workbench scenarios. Required final-head hosted CI is reported on the PR.
 The documented original example/hash check passes unchanged. Checks preserve every
 0001–0007 migration byte, all 19 matrix IDs and **134 local Markdown targets** plus
 OpenAPI schema references. `git diff --check` passes.

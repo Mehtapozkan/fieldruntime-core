@@ -59,8 +59,7 @@ const root =
   "/v1/intake/preparation-packs/pack_synthetic_invoice_dispute_north";
 async function capture(page, name) {
   const dir = process.env.D11_SCREENSHOT_DIR;
-  if (!dir) return;
-  await mkdir(dir, { recursive: true });
+  if (dir) await mkdir(dir, { recursive: true });
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
     assert.ok(
@@ -72,10 +71,11 @@ async function capture(page, name) {
     );
     await page.evaluate(() => globalThis.document.activeElement?.blur());
     await page.locator(".preparation-pack").scrollIntoViewIfNeeded();
-    await page.screenshot({
-      path: `${dir}/${name}-${width}.png`,
-      fullPage: true,
-    });
+    if (dir)
+      await page.screenshot({
+        path: `${dir}/${name}-${width}.png`,
+        fullPage: true,
+      });
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
 }
@@ -353,4 +353,58 @@ test("D11-B T5/T9 browser: independently loaded description and pack cannot sile
   await expect(
     page.getByRole("button", { name: /Publish for preparation/ }),
   ).toBeDisabled();
+});
+
+test("D11-B T7/T9 browser: rollback requires a new explicit decision on applicable retained material", async (t) => {
+  const { h, brief, page } = await host(t);
+  await publish(page);
+  await expect(page.locator(".preparation-pack")).toHaveAttribute(
+    "data-state",
+    "published_for_preparation",
+  );
+  await page
+    .getByLabel("Selection reason", { exact: true })
+    .fill("Withdraw the current preparation selection");
+  await page.getByRole("button", { name: /Withdraw selected pack/ }).click();
+  await expect(page.locator(".preparation-pack")).toHaveAttribute(
+    "data-state",
+    "withdrawn",
+  );
+  await page
+    .getByText("Selection history and guarded rollback (2 entries)", {
+      exact: true,
+    })
+    .click();
+  await page
+    .getByRole("button", { name: /Roll back to this retained artifact/ })
+    .click();
+  await expect(page.getByRole("alert")).toContainText("Give a reason");
+  assert.equal((await snapshot(h, brief)).history.length, 2);
+  await page
+    .getByLabel("Selection reason", { exact: true })
+    .fill(
+      "Fresh approval of the inspected retained artifact on unchanged inputs",
+    );
+  await page
+    .getByLabel("I reviewed this exact candidate for preparation only")
+    .check();
+  await page
+    .getByText("Selection history and guarded rollback (2 entries)", {
+      exact: true,
+    })
+    .click();
+  await page
+    .getByRole("button", { name: /Roll back to this retained artifact/ })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Rollback recorded", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".preparation-pack")).toHaveAttribute(
+    "data-state",
+    "published_for_preparation",
+  );
+  const v = await snapshot(h, brief);
+  assert.equal(v.history.length, 3);
+  assert.equal(v.history[2].operation, "rollback");
+  assert.equal(v.history[2].artifact_hash, v.history[0].artifact_hash);
 });
