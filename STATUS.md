@@ -1,20 +1,27 @@
 # Status
 
-Current milestone: **D9-B synthetic intake implemented for review** on
-`feat/d9b-synthetic-intake`. Accepted D-034 was approved at `e5e8273c`; its approval
-update `6ce63aa1` passed required [CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34170508390).
-PR #29 merged normally at **`f96d6cc7fc943d53854c619e719d1dc53c93c69b`** after checking
-its head, reviews and protections. Required PR/check/up-to-date/force-push/deletion
-rules were preserved; no bypass. Real customer activation remains unapproved.
+Current milestone: **D10-A bounded Discovery design for review; no D10 runtime implementation.**
+[Proposed D-035](docs/architecture/d10-discovery-preparation-review.md) specifies one
+cited workflow brief, R1–R7, six loop outputs, gap-driven questions, descriptive
+correction/review and a proposed improvement before work allocation. Its new review
+boundary remains Proposed; D10-B needs separate approval before implementation.
+The canonical specification and single 19-entry matrix remain authoritative.
 
-This branch adds strict intake contracts, original scoped byte retention, pinned
-parsing, inspectable candidates/coverage, explicit Case create/attach and immutable
-provenance receipts through the API and existing Workbench. Migration 0005 adds
-three supporting tables; the approved retry amendment adds only no-op command
-metadata in migration 0006. All previous checksums/Case semantics/frozen ECC remain unchanged.
-No catalog, credit authority, Action Gateway, worker, real-data processing or closure
-permission is added. [Executable walkthrough and acceptance map](docs/guides/synthetic-intake.md).
-Validation and handoff evidence for this branch appear below.
+**D9-B merged in PR #30 at `ca9543289894fffdaa40ecfe794d83addc2c19de`.** The reviewed
+head was exactly `9d250707458adfdc481a6c9259608f5d6d3f4cc7`, with all three findings
+resolved and required [CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34177310405).
+The effective rules required a PR, strict up-to-date `validate`, and force-push/deletion
+protection; required approving reviews were zero. Normal merge used no bypass.
+Accepted D-034 and its explicit successful-key amendment are preserved, including
+atomic no-op metadata, exact retries, two-tab recovery and migration/export compatibility.
+PR #29's D9-A approval merged at `f96d6cc7`; real customer activation is still unapproved.
+
+Main now provides strict synthetic intake, original bytes and pinned derivation,
+inspectable coverage/candidates and explicit atomic Case/provenance commits through
+API/Workbench. Migrations 0005/0006 are merged; all older checksums, Case semantics and
+frozen ECC remain intact. [Executable intake walkthrough](docs/guides/synthetic-intake.md).
+This branch changes only documentation: no runtime, contracts, migration, worker,
+authority, execution, closure, release or deployment behavior. Validation appears below.
 
 D8-C PR #28 merged normally at `555ac0214b006350b049d96567cb98b92ebc25f8`, preserving
 reviewed head `1f2d9a2da9ae70273b0a6e057c05cf03cbfc2659`. There were no subsequent
@@ -984,9 +991,11 @@ confirmed evidence after refresh failure. The documented example commands and
 portable export checker execute successfully; a forged export fails. Unit intake
 coverage is eleven tests, included in the 285. **63 retained D6 PostgreSQL/API tests
 pass**. The **115 retained D7/D8 PostgreSQL/API tests**, including all eight
-Workbench browser scenarios, also pass locally. Final-head CI evidence is recorded
-in the PR and required before handoff. CI uses the repository's pinned PostgreSQL
-image and retains all existing Compose/appliance/restart/Workbench coverage.
+Workbench browser scenarios, also pass locally. The reviewed head passed
+[CI run 34177310405](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34177310405):
+285 repository, 63 D6, 115 D7/D8 and 32 intake/API/browser tests, Compose and
+appliance/API restarts, plus eight separate D6 Workbench scenarios on PostgreSQL 17.11.
+Publication was skipped. These are D9-B implementation results, not Discovery acceptance.
 
 ECC passes **620/620** with unchanged corpus/gold hashes. Its negative control exits
 **1 at 152/620** from the intended failed assertions, not setup or a crash.
@@ -1027,14 +1036,48 @@ Requirements I1 and supporting R1/R2/R3/R5/R6, P2/P6 and L4 now link actual synt
 acceptance evidence in the existing matrix. They are not complete customer Discovery,
 measurement or activation requirements. [Walkthrough, migration and A1–A12 scope](docs/guides/synthetic-intake.md).
 
+## D10-A design and validation
+
+The [D-035 worked example and proposed boundary](docs/architecture/d10-discovery-preparation-review.md)
+uses the existing north/south Orchid CSV and plain-text delivery note. The source
+cross-check confirms 456/73 bytes, original hashes and row locators, two entity-qualified
+records and unknown population/business times/effort. It supports an entity discrepancy
+and a reported delivery-evidence gap, not a discovered historical route or measured delay.
+The proposed screen leads with objective, findings, uncertainty, owner and next action;
+it is a wireframe, not an implemented screen or newly performed visual test.
+
+The design maps all seven records and six outputs, preserves source/variant disagreements,
+and proposes one Case-linked descriptive-review history instead of a new business
+aggregate or authority engine. It binds current inputs, Case/review revisions, typed
+answers/corrections, synthetic attribution and exact retry/export evidence. Confirmation
+only concerns the description; source or business corrections still use explicit intake.
+D10-B's T1–T12 are future acceptance criteria, not passing new runtime tests.
+
+Local validation: `pnpm validate` passes **285/285**, including formatting, lint,
+types and the public-release check. The initial sandbox run could not bind loopback;
+the successful rerun allowed the existing local HTTP tests. The release check also
+caught removed required README wording; it was restored before the passing rerun.
+`pnpm eval:ecc` passes **620/620**; the negative control exits **1 at 152/620** on its
+intended assertions, with unchanged corpus/gold hashes. `git diff --check` and the
+focused documentation check pass: **179 local links/anchors, all 19 matrix IDs,
+example JSON, fixture hashes/sizes/locators and 12 proposed acceptance rows**.
+
+`docker compose config --quiet` could not run locally (Docker absent, exit 127).
+Final-head CI evidence is recorded in the PR; the existing PostgreSQL/API, browser,
+Compose and appliance suites remain required there. No new D10 screen, local browser
+inspection or implementation acceptance is claimed. The wireframe is a proposal;
+T1–T12 have not been implemented or executed as Discovery tests.
+
 ## Next
 
-Finish review of the two D9-B retry repairs; leave PR #30 open and unmerged.
-D10-A has not started. After review, the next bounded design is **D10-A
-Discovery preparation and operator review**: reuse retained citations for one normal
-route, alternatives, missing-evidence questions, accountable owners and the seven
-Discovery records/six loop outputs. Do not add a worker or new execution/closure
-permission before those needs and boundaries are reviewed.
+Review D10-A and Proposed D-035. The smallest D10-B slice is a deterministic cited brief
+and short agenda with explicit, replayable descriptive answers/corrections/confirmation
+in the existing intake Workbench/API, only after the proposed boundary is approved.
+Read-only brief plus existing plain intake notes is the valid smaller fallback without
+that approval; it cannot be labelled typed confirmed Discovery. D11 owns reviewed Runtime
+Pack publication and applicable policy changes; D12 owns one bounded worker and minimum
+approved proof. Representative routes, baseline/effort/cost capture, operator usefulness,
+customer acceptance and measured economics remain incomplete.
 
 Real customer activation still requires named custody, access, classification,
 retention, deletion and export arrangements. Complete-dataset disposal ends replay;

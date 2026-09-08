@@ -316,12 +316,15 @@ follow-up, with no website change, release or deployment in this assignment.
 
 D9-A specifies minimal intake/provenance/time semantics and the permitted data
 boundary in the single [D-034 — accepted synthetic scope](../architecture/d9-assisted-intake-boundary.md).
-It implements no intake behavior; the owner authorized D9-B to implement one queue export plus supporting documents,
+D9-A was design only; D9-B merged in PR #30 with one queue export plus supporting documents,
 reviewed matching and repeat-import handling. Proposed intake content must preserve
 Case/business-object references, source record and event IDs, activity, actor/role,
 source status, occurrence and ingestion times, timezone, content/provenance bindings
 and matching uncertainty. These are contract-reconciliation requirements, not new
-fields silently added to strict WorkEvent v0. D10 supplies all records, interviews,
+fields silently added to strict WorkEvent v0. [D10-A / Proposed D-035](../architecture/d10-discovery-preparation-review.md)
+now makes one bounded preparation/review design concrete; its new review boundary and
+D10-B implementation remain pending. Documentation does not complete R1–R7 or the six
+outputs. D10 supplies all records, interviews,
 baseline and redesign; D11 reviews one template/pack; D12 supplies one useful
 replaceable worker, bounded proof and minimum reviewed correction capture; D13
 packages customer proof. Assisted D9–D12 evaluations need not wait for every later
