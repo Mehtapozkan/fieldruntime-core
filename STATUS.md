@@ -1,6 +1,6 @@
 # Status
 
-Current milestone: **D10-B merged; D11-A is a docs-only design for review.**
+Current milestone: **D10-B merged; corrected D-036 Accepted; D11-B not implemented.**
 PR #32 merged normally at `953d49ece70f7828935bb0f4636299d7601f16d5`, preserving
 reviewed head `4f86e2f5502f4b7227d7ff7823d372b1e8614faa`. Both review findings were
 resolved and [required head CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34195404986).
@@ -18,10 +18,11 @@ required for those archives. Case/authority/intake histories, successful no-op k
 atomic cross-tab recovery and migration checksums remain intact. Reads do not write.
 [Executable Discovery walkthrough and screenshots](docs/guides/synthetic-discovery.md).
 
-This branch adds [Proposed D-036](docs/architecture/d11-reviewed-runtime-pack.md)
-and a populated preparation-only Runtime Pack example. It proposes a separate synthetic
-publication approval, immutable selection history, current-input checks, supersession
-and guarded rollback; it implements none of them. D11-B awaits human approval;
+This branch records [Accepted D-036](docs/architecture/d11-reviewed-runtime-pack.md)
+and a populated preparation-only Runtime Pack example. The owner approved corrected local
+`100b6818`, published as identical-tree `3ba7f800`. The separate synthetic publication
+role, immutable selection history, current-input checks, supersession and guarded rollback
+are approved for D11-B; none is implemented here. D11-B awaits normal PR #33 merge;
 D12 worker/packet-proof/correction integration remains planned. Complete Discovery,
 real customer activation, business outcome acceptance and Case closure remain incomplete.
 The canonical specification and single 19-entry matrix remain the product plan.
@@ -1249,7 +1250,9 @@ S3 reuses completed applicable D10 review without another Confirm. A new annotat
 advances D, stales the pack, and requires fresh descriptive confirmation followed by
 a new artifact/version and separate publication approval before S4 uses the changed
 basis. D11-B only exposes this transition; D12 still supplies worker execution.
-D-036 remains Proposed. The supporting journal/publication boundary is unapproved.
+The corrected boundary was subsequently approved by the owner at local `100b6818`
+(published as identical-tree `3ba7f800`); D-036 is now Accepted. This approval does
+not publish an individual pack or grant business authority. D11-B is not implemented.
 
 Local correction validation passes `pnpm validate` **297/297** plus format/lint/
 typecheck/release audit. ECC is **620/620**; its intended negative control exits **1**
@@ -1267,10 +1270,22 @@ artifact hash is `sha256:bc54d0a07cd76ccaa80887de0024632260d368d810649ffa9e74f43
 local checks do not establish a final-head CI pass. No future
 publication acceptance test or upstream runtime repair is claimed as implemented.
 
+## D-036 approval record
+
+The owner approved corrected local `100b681817fa34bf671328dba953c5e7eddfe471` on
+2026-09-08. Its identical tree is published at `3ba7f800`; the original correction
+was preserved, not reapplied. D-036 and DECISIONS now record acceptance of only the
+synthetic preparation-publication boundary. Both review findings have corrected
+files and before/after evidence in PR #33. No individual pack is published.
+The approval update passes local `pnpm validate` (297 tests, format/lint/types/release
+check). Required hosted validation must pass on this approval-recording head before
+normal merge. Docker is still unavailable locally. D11-B is authorized but not yet
+implemented and must start from merged main. No D12 or release/deployment work began.
+
 ## Next
 
-Review Proposed D-036 and the populated pack. After explicit human acceptance, D11-B
-can implement the one preparation publication/selection path and T1–T9. Business
+Finish required CI and normal merge of PR #33 with the recorded D-036 approval.
+Then D11-B can implement the one preparation publication/selection path and T1–T9. Business
 source/variant/authority rules remain disabled; D12 retains one bounded replaceable
 worker and separately reviewed minimum proof/correction integration. Descriptive
 confirmation is not permission for either.

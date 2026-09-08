@@ -25,7 +25,7 @@ Real customer activation remains unapproved.
 Main includes D9-B and D10-B (PR #32, merged at `953d49ec`): a cited synthetic
 workflow brief, consequential questions and persistent descriptive answers/corrections/
 confirmations. It uses zero model calls. See the [Discovery walkthrough](docs/guides/synthetic-discovery.md).
-**This review branch adds D11-A design only:** [Proposed D-036](docs/architecture/d11-reviewed-runtime-pack.md)
+**This review branch adds D11-A design only:** [Accepted D-036](docs/architecture/d11-reviewed-runtime-pack.md)
 and a preparation-pack example; no publication or worker capability is implemented.
 The historical prerelease has the smaller boundary described under [Distribution](#distribution).
 

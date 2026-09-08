@@ -1,11 +1,11 @@
 # D-036 — One reviewed synthetic preparation pack
 
-Status: **Proposed. No publication authority or implementation is approved by this record.**
+Status: **Accepted for the narrow synthetic D11-B implementation; no individual pack is published by this record.**
 D11-A is documentation only, based on main `953d49ece70f7828935bb0f4636299d7601f16d5`
-(normal merge of PR #32, reviewed head `4f86e2f5`). D10-B is merged. D11-B requires
-explicit human acceptance of the boundary below before implementation.
+(normal merge of PR #32, reviewed head `4f86e2f5`). D10-B is merged. D11-B is authorized
+but not implemented; it starts only after PR #33 merges normally.
 
-## Decision requested
+## Accepted decision
 
 Permit one server-validated, versioned **preparation-only** Organization Runtime Pack
 for “prepare and coordinate an evidence-backed invoice-dispute disposition.” A fixed
@@ -22,9 +22,38 @@ its current selection; cannot approve business source precedence, financial poli
 action, outcome acceptance, real-data access or closure. No general Builder, policy
 editor, workflow language, additional Case model or authority engine is proposed.
 
-Human approval of D-036 would authorize this narrow D11-B implementation; it would
+Human approval of D-036 authorizes this narrow D11-B implementation; it does
 not publish the example or approve any individual future pack. D-034/D-035 approval
 history, D-013 closure denial, D-014 Case versions and D-032/D-033 remain unchanged.
+
+## Human approval and reviewed correction
+
+On 2026-09-08 the repository owner explicitly approved the corrected decision:
+
+> I approve corrected D-036 as represented by local commit
+> `100b681817fa34bf671328dba953c5e7eddfe471` and the supplied correction.patch.
+>
+> This approval covers only the fixed synthetic preparation-publication role and
+> one immutable PostgreSQL selection history, with exact bindings,
+> operation-specific validation, supersession and guarded rollback. It authorizes
+> D11-B implementation; it does not publish an individual pack or grant business
+> authority.
+
+The reviewed correction is published in PR #33 as
+[`3ba7f8008d03ec3c93b4dca6443f2b226ec76277`](https://github.com/Mehtapozkan/fieldruntime-core/commit/3ba7f8008d03ec3c93b4dca6443f2b226ec76277).
+Its Git tree `bac8cd9bb3be90f93f72a4a0eb56da9ca0407a7d` exactly matches local
+`100b6818`; the patch was not applied again. The original proposal at `b773162a`
+and corrected 0.1.1 example remain in history. This approval records the corrected
+claim-level provenance, withdrawal-specific gates and S3 correction transition;
+it does not retroactively approve the original defects or repair the upstream
+Discovery interpreter. D11-B must preserve historical v1/v2 interpretation.
+
+Acceptance is an architectural instruction, not a publication receipt or a claim
+that implementation/T1–T9 already passed. PR #33 still requires normal repository
+checks and merge; D11-B begins from that merged main and remains a separate PR.
+Real customer processing, worker dispatch, consequential rules and closure are not
+authorized. D12 retains worker execution and separately reviewed minimum proof/
+correction capture. Release and deployment instructions are unchanged.
 
 ## Useful assignment and populated example
 
@@ -376,7 +405,7 @@ intake/Discovery helpers, API and PostgreSQL hosts; no new harness or ECC mutati
 
 ## Smallest D11-B handoff
 
-After human acceptance, deliver one focused implementation PR:
+After PR #33 merges, deliver one focused implementation PR under the approval above:
 
 1. Define strict versioned artifact, operation-specific publication command, journal,
    read and export envelopes for the **one fixed template** above, using the existing
@@ -411,8 +440,8 @@ Open business questions: who owns delivery/terms and disposition acceptance; wha
 source resolves each field/variant conflict; settlement versus cash close event;
 cohort/effort/readiness evidence; and the first useful bounded worker. Unknown answers
 block the corresponding consequential capability, not this synthetic design review.
-The human decision now is only the publication role/purpose, exact immutable selection
-history and preparation-only scope described under **Decision requested**.
+The accepted decision is only the publication role/purpose, exact immutable selection
+history and preparation-only scope described under **Accepted decision**.
 
 ## Reproduce the example basis
 
