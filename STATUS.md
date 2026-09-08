@@ -1,23 +1,31 @@
 # Status
 
-Current milestone: **D10-B implemented for review; complete Discovery remains incomplete.**
-D10-A / [Accepted D-035](docs/architecture/d10-discovery-preparation-review.md)
-merged normally in PR #31 at `222b2842b44efc1da219c1409d5111a55e62641a`, preserving
-approval head `53e3ddd5d0c3752c4f3f98dcd6a3190830f0f006` and
-[passing required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34182770322).
-No unresolved review findings remained; required PR/up-to-date checks and force-push/
-deletion protections were preserved without bypass. The human approval and proposal
-history remain recorded in D-035 and DECISIONS.
+Current milestone: **D10-B merged; corrected D-036 Accepted; D11-B not implemented.**
+PR #32 merged normally at `953d49ece70f7828935bb0f4636299d7601f16d5`, preserving
+reviewed head `4f86e2f5502f4b7227d7ff7823d372b1e8614faa`. Both review findings were
+resolved and [required head CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34195404986).
+The effective main rules required a PR, strict up-to-date `validate`, and force-push/
+deletion protections, with zero required approving reviews. No bypass was used.
+D10-A / Accepted D-035 and its original human approval history remain unchanged.
 
-This branch implements a deterministic cited brief, all seven descriptive records and
-six loop outputs, gap agenda, explicit answers/corrections and two descriptive
-confirmation purposes. One Case-linked PostgreSQL history retains exact bindings,
-trusted synthetic attribution and portable replay. Case/authority/intake business
-histories are unchanged by descriptive review. The existing Workbench and one atomic
-IndexedDB recovery slot serve intake and Discovery. Reads remain side-effect free.
-[Executable walkthrough, limits and screenshots](docs/guides/synthetic-discovery.md).
-The canonical specification and single 19-entry matrix remain authoritative. No models,
-worker integration, real customer activation, release or deployment are included.
+Main provides a deterministic cited brief, seven descriptive records and six loop
+outputs, gap questions, explicit answers/corrections and descriptive confirmation.
+One Case-linked PostgreSQL history retains exact bindings and synthetic attribution.
+Current v2 preserves record/delivery applicability in scoped claims/findings, but its
+loop helper still assigns selected-record citations to every loop output (gap below). Old v1
+reviews/exports retain their original semantics. Node 24.19.0 / tzdata 2026b remains
+required for those archives. Case/authority/intake histories, successful no-op keys,
+atomic cross-tab recovery and migration checksums remain intact. Reads do not write.
+[Executable Discovery walkthrough and screenshots](docs/guides/synthetic-discovery.md).
+
+This branch records [Accepted D-036](docs/architecture/d11-reviewed-runtime-pack.md)
+and a populated preparation-only Runtime Pack example. The owner approved corrected local
+`100b6818`, published as identical-tree `3ba7f800`. The separate synthetic publication
+role, immutable selection history, current-input checks, supersession and guarded rollback
+are approved for D11-B; none is implemented here. D11-B awaits normal PR #33 merge;
+D12 worker/packet-proof/correction integration remains planned. Complete Discovery,
+real customer activation, business outcome acceptance and Case closure remain incomplete.
+The canonical specification and single 19-entry matrix remain the product plan.
 
 **D9-B merged in PR #30 at `ca9543289894fffdaa40ecfe794d83addc2c19de`.** The reviewed
 head was exactly `9d250707458adfdc481a6c9259608f5d6d3f4cc7`, with all three findings
@@ -1188,11 +1196,99 @@ CI now pins the compatible Node 24.19.0 interpreter; the README, guide and fixtu
 record that replay requirement. The fixture, hashes and fail-closed version check
 remain unchanged. Supporting a different timezone interpreter is a separate upgrade.
 
+## D11-A proposed preparation pack
+
+The design binds a four-step read/propose assignment to existing retained bytes,
+scoped source claims, exact Case/intake/Discovery history and interpreter versions.
+It specifies seven records, six loop outputs, owners/questions, disabled business
+rules and separate packet/effect/business-close/Case-resolution evidence. The example
+uses actual disposable D9/D10 API output; its synthetic confirmation is not human
+publication approval. D11-B acceptance gates cover reproducibility, unapproved/stale
+publication, scoped conflicts, retry/atomicity, rollback and historical compatibility.
+No runtime, contract schema, migration, dependency, UI or frozen ECC changes are made.
+
+Local D11-A validation: `pnpm validate` passes **297/297**, formatting, lint,
+typecheck and release audit; ECC passes **620/620**, and its negative control exits
+**1 at 152/620** for intended unsafe-acceptance assertions. The documented example
+command passes through disposable PostgreSQL 18.4/API: exact artifact/basis hashes,
+source citations, restart reconstruction and unchanged read/export snapshots.
+Documentation checks validate **157 local links**, all **19 matrix IDs**, four step
+contracts/dependencies, R1–R7/six outputs and original byte/hash citations.
+`git diff --check` passes. `docker compose config --quiet` cannot run locally
+(exit 127: Docker is not installed); no local Compose/container pass is claimed.
+
+[PR #32 CI at the merged reviewed head](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34195404986)
+passed 297 repository tests, 63 D6, 115 D7/D8, 32 intake and 30 Discovery
+PostgreSQL/API/browser tests, eight separate D6 browser cases, Compose and appliance/
+restart checks using pinned Node 24.19.0 and PostgreSQL 17.11. These are merged
+implementation checks. D11-A's required CI runs on its PR; no D11 publication or
+T1–T9 implementation pass is claimed by the design or example reproduction.
+
+## D11-A design correction (PR #33)
+
+Starting head `b773162a` had two provenance failures: the Human Intervention Map
+cited only the queue row for the DEL-4 note report, and the two-record count cited
+only North's row. The corrected proposed example cites the associated note and both
+entity-qualified rows respectively; proposed objectives/process rules carry no fabricated
+source proof. Its version advances to 0.1.1 and its artifact hash is recomputed.
+All six outputs are audited; the documented check now tests citation relevance,
+not just hash validity. The original Discovery material/export hashes remain unchanged.
+
+The existing `projectDiscovery` loop helper still applies `ownRefs` to every output.
+This is an upstream runtime gap, **not fixed by this documentation change**. D11-B's
+fixed pack projection must derive relevant scoped-claim/coverage support rather than
+copy that fallback. A later upstream repair needs an explicit interpreter version
+and preserved v1/v2 history/replay; no runtime file or migration changes here.
+
+One operation table governs publication: publish/rollback require current basis and
+compatible artifacts; withdraw requires an eligible current reviewer, exact selected
+artifact and stream head, regardless of stale evidence/expired pack effectivity.
+Revoked/expired reviewer grants still deny withdrawal. T7 covers stale-pack withdrawal,
+unauthorized withdrawal, competing stale-head commands and unchanged business histories.
+
+S3 reuses completed applicable D10 review without another Confirm. A new annotation
+advances D, stales the pack, and requires fresh descriptive confirmation followed by
+a new artifact/version and separate publication approval before S4 uses the changed
+basis. D11-B only exposes this transition; D12 still supplies worker execution.
+The corrected boundary was subsequently approved by the owner at local `100b6818`
+(published as identical-tree `3ba7f800`); D-036 is now Accepted. This approval does
+not publish an individual pack or grant business authority. D11-B is not implemented.
+
+Local correction validation passes `pnpm validate` **297/297** plus format/lint/
+typecheck/release audit. ECC is **620/620**; its intended negative control exits **1**
+at **152/620**, not a setup failure. The stronger documented example check fails on
+`b773162a`'s queue citation and passes on the corrected artifact, through disposable
+PostgreSQL 18.4/API. It checks six-output provenance, original archive hashes, read-only
+reuse at D=1, new information at D=2, fresh confirmation at D=3 and restart/export
+preservation. It also explicitly confirms that the upstream helper remains unfixed.
+
+Static checks pass **158 local links**, all **19 matrix IDs**, source-byte/hash citations,
+three operation-specific gate descriptions and retained T1–T9 identifiers. The example
+artifact hash is `sha256:bc54d0a07cd76ccaa80887de0024632260d368d810649ffa9e74f43224e28bcd`.
+`git diff --check` passes. Docker remains unavailable locally (`docker compose config
+--quiet`: exit 127). Hosted CI must be reported against the final PR #33 head; these
+local checks do not establish a final-head CI pass. No future
+publication acceptance test or upstream runtime repair is claimed as implemented.
+
+## D-036 approval record
+
+The owner approved corrected local `100b681817fa34bf671328dba953c5e7eddfe471` on
+2026-09-08. Its identical tree is published at `3ba7f800`; the original correction
+was preserved, not reapplied. D-036 and DECISIONS now record acceptance of only the
+synthetic preparation-publication boundary. Both review findings have corrected
+files and before/after evidence in PR #33. No individual pack is published.
+The approval update passes local `pnpm validate` (297 tests, format/lint/types/release
+check). Required hosted validation must pass on this approval-recording head before
+normal merge. Docker is still unavailable locally. D11-B is authorized but not yet
+implemented and must start from merged main. No D12 or release/deployment work began.
+
 ## Next
 
-Review D10-B without merging it in this task. D11 retains one reviewed Runtime Pack and
-applicable rule publication; D12 retains one bounded replaceable worker and approved
-proof/correction integration. Descriptive confirmation is not permission for either.
+Finish required CI and normal merge of PR #33 with the recorded D-036 approval.
+Then D11-B can implement the one preparation publication/selection path and T1–T9. Business
+source/variant/authority rules remain disabled; D12 retains one bounded replaceable
+worker and separately reviewed minimum proof/correction integration. Descriptive
+confirmation is not permission for either.
 Representative normal/exception routes, governing field/variant rules, baseline/effort/
 cost collection, operator usefulness/support and customer acceptance remain incomplete.
 Measured economics and complete Case closure are not implemented.

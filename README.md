@@ -22,12 +22,12 @@ Real customer activation remains unapproved.
 
 ## What works today
 
-Main includes D9-B (PR #30) and the Accepted D10-A design (PR #31, merged at
-`222b2842b44efc1da219c1409d5111a55e62641a`). **This review branch implements D10-B**:
-a cited synthetic workflow brief, consequential questions and persistent descriptive
-answers/corrections/confirmations. It uses zero model calls. See the
-[Discovery walkthrough](docs/guides/synthetic-discovery.md). The historical prerelease
-has the smaller boundary described under [Distribution](#distribution).
+Main includes D9-B and D10-B (PR #32, merged at `953d49ec`): a cited synthetic
+workflow brief, consequential questions and persistent descriptive answers/corrections/
+confirmations. It uses zero model calls. See the [Discovery walkthrough](docs/guides/synthetic-discovery.md).
+**This review branch adds D11-A design only:** [Accepted D-036](docs/architecture/d11-reviewed-runtime-pack.md)
+and a preparation-pack example; no publication or worker capability is implemented.
+The historical prerelease has the smaller boundary described under [Distribution](#distribution).
 
 | Functionality                                     | Workbench                                                                                                | API / runtime                                                                                           | Availability                                                                          |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -39,7 +39,7 @@ has the smaller boundary described under [Distribution](#distribution).
 | Case progress and evidence receipt                | Expand proposal, attributed decisions, action, independent observation and unresolved gaps in History    | Reuses existing Case, review and action/check reads; no new records or permission                       | Main (D8-A)                                                                           |
 | Failure walkthrough and measurement readiness     | Existing failure/result views remain unchanged                                                           | Five selected PostgreSQL/API control and failure fixtures with evidence output                          | Main (D8-B)                                                                           |
 | Synthetic file intake                             | Explicit prepare, review target, commit and reopen; source citations and gaps                            | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay                 | Main (D9-B); real data unapproved                                                     |
-| Cited workflow preparation and descriptive review | Open retained intake, inspect seven records/six outputs, answer/correct/confirm and reopen history       | Deterministic brief, exact Case/material/review bindings, one immutable journal and portable provenance | This review branch (D10-B); not released; complete Discovery remains pending          |
+| Cited workflow preparation and descriptive review | Open retained intake, inspect seven records/six outputs, answer/correct/confirm and reopen history       | Deterministic brief, exact Case/material/review bindings, one immutable journal and portable provenance | Main (D10-B); not in historical prerelease; complete Discovery remains pending        |
 | Accepted outcome, economics and complete closure  | Unavailable                                                                                              | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof                          | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
@@ -84,7 +84,7 @@ profile; retain site storage while a response is uncertain. For the merged APIs,
 use the [API walkthrough](docs/guides/simulated-credit-api.md). Neither walkthrough
 silently resets an occupied credit slot or moves a changed Case.
 
-For this branch's **synthetic Discovery**, open the existing intake entry at
+For **merged synthetic Discovery**, open the existing intake entry at
 <http://127.0.0.1:3210/?view=intake>. Explicitly prepare the sample, review its Case
 commit, then **Open workflow brief**. Save a descriptive answer and confirm its
 stated purpose separately. [Executable API steps, migration and desktop/390px captures](docs/guides/synthetic-discovery.md).
