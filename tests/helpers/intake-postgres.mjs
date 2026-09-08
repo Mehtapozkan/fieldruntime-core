@@ -1,3 +1,5 @@
+import { PostgresPreparationPackStore } from "../../dist/packages/runtime/src/postgres-preparation-pack-store.js";
+import { syntheticPackContext } from "../../dist/packages/runtime/src/preparation-pack.js";
 import { PostgresDiscoveryStore } from "../../dist/packages/runtime/src/postgres-discovery-store.js";
 // Disposable test host only. Fault hooks never enter the appliance API.
 import assert from "node:assert/strict";
@@ -23,6 +25,7 @@ export const migrationNames = [
   "0005_synthetic_intake",
   "0006_intake_request_bindings",
   "0007_discovery_review",
+  "0008_preparation_pack_selection",
 ];
 export const migrations = await Promise.all(
   migrationNames.map(async (name) =>
@@ -38,7 +41,10 @@ export const migrations = await Promise.all(
     ),
   ),
 );
-export async function intakeHost(t, { upgrade = false } = {}) {
+export async function intakeHost(
+  t,
+  { upgrade = false, beforePack = false } = {},
+) {
   const url = process.env.D9_POSTGRES_URL ?? process.env.D6_POSTGRES_URL;
   assert.ok(
     url,
@@ -51,7 +57,8 @@ export async function intakeHost(t, { upgrade = false } = {}) {
   const schema = `d9_test_${randomUUID().replaceAll("-", "")}`,
     admin = new Pool({ connectionString: url });
   await admin.query(`CREATE SCHEMA ${schema}`);
-  let serverPort = 0;
+  let serverPort = 0,
+    packEnabled = !upgrade && !beforePack;
   let pg,
     pool,
     store,
@@ -62,7 +69,8 @@ export async function intakeHost(t, { upgrade = false } = {}) {
     ids = 0,
     clockReads = 0,
     hook,
-    fault;
+    fault,
+    packContext = syntheticPackContext();
   const trace = [],
     discarded = [];
   const now = () => {
@@ -119,12 +127,20 @@ export async function intakeHost(t, { upgrade = false } = {}) {
         intake,
         dependencies,
         new PostgresDiscoveryStore(pool),
+        packEnabled
+          ? new PostgresPreparationPackStore(pool, () => packContext)
+          : undefined,
       );
     server = createApiServer(
       {
         intake: iw,
         isReady: async () => {
-          await new PostgresDiscoveryStore(pool).assertReady();
+          if (packEnabled)
+            await new PostgresPreparationPackStore(
+              pool,
+              () => packContext,
+            ).assertReady();
+          else await new PostgresDiscoveryStore(pool).assertReady();
           return true;
         },
         executeCaseCommand: (_tenant, cmd) => worker.execute(cmd),
@@ -157,7 +173,13 @@ export async function intakeHost(t, { upgrade = false } = {}) {
     await admin.end();
   });
   open();
-  await migrate(upgrade ? migrations.slice(0, 4) : migrations);
+  await migrate(
+    upgrade
+      ? migrations.slice(0, 4)
+      : beforePack
+        ? migrations.slice(0, 7)
+        : migrations,
+  );
   if (!upgrade) await start();
 
   async function call(path, body) {
@@ -240,6 +262,7 @@ export async function intakeHost(t, { upgrade = false } = {}) {
         "intake_commits",
         "intake_request_bindings",
         "discovery_review_journal",
+        ...(packEnabled ? ["preparation_pack_selection"] : []),
       ];
       const out = {};
       for (const table of tables)
@@ -276,6 +299,9 @@ export async function intakeHost(t, { upgrade = false } = {}) {
       return clockReads;
     },
     dependencies,
+    setPackContext: (value) => {
+      packContext = value;
+    },
     trace,
     discarded,
     call,
@@ -298,7 +324,12 @@ export async function intakeHost(t, { upgrade = false } = {}) {
       await start();
     },
     upgrade: async () => {
+      if (server) {
+        await stop();
+        open();
+      }
       await migrate(migrations.slice(4));
+      packEnabled = true;
       await start();
     },
   };

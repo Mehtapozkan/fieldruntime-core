@@ -25,8 +25,10 @@ Real customer activation remains unapproved.
 Main includes D9-B and D10-B (PR #32, merged at `953d49ec`): a cited synthetic
 workflow brief, consequential questions and persistent descriptive answers/corrections/
 confirmations. It uses zero model calls. See the [Discovery walkthrough](docs/guides/synthetic-discovery.md).
-**This review branch adds D11-A design only:** [Accepted D-036](docs/architecture/d11-reviewed-runtime-pack.md)
-and a preparation-pack example; no publication or worker capability is implemented.
+**D11-A / corrected Accepted D-036 merged in PR #33 at `940a95bf`. This review branch
+implements D11-B:** one fixed preparation pack, separate synthetic publication, withdrawal,
+guarded rollback and portable history. [Try the pack walkthrough](docs/guides/synthetic-preparation-pack.md).
+Worker execution remains pending (D12).
 The historical prerelease has the smaller boundary described under [Distribution](#distribution).
 
 | Functionality                                     | Workbench                                                                                                | API / runtime                                                                                           | Availability                                                                          |
@@ -40,6 +42,7 @@ The historical prerelease has the smaller boundary described under [Distribution
 | Failure walkthrough and measurement readiness     | Existing failure/result views remain unchanged                                                           | Five selected PostgreSQL/API control and failure fixtures with evidence output                          | Main (D8-B)                                                                           |
 | Synthetic file intake                             | Explicit prepare, review target, commit and reopen; source citations and gaps                            | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay                 | Main (D9-B); real data unapproved                                                     |
 | Cited workflow preparation and descriptive review | Open retained intake, inspect seven records/six outputs, answer/correct/confirm and reopen history       | Deterministic brief, exact Case/material/review bindings, one immutable journal and portable provenance | Main (D10-B); not in historical prerelease; complete Discovery remains pending        |
+| Reviewed preparation pack                         | Compact intake panel: inspect, publish, compare, withdraw, roll back and export                          | Strict fixed template, scoped publication profile, exact current basis and immutable selection replay   | D11-B review branch; not in historical prerelease; no worker execution                |
 | Accepted outcome, economics and complete closure  | Unavailable                                                                                              | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof                          | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
@@ -88,7 +91,10 @@ For **merged synthetic Discovery**, open the existing intake entry at
 <http://127.0.0.1:3210/?view=intake>. Explicitly prepare the sample, review its Case
 commit, then **Open workflow brief**. Save a descriptive answer and confirm its
 stated purpose separately. [Executable API steps, migration and desktop/390px captures](docs/guides/synthetic-discovery.md).
-This does not enroll intake Cases for financial actions or publish a Runtime Pack.
+Descriptive confirmation does not enroll intake Cases for financial actions or publish a pack.
+On the D11-B review branch, the separate **Preparation pack** panel provides explicit
+publication after that review; [its guide](docs/guides/synthetic-preparation-pack.md) covers
+changes, stale withdrawal and exact recovery.
 
 The API and PostgreSQL are loopback-only. `fr up` builds the selected source and
 applies checksum-bound migrations; it refuses unsafe configuration. For an existing

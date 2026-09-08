@@ -123,7 +123,7 @@ export function pendingIntakeStorage() {
           result = true;
         } else {
           failure = new Error(
-            "Another tab has an unresolved intake or Discovery command. Recover the saved original submission before starting another; nothing new was submitted.",
+            "Another tab has an unresolved intake, Discovery or pack command. Recover the saved original submission before starting another; nothing new was submitted.",
           );
           tx.abort();
         }
@@ -163,6 +163,10 @@ export function createIntakeClient({
     discovery: null,
     discoveryTarget: null,
     discoveryConfirmed: null,
+    pack: null,
+    packConfirmed: null,
+    packError: null,
+    packNeedsRefresh: true,
   };
   async function request(path, body) {
     const abort = new globalThis.AbortController(),
@@ -240,7 +244,29 @@ export function createIntakeClient({
       "fieldruntime.discovery.navigation.v1",
       JSON.stringify(target),
     );
+    await refreshPack(brief, target);
     return brief;
+  }
+  async function refreshPack(brief, target) {
+    state.packNeedsRefresh = true;
+    state.packError = null;
+    try {
+      const view = await validatePackView(
+        await request(packPath(target)),
+        target,
+      );
+      state.pack = view;
+      if (
+        view.candidate &&
+        !equal(view.candidate.binding.discovery, brief.binding)
+      )
+        throw new Error(
+          "Description and pack were read across a change. Refresh and inspect both before a new submission.",
+        );
+      state.packNeedsRefresh = false;
+    } catch (error) {
+      state.packError = error.message;
+    }
   }
   async function run(operation) {
     if (state.busy) return;
@@ -262,7 +288,11 @@ export function createIntakeClient({
     const saved = state.pending;
     requireData(
       saved &&
-        ([`${ROOT}/preparations`, `${ROOT}/commits`].includes(saved.path) ||
+        ([
+          `${ROOT}/preparations`,
+          `${ROOT}/commits`,
+          `${PACK_ROOT}/selections/publication`,
+        ].includes(saved.path) ||
           /^\/v1\/intake\/bundles\/intake_bundle_[a-f0-9]{64}\/discovery-reviews$/.test(
             saved.path,
           )),
@@ -283,8 +313,19 @@ export function createIntakeClient({
     state.needsRefresh = true;
     try {
       const result = await request(saved.path, saved.body);
-      const isDiscovery = saved.path.endsWith("discovery-reviews");
-      if (isDiscovery) {
+      const isDiscovery = saved.path.endsWith("discovery-reviews"),
+        isPack = saved.path === `${PACK_ROOT}/selections/publication`;
+      if (isPack) {
+        await validatePackResult(result, JSON.parse(saved.body));
+        state.packConfirmed = result;
+        const artifact = result.entry.artifact ?? state.pack?.selected_artifact;
+        if (artifact)
+          state.discoveryTarget = {
+            bundle_id: artifact.binding.discovery.bundle_id,
+            record_key: artifact.binding.discovery.record_key,
+            case_id: artifact.binding.discovery.case_id,
+          };
+      } else if (isDiscovery) {
         await validateDiscoveryResult(result, JSON.parse(saved.body));
         state.discoveryConfirmed = result;
         state.discoveryTarget = {
@@ -309,7 +350,7 @@ export function createIntakeClient({
             ) &&
             /^intake_bundle_[a-f0-9]{64}$/.test(result.bundle_id),
         );
-      if (!isDiscovery) state.confirmed = result;
+      if (!isDiscovery && !isPack) state.confirmed = result;
       state.needsRefresh = true;
       state.recovered = recovering;
       try {
@@ -322,14 +363,16 @@ export function createIntakeClient({
       state.preview = null;
       try {
         await refresh(
-          isDiscovery
-            ? result.entry.command.bundle_id
-            : (result.receipt?.selection.bundle_id ?? result.bundle_id),
+          isPack
+            ? state.discoveryTarget?.bundle_id
+            : isDiscovery
+              ? result.entry.command.bundle_id
+              : (result.receipt?.selection.bundle_id ?? result.bundle_id),
         );
         if (state.discoveryTarget) await refreshDiscovery();
       } catch (error) {
         state.needsRefresh = true;
-        state.error = `Confirmed ${isDiscovery ? "descriptive review" : result.receipt ? "Case receipt" : "preparation"} retained. Current view could not be refreshed: ${error.message}`;
+        state.error = `Confirmed ${isPack ? "publication receipt" : isDiscovery ? "descriptive review" : result.receipt ? "Case receipt" : "preparation"} retained. Current view could not be refreshed: ${error.message}`;
       }
       return result;
     } catch (error) {
@@ -396,6 +439,31 @@ export function createIntakeClient({
           state.needsRefresh = true;
           throw error;
         }
+      }),
+    writePack: (command) =>
+      run(async () => {
+        requireData(
+          !state.pending &&
+            !state.needsRefresh &&
+            !state.packNeedsRefresh &&
+            state.pack,
+        );
+        const v = state.pack;
+        requireData(
+          command.operation === "withdraw"
+            ? v.current.can_withdraw
+            : command.operation === "rollback"
+              ? v.rollback_candidates.some(
+                  (r) =>
+                    r.artifact_hash === command.artifact_hash && r.eligible,
+                )
+              : v.current.can_publish,
+        );
+        state.pending = {
+          path: `${PACK_ROOT}/selections/publication`,
+          body: JSON.stringify(command),
+        };
+        return submitPending();
       }),
     writeDiscovery: (command) =>
       run(async () => {
@@ -573,5 +641,150 @@ export async function validateDiscoveryResult(v, command) {
   );
   await validateDiscoveryEntry(v.entry);
   requireData(equal(v.entry.command, command));
+  return v;
+}
+
+const PACK_ROOT = `${ROOT}/preparation-packs/pack_synthetic_invoice_dispute_north`;
+export function packPath(target) {
+  return `${PACK_ROOT}?bundle_id=${encodeURIComponent(target.bundle_id)}&record_key=${encodeURIComponent(target.record_key)}${target.case_id ? `&case_id=${encodeURIComponent(target.case_id)}` : ""}`;
+}
+const packVersions = {
+  projection: "preparation-pack.v1",
+  selection: "pack-selection.v1",
+};
+async function validatePackArtifact(a, hash) {
+  requireData(
+    a?.schema_version === "preparation-pack.v1" &&
+      a.pack_id === "pack_synthetic_invoice_dispute_north" &&
+      a.authority_granted === false &&
+      a.closure_permission === false &&
+      a.template?.template_id === "invoice-dispute-preparation.v1" &&
+      a.material?.model_calls === 0 &&
+      a.findings?.length === 7 &&
+      a.loop_outputs?.length === 6 &&
+      Array.isArray(a.sources),
+  );
+  const { version, ...content } = a;
+  requireData(
+    version === `pack-v1-${(await intakeHash(content)).slice(7)}` &&
+      hash === (await intakeHash(a)),
+  );
+  requireData(
+    a.binding.discovery.expected_material_hash ===
+      (await intakeHash(a.material)) &&
+      equal(a.binding.manifest, a.material.manifest),
+  );
+  const refs = new Set(a.sources.map((c) => c.id));
+  requireData(
+    a.findings
+      .concat(a.loop_outputs)
+      .every((c) => c.citation_ids.every((id) => refs.has(id))),
+  );
+}
+export async function validatePackEntry(e) {
+  requireData(
+    e?.schema_version === "pack-selection-entry.v1" &&
+      e.tenant_id === "tenant_intake_demo" &&
+      e.pack_id === "pack_synthetic_invoice_dispute_north" &&
+      e.actor?.identity_id === "identity_pack_reviewer_demo" &&
+      e.actor.status === "active" &&
+      e.actor.identity_kind === "human" &&
+      equal(e.versions, packVersions) &&
+      e.operation === e.command?.operation &&
+      e.idempotency_key === e.command.idempotency_key &&
+      e.sequence === e.command.expected_selection_revision + 1 &&
+      e.previous_entry_hash === e.command.expected_selection_head &&
+      e.artifact_hash === e.command.artifact_hash &&
+      e.result?.authority_granted === false &&
+      e.result.closure_permission === false,
+  );
+  await bound(e);
+  requireData(
+    e.command_fingerprint === (await intakeHash(e.command)) &&
+      e.id === `pack_selection_${e.command_fingerprint.slice(7)}` &&
+      e.command.expected_publication_profile_hash ===
+        (await intakeHash(e.profile)),
+  );
+  if (e.operation === "publish") {
+    await validatePackArtifact(e.artifact, e.artifact_hash);
+    requireData(equal(e.artifact.binding, e.command.expected_basis));
+  } else
+    requireData(
+      e.artifact === null && ["withdraw", "rollback"].includes(e.operation),
+    );
+  requireData(
+    e.result.selected_artifact_hash ===
+      (e.operation === "withdraw" ? null : e.artifact_hash),
+  );
+  return e;
+}
+export async function validatePackResult(v, command) {
+  requireData(
+    v?.schema_version === "pack-selection-result.v1" &&
+      v.status === "recorded" &&
+      v.historical_receipt === true &&
+      v.authority_granted === false &&
+      v.closure_permission === false,
+  );
+  await validatePackEntry(v.entry);
+  requireData(equal(v.entry.command, command));
+  return v;
+}
+export async function validatePackView(v, target) {
+  requireData(
+    v?.schema_version === "pack-selection-read.v1" &&
+      v.pack_id === "pack_synthetic_invoice_dispute_north" &&
+      v.authority_granted === false &&
+      v.closure_permission === false &&
+      equal(v.target, { ...target, case_id: target.case_id ?? null }) &&
+      Array.isArray(v.history) &&
+      Array.isArray(v.comparison) &&
+      Array.isArray(v.rollback_candidates) &&
+      [
+        "proposed",
+        "published_for_preparation",
+        "stale",
+        "withdrawn",
+        "unavailable",
+      ].includes(v.current?.status),
+  );
+  await bound(v);
+  let last = null;
+  const artifacts = new Map();
+  for (const e of v.history) {
+    await validatePackEntry(e);
+    requireData(
+      e.sequence === (last?.sequence ?? 0) + 1 &&
+        e.previous_entry_hash === (last?.hash ?? null),
+    );
+    if (e.artifact) artifacts.set(e.artifact_hash, e.artifact);
+    requireData(artifacts.has(e.artifact_hash));
+    last = e;
+  }
+  requireData(
+    v.selection_revision === (last?.sequence ?? 0) &&
+      v.selection_head === (last?.hash ?? null) &&
+      v.selected_artifact_hash ===
+        (last?.result.selected_artifact_hash ?? null),
+  );
+  if (v.candidate) {
+    await validatePackArtifact(v.candidate, v.candidate_hash);
+    const b = v.candidate.binding.discovery;
+    requireData(
+      b.bundle_id === target.bundle_id &&
+        b.record_key === target.record_key &&
+        b.case_id === (target.case_id ?? null),
+    );
+  } else requireData(v.candidate_hash === null);
+  requireData(
+    equal(v.selected_artifact, artifacts.get(v.selected_artifact_hash) ?? null),
+  );
+  requireData(
+    v.rollback_candidates.every((r) => artifacts.has(r.artifact_hash)),
+  );
+  requireData(
+    v.current.eligible === (v.current.status === "published_for_preparation") &&
+      (!v.current.can_withdraw || v.selected_artifact_hash !== null),
+  );
   return v;
 }

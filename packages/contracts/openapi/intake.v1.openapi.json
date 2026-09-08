@@ -3,7 +3,7 @@
   "info": {
     "title": "Synthetic intake API",
     "version": "1",
-    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input. Every successful request key, including no-ops, binds its normalized request fingerprint and original outcome/reference. First no-op key retention is metadata only; exact retries return the original status and cause no durable changes. Exports use intake-export.v2; the conformance reader also accepts strict historical v1 exports without no-op key history. Accepted D-035 adds versioned, Case-linked descriptive Discovery review with zero model calls. Confirmation grants no business authority, outcome acceptance or closure."
+    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input. Every successful request key, including no-ops, binds its normalized request fingerprint and original outcome/reference. First no-op key retention is metadata only; exact retries return the original status and cause no durable changes. Exports use intake-export.v2; the conformance reader also accepts strict historical v1 exports without no-op key history. Accepted D-035 adds versioned, Case-linked descriptive Discovery review with zero model calls. Confirmation grants no business authority, outcome acceptance or closure. Accepted D-036 adds one fixed preparation-only pack and separate synthetic publication profile. Candidate/selection/history/comparison/export GETs do not write. Publish and rollback require current basis; withdrawal checks the current reviewer and exact selected artifact/head even if its business basis or effectivity is stale. Publication never dispatches workers or grants business authority."
   },
   "servers": [
     {
@@ -352,6 +352,121 @@
           },
           "500": {
             "description": "Integrity or persistence unavailable; retain the original command for explicit exact recovery"
+          }
+        }
+      }
+    },
+    "/v1/intake/preparation-packs/pack_synthetic_invoice_dispute_north": {
+      "get": {
+        "description": "One repeatable-read snapshot. No writer lock, IDs, preview retention, revision or clock update. Incompatible basis returns unavailable/stale with operation-specific withdrawal eligibility. Export nests the unchanged Discovery archive and retained selection evidence.",
+        "parameters": [
+          {
+            "name": "bundle_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "record_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "case_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "representation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "const": "export"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Canonical validated response; historical receipts do not renew permission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/read"
+                    },
+                    {
+                      "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/export"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input, duplicate JSON key or query rejected"
+          },
+          "409": {
+            "description": "Binding/head/profile/key/expiry/reviewer conflict; explicit refresh and review required"
+          },
+          "500": {
+            "description": "Integrity or persistence unavailable; preserve exact pending command"
+          }
+        }
+      }
+    },
+    "/v1/intake/preparation-packs/pack_synthetic_invoice_dispute_north/selections/{seat}": {
+      "post": {
+        "description": "Explicit synthetic publication. Server selects identity, current profile, template and canonical inputs. The intake seat has no publication grant. Exact key/body retries return the original historical receipt without mutation. Fresh identical publish is a non-success NO_CHANGE; no key/entry is retained. Withdraw forbids basis/interval fields and ignores stale business evidence or pack expiry; revoked/expired reviewer grants still deny.",
+        "parameters": [
+          {
+            "name": "seat",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["publication", "intake"]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/command"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Canonical validated response; historical receipts do not renew permission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input, duplicate JSON key or query rejected"
+          },
+          "409": {
+            "description": "Binding/head/profile/key/expiry/reviewer conflict; explicit refresh and review required"
+          },
+          "500": {
+            "description": "Integrity or persistence unavailable; preserve exact pending command"
           }
         }
       }

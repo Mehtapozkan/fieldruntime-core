@@ -1,3 +1,4 @@
+import preparationPackSchema from "../schemas/preparation-pack.v1.schema.json" with { type: "json" };
 import discoverySchema from "../schemas/discovery.v1.schema.json" with { type: "json" };
 import intakeSchema from "../schemas/intake.v1.schema.json" with { type: "json" };
 import simulatedCreditSchema from "../schemas/simulated-credit.v1.schema.json" with { type: "json" };
@@ -138,6 +139,33 @@ const discoveryValidators = Object.fromEntries(
   "command" | "material" | "journal" | "read" | "result" | "export",
   ValidateFunction
 >;
+ajv.addSchema(preparationPackSchema);
+const packValidators = Object.fromEntries(
+  (
+    [
+      "profile",
+      "artifact",
+      "command",
+      "journal",
+      "read",
+      "result",
+      "export",
+    ] as const
+  ).map((kind) => [
+    kind,
+    ajv.compile({ $ref: `${preparationPackSchema.$id}#/$defs/${kind}` }),
+  ]),
+) as Record<
+  "profile" | "artifact" | "command" | "journal" | "read" | "result" | "export",
+  ValidateFunction
+>;
+export function assertValidPreparationPackContract(
+  kind: keyof typeof packValidators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(packValidators[kind], value, `preparation-pack.v1/${kind}`);
+}
+
 export function assertValidDiscoveryContract(
   kind: keyof typeof discoveryValidators,
   value: unknown,

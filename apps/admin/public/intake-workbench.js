@@ -1,4 +1,4 @@
-import { createIntakeClient } from "./intake-client.js";
+import { createIntakeClient, packPath } from "./intake-client.js";
 const el = (tag, text, className) => {
   const n = document.createElement(tag);
   if (text !== undefined) n.textContent = text;
@@ -527,6 +527,292 @@ export function mountIntakeWorkbench() {
     n?.setAttribute("tabindex", "-1");
     n?.focus();
   }
+  let packDraft;
+  function packPanel(s) {
+    const box = el("section", undefined, "review-card preparation-pack"),
+      v = s.pack;
+    box.append(el("h2", "Preparation pack"));
+    const target = s.discoveryTarget;
+    const current =
+      v &&
+      !s.packNeedsRefresh &&
+      !s.needsRefresh &&
+      v.target.bundle_id === target.bundle_id &&
+      v.target.record_key === target.record_key &&
+      v.target.case_id === (target.case_id ?? null);
+    const receipt = s.packConfirmed?.entry;
+    if (receipt?.case_id === target.case_id) {
+      const result = el("section", undefined, "pack-result");
+      result.role = "status";
+      result.dataset.revision = String(receipt.sequence);
+      result.append(
+        el(
+          "h3",
+          `${receipt.operation === "withdraw" ? "Withdrawal" : receipt.operation === "rollback" ? "Rollback" : "Publication"} recorded`,
+        ),
+        el(
+          "p",
+          `Confirmed at ${new Date(receipt.recorded_at).toLocaleString()}. ${current ? "Current selection is shown separately below." : "Current selection could not be confirmed. This historical receipt grants no current permission."}`,
+        ),
+        detail("Exact confirmed selection receipt", receipt),
+      );
+      box.append(result);
+    }
+    const status = current ? v.current.status : "unavailable";
+    box.dataset.state = status;
+    const labels = {
+      proposed: "Proposed — separate publication needed",
+      published_for_preparation:
+        "Published for preparation — worker not started",
+      stale: "Stale — previous publication cannot be used",
+      withdrawn: "Withdrawn — no pack selected",
+      unavailable: "Current selection unavailable",
+    };
+    box.append(el("h3", labels[status], "pack-state"));
+    if (s.packError)
+      box.append(
+        el("p", `Pack refresh unavailable: ${s.packError}`, "review-notice"),
+      );
+    if (
+      !v ||
+      v.target.bundle_id !== target.bundle_id ||
+      v.target.record_key !== target.record_key ||
+      v.target.case_id !== (target.case_id ?? null)
+    ) {
+      box.append(
+        el(
+          "p",
+          "Refresh retained evidence to inspect this record’s candidate and current selection. No publication is assumed.",
+        ),
+      );
+      return box;
+    }
+    const a = v.candidate,
+      selected = v.selected_artifact;
+    const grid = el("div", undefined, "pack-focus"),
+      summary = el("div"),
+      controls = el("div", undefined, "review-form pack-controls");
+    if (a) {
+      summary.append(
+        el("p", a.template.objective, "review-issue"),
+        el(
+          "p",
+          a.loop_outputs.find((o) => o.id === "Human Intervention Map").text,
+        ),
+        el(
+          "p",
+          a.loop_outputs.find((o) => o.id === "Population").text,
+          "review-muted",
+        ),
+      );
+      summary.append(
+        el(
+          "p",
+          a.binding.confirmation_entry_hash
+            ? "This candidate reuses its bound, recorded workflow description. Publication is a separate decision; current eligibility is shown above."
+            : "Fresh descriptive confirmation is needed before publication. Unknowns and disputes remain visible; confirmation does not settle them.",
+        ),
+      );
+      const citations = el("details", undefined, "intake-source");
+      citations.append(el("summary", "Pack findings and cited evidence"));
+      for (const claim of a.loop_outputs) {
+        citations.append(
+          el("h4", claim.id),
+          el("p", claim.text),
+          el(
+            "p",
+            `${claim.process_view} · ${claim.claim_state}`,
+            "review-muted",
+          ),
+        );
+        for (const ref of claim.citation_ids) {
+          const c = a.sources.find((c) => c.id === ref),
+            part = el("details", undefined, "intake-source");
+          part.append(
+            el(
+              "summary",
+              `${c.name} · ${c.locator.record === null ? "associated document" : `source row ${c.locator.record}`}`,
+            ),
+            el("pre", c.excerpt ?? "Retained only — no extraction"),
+          );
+          const link = el("a", "Download cited original bytes");
+          link.href = `/v1/intake/artifacts/${c.artifact_hash.slice(7)}`;
+          part.append(link, detail("Citation binding", c));
+          citations.append(part);
+        }
+      }
+      summary.append(citations);
+      if (selected && v.candidate_hash !== v.selected_artifact_hash) {
+        const changes = el("details", undefined, "intake-source");
+        changes.append(el("summary", "Exact changes from the selected pack"));
+        for (const c of v.comparison) {
+          changes.append(
+            el("h4", human(c.field)),
+            detail("Before / after", {
+              before: selected[c.field],
+              after: a[c.field],
+            }),
+          );
+        }
+        summary.append(
+          el(
+            "p",
+            "The current candidate differs from the selected artifact. Review the changed description and bindings; previous approval does not transfer.",
+            "review-notice",
+          ),
+          changes,
+        );
+      }
+    }
+    if (v.current.reasons.length)
+      summary.append(el("p", v.current.reasons.join(" "), "review-notice"));
+    const next = !current
+      ? "Refresh and inspect current selection, or recover the original submission."
+      : status === "published_for_preparation"
+        ? "Inspect or withdraw this selection. Worker execution is not implemented."
+        : v.current.can_publish
+          ? "Inspect the candidate, then explicitly publish it for preparation."
+          : a && !a.binding.confirmation_entry_hash
+            ? "Correct the description if needed, then record fresh descriptive confirmation above. Return here for separate publication."
+            : "Resolve the stated basis or reviewer restriction; withdrawal uses its own eligibility checks.";
+    controls.append(el("h3", "Next action"), el("p", next));
+    controls.append(
+      el(
+        "p",
+        "Synthetic preparation publisher · a separate server-controlled demo profile, not authenticated sign-in.",
+        "review-muted",
+      ),
+    );
+    const draftKey = `${v.target.case_id}:${v.selection_head}:${v.candidate_hash}`;
+    if (!packDraft || packDraft.key !== draftKey)
+      packDraft = {
+        key: draftKey,
+        reason: "",
+        until: new Date(Date.parse(v.evaluated_at) + 3600000)
+          .toISOString()
+          .slice(0, 16),
+        acknowledged: false,
+      };
+    const d = packDraft,
+      reason = input("Selection reason", "text", d.reason);
+    reason.node.maxLength = 2000;
+    reason.node.addEventListener("input", () => (d.reason = reason.node.value));
+    const until = input("Preparation expiry (UTC)", "datetime-local", d.until);
+    until.node.addEventListener("input", () => (d.until = until.node.value));
+    const consent = input(
+      "I reviewed this exact candidate for preparation only",
+      "checkbox",
+    );
+    consent.node.checked = d.acknowledged;
+    consent.node.addEventListener(
+      "change",
+      () => (d.acknowledged = consent.node.checked),
+    );
+    const write = (operation, artifactHash = v.candidate_hash, artifact = a) =>
+      act(async () => {
+        if (!d.reason.trim())
+          throw new Error("Give a reason for this selection change.");
+        if (operation !== "withdraw" && (!d.acknowledged || !d.until))
+          throw new Error(
+            "Review the exact candidate and choose its preparation expiry before publication or rollback.",
+          );
+        const command = {
+          schema_version: "pack-selection-command.v1",
+          operation,
+          pack_id: v.pack_id,
+          expected_selection_revision: v.selection_revision,
+          expected_selection_head: v.selection_head,
+          expected_publication_profile_hash: v.publication_profile_hash,
+          artifact_hash:
+            operation === "withdraw" ? v.selected_artifact_hash : artifactHash,
+          reason: d.reason,
+          idempotency_key: uid(),
+          ...(operation === "withdraw"
+            ? {}
+            : {
+                expected_basis: artifact.binding,
+                effective_until: new Date(`${d.until}:00.000Z`).toISOString(),
+                effective_until_source_timezone: "UTC",
+              }),
+        };
+        await client.writePack(command);
+        const focus =
+          stage.querySelector('[role="alert"]') ??
+          stage.querySelector(".pack-result h3");
+        focus?.setAttribute("tabindex", "-1");
+        focus?.focus();
+      });
+    const disabled = !current || s.busy || !!s.pending;
+    controls.append(reason.wrap);
+    if (a) {
+      controls.append(until.wrap, consent.wrap);
+      const publish = button("Publish for preparation", write("publish"), true);
+      publish.disabled = disabled || !v.current.can_publish;
+      controls.append(publish);
+    }
+    if (selected) {
+      const withdraw = button("Withdraw selected pack", write("withdraw"));
+      withdraw.disabled = disabled || !v.current.can_withdraw;
+      controls.append(withdraw);
+      if (v.current.withdrawal_reasons.length)
+        controls.append(
+          el("p", v.current.withdrawal_reasons.join(" "), "review-notice"),
+        );
+    }
+    grid.append(summary, controls);
+    box.append(grid);
+    const history = el("details", undefined, "intake-source");
+    history.append(
+      el(
+        "summary",
+        `Selection history and guarded rollback (${v.history.length} entries)`,
+      ),
+    );
+    for (const e of v.history) {
+      const part = el("section", undefined, "intake-source");
+      part.append(
+        el(
+          "h4",
+          `${human(e.operation)} · ${new Date(e.recorded_at).toLocaleString()}`,
+        ),
+        el("p", `Synthetic preparation publisher. ${e.command.reason}`),
+        detail("Immutable artifact, exact basis and publication evidence", e),
+      );
+      const rollback = v.rollback_candidates.find(
+        (r) => r.artifact_hash === e.artifact_hash,
+      );
+      if (e.artifact && rollback) {
+        const b = button(
+          "Roll back to this retained artifact",
+          write("rollback", e.artifact_hash, e.artifact),
+        );
+        b.disabled = disabled || !rollback.eligible;
+        part.append(
+          el(
+            "p",
+            "Rollback is a new publication decision. Inspect this retained artifact and supply the reason, expiry and consent above. It must match the current basis.",
+          ),
+          b,
+        );
+        if (rollback.reasons.length)
+          part.append(el("p", rollback.reasons.join(" "), "review-muted"));
+      }
+      history.append(part);
+    }
+    const exportLink = el("a", "Download portable pack and review evidence");
+    exportLink.href = `${packPath(v.target)}&representation=export`;
+    box.append(
+      history,
+      detail("Template, current candidate and technical bindings", v),
+      exportLink,
+      el(
+        "p",
+        "Preparation configuration only: no worker dispatch, model calls, business authority or Case closure. Source reports do not verify customer impact.",
+        "review-muted",
+      ),
+    );
+    return box;
+  }
   function discoveryPanel(s) {
     const v = s.discovery,
       m = v.material,
@@ -792,7 +1078,7 @@ export function mountIntakeWorkbench() {
         ),
       );
     shell.append(summary, controls);
-    box.append(shell);
+    box.append(shell, packPanel(s));
     if (
       s.discoveryConfirmed?.entry.case_id === v.binding.case_id &&
       s.discoveryConfirmed.entry.command.bundle_id === v.binding.bundle_id &&
@@ -996,7 +1282,7 @@ export function mountIntakeWorkbench() {
         el("h2", "Original submission needs recovery"),
         el(
           "p",
-          "One intake or Discovery command is shared across tabs. Recover these exact saved bytes and key; completion in another tab does not authorize a different submission.",
+          "One intake, Discovery or pack command is shared across tabs. Recover these exact saved bytes and key; completion in another tab does not authorize a different submission.",
         ),
         button(
           "Recover original submission",

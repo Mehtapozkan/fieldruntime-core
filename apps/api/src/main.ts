@@ -1,3 +1,4 @@
+import { PostgresPreparationPackStore } from "../../../packages/runtime/src/postgres-preparation-pack-store.js";
 import { PostgresDiscoveryStore } from "../../../packages/runtime/src/postgres-discovery-store.js";
 import { PostgresIntakeStore } from "../../../packages/runtime/src/postgres-intake-store.js";
 import { TransactionalIntakeWorker } from "../../worker/src/intake-service.js";
@@ -151,6 +152,7 @@ async function start(): Promise<void> {
     intakeMigrationSql,
     intakeKeysMigrationSql,
     discoveryMigrationSql,
+    packMigrationSql,
     fixtureDocument,
     walkthroughDocument,
   ] = await Promise.all([
@@ -205,6 +207,13 @@ async function start(): Promise<void> {
     ),
     readFile(
       new URL(
+        "../../../packages/runtime/migrations/0008_preparation_pack_selection.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
         "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
         import.meta.url,
       ),
@@ -234,6 +243,7 @@ async function start(): Promise<void> {
       intakeKeysMigrationSql,
     ),
     createMigrationSource("0007_discovery_review", discoveryMigrationSql),
+    createMigrationSource("0008_preparation_pack_selection", packMigrationSql),
   );
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
   const walkthrough = createGuidedWalkthroughRecord(
@@ -264,13 +274,15 @@ async function start(): Promise<void> {
   );
   const intakeStore = new PostgresIntakeStore(pool);
   const discoveryStore = new PostgresDiscoveryStore(pool);
+  const packStore = new PostgresPreparationPackStore(pool);
   const intakeWorker = new TransactionalIntakeWorker(
     intakeStore,
     undefined,
     discoveryStore,
+    packStore,
   );
-  // Discovery readiness includes the complete intake integrity check.
-  await discoveryStore.assertReady();
+  // Pack readiness includes complete Discovery and intake integrity checks.
+  await packStore.assertReady();
   const workbenchAssets = await loadWorkbenchAssets();
   const server = createApiServer(
     {
@@ -279,7 +291,7 @@ async function start(): Promise<void> {
         if (!(await applianceIsReady(pool, migrations, fixture))) return false;
         await creditStore.assertReady();
         await store.assertReady();
-        await discoveryStore.assertReady();
+        await packStore.assertReady();
         await authorityStore.assertReady(SYNTHETIC_AUTHORITY_TENANT);
         return true;
       },

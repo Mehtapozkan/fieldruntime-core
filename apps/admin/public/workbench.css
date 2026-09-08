@@ -2455,3 +2455,47 @@ button {
 .intake-shell .case-header {
   margin-bottom: 1rem;
 }
+
+.preparation-pack {
+  margin-top: 1rem;
+}
+.pack-focus {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 1fr);
+  gap: 1.5rem;
+}
+.pack-focus > * {
+  min-width: 0;
+}
+.pack-controls {
+  align-self: start;
+}
+.pack-controls label {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+.pack-controls input:not([type="checkbox"]) {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+.pack-controls .button {
+  margin: 0.35rem 0;
+  width: 100%;
+}
+.pack-result {
+  border-left: 3px solid var(--color-accent, #756b4d);
+  padding-left: 1rem;
+}
+.pack-state {
+  margin-bottom: 1rem;
+}
+@media (max-width: 720px) {
+  .pack-focus {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .pack-focus p {
+    margin-block: 0.6rem;
+  }
+}

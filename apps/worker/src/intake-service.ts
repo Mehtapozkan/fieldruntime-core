@@ -1,3 +1,5 @@
+import { PostgresPreparationPackStore } from "../../../packages/runtime/src/postgres-preparation-pack-store.js";
+import type { PackTarget } from "../../../packages/runtime/src/preparation-pack.js";
 import { PostgresDiscoveryStore } from "../../../packages/runtime/src/postgres-discovery-store.js";
 import { randomUUID } from "node:crypto";
 import {
@@ -30,6 +32,7 @@ export class TransactionalIntakeWorker {
       nextId: (kind): string => `${kind}_${randomUUID().replaceAll("-", "_")}`,
     }),
     readonly discovery?: PostgresDiscoveryStore,
+    readonly pack?: PostgresPreparationPackStore,
   ) {}
   private async json(
     operation: () => Promise<IntakeObject>,
@@ -97,6 +100,28 @@ export class TransactionalIntakeWorker {
       if (!this.discovery)
         throw new IntakeInputError("NOT_FOUND", "Discovery is unavailable");
       return this.discovery.export(id, key, caseId);
+    });
+  }
+  readPack(target: PackTarget, exporting = false): Promise<JsonObject> {
+    return this.json(() => {
+      if (!this.pack)
+        throw new IntakeInputError(
+          "NOT_FOUND",
+          "Preparation publication is unavailable",
+        );
+      return exporting
+        ? this.pack.export(target, this.dependencies().now)
+        : this.pack.read(target, this.dependencies().now);
+    });
+  }
+  selectPack(command: unknown, seat: string): Promise<JsonObject> {
+    return this.json(() => {
+      if (!this.pack)
+        throw new IntakeInputError(
+          "NOT_FOUND",
+          "Preparation publication is unavailable",
+        );
+      return this.pack.submit(command, seat, this.dependencies().now);
     });
   }
   async artifact(hash: string): Promise<Buffer> {
