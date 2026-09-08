@@ -1,31 +1,41 @@
 # Status
 
-Current milestone: **D10-B merged; corrected D-036 Accepted; D11-B not implemented.**
-PR #32 merged normally at `953d49ece70f7828935bb0f4636299d7601f16d5`, preserving
-reviewed head `4f86e2f5502f4b7227d7ff7823d372b1e8614faa`. Both review findings were
-resolved and [required head CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34195404986).
-The effective main rules required a PR, strict up-to-date `validate`, and force-push/
-deletion protections, with zero required approving reviews. No bypass was used.
-D10-A / Accepted D-035 and its original human approval history remain unchanged.
+Current milestone: **D11-A merged; D11-B implemented on this review branch.**
+Corrected Accepted D-036 and the explicit owner approval merged normally in PR #33
+at `940a95bf62463ba3c42a0e6221b9e6849f523410`. Approval-recording head `3c93f6f6`
+passed [required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34270252563);
+both findings were resolved. Main's required PR, strict up-to-date `validate` and
+force-push/deletion protections were preserved without bypass. The corrected local
+`100b6818` was published as identical-tree `3ba7f800`, without reapplying its patch.
 
-Main provides a deterministic cited brief, seven descriptive records and six loop
-outputs, gap questions, explicit answers/corrections and descriptive confirmation.
-One Case-linked PostgreSQL history retains exact bindings and synthetic attribution.
-Current v2 preserves record/delivery applicability in scoped claims/findings, but its
-loop helper still assigns selected-record citations to every loop output (gap below). Old v1
-reviews/exports retain their original semantics. Node 24.19.0 / tzdata 2026b remains
-required for those archives. Case/authority/intake histories, successful no-op keys,
-atomic cross-tab recovery and migration checksums remain intact. Reads do not write.
-[Executable Discovery walkthrough and screenshots](docs/guides/synthetic-discovery.md).
+D11-B adds one strict, fixed synthetic preparation template, claim-relevant pack
+projection, separate server-controlled publication profile and immutable PostgreSQL
+selection history. Explicit publish/withdraw/guarded rollback use operation-specific
+basis, reviewer, expiry and exact-head checks. Stale or expired packs remain withdrawable
+by a currently eligible reviewer. Selection advances P, not Case C, Discovery D or R/S.
+Reads/diffs/exports use a consistent read-only snapshot. Accepted command evidence and
+historical input anchors reconstruct after restart; exact retries do not renew permission.
+[Executable API/Workbench walkthrough, T1–T9 coverage and captures](docs/guides/synthetic-preparation-pack.md).
 
-This branch records [Accepted D-036](docs/architecture/d11-reviewed-runtime-pack.md)
-and a populated preparation-only Runtime Pack example. The owner approved corrected local
-`100b6818`, published as identical-tree `3ba7f800`. The separate synthetic publication
-role, immutable selection history, current-input checks, supersession and guarded rollback
-are approved for D11-B; none is implemented here. D11-B awaits normal PR #33 merge;
-D12 worker/packet-proof/correction integration remains planned. Complete Discovery,
-real customer activation, business outcome acceptance and Case closure remain incomplete.
-The canonical specification and single 19-entry matrix remain the product plan.
+The existing intake Workbench now exposes a compact pack panel with uncertainty,
+current selection, exact changes, separate publication and technical provenance.
+Current descriptive review is reused without another confirmation write. Genuine
+corrections make the old pack stale; fresh descriptive review and separate publication
+are required. The atomic IndexedDB slot also protects pack commands across tabs.
+Confirmed receipts survive failed refresh; mixed projections show unavailable.
+Migration 0008 is additive; every 0001–0007 checksum and successful intake key survives.
+
+D10-B merged in PR #32 at `953d49ece70f7828935bb0f4636299d7601f16d5`.
+Historical Discovery v1/v2 retains its original loop-helper semantics; the new pack
+projection derives relevant citations from scoped claims and full upload coverage.
+The old helper remains a documented upstream gap, not silently repaired. Node 24.19.0 /
+tzdata 2026b is still required. All 19 canonical matrix entries remain; complete Discovery,
+source/variant rules, customer evidence and measurements remain incomplete.
+
+**Next: D12 useful bounded worker integration and separately reviewed minimum proof/
+correction capture.** D11-B does not execute the four-step assignment, invoke models,
+activate consequential rules, authorize a credit or allow Case closure. Real customer
+activation remains unapproved. No release or deployment is included.
 
 **D9-B merged in PR #30 at `ca9543289894fffdaa40ecfe794d83addc2c19de`.** The reviewed
 head was exactly `9d250707458adfdc481a6c9259608f5d6d3f4cc7`, with all three findings
@@ -1196,7 +1206,7 @@ CI now pins the compatible Node 24.19.0 interpreter; the README, guide and fixtu
 record that replay requirement. The fixture, hashes and fail-closed version check
 remain unchanged. Supporting a different timezone interpreter is a separate upgrade.
 
-## D11-A proposed preparation pack
+## D11-A proposed preparation pack (historical checkpoint)
 
 The design binds a four-step read/propose assignment to existing retained bytes,
 scoped source claims, exact Case/intake/Discovery history and interpreter versions.
@@ -1224,7 +1234,7 @@ restart checks using pinned Node 24.19.0 and PostgreSQL 17.11. These are merged
 implementation checks. D11-A's required CI runs on its PR; no D11 publication or
 T1–T9 implementation pass is claimed by the design or example reproduction.
 
-## D11-A design correction (PR #33)
+## D11-A design correction (PR #33 historical checkpoint)
 
 Starting head `b773162a` had two provenance failures: the Human Intervention Map
 cited only the queue row for the DEL-4 note report, and the two-record count cited
@@ -1270,7 +1280,7 @@ artifact hash is `sha256:bc54d0a07cd76ccaa80887de0024632260d368d810649ffa9e74f43
 local checks do not establish a final-head CI pass. No future
 publication acceptance test or upstream runtime repair is claimed as implemented.
 
-## D-036 approval record
+## D-036 approval record (historical checkpoint)
 
 The owner approved corrected local `100b681817fa34bf671328dba953c5e7eddfe471` on
 2026-09-08. Its identical tree is published at `3ba7f800`; the original correction
@@ -1282,10 +1292,42 @@ check). Required hosted validation must pass on this approval-recording head bef
 normal merge. Docker is still unavailable locally. D11-B is authorized but not yet
 implemented and must start from merged main. No D12 or release/deployment work began.
 
+## D11-B implementation validation
+
+Local `pnpm validate` passes **307/307** tests plus formatting, lint, types and
+public-release audit. ECC passes **620/620**; its negative control exits **1 at 152/620**
+for intended failed safety assertions. Real local PostgreSQL 18.4/API passes the
+new **26 persistence/API + 7 browser** scenarios, including the executable appliance
+walkthrough and restart retry; retained intake/Discovery passes **62/62**.
+The retained D6–D8 suite passes **178/178**, including authority, obsolete-Case replay,
+action/verification and Workbench scenarios. Required final-head hosted CI is reported on the PR.
+The documented original example/hash check passes unchanged. Checks preserve every
+0001–0007 migration byte, all 19 matrix IDs and **134 local Markdown targets** plus
+OpenAPI schema references. `git diff --check` passes.
+
+Chromium captures cover proposed, published, stale-after-correction and withdrawn
+states at desktop/390px. Inspected text, evidence disclosures, controls and horizontal
+fit; keyboard checks traverse the native expiry field, consent and publication,
+open citations and focus the confirmed receipt. No screen-reader/other-browser audit.
+`docker compose config --quiet` is unavailable locally (exit 127: Docker not installed).
+CI retains PostgreSQL 17.11, Compose, appliance and all Workbench checks, adding pack
+fresh/upgrade/fault/replay/browser tests and a real container restart smoke. Local
+PostgreSQL test-host evidence is not a local Docker pass.
+
+The first full D11-B CI at `e6328a3` passed 307 repository, 63 D6, 115 D7/D8,
+32 intake, 30 Discovery and 33 new pack tests, plus Compose configuration and the
+existing appliance/restart controls. Its new cross-process pack export check correctly
+rejected a timezone-interpreter mismatch: the old Docker digest selected Node 24.20.0
+while native validation was pinned to 24.19.0. The container now uses the verified
+24.19.0 image and an early node/tz fingerprint assertion; no replay check was weakened.
+The expanded full-suite job has a 45-minute budget; all assertions remain required.
+Final corrected-head CI is reported on the PR. Historical archives from other interpreter
+versions must retain their original image/volume; no silent timezone conversion is added.
+
 ## Next
 
-Finish required CI and normal merge of PR #33 with the recorded D-036 approval.
-Then D11-B can implement the one preparation publication/selection path and T1–T9. Business
+Review and merge D11-B separately. D12 remains the next useful worker integration;
+no worker execution or extra planning stage is added here. Business
 source/variant/authority rules remain disabled; D12 retains one bounded replaceable
 worker and separately reviewed minimum proof/correction integration. Descriptive
 confirmation is not permission for either.

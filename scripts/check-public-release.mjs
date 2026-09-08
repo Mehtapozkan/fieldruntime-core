@@ -109,7 +109,7 @@ const expectedPostgresImage =
   "postgres:17.11-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73";
 requireText("compose.yaml", [expectedPostgresImage]);
 const expectedNodeImage =
-  "node:24-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e";
+  "node:24.19.0-bookworm-slim@sha256:a9f5f7c91a432850b2a8a7797adf5eadb6c733ceed61167806cee7ea7fbc29df";
 requireText("Dockerfile", [expectedNodeImage]);
 
 const dockerfile = read("Dockerfile");

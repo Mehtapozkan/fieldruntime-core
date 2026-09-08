@@ -50,10 +50,15 @@ inputs. **Use this answer in a new draft** only fills the form; save a new annot
 and confirm separately. Old answers and their original citations remain available.
 
 After an uncertain submission, **Recover original submission** sends the same bytes
-and key. One atomic IndexedDB slot covers intake and Discovery across tabs. A competing
+and key. One atomic IndexedDB slot covers intake, Discovery and (on the D11-B review branch)
+pack publication across tabs. A competing
 tab cannot replace it or send after a failed claim; late completion cannot clear a newer
 command. A confirmed receipt survives a failed refresh, with current applicability
 explicitly unconfirmed. Keep site storage while recovery is pending. No automatic retries.
+
+The separate [preparation-pack panel](synthetic-preparation-pack.md) reuses an applicable
+descriptive review without another confirmation. Corrections require fresh review and
+separate publication; Discovery confirmation alone never publishes a pack.
 
 ## Evidence-responsive scope
 

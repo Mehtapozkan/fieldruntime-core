@@ -3,7 +3,8 @@
 Status: **Accepted for the narrow synthetic D11-B implementation; no individual pack is published by this record.**
 D11-A is documentation only, based on main `953d49ece70f7828935bb0f4636299d7601f16d5`
 (normal merge of PR #32, reviewed head `4f86e2f5`). D10-B is merged. D11-B is authorized
-but not implemented; it starts only after PR #33 merges normally.
+by this decision. PR #33 merged normally at `940a95bf`; D11-B implementation and
+actual T1–T9 evidence are recorded separately in the [implementation guide](../guides/synthetic-preparation-pack.md).
 
 ## Accepted decision
 
@@ -49,8 +50,8 @@ it does not retroactively approve the original defects or repair the upstream
 Discovery interpreter. D11-B must preserve historical v1/v2 interpretation.
 
 Acceptance is an architectural instruction, not a publication receipt or a claim
-that implementation/T1–T9 already passed. PR #33 still requires normal repository
-checks and merge; D11-B begins from that merged main and remains a separate PR.
+that implementation/T1–T9 already passed at approval time. PR #33 subsequently
+passed required checks and merged; D11-B began from that main and remains a separate PR.
 Real customer processing, worker dispatch, consequential rules and closure are not
 authorized. D12 retains worker execution and separately reviewed minimum proof/
 correction capture. Release and deployment instructions are unchanged.

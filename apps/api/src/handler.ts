@@ -157,9 +157,42 @@ function safeCommandResult(result: CaseCommandResult): JsonObject {
   };
 }
 
+// D-036 commands reject duplicate JSON keys before boundary validation, including
+// escaped spellings of the same key. JSON.parse first establishes valid JSON syntax.
+function assertUniqueJsonKeys(body: string): void {
+  const tokens =
+    body.match(/"(?:\\[\s\S]|[^"\\])*"|[{}[\]:,]|[^\s{}[\]:,]+/g) ?? [];
+  let i = 0;
+  const value = (): void => {
+    const token = tokens[i++];
+    if (token === "{") {
+      const keys = new Set<string>();
+      while (tokens[i] !== "}") {
+        const key = JSON.parse(tokens[i++] ?? "") as string;
+        if (keys.has(key)) throw new Error("Duplicate JSON key");
+        keys.add(key);
+        i++;
+        value();
+        if (tokens[i] !== ",") break;
+        i++;
+      }
+      i++;
+    } else if (token === "[") {
+      while (tokens[i] !== "]") {
+        value();
+        if (tokens[i] !== ",") break;
+        i++;
+      }
+      i++;
+    }
+  };
+  value();
+}
+
 function parseCommand(
   request: ApiRequest,
   limit = MAX_BODY_BYTES,
+  rejectDuplicateKeys = false,
 ): { readonly error: ApiResponse } | { readonly command: JsonObject } {
   const type = contentType(request.headers);
   const mediaType = type?.split(";", 1)[0]?.trim();
@@ -172,6 +205,7 @@ function parseCommand(
   }
   try {
     const parsed = JSON.parse(body) as JsonValue;
+    if (rejectDuplicateKeys) assertUniqueJsonKeys(body);
     if (!isObject(parsed)) {
       return { error: response(400, { error: "invalid_command" }) };
     }
@@ -192,6 +226,69 @@ export async function handleApiRequest(
   if (segments[0] === "v1" && segments[1] === "intake" && dependencies.intake) {
     const intake = dependencies.intake;
     try {
+      if (
+        segments[2] === "preparation-packs" &&
+        segments[3] === "pack_synthetic_invoice_dispute_north"
+      ) {
+        const params = new URL(request.path, "http://localhost").searchParams;
+        if (
+          method === "POST" &&
+          segments.length === 6 &&
+          segments[4] === "selections"
+        ) {
+          if (params.size) return response(400, { error: "invalid_query" });
+          const parsed = parseCommand(request, 131072, true);
+          if ("error" in parsed) return parsed.error;
+          return response(
+            200,
+            await intake.selectPack(parsed.command, segments[5] ?? ""),
+          );
+        }
+        if (method === "GET" && segments.length === 4) {
+          if (
+            [...params.keys()].some(
+              (k) =>
+                ![
+                  "bundle_id",
+                  "record_key",
+                  "case_id",
+                  "representation",
+                ].includes(k) || params.getAll(k).length !== 1,
+            ) ||
+            (params.has("representation") &&
+              params.get("representation") !== "export")
+          )
+            return response(400, { error: "invalid_query" });
+          const bundle = params.get("bundle_id"),
+            key = params.get("record_key"),
+            caseId = params.get("case_id");
+          if (
+            !bundle ||
+            !CANONICAL_ID.test(bundle) ||
+            !key ||
+            !/^sha256:[a-f0-9]{64}$/.test(key) ||
+            (caseId !== null && !CANONICAL_ID.test(caseId))
+          )
+            return response(400, { error: "invalid_query" });
+          const result = response(
+            200,
+            await intake.readPack(
+              { bundle_id: bundle, record_key: key, case_id: caseId },
+              params.get("representation") === "export",
+            ),
+          );
+          return params.get("representation") === "export"
+            ? {
+                ...result,
+                headers: {
+                  ...JSON_HEADERS,
+                  "content-disposition":
+                    "attachment; filename=synthetic-preparation-pack-export.json",
+                },
+              }
+            : result;
+        }
+      }
       if (
         segments.length === 5 &&
         segments[2] === "bundles" &&
