@@ -462,19 +462,19 @@
     },
     "worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa",
     "recorded_at": "2026-09-07T16:06:01.000Z",
-    "deadline": "2026-09-07T16:06:06.000Z",
     "versions": {
       "worker": "disposition-code.v1",
       "validator": "preparation-result-validator.v1",
       "journal": "preparation-work.v1"
     },
     "input_manifest_hash": "sha256:4fdb3a2d6769340520b4a9a384a93c62c66838a3ef47e055f6396dac9456ab4e",
-    "hash": "sha256:435fe09537ff7d428019b6e5faf18217876cee5a0863adf0d975edf60f090993"
+    "computation_budget_ms": 5000,
+    "hash": "sha256:7bc55425ac9b64f35f5ea4a5e0278e4ba24dd7814ddd8faf033338692954b67a"
   },
   "expected_result": {
     "schema_version": "disposition-preparation-result.v1",
     "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
-    "started_entry_hash": "sha256:435fe09537ff7d428019b6e5faf18217876cee5a0863adf0d975edf60f090993",
+    "started_entry_hash": "sha256:7bc55425ac9b64f35f5ea4a5e0278e4ba24dd7814ddd8faf033338692954b67a",
     "binding_hash": "sha256:daa910f23ad1ee6d4b690250e012182ef45e2fb5a0ab9121aac7512df8eeef16",
     "outcome": "prepared_gap_packet",
     "title": "Orchid / North dispute-17 — evidence request ready for task review",
@@ -715,19 +715,19 @@
     "financial_authority": false,
     "case_closure_permission": false
   },
-  "result_hash": "sha256:e9170992f323ad0528fd052517d31ebc6fd623f1e8ecb802eb0d7d0e1538d336",
+  "result_hash": "sha256:e1eaa89b96216347e5065685a0a5dd80516c6039fecbd40f123b2ae53a43c94a",
   "terminal_entry_recipe": {
     "entry_without_result": {
       "schema_version": "preparation-work-entry.v1",
       "event": "terminal_result",
       "sequence": 2,
-      "previous_entry_hash": "sha256:435fe09537ff7d428019b6e5faf18217876cee5a0863adf0d975edf60f090993",
+      "previous_entry_hash": "sha256:7bc55425ac9b64f35f5ea4a5e0278e4ba24dd7814ddd8faf033338692954b67a",
       "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
-      "started_entry_hash": "sha256:435fe09537ff7d428019b6e5faf18217876cee5a0863adf0d975edf60f090993",
+      "started_entry_hash": "sha256:7bc55425ac9b64f35f5ea4a5e0278e4ba24dd7814ddd8faf033338692954b67a",
       "binding_hash": "sha256:daa910f23ad1ee6d4b690250e012182ef45e2fb5a0ab9121aac7512df8eeef16",
       "outcome": "prepared_gap_packet",
-      "result_hash": "sha256:e9170992f323ad0528fd052517d31ebc6fd623f1e8ecb802eb0d7d0e1538d336",
-      "recorded_at": "2026-09-07T16:06:02.000Z",
+      "result_hash": "sha256:e1eaa89b96216347e5065685a0a5dd80516c6039fecbd40f123b2ae53a43c94a",
+      "recorded_at": "2026-09-07T16:06:02.130Z",
       "versions": {
         "worker": "disposition-code.v1",
         "validator": "preparation-result-validator.v1",
@@ -735,18 +735,30 @@
       },
       "conformance": "passed_in_proposed_example_only",
       "authority_granted": false,
-      "closure_permission": false
+      "closure_permission": false,
+      "parent_timing": {
+        "computation_started_at": "2026-09-07T16:06:01.100Z",
+        "computation_completed_at": "2026-09-07T16:06:02.100Z",
+        "computation_elapsed_ms": 1000,
+        "computation_budget_ms": 5000,
+        "completed_within_budget": true,
+        "measurement_source": "runtime_parent_monotonic_clock",
+        "validation_elapsed_ms": 20,
+        "writer_lock_wait_ms": 0,
+        "terminal_evaluated_at": "2026-09-07T16:06:02.130Z",
+        "source_timezone": "UTC"
+      }
     },
-    "entry_hash": "sha256:251e5861240d3cf98fcd194c0c01135e7bbd32e5d2fa051dcb55b22e0eed92c3"
+    "entry_hash": "sha256:8cce9dd597c72180d1801b3325aec9319ac67b21ecf3823d8cc43f130261ef5e"
   },
   "task_review_command": {
     "schema_version": "preparation-task-review.v1",
     "operation": "task_review",
     "purpose": "preparation_usefulness",
     "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
-    "result_hash": "sha256:e9170992f323ad0528fd052517d31ebc6fd623f1e8ecb802eb0d7d0e1538d336",
+    "result_hash": "sha256:e1eaa89b96216347e5065685a0a5dd80516c6039fecbd40f123b2ae53a43c94a",
     "expected_work_revision": 2,
-    "expected_work_head": "sha256:251e5861240d3cf98fcd194c0c01135e7bbd32e5d2fa051dcb55b22e0eed92c3",
+    "expected_work_head": "sha256:8cce9dd597c72180d1801b3325aec9319ac67b21ecf3823d8cc43f130261ef5e",
     "decision": "approve",
     "reason": "The scoped gap checklist and unsent request are useful for the next evidence-gathering conversation; dispute and Case remain unresolved.",
     "idempotency_key": "d12-example-task-review"
@@ -757,23 +769,166 @@
     "not_in_client_command": true
   },
   "correction_example": {
+    "schema_version": "purpose_limited_preparation_correction.v1",
     "operation": "correction",
-    "original_result_hash": "sha256:e9170992f323ad0528fd052517d31ebc6fd623f1e8ecb802eb0d7d0e1538d336",
+    "purpose": "preparation_usefulness",
+    "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+    "binding_hash": "sha256:daa910f23ad1ee6d4b690250e012182ef45e2fb5a0ab9121aac7512df8eeef16",
+    "original_result_hash": "sha256:e1eaa89b96216347e5065685a0a5dd80516c6039fecbd40f123b2ae53a43c94a",
+    "expected_work_revision": 3,
+    "expected_work_head": "sha256:1e3b56d9b5c8fced88cf5ee97800fd02606d7b672df9b772741e53fbf7ff0abb",
     "target": "/follow_up/requests/0/text",
     "before": "Please provide DEL-4 confirmation or identify the evidence owner.",
     "after": "Please identify who can supply DEL-4 confirmation and the permitted retrieval route; this request assigns no owner.",
     "classification": "knowledge_bearing",
+    "primary_reason": "MISSING_KNOWLEDGE",
     "reason": "Make the unconfirmed evidence owner and access path explicit in the proposed request.",
     "citation_ids": [
       "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81",
       "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975"
     ],
+    "evidence_limits": [
+      "The supplied row names an upstream owner, not an accountable evidence recipient.",
+      "No source establishes the permitted retrieval route or independent delivery proof.",
+      "This proposed wording neither assigns an owner nor authorizes contact."
+    ],
+    "idempotency_key": "d12-example-correction"
+  },
+  "task_review_entry": {
+    "schema_version": "preparation-work-entry.v1",
+    "event": "task_review",
+    "sequence": 3,
+    "previous_entry_hash": "sha256:8cce9dd597c72180d1801b3325aec9319ac67b21ecf3823d8cc43f130261ef5e",
+    "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+    "command": {
+      "schema_version": "preparation-task-review.v1",
+      "operation": "task_review",
+      "purpose": "preparation_usefulness",
+      "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+      "result_hash": "sha256:e1eaa89b96216347e5065685a0a5dd80516c6039fecbd40f123b2ae53a43c94a",
+      "expected_work_revision": 2,
+      "expected_work_head": "sha256:8cce9dd597c72180d1801b3325aec9319ac67b21ecf3823d8cc43f130261ef5e",
+      "decision": "approve",
+      "reason": "The scoped gap checklist and unsent request are useful for the next evidence-gathering conversation; dispute and Case remain unresolved.",
+      "idempotency_key": "d12-example-task-review"
+    },
+    "command_fingerprint": "sha256:9b57431fc30e39cfdc860d4a932b938902b980de2cbd3fa4c9fbb3d6d38d8794",
+    "actor": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_intake_operator",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "human",
+      "status": "active"
+    },
+    "worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa",
+    "recorded_at": "2026-09-07T16:07:00.000Z",
+    "recorded_at_source_timezone": "UTC",
+    "versions": {
+      "worker": "disposition-code.v1",
+      "validator": "preparation-result-validator.v1",
+      "journal": "preparation-work.v1"
+    },
+    "result_hash": "sha256:e1eaa89b96216347e5065685a0a5dd80516c6039fecbd40f123b2ae53a43c94a",
+    "purpose": "preparation_usefulness",
+    "review_state": "accepted_for_preparation",
+    "authority_granted": false,
+    "closure_permission": false,
+    "hash": "sha256:1e3b56d9b5c8fced88cf5ee97800fd02606d7b672df9b772741e53fbf7ff0abb"
+  },
+  "correction_entry": {
+    "schema_version": "preparation-work-entry.v1",
+    "event": "correction",
+    "sequence": 4,
+    "previous_entry_hash": "sha256:1e3b56d9b5c8fced88cf5ee97800fd02606d7b672df9b772741e53fbf7ff0abb",
+    "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+    "command": {
+      "schema_version": "purpose_limited_preparation_correction.v1",
+      "operation": "correction",
+      "purpose": "preparation_usefulness",
+      "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+      "binding_hash": "sha256:daa910f23ad1ee6d4b690250e012182ef45e2fb5a0ab9121aac7512df8eeef16",
+      "original_result_hash": "sha256:e1eaa89b96216347e5065685a0a5dd80516c6039fecbd40f123b2ae53a43c94a",
+      "expected_work_revision": 3,
+      "expected_work_head": "sha256:1e3b56d9b5c8fced88cf5ee97800fd02606d7b672df9b772741e53fbf7ff0abb",
+      "target": "/follow_up/requests/0/text",
+      "before": "Please provide DEL-4 confirmation or identify the evidence owner.",
+      "after": "Please identify who can supply DEL-4 confirmation and the permitted retrieval route; this request assigns no owner.",
+      "classification": "knowledge_bearing",
+      "primary_reason": "MISSING_KNOWLEDGE",
+      "reason": "Make the unconfirmed evidence owner and access path explicit in the proposed request.",
+      "citation_ids": [
+        "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81",
+        "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975"
+      ],
+      "evidence_limits": [
+        "The supplied row names an upstream owner, not an accountable evidence recipient.",
+        "No source establishes the permitted retrieval route or independent delivery proof.",
+        "This proposed wording neither assigns an owner nor authorizes contact."
+      ],
+      "idempotency_key": "d12-example-correction"
+    },
+    "command_fingerprint": "sha256:60dd9e1a085c9e037c6a4cae3734f49179134616497ae3344c3f260f10261979",
+    "actor": {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_intake_operator",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "human",
+      "status": "active"
+    },
+    "worker_profile_hash": "sha256:8be493fafe8a014c261d9db962ab2158f2ad94eee4227d62d1059402327f5afa",
+    "recorded_at": "2026-09-07T16:08:00.000Z",
+    "recorded_at_source_timezone": "UTC",
+    "versions": {
+      "worker": "disposition-code.v1",
+      "validator": "preparation-result-validator.v1",
+      "journal": "preparation-work.v1"
+    },
     "candidate": {
+      "schema_version": "preparation-evaluation-candidate.v1",
+      "candidate_id": "evaluation_60dd9e1a085c9e037c6a4cae3734f49179134616497ae3344c3f260f10261979",
+      "candidate_revision": 1,
+      "correction_command_fingerprint": "sha256:60dd9e1a085c9e037c6a4cae3734f49179134616497ae3344c3f260f10261979",
       "status": "not_reviewed",
-      "expected_behavior": "Draft asks for an evidence contact without assigning Taylor ownership; source report never becomes independent delivery proof.",
-      "test_input_hash": "sha256:4fdb3a2d6769340520b4a9a384a93c62c66838a3ef47e055f6396dac9456ab4e",
+      "test_case": {
+        "input_manifest_hash": "sha256:4fdb3a2d6769340520b4a9a384a93c62c66838a3ef47e055f6396dac9456ab4e",
+        "original_result_hash": "sha256:e1eaa89b96216347e5065685a0a5dd80516c6039fecbd40f123b2ae53a43c94a",
+        "expected_output_patch": {
+          "target": "/follow_up/requests/0/text",
+          "before": "Please provide DEL-4 confirmation or identify the evidence owner.",
+          "after": "Please identify who can supply DEL-4 confirmation and the permitted retrieval route; this request assigns no owner."
+        },
+        "expected_behavior": "Draft asks for an evidence contact without assigning Taylor ownership; source report never becomes independent delivery proof."
+      },
+      "test_case_hash": "sha256:87aa3c5517f43161d36b9c988d3b602268c82c7df7933e759cf344a2ab57c567",
       "promotion_status": "not_promoted"
     },
-    "next": "Explicit human evaluation-candidate review, normal tested code/profile change, fresh compatible pack publication and new invocation/task review; no automatic promotion or transferred acceptance."
-  }
+    "authority_granted": false,
+    "closure_permission": false,
+    "hash": "sha256:b3e4a96ec107edd0e5d33e6e80b18dce1d8cc24cd828b821843ccbb7bb102f7f"
+  },
+  "evaluation_review_command": {
+    "schema_version": "preparation-evaluation-review.v1",
+    "operation": "evaluation_review",
+    "purpose": "synthetic_evaluation_candidate",
+    "invocation_id": "preparation_c5c30249f0c4ec97121880d6901ea5a9fa14f438d7be0aef3bda7abbbda4436a",
+    "correction_entry_hash": "sha256:b3e4a96ec107edd0e5d33e6e80b18dce1d8cc24cd828b821843ccbb7bb102f7f",
+    "candidate_id": "evaluation_60dd9e1a085c9e037c6a4cae3734f49179134616497ae3344c3f260f10261979",
+    "expected_candidate_revision": 1,
+    "expected_test_case_hash": "sha256:87aa3c5517f43161d36b9c988d3b602268c82c7df7933e759cf344a2ab57c567",
+    "expected_work_revision": 4,
+    "expected_work_head": "sha256:b3e4a96ec107edd0e5d33e6e80b18dce1d8cc24cd828b821843ccbb7bb102f7f",
+    "decision": "approve",
+    "reason": "Accept this explicitly synthetic wording regression candidate for evaluation; no code, pack or authority is promoted.",
+    "test_references": [
+      "Proposed W6: no inferred recipient or evidence access; source report stays separate from independent proof."
+    ],
+    "idempotency_key": "d12-example-evaluation-review"
+  },
+  "evaluation_review_attribution": {
+    "server_selected_identity_id": "identity_pack_reviewer_demo",
+    "distinct_from_correction_author": true,
+    "synthetic": true,
+    "not_in_client_command": true
+  },
+  "correction_next": "Explicit human evaluation-candidate review, normal tested code/profile change, fresh compatible pack publication and new invocation/task review; no automatic promotion or transferred acceptance."
 }

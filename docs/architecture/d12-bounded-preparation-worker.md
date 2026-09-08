@@ -159,20 +159,29 @@ service, scheduler, mutable task aggregate or background recovery sweep.
 1. Under the writer lock, check integrity, key binding, exact U/head, full current
    Case/D/P/basis/pack compatibility and both publication/worker eligibility at server
    time. Append `started`, retaining command, trusted manifest/profile, actor/version,
-   evaluation time/deadline and stable invocation reference. One nonterminal invocation
+   evaluation time, computation budget and stable invocation reference. One nonterminal invocation
    per Case; competing fresh keys fail without writing. Failed eligibility does not
    create a successful start/key. The original successful key always binds this receipt.
    While pending, other U mutations except interruption are refused; D10 corrections,
    D11 withdrawal and business decisions retain their independent permitted paths.
-2. Release the lock. The same request performs the bounded in-process call on the
-   immutable snapshot, with no writer lock held during computation. No work resumes
-   automatically on startup. UI GETs can show only the recorded start, not invented steps.
+2. Release the lock. After start commit, the runtime parent starts its monotonic
+   computation timer and invokes the worker on the immutable snapshot. On receiving
+   completion, **before waiting for the writer lock**, the parent records completion
+   time/elapsed duration and checks the five-second budget. The worker cannot supply
+   those values. Timeout terminates the thread; late output is discarded. Retain the
+   parent's UTC start/completion and monotonic elapsed/budget verdict with the terminal
+   entry; time spent validating or waiting for the database is recorded separately.
+   No work resumes automatically on startup. GET shows only the recorded start.
 3. Before retaining a result, reacquire the lock and recheck the exact started U/head,
-   C/D/P/input/profile/identity/scope/effectivity and current clock/deadline. If an
+   C/D/P/input/profile/identity/scope/effectivity and current durable clock guard. Recheck
+   the retained parent computation-budget verdict, not terminal time against that
+   computation deadline. Publication/identity expiry is still checked at this **current
+   terminal evaluation time**, so permission lost while waiting prevents acceptance.
+   If an
    interruption already terminated this invocation, discard the late result without
    appending another terminal entry. Otherwise append one
    terminal result with its content/hash, conformance findings, input/permission evidence,
-   implementation versions and evaluation times atomically. If permission/basis changed,
+   implementation versions, parent timing evidence and evaluation times atomically. If permission/basis changed,
    append `invalidated` with the historical draft/evidence if readable and valid, never an
    accepted current result. Malformed worker output records bounded failure diagnostics,
    not trusted claims. Recheck row/JSON/hash reconstruction before commit.
@@ -189,6 +198,13 @@ makes current usability false. Rollback to the same artifact changes P, so an ol
 invocation cannot revive. Equal timestamps do not order journals; retain exact input,
 selection and internal writer-order anchors at start and completion, rejecting omitted
 strictly earlier canonical changes. Do not substitute latest state for historical replay.
+
+For example, 1 second of computation followed by 7 seconds waiting for the writer
+lock remains within the computation budget. Accept only if current C/D/P, profiles,
+identity, scope and effectivity still pass when the lock is acquired. The same wait
+crossing pack expiry yields `invalidated`; a 5,001 ms computation yields a timeout
+failure even with no lock wait. UTC rollback fails the durable clock checks; replay
+retains the parent's original timing evidence, never a newly measured replay duration.
 
 A crash after `started` leaves a pending invocation, not a fabricated completion.
 On reload retry the original bytes/key to recover its reference, then inspect. An
@@ -227,6 +243,19 @@ implied. Unknown fields/duplicate keys/unsupported versions are rejected.
 | `evaluation_review` | Exact correction/hash and synthetic input/expected-output case hash, candidate revision, independent eligible human reviewer, decision/reason and test references. Initially `not_reviewed`; only a recorded decision can say accepted/rejected for evaluation. Acceptance selects a regression candidate, never promotes code, template, policy or authority. Authority-only corrections cannot teach reduced approvals.                                                                                                     |
 | `proof_note`        | Manual synthetic evidence for one of the canonical five measures or a named cost category: exact Case/record/run/result, measure-definition version, cohort/period/coverage, source/locator/time, value/unit or explicit unknown, method/owner, observed/estimated/hypothesis/synthetic label, and any superseded/reversal/reopen reference. One bounded note, no metrics engine. Missing evidence cannot be posted as verified business proof.                                                                               |
 | `interrupt`         | Current eligible task operator, exact pending invocation and U/head. Independent of stale pack or expired execution grant; the operator's own grant must be current. No new execution permission.                                                                                                                                                                                                                                                                                                                             |
+
+The correction schema is `purpose_limited_preparation_correction.v1`, matching the
+fixed v2 template’s minimum-capture reference. Its commands carry `schema_version`,
+operation/purpose, exact invocation and
+binding/result hashes, expected U/head, target pointer, before/after, classification,
+primary reason, explanation, relevant citations/evidence limits and idempotency key.
+The server resolves the invocation's tenant/Case/record and attributes the current
+eligible human; client actor fields are forbidden. The immutable entry retains that
+actor/profile, command/fingerprint and time. Its derived candidate begins unreviewed.
+The [complete example](../examples/d12-preparation-worker.proposed.json) binds correction
+U3 → U4 to the preceding task-review entry and supplies the separate exact-head,
+independent evaluation-review command. Candidate status/actor/next-step prose are
+server evidence or documentation, never extra client fields allowed by a strict command.
 
 Every first successful operation binds its tenant/Case/operation/key to the exact body
 and original receipt; exact retry never writes. Competing U heads conflict. Reviews,
@@ -293,18 +322,18 @@ runtime conformance checks. No client can choose arbitrary code or impersonate a
 These are **future acceptance tests**, not implementation results of this design PR.
 Reuse existing disposable PostgreSQL/API helpers, browser driver and fixture variations.
 
-| ID                       | Required assertion                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| W1 useful result         | Existing synthetic rows/note yield the worked checklist, deduplicated questions, unsent draft and explicit disposition abstention. S3 reuses D10 confirmation; four step proofs bind the same basis. A useful gap packet is task-reviewable but no customer outcome is asserted.                                                                                                                               |
-| W2 scoped truth          | PR32 A/B, same-delivery, shared-object and reversed order controls: relevant citations for every clause and full coverage; independent records never transfer proof or create false conflict. Opaque/ambiguous/missing support stays explicit. Unavailable read is SYSTEM_FAILURE, not absence.                                                                                                                |
-| W3 permission            | v1 packs, unpublished/stale/withdrawn/expired v2, wrong subject/read scope, unknown/revoked/contradictory identity, wrong purpose and caller privileges/results are denied. No worker self-review. Valid same-subject conflicts produce a gap packet, never adjudication.                                                                                                                                      |
-| W4 races                 | Change C (including D-014 rejection), D, business input, P, publication/worker profile, scope or expiry between start and result. Result invalidates or remains historical after later change; no current use/approval. No-op intake key bookkeeping alone does not stale basis. Equal timestamps use retained order/anchors.                                                                                  |
-| W5 retries/restart       | Same-key and same-U races, lost start/final response, rollback at insert/commit, crash pending, explicit interruption/fenced late result/fresh start. Original key returns original receipt after restart with no write or repeated computation; no double-counted result. Cross-tab original bytes survive and cannot be overwritten or wrongly cleared.                                                      |
-| W6 review/correction     | Accept a cited gap packet for preparation; reject/modify/escalate retain purpose/reason and terminal review state. Stale acceptance denied; historical interventions permitted under current human grants. Correct mistaken wording, review its evaluation candidate, then new version/publication/run; no transferred acceptance or automatic promotion. New source facts additionally require D9/D10 review. |
-| W7 proof measures        | Five distinct units/cohorts/periods with coverage/unknowns; synthetic credit never cash; import alone never newly attended. Deduplicate overlap; reversals/reopens and negative attention changes remain visible. Include failed/open work and all attributable human/cost categories; missing is not zero. Notes confer no verified business outcome or closure.                                              |
-| W8 replay/replaceability | Fresh install and upgrade after 0008 preserve checksums, Case/review/selection histories, v1/v2 Discovery and successful keys. Restart/export reconstruct old/new worker versions. Reject coherent output/citation/index/obsolete-prefix forgery; incompatible timezone/history fails closed. Replace code via profile/version/publication without rewriting old results.                                      |
-| W9 boundedness/clarity   | Test input/result/time limits, deterministic abstention, zero model/network calls and no background resumption. Desktop/390px and keyboard: one next action, expandable completed review/publication, accessible withdrawal/correction/recovery, confirmed receipt separate from failed refresh/current permission. GET/expand/export create no writes.                                                        |
-| W10 retained safeguards  | All authority, D6–D8, intake A1–A12, Discovery T1–T12, D11 T1–T9, ECC/negative control, PostgreSQL/browser/Compose/appliance checks pass. A completed and task-accepted worker still cannot close the Case, enroll a credit or bypass independent effect verification.                                                                                                                                         |
+| ID                       | Required assertion                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W1 useful result         | Existing synthetic rows/note yield the worked checklist, deduplicated questions, unsent draft and explicit disposition abstention. S3 reuses D10 confirmation; four step proofs bind the same basis. A useful gap packet is task-reviewable but no customer outcome is asserted.                                                                                                                                                                                                                                                         |
+| W2 scoped truth          | PR32 A/B, same-delivery, shared-object and reversed order controls: relevant citations for every clause and full coverage; independent records never transfer proof or create false conflict. Opaque/ambiguous/missing support stays explicit. Unavailable read is SYSTEM_FAILURE, not absence.                                                                                                                                                                                                                                          |
+| W3 permission            | v1 packs, unpublished/stale/withdrawn/expired v2, wrong subject/read scope, unknown/revoked/contradictory identity, wrong purpose and caller privileges/results are denied. No worker self-review. Valid same-subject conflicts produce a gap packet, never adjudication.                                                                                                                                                                                                                                                                |
+| W4 races                 | Change C (including D-014 rejection), D, business input, P, publication/worker profile, scope or expiry between start and result. Result invalidates or remains historical after later change; no current use/approval. No-op intake key bookkeeping alone does not stale basis. Equal timestamps use retained order/anchors.                                                                                                                                                                                                            |
+| W5 retries/restart       | Same-key and same-U races, lost start/final response, rollback at insert/commit, crash pending, explicit interruption/fenced late result/fresh start. Original key returns original receipt after restart with no write or repeated computation; no double-counted result. Cross-tab original bytes survive and cannot be overwritten or wrongly cleared.                                                                                                                                                                                |
+| W6 review/correction     | Accept a cited gap packet for preparation; reject/modify/escalate retain purpose/reason and terminal review state. Stale acceptance denied; historical interventions permitted under current human grants. Reject missing/altered correction envelope fields, stale U/head and changed-body key reuse; exact retry survives restart. Correct mistaken wording, review its evaluation candidate, then new version/publication/run; no transferred acceptance or automatic promotion. New source facts additionally require D9/D10 review. |
+| W7 proof measures        | Five distinct units/cohorts/periods with coverage/unknowns; synthetic credit never cash; import alone never newly attended. Deduplicate overlap; reversals/reopens and negative attention changes remain visible. Include failed/open work and all attributable human/cost categories; missing is not zero. Notes confer no verified business outcome or closure.                                                                                                                                                                        |
+| W8 replay/replaceability | Fresh install and upgrade after 0008 preserve checksums, Case/review/selection histories, v1/v2 Discovery and successful keys. Restart/export reconstruct old/new worker versions. Reject coherent output/citation/index/obsolete-prefix forgery; incompatible timezone/history fails closed. Replace code via profile/version/publication without rewriting old results.                                                                                                                                                                |
+| W9 boundedness/clarity   | Test input/result/time limits, deterministic abstention, zero model/network calls and no background resumption. A fast computation plus >5s writer wait is not a compute timeout; expiry during that wait still invalidates. Slow computation fails with no contention. Desktop/390px and keyboard: one next action, expandable completed review/publication, accessible withdrawal/correction/recovery, confirmed receipt separate from failed refresh/current permission. GET/expand/export create no writes.                          |
+| W10 retained safeguards  | All authority, D6–D8, intake A1–A12, Discovery T1–T12, D11 T1–T9, ECC/negative control, PostgreSQL/browser/Compose/appliance checks pass. A completed and task-accepted worker still cannot close the Case, enroll a credit or bypass independent effect verification.                                                                                                                                                                                                                                                                   |
 
 Unseen synthetic comparisons must include different records/amounts, unassociated
 support, opposing claims, ambiguous language and prompt-like source text. Gates are

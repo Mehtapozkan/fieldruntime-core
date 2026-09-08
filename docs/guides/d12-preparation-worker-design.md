@@ -75,7 +75,11 @@ not calls to the financial approval API. The service cannot accept its own work.
 The example correction makes the unsent request explicitly ask for the evidence
 contact and permitted retrieval route instead of implying an assigned recipient.
 It retains the exact old result, JSON pointer, before/after, reason and citations.
-The candidate input hash binds the retained manifest in `start_command.binding.basis.manifest`;
+The correction is a complete proposed command bound to the retained U3 task review,
+with its original result, exact U/head, key, reason and evidence limits. The server-attributed
+U4 entry contains the unreviewed candidate; a separate complete evaluation-review
+command binds that candidate/hash and U4. Actor and candidate status are absent from
+the client correction. The candidate input hash binds the retained manifest in `start_command.binding.basis.manifest`;
 its referenced bundle and locators reconstruct the original bytes, not a caller narrative.
 The synthetic evaluation candidate begins **not reviewed**. An independent eligible
 human must review its exact input/expected-output case. Only after reviewed tests and
@@ -217,12 +221,48 @@ try {
   assert.equal(x.expected_result.proof_readiness.length, 5);
   assert.ok(x.expected_result.proof_readiness.every(m => m.status === 'unknown' && m.value === null));
   assert.equal(x.correction_example.before, x.expected_result.follow_up.requests[0].text);
-  assert.equal(x.correction_example.candidate.test_input_hash, sha256Json(proposed.binding.manifest));
+  const correction = x.correction_example;
+  assert.deepEqual(Object.keys(correction).sort(), [
+    'schema_version', 'operation', 'purpose', 'invocation_id', 'binding_hash',
+    'original_result_hash', 'expected_work_revision', 'expected_work_head',
+    'target', 'before', 'after', 'classification', 'primary_reason', 'reason',
+    'citation_ids', 'evidence_limits', 'idempotency_key'
+  ].sort());
+  assert.equal(correction.schema_version, proposed.template.correction_requirements.minimum_capture);
+  assert.equal(correction.invocation_id, x.expected_result.invocation_id);
+  assert.equal(correction.original_result_hash, x.result_hash);
+  assert.equal(correction.binding_hash, sha256Json(x.start_command.binding));
+  assert.equal(correction.expected_work_revision, 3);
+  assert.equal(correction.expected_work_head, x.task_review_entry.hash);
+  assert.notEqual(correction.idempotency_key, x.task_review_command.idempotency_key);
+  for (const entry of [x.task_review_entry, x.correction_entry]) {
+    const {hash: entryHash, ...body} = entry;
+    assert.equal(entryHash, sha256Json(body));
+    assert.equal(entry.command_fingerprint, sha256Json(entry.command));
+    assert.equal(entry.actor.identity_id, x.task_review_attribution.server_selected_identity_id);
+  }
+  assert.deepEqual(x.correction_entry.command, correction);
+  assert.equal(x.correction_entry.previous_entry_hash, x.task_review_entry.hash);
+  const candidate = x.correction_entry.candidate;
+  assert.equal(candidate.test_case.input_manifest_hash, sha256Json(proposed.binding.manifest));
+  assert.equal(candidate.test_case_hash, sha256Json(candidate.test_case));
+  assert.equal(candidate.status, 'not_reviewed');
+  assert.equal(x.evaluation_review_command.expected_work_head, x.correction_entry.hash);
+  assert.equal(x.evaluation_review_command.expected_test_case_hash, candidate.test_case_hash);
+  assert.notEqual(x.evaluation_review_attribution.server_selected_identity_id, x.correction_entry.actor.identity_id);
+  const timing = terminal.parent_timing;
+  assert.equal(timing.completed_within_budget, timing.computation_elapsed_ms <= timing.computation_budget_ms);
+  assert.ok(Date.parse(timing.computation_completed_at) <= Date.parse(timing.terminal_evaluated_at));
+  // Design arithmetic only: no worker/timer/eligibility implementation is invoked.
+  const proposedTimingGate = (computeMs, currentEligibility) => computeMs <= 5000 && currentEligibility;
+  assert.equal(proposedTimingGate(1000, true), true); // even after 7000ms lock wait
+  assert.equal(proposedTimingGate(1000, false), false); // expiry while waiting
+  assert.equal(proposedTimingGate(5001, true), false); // compute timeout
   const before = await h.snapshot();
   await h.restart();
   assert.equal(sha256Json(await h.ok(path + '&representation=export')), x.baseline.actual_export_hash);
   assert.deepEqual(await h.snapshot(), before);
-  console.log('PASS: real D11 basis/restart; proposed hashes and scoped citations; v2 rejected by current runtime; five unknown measures; no D12 execution or acceptance test pass');
+  console.log('PASS: real D11 basis/restart; proposed hashes, correction envelope and timing examples; scoped citations; v2 rejected by current runtime; five unknown measures; no D12 execution or acceptance test pass');
 } finally { for (const close of cleanup.reverse()) await close(); }
 JS
 ```

@@ -1348,7 +1348,7 @@ hashes, checks proposed pack/start/result/review hashes and scoped citations, co
 strict v1 rejection of the proposed v2 pack, and preserves byte-identical export and
 database state after restart/read. This is existing D11 and document-consistency evidence,
 not a D12 W1–W10 implementation pass. All five example measures remain unknown.
-Local link checks cover **162 Markdown targets** and all **19 original matrix IDs**;
+Local link checks cover **163 Markdown targets** and all **19 original matrix IDs**;
 `git diff --check` passes. Applied migration and frozen ECC bytes remain unchanged.
 
 `docker compose config --quiet` is unavailable locally: Docker is not installed
@@ -1356,6 +1356,15 @@ Local link checks cover **162 Markdown targets** and all **19 original matrix ID
 PostgreSQL/API/browser/Compose/appliance suites. This docs-only change adds no browser
 screenshots or visual checks; its layout is a proposal. Existing D11 captures remain
 available in the implementation guide. No measured customer result is claimed.
+
+The initial D12-A head `d16aab1d` passed full CI, then review identified two design
+inconsistencies: an incomplete correction command and a computation deadline that
+included writer-lock wait. The correction now binds the original invocation/result,
+exact U3 head and key, with server-attributed U4 evidence and a separate evaluation
+review. The parent checks computation completion before lock wait; current permission
+and expiry are still rechecked under the lock. Documented checks cover both corrected
+examples; W6/W9 require the corresponding future runtime regressions. Final revised-head
+CI is reported on the PR; these remain design assertions, not D12 implementation.
 
 ## Next
 
