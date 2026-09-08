@@ -268,11 +268,13 @@ Proposed minimal surface through the existing intake runtime/API boundary:
   `improvement_discussion`). No `approve`, arbitrary actor, source rank, policy,
   Case state, authority result or implementation-version input is accepted.
 
-`material_hash` binds the complete reproducible brief content and source manifest;
-exclude its own hash, future record time/IDs and confirmation receipts. Include annotation
-lineage that changes that content. The request separately checks exact Discovery revision
-and prior entry hash. A confirmation record may advance that revision without changing
-its own reviewed content hash; later edits change the content and cannot inherit confirmation.
+`material_hash` binds a canonical `material` object: source manifest, findings, questions,
+R1–R7, six outputs, proposed improvement and applicable annotation lineage. Exclude the
+response envelope's history list, current-applicability calculation, read time, its own
+hash, future record time/IDs and confirmation receipts. These exclusions avoid circular
+or time-varying consent. The command separately checks exact Discovery revision and prior
+entry hash. A confirmation may advance that revision without changing its reviewed
+content hash; later edits change the content and cannot inherit confirmation.
 This avoids a self-staling confirmation while preserving exact optimistic concurrency.
 
 The server manifest includes the selected original bundle/hash and record key/revision,
@@ -348,7 +350,10 @@ permission. No authority evaluator consumes Discovery confirmations or proposed 
 Current applicability requires the exact material/manifest and Case bindings to remain
 valid. Any Case-version change, including D-014 rejection, new business intake, new
 annotation content or template version makes the older description historical. Retain
-old answers and confirmations visibly; do not transfer them automatically. New evidence
+old answers and confirmations visibly; do not transfer them automatically. If the source/
+Case/template manifest changes, rebuild the current draft from its source-derived material;
+old annotations remain historical. Carrying an answer forward requires an explicit new
+annotation against the refreshed binding, then a separate confirmation. New evidence
 requires explicit selection, refresh and fresh consent. Integrity failure/mixed projections
 produce incomplete information, not an apparently reconciled brief. A read is never proof
 that someone inspected a screen; the entry records what they submitted/confirmed.
