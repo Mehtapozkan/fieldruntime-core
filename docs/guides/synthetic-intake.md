@@ -188,4 +188,4 @@ forged request/result references and 0005→0006 upgrade fail closed or preserve
 expected result. Six browser scenarios include atomic competing tab claims,
 completion in one tab, conditional clearing after a late response and reload recovery.
 [Final-head validation](../../STATUS.md#d9-b-implementation-and-validation) and the PR
-record actual local versus CI results. D10-A is docs-only; Proposed D-035 needs approval.
+record actual local versus CI results. D10-A is docs-only; D-035 is Accepted; D10-B follows normal PR #31 merge.

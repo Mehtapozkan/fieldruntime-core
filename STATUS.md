@@ -1,10 +1,12 @@
 # Status
 
-Current milestone: **D10-A bounded Discovery design for review; no D10 runtime implementation.**
-[Proposed D-035](docs/architecture/d10-discovery-preparation-review.md) specifies one
+Current milestone: **D-035 Accepted; D10-B authorized after normal PR #31 merge, not implemented.**
+[Accepted D-035](docs/architecture/d10-discovery-preparation-review.md) specifies one
 cited workflow brief, R1–R7, six loop outputs, gap-driven questions, descriptive
 correction/review and a proposed improvement before work allocation. Its new review
-boundary remains Proposed; D10-B needs separate approval before implementation.
+boundary was explicitly approved by the human owner against current PR #31 head
+`814b415e`. The approval also requires a second supported synthetic input and
+changed delivery-evidence controls in T1–T3. No implementation is claimed by this update.
 The canonical specification and single 19-entry matrix remain authoritative.
 
 **D9-B merged in PR #30 at `ca9543289894fffdaa40ecfe794d83addc2c19de`.** The reviewed
@@ -1036,7 +1038,7 @@ Requirements I1 and supporting R1/R2/R3/R5/R6, P2/P6 and L4 now link actual synt
 acceptance evidence in the existing matrix. They are not complete customer Discovery,
 measurement or activation requirements. [Walkthrough, migration and A1–A12 scope](docs/guides/synthetic-intake.md).
 
-## D10-A design and validation
+## D10-A design, approval and validation
 
 The [D-035 worked example and proposed boundary](docs/architecture/d10-discovery-preparation-review.md)
 uses the existing north/south Orchid CSV and plain-text delivery note. The source
@@ -1051,7 +1053,12 @@ and proposes one Case-linked descriptive-review history instead of a new busines
 aggregate or authority engine. It binds current inputs, Case/review revisions, typed
 answers/corrections, synthetic attribution and exact retry/export evidence. Confirmation
 only concerns the description; source or business corrections still use explicit intake.
-D10-B's T1–T12 are future acceptance criteria, not passing new runtime tests.
+The owner approved D-035 on 2026-09-07 and authorized D10-B after normal merge.
+T1–T3 now require varied customer identifiers/amounts and missing, reported, conflicting
+or ambiguous delivery material. T1–T12 remain implementation acceptance criteria,
+not passing new Discovery tests. The reviewed design head passed
+[CI 34180898208](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34180898208);
+the approval update must pass its own required validation before merge.
 
 Local validation: `pnpm validate` passes **285/285**, including formatting, lint,
 types and the public-release check. The initial sandbox run could not bind loopback;
@@ -1070,11 +1077,12 @@ T1–T12 have not been implemented or executed as Discovery tests.
 
 ## Next
 
-Review D10-A and Proposed D-035. The smallest D10-B slice is a deterministic cited brief
+Merge the approved D10-A documentation normally after its required checks pass.
+Then implement D10-B: a deterministic cited brief
 and short agenda with explicit, replayable descriptive answers/corrections/confirmation
-in the existing intake Workbench/API, only after the proposed boundary is approved.
-Read-only brief plus existing plain intake notes is the valid smaller fallback without
-that approval; it cannot be labelled typed confirmed Discovery. D11 owns reviewed Runtime
+in the existing intake Workbench/API. Approval is recorded; implementation must prove
+T1–T12 and varied customer/amount/evidence inputs, without fixed Orchid conclusions.
+Descriptions and confirmations grant no business authority or independent verification. D11 owns reviewed Runtime
 Pack publication and applicable policy changes; D12 owns one bounded worker and minimum
 approved proof. Representative routes, baseline/effort/cost capture, operator usefulness,
 customer acceptance and measured economics remain incomplete.

@@ -25,7 +25,7 @@ Real customer activation remains unapproved.
 Main includes D9-B [PR #30](https://github.com/Mehtapozkan/fieldruntime-core/pull/30)
 at `ca9543289894fffdaa40ecfe794d83addc2c19de`. This branch adds only the
 [D10-A Discovery design](docs/architecture/d10-discovery-preparation-review.md);
-its descriptive-review boundary is Proposed and no D10 capability is implemented.
+its descriptive-review boundary is Accepted and no D10 capability is implemented.
 The historical prerelease has a smaller
 boundary described under [Distribution](#distribution).
 
@@ -143,7 +143,7 @@ history. They remain isolated from Orchid.
 - **D10–D12:** [D10-A design in review](docs/architecture/d10-discovery-preparation-review.md)
   covers seven records, six outputs, Operational Legibility, gap-driven questions
   and redesign. D10-B's
-  descriptive review needs Proposed D-035 approval; D11 supplies a reviewed Runtime
+  descriptive review is authorized after PR #31 merges; D11 supplies a reviewed Runtime
   Pack, D12 one bounded worker. No Discovery runtime or real-data permission exists today.
 - **D13 — Customer proof:** planned 25-Case Challenge and Operating Capacity Map.
   Assisted evaluations may begin during D9–D12 within an approved data boundary;

@@ -1,7 +1,24 @@
 # D-035 — Bounded Discovery preparation and descriptive review
 
-Status: **Proposed — human approval required before the new review boundary is implemented.**
-D10-A is documentation only. D10-B, the records, APIs and screen below are not implemented.
+Status: **Accepted for narrow synthetic implementation. Real-customer activation remains unapproved.**
+D10-A is documentation only. D10-B is authorized after PR #31 merges normally;
+the records, APIs and screen below are not implemented by this approval update.
+
+## Human approval and proposal history
+
+On 2026-09-07 (operator local date), the human owner instructed:
+
+> I approve D-035’s narrow synthetic descriptive-review boundary and authorize D10-B after PR #31 merges normally.
+>
+> This approval covers immutable, Case-linked descriptive answers, corrections and confirmations; exact bindings and retry recovery; the specified conservative input invalidation; one supporting PostgreSQL history; and portable provenance. Confirmation grants no business authority, outcome acceptance or closure permission. Real-customer activation remains unapproved.
+
+The current PR head was verified as `814b415e8c80b4b81c9c2ccbc4abdeec244d2365`.
+The [initial proposal](https://github.com/Mehtapozkan/fieldruntime-core/blob/cd9fdf94c5452130d3c8cf76a3f120c6a28d6cb0/docs/architecture/d10-discovery-preparation-review.md)
+and [consent/stale-answer clarification](https://github.com/Mehtapozkan/fieldruntime-core/blob/814b415e8c80b4b81c9c2ccbc4abdeec244d2365/docs/architecture/d10-discovery-preparation-review.md)
+remain immutable proposal history. The same instruction requires the T1–T3 input-
+variation clarification below. This approval adds no customer-data permission, policy,
+outcome acceptance, Runtime Pack publication, worker integration or closure boundary.
+The remaining design examples describe the accepted scope, not implemented APIs.
 The [canonical specification](../product/workflow-discovery.md) remains the product
 specification; the [single 19-entry matrix](../product/requirements-implementation-matrix.md)
 remains the requirement/gaps record. This is its bounded design, not another roadmap.
@@ -13,21 +30,21 @@ preserving reviewed head `9d250707458adfdc481a6c9259608f5d6d3f4cc7` and
 Only the fixed synthetic invoice-dispute profile is in scope; real customer activation
 is unapproved. No model/provider, worker, new pack, external action or closure permission.
 
-## Purpose and decision to approve
+## Purpose and accepted decision
 
 Help one operator explain what prevents an evidence-backed invoice-dispute disposition,
 correct that explanation and review a feasible improvement. Prepare from retained inputs
 using deterministic code; label every inference and missing fact. Do not claim to have
 discovered a historical process from a queue snapshot.
 
-**Proposed boundary:** allow the server-selected synthetic intake operator to append
+**Accepted boundary:** allow the server-selected synthetic intake operator to append
 Case-linked Discovery answers, corrections and confirmations for the stated purpose
 of descriptive workflow review. Retain their exact material, source/Case bindings,
 attribution, versions and retry result in one immutable supporting PostgreSQL history.
 Brief reads remain derived and read-only. Confirmation never creates executable policy,
 an Authority Decision, action permission, customer acceptance or a resolved Case.
 
-The new part requiring approval is that durable, typed descriptive-review boundary.
+The approved addition is that durable, typed descriptive-review boundary.
 D-034 retains source material and intake consent, but does not define structured
 interview answers or confirmation of a workflow description. D-032's approval journal
 has consequential-request lifecycle semantics and must not be repurposed. D-035 neither
@@ -249,7 +266,7 @@ text, reuse D6 approvals, or mutate intake receipts to simulate the feature.
 ## Proposed contracts, binding and persistence
 
 All names and payloads in this section are design examples, **not callable APIs**.
-After D-035 approval, add strict versioned Discovery contracts; preserve intake v1,
+After PR #31 merges normally, add strict versioned Discovery contracts; preserve intake v1,
 export v1/v2 and all v0 contracts. Use bounded deterministic templates/structural
 findings plus exact text excerpts for this profile. Do not synthesize a semantic claim
 from arbitrary prose or opaque files. Version templates, extraction rules and projection;
@@ -375,7 +392,7 @@ retry, replacement key, silent rebase, authoritative local draft or multi-comman
 
 ## Smallest D10-B implementation and acceptance
 
-After separate D-035 approval, one focused D10-B PR can implement the fixed-profile
+After PR #31 merges normally, one focused D10-B PR will implement the fixed-profile
 deterministic brief, short gap agenda and typed descriptive review above in the existing
 Workbench/API. An operator can inspect cited findings, save unknown/disputed answers,
 correct a claim, explicitly confirm the description or improvement discussion, and reopen
@@ -390,20 +407,30 @@ disposable PostgreSQL host and browser fixture. No dependency, provider or new f
 Keep annotation correction local to Discovery; generic Case correction/evaluation promotion
 remains D11/D12/D16, not an implementation shortcut here.
 
-| Test                                 | Required actual runtime/API/PostgreSQL and browser evidence in D10-B                                                                                                                                                                                                                                                                                                         |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T1 Supported brief / R1–R3           | Prepare existing sample; read without writes; E1–E4 agree with bytes/locators. Two entities remain distinct; normal/documented route and denominator remain unknown. Both uncommitted rows stay in coverage. Identical source bindings under internal collection reordering reproduce the same material; changed original bytes retain different provenance. No model calls. |
-| T2 Evidence limits / R1/R6           | Snapshot and review timestamps cannot create historical transitions, elapsed work or effort. Retained-only PDF/image never yields parsed text; invalid excerpt/foreign artifact and unsupported event profile fail. Additional operator transcript is labelled reported.                                                                                                     |
-| T3 Questions/readiness / R2/R3/R7    | Missing delivery, owner, population, time and precedence generate the relevant agenda; answered/unknown/disputed remain distinct. Demonstrated task correction differs from self-assessment and authority. No hidden score or unchosen recording.                                                                                                                            |
-| T4 Source/variant conflicts / R4/R5  | Add a conflicting retained source and an ambiguous variant. Show both values/times/scopes; newer data and operator confirmation do not install precedence or authorize a decision. Keep Discovery available with the blocker.                                                                                                                                                |
-| T5 Correction and confirmation / L4  | C=1, revision 0 → answer/correction revision 1 → GET → confirm revision 2; C/R/S and intake business history unchanged. Before/after/reason/actor/citations survive restart. A confirmed disputed description remains disputed; corrected source material needs explicit D9 attachment.                                                                                      |
-| T6 Stale review / P2/P3              | Change Case C (also D-014), prepare new relevant business material, append another answer or change template between read/write: reject stale bindings without writes. Historical receipt remains, current confirmation is false; refresh and explicit resubmission required. Fresh no-op intake key metadata alone does not stale the manifest.                             |
-| T7 Concurrency and retry / I1        | Same original key/body races return one entry/result; changed body conflicts; competing revisions give one success. Lost response → restart → exact retry has no second entry/write. Fresh-key no-change is a non-success. Inject insert/read-back/commit failure and clock regression; no half-result or reserved successful key without its result.                        |
-| T8 Read integrity and export / I1/P6 | Repeated open/expand/GET/export leave every durable table and clock unchanged. Altered hashes, citations, Case anchors, actor/result or coherent subsets fail replay/readiness/read. Fresh installation and upgrade preserve 0001–0006; full export/reconstruction restores exact history/keys, legacy intake-only export claims no Discovery review.                        |
-| T9 Browser recovery / P3             | Two tabs compete across intake and Discovery; loser sends nothing; late completion cannot clear a newer command. Reload recovers exact bytes/key. Confirmed save with failed refresh keeps receipt but unconfirmed current applicability; mixed reads cannot show reviewed-current. Keyboard/390px keep objective, uncertainty and next control readable.                    |
-| T10 Redesign/measurement / P1/P5/R6  | Proposed changes precede mechanism allocation. Missing full cohort/effort/cost and unresolved Cases block numerical improvement claims. Overlapping waits are not summed, absent effort is not zero, and $15,000/$2,500 are reported dispute values, not savings.                                                                                                            |
-| T11 Authority/closure / P2/L3/B1     | Inject actor, rank, policy, success flag and document instructions; none becomes trusted context. Confirmation/proposed precedence cannot change authority, enrollment, Case ownership/state, commitments, outcomes or closure. Retain repaired resolver, D6–D8 and frozen ECC/negative-control regressions.                                                                 |
-| T12 Full handoff / L1                | All seven records and six outputs are present with supported/unknown/disputed status; review history reconstructs but no “Discovery complete”, approved pack or business-outcome label appears merely because a form was saved.                                                                                                                                              |
+| Test                                 | Required actual runtime/API/PostgreSQL and browser evidence in D10-B                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T1 Supported brief / R1–R3           | Prepare existing sample; read without writes; E1–E4 agree with bytes/locators. Two entities remain distinct; normal/documented route and denominator remain unknown. Both uncommitted rows stay in coverage. Identical source bindings under internal collection reordering reproduce the same material; changed original bytes retain different provenance. No model calls. A second supported synthetic input changes customer identifiers, amounts and evidence conditions; findings and counts derive from inputs, never Orchid constants. |
+| T2 Evidence limits / R1/R6           | Snapshot and review timestamps cannot create historical transitions, elapsed work or effort. Retained-only PDF/image never yields parsed text; invalid excerpt/foreign artifact and unsupported event profile fail. Additional operator transcript is labelled reported. A source reporting delivery confirmation remains a source claim, never an independently verified fact.                                                                                                                                                                |
+| T3 Questions/readiness / R2/R3/R7    | Missing delivery, owner, population, time and precedence generate the relevant agenda; answered/unknown/disputed remain distinct. Demonstrated task correction differs from self-assessment and authority. No hidden score or unchosen recording. Changing the supplied delivery material changes the agenda; ambiguous prose produces a cited excerpt and review question, not a fixed delivery-gap conclusion.                                                                                                                               |
+| T4 Source/variant conflicts / R4/R5  | Add a conflicting retained source and an ambiguous variant. Show both values/times/scopes; newer data and operator confirmation do not install precedence or authorize a decision. Keep Discovery available with the blocker.                                                                                                                                                                                                                                                                                                                  |
+| T5 Correction and confirmation / L4  | C=1, revision 0 → answer/correction revision 1 → GET → confirm revision 2; C/R/S and intake business history unchanged. Before/after/reason/actor/citations survive restart. A confirmed disputed description remains disputed; corrected source material needs explicit D9 attachment.                                                                                                                                                                                                                                                        |
+| T6 Stale review / P2/P3              | Change Case C (also D-014), prepare new relevant business material, append another answer or change template between read/write: reject stale bindings without writes. Historical receipt remains, current confirmation is false; refresh and explicit resubmission required. Fresh no-op intake key metadata alone does not stale the manifest.                                                                                                                                                                                               |
+| T7 Concurrency and retry / I1        | Same original key/body races return one entry/result; changed body conflicts; competing revisions give one success. Lost response → restart → exact retry has no second entry/write. Fresh-key no-change is a non-success. Inject insert/read-back/commit failure and clock regression; no half-result or reserved successful key without its result.                                                                                                                                                                                          |
+| T8 Read integrity and export / I1/P6 | Repeated open/expand/GET/export leave every durable table and clock unchanged. Altered hashes, citations, Case anchors, actor/result or coherent subsets fail replay/readiness/read. Fresh installation and upgrade preserve 0001–0006; full export/reconstruction restores exact history/keys, legacy intake-only export claims no Discovery review.                                                                                                                                                                                          |
+| T9 Browser recovery / P3             | Two tabs compete across intake and Discovery; loser sends nothing; late completion cannot clear a newer command. Reload recovers exact bytes/key. Confirmed save with failed refresh keeps receipt but unconfirmed current applicability; mixed reads cannot show reviewed-current. Keyboard/390px keep objective, uncertainty and next control readable.                                                                                                                                                                                      |
+| T10 Redesign/measurement / P1/P5/R6  | Proposed changes precede mechanism allocation. Missing full cohort/effort/cost and unresolved Cases block numerical improvement claims. Overlapping waits are not summed, absent effort is not zero, and $15,000/$2,500 are reported dispute values, not savings.                                                                                                                                                                                                                                                                              |
+| T11 Authority/closure / P2/L3/B1     | Inject actor, rank, policy, success flag and document instructions; none becomes trusted context. Confirmation/proposed precedence cannot change authority, enrollment, Case ownership/state, commitments, outcomes or closure. Retain repaired resolver, D6–D8 and frozen ECC/negative-control regressions.                                                                                                                                                                                                                                   |
+| T12 Full handoff / L1                | All seven records and six outputs are present with supported/unknown/disputed status; review history reconstructs but no “Discovery complete”, approved pack or business-outcome label appears merely because a form was saved.                                                                                                                                                                                                                                                                                                                |
+
+**T1–T3 input-variation control (required by the approval instruction):** reuse the
+supported intake profile with a second synthetic customer, different entity-qualified
+identifiers and amounts. Exercise no supplied delivery support, a note reporting delivery
+confirmation, contradictory notes, and prose whose meaning cannot be established
+deterministically. Show the corresponding sources/questions, deriving actual counts
+and values from retained input. Preserve four distinct meanings: missing supplied evidence;
+a source reporting an event/outcome; conflicting source claims; independently verified
+fact. This Discovery slice creates none of the fourth kind. No hard-coded Orchid
+conclusion, fixed demonstration count or success label may make the tests pass.
 
 Run repository validation, all retained intake A1–A12/retry/upgrade/browser checks,
 D6–D8 PostgreSQL/API and Workbench regressions, ECC/negative control, Compose and appliance
@@ -427,15 +454,16 @@ Discovery confirmation as permission. D-013/D-017/D-033 keep action/closure guar
 D-034's no-op keys, full artifact scope, parser limits and dataset disposal remain intact.
 
 The canonical roadmap reserves general intervention/correction promotion for D11/D12.
-The smallest proposed clarification is **descriptive Discovery annotations in D10-B only**,
-not runtime Case corrections, policy approval or learning capture. Approve that narrow
-addition and its one supporting history before implementing it. If not approved, the
-valid simpler alternative is a read-only brief plus existing plain intake notes, explicitly
-lacking typed confirmation/correction status. Do not silently call that full D10-B review.
+The accepted clarification is **descriptive Discovery annotations in D10-B only**,
+not runtime Case corrections, policy approval or learning capture. The owner approved
+that narrow addition and its one supporting history above. The original smaller
+alternative remains documented: read-only brief plus plain intake notes, explicitly
+lacking typed confirmation/correction status. It is not a substitute for the now-authorized
+D10-B review implementation.
 
 Unresolved business questions are the Q1–Q8 agenda, not blockers to synthetic design.
-Architecture approval must settle this descriptive-review scope, conservative input
-invalidation and portable history. Real evaluation additionally needs D-034's named
+Architecture approval covers this descriptive-review scope, conservative input
+invalidation and portable history. Real evaluation still needs D-034's named
 customer/custodian/files/people/location/access/classification/retention/export/deletion
 approval. The published prerelease remains historical; Apache-2.0, existing release
 instructions and deployment restrictions are unchanged.

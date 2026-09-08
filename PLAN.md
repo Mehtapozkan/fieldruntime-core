@@ -25,9 +25,9 @@ activation remains unapproved. PR #29 merged normally at `f96d6cc7`; D9-B PR #30
 merged normally at `ca9543289894fffdaa40ecfe794d83addc2c19de` from reviewed head
 `9d250707`, with required CI passing and all findings resolved. The approved retry
 amendment, successful no-op key bindings, cross-tab recovery and migration compatibility
-are preserved. D10-A is now a docs-only proposal on `docs/d10a-discovery-preparation`;
-[Proposed D-035](docs/architecture/d10-discovery-preparation-review.md) is not approval
-or implementation of its new review boundary. The canonical specification and all
+are preserved. D10-A is a docs-only accepted design on `docs/d10a-discovery-preparation`;
+[Accepted D-035](docs/architecture/d10-discovery-preparation-review.md) records the human approval and D10-B authorization after normal PR #31 merge;
+this update implements no runtime behavior. The canonical specification and all
 19 matrix entries remain the product plan. No release or deployment is included.
 
 The published `v0.1.0-evaluation-preview.0` is a historical snapshot at `3db1b4bf`,
@@ -217,13 +217,14 @@ D-013 and D-033 remain unchanged; measured economics stays unimplemented.
    [Walkthrough and A1–A12 evidence](docs/guides/synthetic-intake.md). No nullable v0 fields,
    automatic matching, policy enrollment, transferred approval or real customer activation.
    Whole-dataset disposal ends replay; selective erasure is absent.
-3. **D10-A — docs-only design in review:** [Proposed D-035](docs/architecture/d10-discovery-preparation-review.md)
+3. **D10-A — accepted design awaiting normal merge:** [Accepted D-035](docs/architecture/d10-discovery-preparation-review.md)
    supplies the worked invoice-dispute brief, gap-driven interviews, seven records/six
    outputs, source/variant disagreements, readiness/support, baseline and redesign before
    allocation. A compact screen is proposed; no Discovery functionality is implemented.
-4. **D10-B — after D-035 approval:** implement the fixed-profile deterministic brief and
+4. **D10-B — authorized after PR #31 merge:** implement the fixed-profile deterministic brief and
    typed descriptive review using existing intake/Case evidence and the proposed minimal
-   supporting history. Execute T1–T12 through PostgreSQL/API and browser; preserve all
+   supporting history. Execute T1–T12 plus varied customer/amount/delivery-evidence controls through
+   PostgreSQL/API and browser; preserve all
    A1–A12/retry/migration, D6–D8, ECC and closure safeguards. No model calls or workers.
    Operators can save/correct/confirm a description and reopen it; historical routes,
    source rules, population/effort coverage and business outcomes remain incomplete.

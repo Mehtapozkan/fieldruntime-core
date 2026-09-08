@@ -321,9 +321,9 @@ reviewed matching and repeat-import handling. Proposed intake content must prese
 Case/business-object references, source record and event IDs, activity, actor/role,
 source status, occurrence and ingestion times, timezone, content/provenance bindings
 and matching uncertainty. These are contract-reconciliation requirements, not new
-fields silently added to strict WorkEvent v0. [D10-A / Proposed D-035](../architecture/d10-discovery-preparation-review.md)
-now makes one bounded preparation/review design concrete; its new review boundary and
-D10-B implementation remain pending. Documentation does not complete R1–R7 or the six
+fields silently added to strict WorkEvent v0. [D10-A / Accepted D-035](../architecture/d10-discovery-preparation-review.md)
+now makes one bounded preparation/review design concrete; its narrow synthetic review
+boundary is approved and D10-B is authorized after normal PR #31 merge, not implemented. Documentation does not complete R1–R7 or the six
 outputs. D10 supplies all records, interviews,
 baseline and redesign; D11 reviews one template/pack; D12 supplies one useful
 replaceable worker, bounded proof and minimum reviewed correction capture; D13
