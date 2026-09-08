@@ -10,7 +10,7 @@ try {
     JSON.parse(await readFile(process.argv[2], "utf8")),
   );
   process.stdout.write(
-    `PASS: ${state.bundles.length} bundles, ${state.artifacts.size} original artifacts, ${state.commits.length} receipts and ${state.cases.cases.length} Cases reconstruct. Synthetic evidence only; no current authorization.\n`,
+    `PASS: ${state.bundles.length} bundles, ${state.artifacts.size} original artifacts, ${state.commits.length} receipts, ${state.requestBindings?.length ?? 0} no-op request bindings and ${state.cases.cases.length} Cases reconstruct. Synthetic evidence only; no current authorization.\n`,
   );
 } catch (error) {
   process.stderr.write(`FAIL: ${error.message}\n`);

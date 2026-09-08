@@ -23,6 +23,7 @@ import {
 import {
   assertIntakeState,
   exportIntakeState,
+  intakeRequestMetadata,
   type IntakeState,
 } from "./intake-integrity.js";
 import {
@@ -79,6 +80,18 @@ function bundleColumns(b: IntakeObject): IntakeObject {
     bundle: b,
   };
 }
+function bindingColumns(b: IntakeObject): IntakeObject {
+  return {
+    tenant_id: b.tenant_id,
+    intake_scope_id: b.intake_scope_id,
+    operation: b.operation,
+    idempotency_key: b.idempotency_key,
+    request_fingerprint: b.request_fingerprint,
+    recorded_at: b.recorded_at,
+    binding_hash: b.hash,
+    binding: b,
+  };
+}
 function assertColumns(row: IntakeObject, expected: IntakeObject): void {
   for (const [k, v] of Object.entries(expected))
     requireIntake(
@@ -102,6 +115,14 @@ export async function loadIntakeStore(client: SqlClient): Promise<IntakeState> {
     const receipts = await client.query<IntakeObject>(
       "/* fr:intake-load-commits */ SELECT * FROM intake_commits ORDER BY sequence",
     );
+    const requestRows = await client.query<IntakeObject>(
+      "/* fr:intake-load-request-bindings */ SELECT * FROM intake_request_bindings ORDER BY recorded_at, operation, idempotency_key",
+    );
+    const requestBindings = requestRows.rows.map((row) => {
+      const b = intakeObject(row.binding);
+      assertColumns(row, bindingColumns(b));
+      return b;
+    });
     const bytes = new Map<string, Buffer>();
     for (const a of artifacts.rows) {
       requireIntake(
@@ -131,12 +152,14 @@ export async function loadIntakeStore(client: SqlClient): Promise<IntakeState> {
       ...canonical.credit.entries.map((e) => e.recorded_at as string),
       ...prepared.map((b) => String(b.retained_at)),
       ...commits.map((r) => String(r.recorded_at)),
+      ...requestBindings.map((b) => String(b.recorded_at)),
     ];
     const state = {
       cases: canonical.cases,
       artifacts: bytes,
       bundles: prepared,
       commits,
+      requestBindings,
       clockFloor: times.reduce((a, b) => (a > b ? a : b), ""),
     };
     assertIntakeState(state);
@@ -152,7 +175,7 @@ export async function loadIntakeStore(client: SqlClient): Promise<IntakeState> {
 }
 async function insert(
   client: SqlClient,
-  table: "intake_bundles" | "intake_commits",
+  table: "intake_bundles" | "intake_commits" | "intake_request_bindings",
   columns: IntakeObject,
 ): Promise<void> {
   const keys = Object.keys(columns);
@@ -199,6 +222,52 @@ function committedResult(status: string, receipt: IntakeObject): IntakeObject {
     authority_granted: false,
   });
 }
+function boundNoop(
+  state: IntakeState,
+  operation: string,
+  input: IntakeObject,
+): IntakeObject | undefined {
+  const binding = state.requestBindings?.find(
+    (b) =>
+      b.operation === operation && b.idempotency_key === input.idempotency_key,
+  );
+  if (!binding) return undefined;
+  requireIntake(
+    binding.request_fingerprint === sha256Json(input),
+    "IDEMPOTENCY_CONFLICT",
+    "Intake request key was used for another request",
+  );
+  const ref = intakeObject(binding.result);
+  if (operation === "prepare")
+    return preparedResult(String(ref.status), bundleAt(state, ref.bundle_id));
+  const receipt = state.commits.find((r) => r.id === ref.receipt_id);
+  requireIntake(receipt, "INTAKE_INTEGRITY", "Original receipt missing");
+  return committedResult(String(ref.status), receipt);
+}
+async function bindNoop(
+  client: SqlClient,
+  operation: string,
+  input: IntakeObject,
+  ref: IntakeObject,
+  at: string,
+): Promise<void> {
+  const content = {
+    schema_version: "intake-request-binding.v1",
+    tenant_id: INTAKE_TENANT,
+    intake_scope_id: "scope_invoice_disputes",
+    operation,
+    idempotency_key: input.idempotency_key,
+    request_fingerprint: sha256Json(input),
+    request: intakeRequestMetadata(input, operation),
+    result: ref,
+    recorded_at: at,
+  };
+  const binding = { ...content, hash: sha256Json(content) };
+  assertValidIntakeContract("request_binding", binding);
+  await insert(client, "intake_request_bindings", bindingColumns(binding));
+  await writerRevision(client);
+  await loadIntakeStore(client);
+}
 export class PostgresIntakeStore {
   constructor(readonly pool: SqlPool) {}
   async prepare(
@@ -215,18 +284,32 @@ export class PostgresIntakeStore {
         prior = state.bundles.find(
           (b) => b.preparation_key === input.idempotency_key,
         );
+      const retained = boundNoop(state, "prepare", input);
+      if (retained) return retained;
       if (prior) {
         requireIntake(
           prior.preparation_fingerprint === fingerprint,
           "IDEMPOTENCY_CONFLICT",
           "Preparation key was used for different bytes or metadata",
         );
-        return preparedResult("duplicate", prior);
+        return preparedResult("prepared", prior);
       }
       const identical = state.bundles.find((b) => b.id === parsed.bundle.id);
-      // D-034 A2 retains the original bundle/key without a fresh-key alias.
-      // This no-op does not reserve the submitted key or accept new metadata.
-      if (identical) return preparedResult("already_retained", identical);
+      if (identical) {
+        const outcome = preparedResult("already_retained", identical);
+        await bindNoop(
+          client,
+          "prepare",
+          input,
+          {
+            status: outcome.status,
+            bundle_id: identical.id,
+            bundle_hash: identical.hash,
+          },
+          checkedTime(state, now),
+        );
+        return outcome;
+      }
       const at = checkedTime(state, now),
         prepared = prepareIntake(input, ingestedAt, at);
       for (const [hash, bytes] of prepared.bytes)
@@ -253,13 +336,15 @@ export class PostgresIntakeStore {
         prior = state.commits.find(
           (r) => r.idempotency_key === selection.idempotency_key,
         );
+      const retained = boundNoop(state, "commit", selection);
+      if (retained) return retained;
       if (prior) {
         requireIntake(
           prior.command_fingerprint === fingerprint,
           "IDEMPOTENCY_CONFLICT",
           "Commit key was used for another selection",
         );
-        return committedResult("duplicate", prior);
+        return committedResult("committed", prior);
       }
       const bundle = bundleAt(state, selection.bundle_id),
         material = buildIntakeMaterial(selection, bundle, state.commits),
@@ -278,6 +363,17 @@ export class PostgresIntakeStore {
           existing.case_id === material.target_case_id,
           "TARGET_CONFLICT",
           "Material already belongs to another Case",
+        );
+        await bindNoop(
+          client,
+          "commit",
+          selection,
+          {
+            status: "already_committed",
+            receipt_id: existing.id,
+            receipt_hash: existing.hash,
+          },
+          checkedTime(state, dependencies.now),
         );
         return committedResult("already_committed", existing);
       }

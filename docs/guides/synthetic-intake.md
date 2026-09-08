@@ -68,20 +68,30 @@ command/key before submission; localStorage retains a navigation ID. Clearing si
 storage loses unconfirmed retry information, not canonical history. No new key is
 chosen automatically. A confirmed receipt remains visible if its refresh fails.
 
-D-034’s no-alias reimport rule returns the original bundle/receipt for unchanged
-material. A fresh key yielding `already_retained` or `already_committed` is not
-reserved: only the original retained command key is durably bound to its exact
-body. Always recover an uncertain submission with its unchanged command. Do not
-treat a historical no-op as acceptance of a new key, filename, reason or consent.
+The owner-approved D-034 amendment binds **every successful request key**, including
+`already_retained` and `already_committed`, to its normalized request fingerprint and
+original outcome/reference within the trusted tenant/intake scope and operation.
+Exact retries return that original status (`prepared`, `committed` or the original
+no-op status), not a new business receipt. A changed valid body under that key returns
+`IDEMPOTENCY_CONFLICT`. A first no-op key binding is a metadata write; it advances
+only writer metadata, never C/R/S, source versions, Cases, WorkEvents or business
+receipts. Later exact retries write nothing. Inspection and exports stay read-only.
 
-| Operation         | Endpoint                                      | Durable effect                                                  |
-| ----------------- | --------------------------------------------- | --------------------------------------------------------------- |
-| Prepare           | `POST /v1/intake/preparations`                | Original scoped bytes + immutable bundle; no Case/review/action |
-| List/open         | `GET /v1/intake/bundles[/{id}]`               | None                                                            |
-| Inspect selection | `POST /v1/intake/selections/preview`          | None; consistent read-only snapshot, no issued preview          |
-| Commit one row    | `POST /v1/intake/commits`                     | Atomic Case append, indexes, provenance and receipt             |
-| Original artifact | `GET /v1/intake/artifacts/{64-hex-byte-hash}` | None; attachment download under full synthetic scope            |
-| Portable evidence | `GET /v1/intake/export`                       | None                                                            |
+One outstanding intake command is shared across tabs. IndexedDB atomically claims
+the slot before sending and clears only the exact completed command. If another tab
+holds it, the new command is not sent: **Recover original submission** exposes the
+saved bytes/key. Reload the other tab after completion to refresh its recovery state.
+A late response cannot clear a newer command. No key replacement or resubmission is
+automatic; clearing site data still loses local recovery information.
+
+| Operation         | Endpoint                                      | Durable effect                                                            |
+| ----------------- | --------------------------------------------- | ------------------------------------------------------------------------- |
+| Prepare           | `POST /v1/intake/preparations`                | Original scoped bytes/bundle or no-op key metadata; no Case/review/action |
+| List/open         | `GET /v1/intake/bundles[/{id}]`               | None                                                                      |
+| Inspect selection | `POST /v1/intake/selections/preview`          | None; consistent read-only snapshot, no issued preview                    |
+| Commit one row    | `POST /v1/intake/commits`                     | Atomic Case/provenance receipt or no-op key metadata                      |
+| Original artifact | `GET /v1/intake/artifacts/{64-hex-byte-hash}` | None; attachment download under full synthetic scope                      |
+| Portable evidence | `GET /v1/intake/export`                       | None                                                                      |
 
 Strict [contracts](../../packages/contracts/schemas/intake.v1.schema.json) reject
 unknown fields, identities, classifications, scopes and success claims. The runtime
@@ -93,7 +103,11 @@ is only a comparison binding. Normal Case commands cannot manufacture the reserv
 
 Migration **0005_synthetic_intake** adds only `intake_artifacts`, `intake_bundles` and
 `intake_commits`, plus immutable-record and deferred Case/receipt pair constraints.
-Migrations 0001–0004 and their checksums stay unchanged. `fr up` applies it to fresh
+Migration **0006_intake_request_bindings** adds only an immutable, intake-specific
+no-op command binding table. Original successful keys already reside in bundles
+and receipts and remain binding on upgrade; no backfill duplicates them. Historical
+no-op keys that were never retained cannot be recovered or retroactively reserved.
+Migrations 0001–0005 and their checksums stay unchanged. `fr up` applies it to fresh
 and existing preview volumes; stop the old process first and preserve a complete
 private backup of the evaluation dataset if needed. No online/rolling migration or
 downgrade is promised. Failed migration must be investigated, not checksum-edited.
@@ -104,10 +118,13 @@ pnpm build
 node scripts/check-intake-export.mjs /tmp/synthetic-intake-export.json
 ```
 
-The export retains original bytes, bundles, consent/receipts and the associated
+Versioned `intake-export.v2` retains the additional request bindings and the original
+bytes, bundles, consent/receipts and the associated
 existing Case engine state (journals/projections and replay indexes). The checker
 recomputes bytes → pinned parser/mapping → material → v0 command → journal bindings.
-A test-only conformance fixture reconstructs an export in a fresh PostgreSQL schema,
+The checker also accepts strict historical v1 exports, which have only original
+retained-key guarantees. They cannot attest to unrecorded no-op keys. Never discard
+v2 key metadata when moving current evidence. A test-only conformance fixture reconstructs an export in a fresh PostgreSQL schema,
 restarts and exact-retries it. There is deliberately **no live restore endpoint**.
 Unknown implementation/timezone versions fail closed; future upgrades must retain
 compatible implementations or explicitly support their old replay semantics.
@@ -142,7 +159,7 @@ D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/f
 | D-034 vector | Executable evidence                                                                                                                      |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | A1           | Real prepare/preview/create; existing owner/high severity C4→C5 attach; separate ingestion/review time; restart                          |
-| A2           | Renamed files return original preparation; exact/new-key same-material retries leave histories unchanged                                 |
+| A2           | Renamed files return original preparation; every successful key is bound; first no-op adds metadata only, exact retry writes nothing     |
 | A3           | Reordered rows/headers change bytes/locators, preserve K/V/M and original receipts                                                       |
 | A4           | Changed row/support appends evidence; contradictory reported revision requires acknowledgment; C advances                                |
 | A5           | Same invoice across entities creates distinct roots; cross-entity/moved targets denied                                                   |
@@ -162,3 +179,12 @@ Next bounded work is D10 Discovery: use these retained claims to prepare a cited
 normal route, alternatives, missing-evidence questions and the seven Discovery
 records/six loop outputs for operator review. No worker allocation, new authority,
 closure rule or real-data activation follows automatically from successful intake.
+
+The PR #30 retry repair adds focused checks for both operations: fresh no-op key →
+changed valid body returns 409; exact/lost-response retry after restart returns the
+original outcome; concurrent same-key commands, metadata rollback, backward clocks,
+forged request/result references and 0005→0006 upgrade fail closed or preserve the
+expected result. Six browser scenarios include atomic competing tab claims,
+completion in one tab, conditional clearing after a late response and reload recovery.
+[Final-head validation](../../STATUS.md#d9-b-implementation-and-validation) and the PR
+record actual local versus CI results. D10-A has not started.

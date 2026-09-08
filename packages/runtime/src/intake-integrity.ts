@@ -23,6 +23,7 @@ import {
   INTAKE_SCOPES,
   INTAKE_TENANT,
   normalizeIntakeSelection,
+  normalizeIntakePrepare,
   prepareIntake,
   requireIntake,
   type IntakeObject,
@@ -33,6 +34,7 @@ export interface IntakeState {
   readonly bundles: readonly IntakeObject[];
   readonly commits: readonly IntakeObject[];
   readonly clockFloor: string;
+  readonly requestBindings?: readonly IntakeObject[];
 }
 const same = (a: unknown, b: unknown): boolean =>
   canonicalJson(a) === canonicalJson(b);
@@ -219,6 +221,99 @@ export function assertIntakeState(state: IntakeState): void {
           "Intake Case event has no provenance receipt",
         );
     }
+  assertRequestBindings(state);
+}
+// Preparation command metadata refers to the existing original bytes, never copies them.
+export function intakeRequestMetadata(
+  input: IntakeObject,
+  operation: string,
+): IntakeObject {
+  if (operation === "commit") return input;
+  return {
+    ...input,
+    artifacts: intakeList(input.artifacts).map(({ bytes_base64, ...a }) => ({
+      ...a,
+      byte_hash: intakeBytesHash(Buffer.from(String(bytes_base64), "base64")),
+    })),
+  };
+}
+function assertRequestBindings(state: IntakeState): void {
+  const keys = new Set([
+    ...state.bundles.map((b) => `prepare:${String(b.preparation_key)}`),
+    ...state.commits.map((r) => `commit:${String(r.idempotency_key)}`),
+  ]);
+  for (const b of state.requestBindings ?? []) {
+    assertValidIntakeContract("request_binding", b);
+    const key = `${String(b.operation)}:${String(b.idempotency_key)}`;
+    requireIntake(
+      !keys.has(key) &&
+        b.hash === sha256Json(withoutHash(b)) &&
+        new Date(String(b.recorded_at)).toISOString() === b.recorded_at,
+      "INTAKE_INTEGRITY",
+      "Request binding identity, hash or time changed",
+    );
+    keys.add(key);
+    const metadata = intakeObject(b.request),
+      result = intakeObject(b.result);
+    let input: IntakeObject;
+    if (b.operation === "prepare") {
+      input = normalizeIntakePrepare({
+        ...metadata,
+        artifacts: intakeList(metadata.artifacts).map(({ byte_hash, ...a }) => {
+          const bytes = state.artifacts.get(String(byte_hash));
+          requireIntake(
+            bytes,
+            "INTAKE_INTEGRITY",
+            "Request source bytes missing",
+          );
+          return { ...a, bytes_base64: bytes.toString("base64") };
+        }),
+      });
+      const original = state.bundles.find((v) => v.id === result.bundle_id);
+      requireIntake(
+        original &&
+          result.status === "already_retained" &&
+          original.hash === result.bundle_hash &&
+          b.recorded_at >= String(original.retained_at) &&
+          prepareIntake(
+            input,
+            String(original.ingested_at),
+            String(original.retained_at),
+          ).bundle.id === original.id,
+        "INTAKE_INTEGRITY",
+        "Preparation request no longer reproduces its original bundle",
+      );
+    } else {
+      input = normalizeIntakeSelection(metadata, "selection");
+      const original = state.commits.find((v) => v.id === result.receipt_id),
+        bundle = state.bundles.find((v) => v.id === input.bundle_id);
+      requireIntake(
+        original &&
+          bundle &&
+          result.status === "already_committed" &&
+          original.hash === result.receipt_hash &&
+          b.recorded_at >= String(original.recorded_at),
+        "INTAKE_INTEGRITY",
+        "Commit request original receipt missing or changed",
+      );
+      const material = buildIntakeMaterial(input, bundle, state.commits);
+      requireIntake(
+        material.material_key === original.material_key &&
+          material.target_case_id === original.case_id &&
+          material.material_key === input.expected_material_key &&
+          sha256Json(material) === input.expected_consent_hash,
+        "INTAKE_INTEGRITY",
+        "Commit request does not reproduce its original material/target",
+      );
+    }
+    requireIntake(
+      input.idempotency_key === b.idempotency_key &&
+        sha256Json(input) === b.request_fingerprint &&
+        same(intakeRequestMetadata(input, String(b.operation)), metadata),
+      "INTAKE_INTEGRITY",
+      "Request fingerprint or normalized metadata changed",
+    );
+  }
 }
 export function exportIntakeState(state: IntakeState): IntakeObject {
   assertIntakeState(state);
@@ -236,7 +331,8 @@ export function exportIntakeState(state: IntakeState): IntakeObject {
     ),
   };
   const content = {
-    schema_version: "intake-export.v1",
+    schema_version: "intake-export.v2",
+    request_bindings: state.requestBindings ?? [],
     tenant_id: INTAKE_TENANT,
     scope_ids: [...INTAKE_SCOPES],
     artifacts: [...state.artifacts]
@@ -296,6 +392,10 @@ export function validateIntakeExport(value: unknown): IntakeState {
     bundles: intakeList(data.bundles),
     commits: intakeList(data.commits),
     clockFloor: "",
+    requestBindings:
+      data.schema_version === "intake-export.v2"
+        ? intakeList(data.request_bindings)
+        : [],
   };
   assertIntakeState(state);
   return state;

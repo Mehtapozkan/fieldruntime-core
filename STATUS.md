@@ -10,7 +10,8 @@ rules were preserved; no bypass. Real customer activation remains unapproved.
 This branch adds strict intake contracts, original scoped byte retention, pinned
 parsing, inspectable candidates/coverage, explicit Case create/attach and immutable
 provenance receipts through the API and existing Workbench. Migration 0005 adds
-three supporting tables; old migrations/Case semantics/frozen ECC remain unchanged.
+three supporting tables; the approved retry amendment adds only no-op command
+metadata in migration 0006. All previous checksums/Case semantics/frozen ECC remain unchanged.
 No catalog, credit authority, Action Gateway, worker, real-data processing or closure
 permission is added. [Executable walkthrough and acceptance map](docs/guides/synthetic-intake.md).
 Validation and handoff evidence for this branch appear below.
@@ -975,13 +976,13 @@ material does not duplicate history; changed material needs current C/prior bind
 and fresh consent. R/S and Orchid enrollment remain untouched. No import grants
 financial authority, and standalone journal replay does not claim source-byte replay.
 
-Local `pnpm validate` passes **284 tests**, formatting, lint, typecheck and release
-audit. Real local PostgreSQL **18.4** passes **19 intake/API tests** (including
-nested tamper variants) and **three Chromium browser scenarios**: prepare/inspect/
+Local `pnpm validate` passes **285 tests**, formatting, lint, typecheck and release
+audit. Real local PostgreSQL **18.4** passes **26 intake/API tests** (including
+nested tamper variants) and **six Chromium browser scenarios**: prepare/inspect/
 commit, exact lost-response recovery, restart, stale or edited inspection and retained
 confirmed evidence after refresh failure. The documented example commands and
 portable export checker execute successfully; a forged export fails. Unit intake
-coverage is ten tests, included in the 284. **63 retained D6 PostgreSQL/API tests
+coverage is eleven tests, included in the 285. **63 retained D6 PostgreSQL/API tests
 pass**. The **115 retained D7/D8 PostgreSQL/API tests**, including all eight
 Workbench browser scenarios, also pass locally. Final-head CI evidence is recorded
 in the PR and required before handoff. CI uses the repository's pinned PostgreSQL
@@ -1004,10 +1005,23 @@ exact retained order/locators. Full source/receipt content remains expandable.
 PR review reproduced HTTP 500 on equivalent decoded preparation routes, premature
 large-upload rejection, and unsupported bare CR inside quoted CSV. Shared route
 decoding and strict LF/CRLF validation correct these with regression coverage.
-The requested fresh-key reservation for unchanged reimports remains a review
-question: Accepted D-034 A2 specifies original receipts with no alias. The current
-implementation durably binds original retained keys, leaves no-op keys unreserved,
-and documents that limit rather than silently adding a key registry.
+The owner approved the narrow D-034 retry amendment after `209bf5f7`; its original
+approval history remains retained. Before repair, both preparation and commit
+accepted changed valid bodies under fresh no-op keys (HTTP 200). They now return
+409 `IDEMPOTENCY_CONFLICT`. Original keys remain in bundles/business receipts;
+new no-op keys bind their request fingerprint, byte-referencing request metadata,
+original result reference and checked time atomically in `intake_request_bindings`.
+First bindings change writer metadata only; exact retries return the original
+outcome with no further writes. No source version, WorkEvent, Case, receipt or C/R/S
+is duplicated. Migration 0006 preserves 0001–0005 and needs no fabricated backfill:
+unknown historical no-op keys remain unknown. Export v2 includes new bindings;
+strict historical v1 conformance retains only its original-key guarantees.
+
+Two actual tabs reproduced the shared-slot failure. The browser now claims the
+single IndexedDB slot atomically before sending, rejects competing commands and
+clears only the exact expected command. Reload and explicit recovery retain the
+original bytes/key; a late completion cannot delete a newer saved command. Storage
+claim failure sends nothing. This adds no inbox, automatic retries or authority.
 
 Requirements I1 and supporting R1/R2/R3/R5/R6, P2/P6 and L4 now link actual synthetic
 acceptance evidence in the existing matrix. They are not complete customer Discovery,
@@ -1015,7 +1029,8 @@ measurement or activation requirements. [Walkthrough, migration and A1–A12 sco
 
 ## Next
 
-Review D9-B; leave its PR open and unmerged. The next bounded design is **D10-A
+Finish review of the two D9-B retry repairs; leave PR #30 open and unmerged.
+D10-A has not started. After review, the next bounded design is **D10-A
 Discovery preparation and operator review**: reuse retained citations for one normal
 route, alternatives, missing-evidence questions, accountable owners and the seven
 Discovery records/six loop outputs. Do not add a worker or new execution/closure

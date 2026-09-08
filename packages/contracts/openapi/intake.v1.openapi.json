@@ -3,7 +3,7 @@
   "info": {
     "title": "Synthetic intake API",
     "version": "1",
-    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input."
+    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input. Every successful request key, including no-ops, binds its normalized request fingerprint and original outcome/reference. First no-op key retention is metadata only; exact retries return the original status and cause no durable changes. Exports use intake-export.v2; the conformance reader also accepts strict historical v1 exports without no-op key history."
   },
   "servers": [
     {

@@ -538,7 +538,7 @@ export function mountIntakeWorkbench() {
         el("h2", "Original submission needs recovery"),
         el(
           "p",
-          "No unconfirmed commit is treated as accepted. Retry the saved command to recover its original result.",
+          "One intake command is shared across tabs. Recover these exact saved bytes and key; completion in another tab does not authorize a different submission.",
         ),
         button(
           "Recover original submission",
@@ -557,7 +557,7 @@ export function mountIntakeWorkbench() {
         el(
           "h2",
           r
-            ? s.confirmed.status === "committed"
+            ? s.confirmed.status === "committed" && !s.recovered
               ? "Material reviewed into Case"
               : "Original Case receipt recovered"
             : "Preparation retained — review still required",

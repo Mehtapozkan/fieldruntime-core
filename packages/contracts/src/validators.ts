@@ -102,6 +102,7 @@ const intakeValidators = Object.fromEntries(
       "commit_result",
       "list",
       "export",
+      "request_binding",
     ] as const
   ).map((kind) => [
     kind,
@@ -120,7 +121,8 @@ const intakeValidators = Object.fromEntries(
   | "prepare_result"
   | "commit_result"
   | "list"
-  | "export",
+  | "export"
+  | "request_binding",
   ValidateFunction
 >;
 export function assertValidIntakeContract(

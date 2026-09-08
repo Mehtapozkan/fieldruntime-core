@@ -20,6 +20,7 @@ export const migrationNames = [
   "0003_simulated_credit",
   "0004_credit_verification",
   "0005_synthetic_intake",
+  "0006_intake_request_bindings",
 ];
 export const migrations = await Promise.all(
   migrationNames.map(async (name) =>
@@ -231,6 +232,7 @@ export async function intakeHost(t, { upgrade = false } = {}) {
         "intake_artifacts",
         "intake_bundles",
         "intake_commits",
+        "intake_request_bindings",
       ];
       const out = {};
       for (const table of tables)

@@ -2197,7 +2197,8 @@
         "status",
         "bundle_id",
         "bundle_hash"
-      ]
+      ],
+      "description": "Exact retries return the original successful status/reference. Legacy duplicate status remains readable; current writes do not change the original outcome on retry."
     },
     "commit_result": {
       "type": "object",
@@ -2225,7 +2226,8 @@
         "status",
         "receipt",
         "authority_granted"
-      ]
+      ],
+      "description": "Exact retries return the original successful status/reference. Legacy duplicate status remains readable; current writes do not change the original outcome on retry."
     },
     "list": {
       "type": "object",
@@ -2291,6 +2293,221 @@
       ]
     },
     "export": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/export_v1"
+        },
+        {
+          "$ref": "#/$defs/export_v2"
+        }
+      ]
+    },
+    "request_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "queue",
+            "support"
+          ]
+        },
+        "document_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "media_type": {
+          "enum": [
+            "text/csv",
+            "text/plain",
+            "text/markdown",
+            "application/pdf",
+            "image/png",
+            "image/jpeg"
+          ]
+        },
+        "declared_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "associations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/association"
+          },
+          "maxItems": 100
+        },
+        "byte_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "role",
+        "document_id",
+        "name",
+        "media_type",
+        "byte_hash",
+        "declared_hash",
+        "associations"
+      ]
+    },
+    "preparation_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-prepare.v1"
+        },
+        "profile_id": {
+          "const": "invoice-dispute-intake.v1"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "claims": {
+          "$ref": "#/$defs/claims"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/request_artifact"
+          },
+          "maxItems": 17
+        }
+      },
+      "required": [
+        "schema_version",
+        "profile_id",
+        "idempotency_key",
+        "claims",
+        "artifacts"
+      ]
+    },
+    "request_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-request-binding.v1"
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "intake_scope_id": {
+          "const": "scope_invoice_disputes"
+        },
+        "operation": {
+          "enum": [
+            "prepare",
+            "commit"
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "request_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "request": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/preparation_metadata"
+            },
+            {
+              "$ref": "#/$defs/selection"
+            }
+          ]
+        },
+        "result": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "const": "already_retained"
+                },
+                "bundle_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                },
+                "bundle_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "status",
+                "bundle_id",
+                "bundle_hash"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "const": "already_committed"
+                },
+                "receipt_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                },
+                "receipt_hash": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "status",
+                "receipt_id",
+                "receipt_hash"
+              ]
+            }
+          ]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "intake_scope_id",
+        "operation",
+        "idempotency_key",
+        "request_fingerprint",
+        "request",
+        "result",
+        "recorded_at",
+        "hash"
+      ]
+    },
+    "export_v1": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -2492,6 +2709,54 @@
         "commits",
         "hash",
         "case_state"
+      ]
+    },
+    "export_v2": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-export.v2"
+        },
+        "tenant_id": {
+          "$ref": "#/$defs/export_v1/properties/tenant_id"
+        },
+        "scope_ids": {
+          "$ref": "#/$defs/export_v1/properties/scope_ids"
+        },
+        "artifacts": {
+          "$ref": "#/$defs/export_v1/properties/artifacts"
+        },
+        "bundles": {
+          "$ref": "#/$defs/export_v1/properties/bundles"
+        },
+        "commits": {
+          "$ref": "#/$defs/export_v1/properties/commits"
+        },
+        "hash": {
+          "$ref": "#/$defs/export_v1/properties/hash"
+        },
+        "case_state": {
+          "$ref": "#/$defs/export_v1/properties/case_state"
+        },
+        "request_bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/request_binding"
+          },
+          "maxItems": 100000
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "scope_ids",
+        "artifacts",
+        "bundles",
+        "commits",
+        "hash",
+        "case_state",
+        "request_bindings"
       ]
     }
   }

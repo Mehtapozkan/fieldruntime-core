@@ -5,6 +5,26 @@ import { intakeHost } from "../tests/helpers/intake-postgres.mjs";
 import { intakeInput } from "../tests/helpers/intake.mjs";
 import { validateIntakeExport } from "../dist/packages/runtime/src/intake-integrity.js";
 const root = "/v1/intake";
+function businessState(snapshot) {
+  return Object.fromEntries(
+    Object.entries(snapshot).filter(
+      ([key]) =>
+        !["intake_request_bindings", "runtime_writer_lock"].includes(key),
+    ),
+  );
+}
+function assertNoopMetadata(before, after) {
+  assert.deepEqual(businessState(after), businessState(before));
+  assert.equal(
+    after.intake_request_bindings.length,
+    before.intake_request_bindings.length + 1,
+  );
+  assert.equal(
+    Number(after.runtime_writer_lock[0].row.revision),
+    Number(before.runtime_writer_lock[0].row.revision) + 1,
+  );
+}
+
 test("D9-B preparation routes share decoded paths, ingestion attribution and bounded upload size", async (t) => {
   const h = await intakeHost(t);
   for (const [index, path] of [
@@ -52,7 +72,7 @@ test("D9-B A1/A9/A12 PostgreSQL/API: explicit prepare, preview, atomic commit, r
   assert.equal(state.commits.length, 1);
   await h.restart();
   const retry = await h.ok(`${root}/commits`, selection);
-  assert.equal(retry.status, "duplicate");
+  assert.equal(retry.status, "committed");
   assert.deepEqual(retry.receipt, accepted.receipt);
   assert.equal(
     (await h.ok(`${root}/bundles/${view.bundle.id}`)).candidates[0].commits
@@ -81,10 +101,11 @@ test("D9-B A2 PostgreSQL: renamed bytes are retained once and changed-key bodies
   const same = await h.ok(`${root}/preparations`, input);
   assert.equal(same.status, "already_retained");
   assert.equal(same.bundle_id, view.bundle.id);
-  assert.deepEqual(await h.snapshot(), before);
+  const withKey = await h.snapshot();
+  assertNoopMetadata(before, withKey);
   await h.restart();
   assert.deepEqual(await h.ok(`${root}/preparations`, input), same);
-  assert.deepEqual(await h.snapshot(), before);
+  assert.deepEqual(await h.snapshot(), withKey);
   input.idempotency_key = "prepare-1";
   assert.equal((await h.call(`${root}/preparations`, input)).status, 409);
 });
@@ -109,7 +130,7 @@ test("D9-B A3/A4/A7/A11 PostgreSQL: reorders are no-ops; changed rows/support an
   const noop = await h.ok(`${root}/commits`, selection);
   assert.equal(noop.status, "already_committed");
   assert.deepEqual(noop.receipt, first.receipt);
-  assert.deepEqual(await h.snapshot(), before);
+  assertNoopMetadata(before, await h.snapshot());
   const changed = editQueue(structuredClone(input), (rows) => {
     rows[0].amount_minor = "1600000";
   });
@@ -283,7 +304,7 @@ test("D9-B A9/A10 PostgreSQL: concurrent exact/new-key duplicates converge; diff
   assert.deepEqual(results.map((r) => r.status).sort(), [
     "already_committed",
     "committed",
-    "duplicate",
+    "committed",
   ]);
   assert.equal(new Set(results.map((r) => r.receipt.hash)).size, 1);
   const conflict = await h.call(`${root}/commits`, {
@@ -321,7 +342,7 @@ test("D9-B A9 PostgreSQL: lost successful commit, failed rollback, backward cloc
   const before = await h.snapshot();
   h.setTime("2026-09-07T16:04:00.000Z");
   const retry = await h.ok(`${root}/commits`, selection);
-  assert.equal(retry.status, "duplicate");
+  assert.equal(retry.status, "committed");
   assert.deepEqual(await h.snapshot(), before);
   const second = await h.selection(v, 1);
   assert.equal(
@@ -506,6 +527,114 @@ test("D9-B A12 portable conformance: import retained export into a fresh disposa
   const exported = await h.ok(`${root}/export`),
     source = validateIntakeExport(exported),
     fresh = await intakeHost(t);
+  await restoreIntakeFixture(fresh, source);
+  await fresh.restart();
+  assert.deepEqual(await fresh.ok(`${root}/export`), exported);
+  assert.equal((await fresh.call("/readyz")).status, 200);
+  const before = await fresh.snapshot();
+  const retried = await fresh.ok(
+    `${root}/commits`,
+    source.commits[0].selection,
+  );
+  assert.equal(retried.status, "committed");
+  assert.deepEqual(await fresh.snapshot(), before);
+});
+
+test("D9-B documented API commands: prepare → inspect → commit → restart → exact retry and export checker", async (t) => {
+  const { mkdtemp, writeFile, rm } = await import("node:fs/promises"),
+    { tmpdir } = await import("node:os"),
+    { join } = await import("node:path"),
+    { promisify } = await import("node:util"),
+    { execFile } = await import("node:child_process");
+  const run = promisify(execFile),
+    h = await intakeHost(t),
+    dir = await mkdtemp(join(tmpdir(), "fieldruntime-intake-example-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const example = async (op, ...args) =>
+    (
+      await run(
+        process.execPath,
+        ["scripts/intake-example.mjs", op, dir, ...args],
+        { env: { ...process.env, FIELD_RUNTIME_URL: h.base } },
+      )
+    ).stdout;
+  await example("prepare");
+  assert.match(await example("read"), /intake-view.v1/);
+  assert.match(
+    await example("inspect", "create"),
+    /no Case mutation has been submitted/,
+  );
+  assert.match(await example("commit"), /"status": "committed"/);
+  await h.restart();
+  const before = await h.snapshot();
+  assert.match(await example("commit"), /"status": "committed"/);
+  assert.deepEqual(await h.snapshot(), before);
+  const exported = await h.ok(`${root}/export`),
+    file = join(dir, "export.json");
+  await writeFile(file, JSON.stringify(exported));
+  assert.match(
+    (await run(process.execPath, ["scripts/check-intake-export.mjs", file]))
+      .stdout,
+    /PASS: 1 bundles, 2 original artifacts, 1 receipts, 0 no-op request bindings and 1 Cases/,
+  );
+  exported.commits[0].review_material.record.reported_owner =
+    "coherently forged";
+  delete exported.hash;
+  exported.hash = sha256Json(exported);
+  await writeFile(file, JSON.stringify(exported));
+  await assert.rejects(
+    run(process.execPath, ["scripts/check-intake-export.mjs", file]),
+    (error) => error.code === 1 && error.stderr.includes("FAIL:"),
+  );
+});
+
+test("D9 retry amendment: preparation no-op key cannot accept different valid bytes", async (t) => {
+  const h = await intakeHost(t),
+    input = await intakeInput("prepare-K1");
+  await h.prepare(input);
+  const noop = { ...input, idempotency_key: "prepare-K2" };
+  assert.equal(
+    (await h.ok(`${root}/preparations`, noop)).status,
+    "already_retained",
+  );
+  const changed = editQueue(structuredClone(noop), (rows) => {
+    rows[0].amount_minor = "1600000";
+  });
+  const result = await h.call(`${root}/preparations`, changed);
+  t.diagnostic(
+    JSON.stringify({
+      operation: "prepare",
+      changed_body_status: result.status,
+      result: result.data.status ?? result.data.error,
+    }),
+  );
+  assert.equal(result.status, 409);
+  assert.equal(result.data.error, "IDEMPOTENCY_CONFLICT");
+});
+test("D9 retry amendment: commit no-op key cannot accept a different valid selection", async (t) => {
+  const h = await intakeHost(t),
+    view = await h.prepare(),
+    first = await h.selection(view, 0, { key: "commit-K1" });
+  await h.ok(`${root}/commits`, first);
+  assert.equal(
+    (await h.ok(`${root}/commits`, { ...first, idempotency_key: "commit-K2" }))
+      .status,
+    "already_committed",
+  );
+  const other = await h.selection(view, 1, { key: "commit-K2" });
+  const result = await h.call(`${root}/commits`, other);
+  t.diagnostic(
+    JSON.stringify({
+      operation: "commit",
+      changed_body_status: result.status,
+      result: result.data.status ?? result.data.error,
+    }),
+  );
+  assert.equal(result.status, 409);
+  assert.equal(result.data.error, "IDEMPOTENCY_CONFLICT");
+});
+
+async function restoreIntakeFixture(fresh, source) {
   const { executeCaseCommand } =
       await import("../dist/packages/runtime/src/case-engine.js"),
     { persistCaseCommandResult } =
@@ -582,6 +711,20 @@ test("D9-B A12 portable conformance: import retained export into a fresh disposa
         [row],
       );
     }
+    for (const b of source.requestBindings ?? [])
+      await c.query(
+        "INSERT INTO intake_request_bindings VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+        [
+          b.tenant_id,
+          b.intake_scope_id,
+          b.operation,
+          b.idempotency_key,
+          b.request_fingerprint,
+          b.recorded_at,
+          b.hash,
+          b,
+        ],
+      );
     await c.query("COMMIT");
   } catch (e) {
     await c.query("ROLLBACK");
@@ -589,62 +732,232 @@ test("D9-B A12 portable conformance: import retained export into a fresh disposa
   } finally {
     c.release();
   }
-  await fresh.restart();
-  assert.deepEqual(await fresh.ok(`${root}/export`), exported);
-  assert.equal((await fresh.call("/readyz")).status, 200);
-  const before = await fresh.snapshot();
-  const retried = await fresh.ok(
-    `${root}/commits`,
-    source.commits[0].selection,
+}
+
+for (const operation of ["prepare", "commit"]) {
+  test(`D9 retry amendment ${operation}: metadata rollback, lost response, restart and competing keys preserve business history`, async (t) => {
+    const h = await intakeHost(t),
+      input = await intakeInput("original"),
+      view = await h.prepare(input);
+    const selection = await h.selection(view, 0, { key: "original" });
+    const original = await h.ok(`${root}/commits`, selection);
+    const path = `${root}/${operation === "prepare" ? "preparations" : "commits"}`;
+    const command = {
+      ...(operation === "prepare" ? input : selection),
+      idempotency_key: "noop",
+    };
+    const before = await h.snapshot();
+    h.setTime("2026-09-07T16:06:00.000Z");
+    h.fault({ tag: "fr:intake_request_bindings-insert" });
+    assert.equal((await h.call(path, command)).status, 500);
+    assert.deepEqual(await h.snapshot(), before);
+    h.fault({ tag: "COMMIT", after: true });
+    assert.equal((await h.call(path, command)).status, 500);
+    const recorded = await h.snapshot();
+    assertNoopMetadata(before, recorded);
+    await h.restart();
+    h.setTime("2026-09-07T16:04:00.000Z");
+    const result = await h.ok(path, command);
+    assert.equal(
+      result.status,
+      operation === "prepare" ? "already_retained" : "already_committed",
+    );
+    if (operation === "prepare") assert.equal(result.bundle_id, view.bundle.id);
+    else assert.deepEqual(result.receipt, original.receipt);
+    assert.deepEqual(await h.ok(path, command), result);
+    assert.deepEqual(await h.snapshot(), recorded);
+    assert.equal(
+      (await h.call(path, { ...command, idempotency_key: "backward-new" })).data
+        .error,
+      "CLOCK_REGRESSION",
+    );
+    assert.deepEqual(await h.snapshot(), recorded);
+    h.setTime("2026-09-07T16:07:00.000Z");
+    const concurrent = { ...command, idempotency_key: "concurrent" };
+    const outcomes = await Promise.all([
+      h.ok(path, concurrent),
+      h.ok(path, concurrent),
+    ]);
+    assert.deepEqual(outcomes[0], outcomes[1]);
+    assertNoopMetadata(recorded, await h.snapshot());
+    const race = { ...command, idempotency_key: "different-bodies" };
+    const changed =
+      operation === "prepare"
+        ? structuredClone(race)
+        : await h.selection(
+            await h.ok(`${root}/bundles/${view.bundle.id}`),
+            0,
+            {
+              key: "different-bodies",
+              reason: "Another explicitly reviewed request",
+            },
+          );
+    if (operation === "prepare")
+      changed.artifacts[0].name = "different-name.csv";
+    const stable = await h.snapshot();
+    const raced = await Promise.all([
+      h.call(path, race),
+      h.call(path, changed),
+    ]);
+    assert.deepEqual(raced.map((r) => r.status).sort(), [200, 409]);
+    assert.equal(
+      raced.find((r) => r.status === 409).data.error,
+      "IDEMPOTENCY_CONFLICT",
+    );
+    assertNoopMetadata(stable, await h.snapshot());
+    const readOnly = await h.snapshot();
+    const exported = await h.ok(`${root}/export`);
+    assert.equal(exported.schema_version, "intake-export.v2");
+    const restored = await intakeHost(t);
+    await restoreIntakeFixture(restored, validateIntakeExport(exported));
+    await restored.restart();
+    assert.deepEqual(await restored.ok(path, command), result);
+    assert.deepEqual(await restored.ok(`${root}/export`), exported);
+    await h.ok(`${root}/bundles/${view.bundle.id}`);
+    await h.selection(await h.ok(`${root}/bundles/${view.bundle.id}`));
+    assert.deepEqual(await h.snapshot(), readOnly);
+  });
+}
+
+test("D9 retry amendment: migration 0006 preserves original keys and v1 exports without inventing historical no-op keys", async (t) => {
+  const source = await intakeHost(t),
+    input = await intakeInput("legacy-prepare"),
+    view = await source.prepare(input),
+    selection = await source.selection(view, 0, { key: "legacy-commit" }),
+    result = await source.ok(`${root}/commits`, selection);
+  const v2 = await source.ok(`${root}/export`);
+  const content = { ...v2 };
+  delete content.hash;
+  delete content.request_bindings;
+  const legacyContent = { ...content, schema_version: "intake-export.v1" };
+  const legacy = { ...legacyContent, hash: sha256Json(legacyContent) };
+  const restored = await intakeHost(t, { upgrade: true });
+  const { applyMigration } =
+    await import("../dist/apps/worker/src/bootstrap.js");
+  const { migrations } = await import("../tests/helpers/intake-postgres.mjs");
+  await applyMigration(restored.pool, migrations[4]);
+  await restoreIntakeFixture(restored, validateIntakeExport(legacy));
+  const checksums = (
+    await restored.pg.query(
+      "SELECT * FROM fieldruntime_schema_migrations ORDER BY version",
+    )
+  ).rows;
+  assert.equal(checksums.length, 5);
+  await restored.upgrade();
+  assert.deepEqual(
+    (
+      await restored.pg.query(
+        "SELECT * FROM fieldruntime_schema_migrations ORDER BY version",
+      )
+    ).rows.slice(0, 5),
+    checksums,
   );
-  assert.equal(retried.status, "duplicate");
-  assert.deepEqual(await fresh.snapshot(), before);
+  const before = await restored.snapshot();
+  assert.equal(before.intake_request_bindings.length, 0);
+  assert.equal(
+    (await restored.ok(`${root}/preparations`, input)).status,
+    "prepared",
+  );
+  assert.deepEqual(await restored.ok(`${root}/commits`, selection), result);
+  assert.deepEqual(await restored.snapshot(), before);
+  assert.equal(
+    (
+      await restored.call(`${root}/preparations`, {
+        ...input,
+        claims: { ...input.claims, coverage: "partial" },
+      })
+    ).data.error,
+    "IDEMPOTENCY_CONFLICT",
+  );
+  assert.equal(
+    (
+      await restored.call(`${root}/commits`, {
+        ...selection,
+        reason: "Changed",
+      })
+    ).data.error,
+    "IDEMPOTENCY_CONFLICT",
+  );
+  // A never-retained historical no-op key remains unknowable. Its first post-upgrade success binds now.
+  await restored.ok(`${root}/preparations`, {
+    ...input,
+    idempotency_key: "historically-unrecorded",
+  });
+  assertNoopMetadata(before, await restored.snapshot());
+  await restored.restart();
+  assert.equal((await restored.call("/readyz")).status, 200);
 });
 
-test("D9-B documented API commands: prepare → inspect → commit → restart → exact retry and export checker", async (t) => {
-  const { mkdtemp, writeFile, rm } = await import("node:fs/promises"),
-    { tmpdir } = await import("node:os"),
-    { join } = await import("node:path"),
-    { promisify } = await import("node:util"),
-    { execFile } = await import("node:child_process");
-  const run = promisify(execFile),
-    h = await intakeHost(t),
-    dir = await mkdtemp(join(tmpdir(), "fieldruntime-intake-example-"));
-  t.after(() => rm(dir, { recursive: true, force: true }));
-  const example = async (op, ...args) =>
-    (
-      await run(
-        process.execPath,
-        ["scripts/intake-example.mjs", op, dir, ...args],
-        { env: { ...process.env, FIELD_RUNTIME_URL: h.base } },
-      )
-    ).stdout;
-  await example("prepare");
-  assert.match(await example("read"), /intake-view.v1/);
-  assert.match(
-    await example("inspect", "create"),
-    /no Case mutation has been submitted/,
-  );
-  assert.match(await example("commit"), /"status": "committed"/);
-  await h.restart();
-  const before = await h.snapshot();
-  assert.match(await example("commit"), /"status": "duplicate"/);
-  assert.deepEqual(await h.snapshot(), before);
-  const exported = await h.ok(`${root}/export`),
-    file = join(dir, "export.json");
-  await writeFile(file, JSON.stringify(exported));
-  assert.match(
-    (await run(process.execPath, ["scripts/check-intake-export.mjs", file]))
-      .stdout,
-    /PASS: 1 bundles, 2 original artifacts, 1 receipts and 1 Cases/,
-  );
-  exported.commits[0].review_material.record.reported_owner =
-    "coherently forged";
-  delete exported.hash;
-  exported.hash = sha256Json(exported);
-  await writeFile(file, JSON.stringify(exported));
-  await assert.rejects(
-    run(process.execPath, ["scripts/check-intake-export.mjs", file]),
-    (error) => error.code === 1 && error.stderr.includes("FAIL:"),
-  );
-});
+for (const operation of ["prepare", "commit"]) {
+  test(`D9 retry amendment ${operation}: coherently altered request/result evidence fails replay and readiness`, async (t) => {
+    const h = await intakeHost(t),
+      input = await intakeInput("source"),
+      view = await h.prepare(input),
+      selection = await h.selection(view, 0, { key: "source" });
+    await h.ok(`${root}/commits`, selection);
+    const second = await h.ok(`${root}/commits`, await h.selection(view, 1));
+    const other = await h.prepare(
+      editQueue(await intakeInput("other"), (rows) => {
+        rows[0].amount_minor = "1700000";
+      }),
+    );
+    const path = `${root}/${operation === "prepare" ? "preparations" : "commits"}`;
+    await h.ok(path, {
+      ...(operation === "prepare" ? input : selection),
+      idempotency_key: "noop",
+    });
+    const valid = await h.ok(`${root}/export`);
+    for (const kind of ["fingerprint", "result", "scope"]) {
+      const data = structuredClone(valid),
+        b = data.request_bindings[0];
+      if (kind === "fingerprint")
+        b.request_fingerprint = `sha256:${"0".repeat(64)}`;
+      if (kind === "scope") b.intake_scope_id = "scope_other";
+      if (kind === "result")
+        b.result =
+          operation === "prepare"
+            ? {
+                status: "already_retained",
+                bundle_id: other.bundle.id,
+                bundle_hash: other.bundle.hash,
+              }
+            : {
+                status: "already_committed",
+                receipt_id: second.receipt.id,
+                receipt_hash: second.receipt.hash,
+              };
+      const bound = { ...b };
+      delete bound.hash;
+      b.hash = sha256Json(bound);
+      const outer = { ...data };
+      delete outer.hash;
+      data.hash = sha256Json(outer);
+      assert.throws(() => validateIntakeExport(data));
+    }
+    const b = structuredClone(valid.request_bindings[0]);
+    b.request_fingerprint = `sha256:${"0".repeat(64)}`;
+    const bound = { ...b };
+    delete bound.hash;
+    b.hash = sha256Json(bound);
+    const c = await h.pg.connect();
+    try {
+      await c.query("BEGIN");
+      await c.query("SET LOCAL session_replication_role = replica");
+      await c.query(
+        "UPDATE intake_request_bindings SET binding=$1, binding_hash=$2, request_fingerprint=$3",
+        [b, b.hash, b.request_fingerprint],
+      );
+      await c.query("COMMIT");
+    } finally {
+      c.release();
+    }
+    assert.equal((await h.call("/readyz")).status, 503);
+    assert.equal(
+      (await h.call(`${root}/bundles/${view.bundle.id}`)).status,
+      500,
+    );
+    assert.equal((await h.call(`${root}/export`)).status, 500);
+    await h.restart();
+    assert.equal((await h.call("/readyz")).status, 503);
+  });
+}

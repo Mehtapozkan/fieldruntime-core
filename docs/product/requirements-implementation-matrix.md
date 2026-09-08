@@ -3,6 +3,10 @@
 This is the single requirement/gaps matrix for the [canonical specification](workflow-discovery.md).
 Inspection baseline: main `f96d6cc7fc943d53854c619e719d1dc53c93c69b` includes D9-A PR #29
 and merged D6–D8. This D9-B branch implements [D-034's synthetic scope][boundary].
+PR #30’s approved retry amendment adds scoped successful no-op key bookkeeping
+(migration 0006), v2 export compatibility and atomic one-command browser recovery
+across tabs. Existing business material/C/R/S remain unchanged on no-ops. Original
+retained keys survive upgrade; previously unrecorded no-op keys remain unknowable.
 Primary I1; supporting R1/R2/R3/R5/R6, P2/P6 and L4. Real customer activation,
 Discovery and production scope remain unapproved/unimplemented.
 A schema, document, synthetic screen or narrower test does not complete a customer

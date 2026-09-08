@@ -22,7 +22,9 @@ reviewed head `1f2d9a2d`, with passing required checks and its finding resolved.
 D9-A’s minimum synthetic intake/provenance design is Accepted for synthetic
 implementation at reviewed head `e5e8273c`. The owner authorized D9-B; real customer
 activation remains unapproved. PR #29 merged normally at `f96d6cc7`; D9-B synthetic
-intake is implemented on `feat/d9b-synthetic-intake` for review. The September 7 documentation
+intake is implemented on `feat/d9b-synthetic-intake` for review. PR #30’s approved
+retry amendment binds successful no-op keys and enforces atomic single-command
+browser recovery across tabs; its repairs precede merge or D10-A. The September 7 documentation
 reconciliation preserves the completed tests and adds the canonical MVP specification
 and requirement/gaps matrix. No release or deployment is included.
 

@@ -237,3 +237,36 @@ test("D9-B CSV grammar: quoted newlines accept LF/CRLF and reject bare CR", asyn
     }
   }
 });
+
+test("D9 retry amendment contract: legacy export remains strict; v2 retains command bindings explicitly", async () => {
+  const { exportIntakeState, validateIntakeExport } =
+    await import("../dist/packages/runtime/src/intake-integrity.js");
+  const { sha256Json } =
+    await import("../dist/packages/contracts/src/index.js");
+  const prepared = prepareIntake(
+    await intakeInput(),
+    INTAKE_START,
+    INTAKE_START,
+  );
+  const current = exportIntakeState({
+    cases: empty,
+    artifacts: prepared.bytes,
+    bundles: [prepared.bundle],
+    commits: [],
+    requestBindings: [],
+    clockFloor: INTAKE_START,
+  });
+  assert.equal(current.schema_version, "intake-export.v2");
+  const content = { ...current };
+  delete content.hash;
+  delete content.request_bindings;
+  const old = { ...content, schema_version: "intake-export.v1" };
+  const legacy = { ...old, hash: sha256Json(old) };
+  assert.equal(validateIntakeExport(legacy).requestBindings.length, 0);
+  assert.throws(() =>
+    assertValidIntakeContract("export", { ...legacy, request_bindings: [] }),
+  );
+  const incomplete = { ...current };
+  delete incomplete.request_bindings;
+  assert.throws(() => assertValidIntakeContract("export", incomplete));
+});

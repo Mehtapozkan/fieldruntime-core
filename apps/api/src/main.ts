@@ -148,6 +148,7 @@ async function start(): Promise<void> {
     creditMigrationSql,
     verificationMigrationSql,
     intakeMigrationSql,
+    intakeKeysMigrationSql,
     fixtureDocument,
     walkthroughDocument,
   ] = await Promise.all([
@@ -188,6 +189,13 @@ async function start(): Promise<void> {
     ),
     readFile(
       new URL(
+        "../../../packages/runtime/migrations/0006_intake_request_bindings.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
         "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
         import.meta.url,
       ),
@@ -212,6 +220,10 @@ async function start(): Promise<void> {
     createMigrationSource("0003_simulated_credit", creditMigrationSql),
     createMigrationSource("0004_credit_verification", verificationMigrationSql),
     createMigrationSource("0005_synthetic_intake", intakeMigrationSql),
+    createMigrationSource(
+      "0006_intake_request_bindings",
+      intakeKeysMigrationSql,
+    ),
   );
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
   const walkthrough = createGuidedWalkthroughRecord(
