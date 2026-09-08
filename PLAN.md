@@ -21,12 +21,14 @@ presentation merged in PR #28 at `555ac0214b006350b049d96567cb98b92ebc25f8` from
 reviewed head `1f2d9a2d`, with passing required checks and its finding resolved.
 D9-A’s minimum synthetic intake/provenance design is Accepted for synthetic
 implementation at reviewed head `e5e8273c`. The owner authorized D9-B; real customer
-activation remains unapproved. PR #29 merged normally at `f96d6cc7`; D9-B synthetic
-intake is implemented on `feat/d9b-synthetic-intake` for review. PR #30’s approved
-retry amendment binds successful no-op keys and enforces atomic single-command
-browser recovery across tabs; its repairs precede merge or D10-A. The September 7 documentation
-reconciliation preserves the completed tests and adds the canonical MVP specification
-and requirement/gaps matrix. No release or deployment is included.
+activation remains unapproved. PR #29 merged normally at `f96d6cc7`; D9-B PR #30
+merged normally at `ca9543289894fffdaa40ecfe794d83addc2c19de` from reviewed head
+`9d250707`, with required CI passing and all findings resolved. The approved retry
+amendment, successful no-op key bindings, cross-tab recovery and migration compatibility
+are preserved. D10-A is a docs-only accepted design on `docs/d10a-discovery-preparation`;
+[Accepted D-035](docs/architecture/d10-discovery-preparation-review.md) records the human approval and D10-B authorization after normal PR #31 merge;
+this update implements no runtime behavior. The canonical specification and all
+19 matrix entries remain the product plan. No release or deployment is included.
 
 The published `v0.1.0-evaluation-preview.0` is a historical snapshot at `3db1b4bf`,
 before D6/D7; merges do not update it. This plan describes current source and future
@@ -80,8 +82,8 @@ historical behavior alone never establishes business authority.
 | D6 — Governed Case Session                                     | Merged      | Authoritative identity, delegation, and business authority; exact Case owner, delegated worker, authority owner, and verifier; payload-bound approvals; deterministic authority resolution                     | The Decision Packet is runtime-backed, approvals bind the exact payload, and authority resolution fails closed                                                                    |
 | D7 — Controlled Action + Independent Verification              | Merged      | Bounded Orchid credit, independent verification and Workbench action/check controls merged in PRs #23–#25                                                                                                      | Bypass, self-verification, unbound-payload, precondition, and duplicate-effect negative tests pass                                                                                |
 | D8 — Receipts + Measurement Readiness + Failure Demonstrations | In progress | D8-A/B/C merged; accepted-outcome and measured-economics capabilities remain planned                                                                                                                           | Reconstruct evidence and assert unsafe paths; distinguish missing effort/outcomes/economics from measured results; no new closure permission                                      |
-| D9 — Intake + Case Formation                                   | In review   | D9-A merged; D9-B implements synthetic preparation, source retention, reviewed create/attach, coverage, exact retries and portable replay on its review branch                                                 | No duplicate Cases/events; uncertain links, source versions and missing population remain explicit; portable provenance; existing upstream Case ownership preserved               |
-| D10 — Discovery + Readiness + Redesign                         | Planned     | All seven Discovery records, guided interviews, baseline, bottleneck ranking and redesign before allocation; Trigger, Objective, recurring Population, Close Event, Human Intervention Map and Correction Path | One operator-reviewed workflow; every finding cited or labeled, preserved source/variant conflicts, valid measurement coverage and named controls/owners                          |
+| D9 — Intake + Case Formation                                   | Merged      | D9-A/B merged; synthetic preparation, source retention, reviewed create/attach, successful-key bindings, cross-tab recovery and portable replay                                                                | No duplicate Cases/events; uncertain links, source versions and missing population remain explicit; portable provenance; existing upstream Case ownership preserved               |
+| D10 — Discovery + Readiness + Redesign                         | In review   | All seven Discovery records, guided interviews, baseline, bottleneck ranking and redesign before allocation; Trigger, Objective, recurring Population, Close Event, Human Intervention Map and Correction Path | One operator-reviewed workflow; every finding cited or labeled, preserved source/variant conflicts, valid measurement coverage and named controls/owners                          |
 | D11 — Reviewed Runtime Builder                                 | Planned     | One reviewed workflow template compiles a versioned Organization Runtime Pack with step, separate authorization, outcome, intervention, correction and evaluation requirements                                 | Reproducible pack; draft/contradictory rules cannot execute; approved diffs and rollback; any changed trust/closure boundary has human approval                                   |
 | D12 — One Useful Replaceable Worker                            | Planned     | Evidence gathering, reconciliation and drafts within reviewed read/propose scope; bounded execution, independent proof and minimum manual reviewed correction capture                                          | API-only scoped work/denial/abstention/exact retry/result inspection; replace worker without losing history; code-only and human-approved AI controls; no unsupported closure     |
 | D13 — 25-Case Challenge + Customer Proof                       | Planned     | Operating Capacity Map, valid manual/generic-agent comparison, total human attention and delivery costs, paid continuation experiment; bounded 30-day evaluation when ready                                    | Report coverage, quality, failed/open Cases and uncertainty; two partners return with a second batch and one paid continuation is a proposed target, not PMF or a measured result |
@@ -209,20 +211,27 @@ D-013 and D-033 remain unchanged; measured economics stays unimplemented.
    generic reviewer card is replaced by “Why you?” beside controls plus expandable
    policy evidence. No runtime contract, authority rule or persistence changes.
    [Workbench walkthrough and before/after captures](apps/admin/README.md#d8-c-operator-attention-and-visual-review).
-2. **D9-A merged; D9-B in review:** [D-034](docs/architecture/d9-assisted-intake-boundary.md)
-   is Accepted for synthetic implementation. The branch implements its strict intake
-   contracts, scoped byte/derivation retention, explicit review occurrence, atomic
-   Case/provenance persistence and inspectable Workbench. [Walkthrough and A1–A12
-   evidence](docs/guides/synthetic-intake.md). No nullable v0 fields, automatic
-   matching, policy enrollment, transferred approval or real customer activation.
-   Whole-dataset disposal ends replay; selective erasure is not implemented.
-3. **Next: D10-A, a bounded Discovery preparation/review design.** Reuse retained
-   intake citations for one normal route, material alternatives, missing-evidence
-   questions and accountable owners before adding contracts. Keep D10–D13 in order. Discovery includes interviews,
-   self-assessment/support, all seven records and six loop outputs. Redesign precedes
-   execution allocation; Builder publishes one reviewed template, and D12 uses one
-   suitable replaceable worker (Hermes is a candidate, not a dependency mandate).
-   Minimum correction-to-evaluation review can be manual before full D16 tooling.
+2. **D9-A/B — merged in PRs #29/#30:** [Accepted D-034](docs/architecture/d9-assisted-intake-boundary.md)
+   and its amendment are implemented: scoped bytes/derivations, explicit intake review
+   occurrence, atomic Case/provenance, durable successful keys and safe cross-tab recovery.
+   [Walkthrough and A1–A12 evidence](docs/guides/synthetic-intake.md). No nullable v0 fields,
+   automatic matching, policy enrollment, transferred approval or real customer activation.
+   Whole-dataset disposal ends replay; selective erasure is absent.
+3. **D10-A — accepted design awaiting normal merge:** [Accepted D-035](docs/architecture/d10-discovery-preparation-review.md)
+   supplies the worked invoice-dispute brief, gap-driven interviews, seven records/six
+   outputs, source/variant disagreements, readiness/support, baseline and redesign before
+   allocation. A compact screen is proposed; no Discovery functionality is implemented.
+4. **D10-B — authorized after PR #31 merge:** implement the fixed-profile deterministic brief and
+   typed descriptive review using existing intake/Case evidence and the proposed minimal
+   supporting history. Execute T1–T12 plus varied customer/amount/delivery-evidence controls through
+   PostgreSQL/API and browser; preserve all
+   A1–A12/retry/migration, D6–D8, ECC and closure safeguards. No model calls or workers.
+   Operators can save/correct/confirm a description and reopen it; historical routes,
+   source rules, population/effort coverage and business outcomes remain incomplete.
+5. **D11 then D12:** review/publish one Runtime Pack, then integrate one useful bounded
+   replaceable worker and minimum approved proof/correction capture. A Discovery
+   confirmation never installs policy or authorizes execution. Hermes remains a candidate,
+   not a dependency mandate; broad correction/replay tooling stays D16.
 
 Customer learning accompanies D9–D12: assisted packet sessions, then a comparable
 fresh batch against manual and generic-agent alternatives with equal input/tool/

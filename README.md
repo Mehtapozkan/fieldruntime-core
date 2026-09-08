@@ -12,7 +12,7 @@ checks its source through the Workbench, with explicit actions and recoverable
 retries. History provides a compact, inspectable Case progress and evidence receipt.
 The merged failure walkthrough demonstrates the safeguards with isolated test fixtures.
 Merged D8-C clarifies current attention, Case ownership and the selected reviewer’s
-policy requirement in the same view. This D9-B review branch adds explicit synthetic
+policy requirement in the same view. Merged D9-B adds explicit synthetic
 CSV/document preparation, reviewed Case create/attach, retained provenance and safe
 reimport under [Accepted D-034](docs/architecture/d9-assisted-intake-boundary.md).
 Real customer activation remains unapproved.
@@ -22,9 +22,11 @@ Real customer activation remains unapproved.
 
 ## What works today
 
-“Main” includes D9-A [PR #29](https://github.com/Mehtapozkan/fieldruntime-core/pull/29)
-at `f96d6cc7fc943d53854c619e719d1dc53c93c69b`. **D9-B synthetic intake is implemented
-on this review branch, not yet merged.** The historical prerelease has a smaller
+Main includes D9-B [PR #30](https://github.com/Mehtapozkan/fieldruntime-core/pull/30)
+at `ca9543289894fffdaa40ecfe794d83addc2c19de`. This branch adds only the
+[D10-A Discovery design](docs/architecture/d10-discovery-preparation-review.md);
+its descriptive-review boundary is Accepted and no D10 capability is implemented.
+The historical prerelease has a smaller
 boundary described under [Distribution](#distribution).
 
 | Functionality                                    | Workbench                                                                                                | API / runtime                                                                             | Availability                                                                          |
@@ -36,7 +38,7 @@ boundary described under [Distribution](#distribution).
 | ECC and legacy illustration                      | Separate Acme fixture story; illustrated action, verification and outcome screens                        | Thirty frozen synthetic cases and deterministic evaluation                                | Main and historical prerelease; legacy screens never invoke runtime action/check APIs |
 | Case progress and evidence receipt               | Expand proposal, attributed decisions, action, independent observation and unresolved gaps in History    | Reuses existing Case, review and action/check reads; no new records or permission         | Main (D8-A)                                                                           |
 | Failure walkthrough and measurement readiness    | Existing failure/result views remain unchanged                                                           | Five selected PostgreSQL/API control and failure fixtures with evidence output            | Main (D8-B)                                                                           |
-| Synthetic file intake                            | Explicit prepare, review target, commit and reopen; source citations and gaps                            | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay   | D9-B review branch; real data unapproved                                              |
+| Synthetic file intake                            | Explicit prepare, review target, commit and reopen; source citations and gaps                            | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay   | Main (D9-B); real data unapproved                                                     |
 | Accepted outcome, economics and complete closure | Unavailable                                                                                              | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof            | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
@@ -117,7 +119,7 @@ distinct from current authority.
 `/?view=legacy`. The six-action story illustrates a connector claiming success,
 a missing effect, read-back, recovery and receipts. Those screens are presentation
 only: they record no human approval, action, verification or outcome in runtime
-history. They remain isolated from Orchid, even on this review branch.
+history. They remain isolated from Orchid.
 [Legacy five-minute walkthrough](docs/guides/5-minute-evaluation.md).
 
 ![Legacy Acme fixture illustration; not the runtime-backed Orchid review](docs/assets/guided-workbench-preview.svg)
@@ -136,10 +138,13 @@ history. They remain isolated from Orchid, even on this review branch.
 - **D8-C — Attention presentation:** merged in PR #28; selected-seat “Why you?”,
   separate recorded Case owner and reconciled current attention. Existing milestones,
   uncertainty, permitted interventions and recovery remain. [Walkthrough and captures](apps/admin/README.md#d8-c-operator-attention-and-visual-review).
-- **D9–D12:** proposed intake contracts/data boundary, then one queue export and
-  documents; all seven Discovery records, interviews, Operational Legibility and redesign; one reviewed
-  Runtime Pack; one useful replaceable worker and minimum reviewed proof/corrections.
-  No automatic Case matching, external Case import or customer-data permission exists today.
+- **D9 — Synthetic intake:** merged in PR #30, including retained bytes, explicit
+  Case create/attach, successful-key bindings and cross-tab recovery. [Try intake](docs/guides/synthetic-intake.md).
+- **D10–D12:** [D10-A design in review](docs/architecture/d10-discovery-preparation-review.md)
+  covers seven records, six outputs, Operational Legibility, gap-driven questions
+  and redesign. D10-B's
+  descriptive review is authorized after PR #31 merges; D11 supplies a reviewed Runtime
+  Pack, D12 one bounded worker. No Discovery runtime or real-data permission exists today.
 - **D13 — Customer proof:** planned 25-Case Challenge and Operating Capacity Map.
   Assisted evaluations may begin during D9–D12 within an approved data boundary;
   measured quality, total effort and repeat use determine continuation. Connected
@@ -158,8 +163,8 @@ The [canonical specification](docs/product/workflow-discovery.md) and
 retain the Discovery, Business Loop and measurement requirements. Business Loops
 describe recurring Cases, not another runtime or a currently implemented platform.
 
-For this review branch’s [failure walkthrough and measurement-readiness note](docs/guides/d8-failure-walkthrough.md),
-select `feat/d8b-failure-walkthrough` and use disposable test fixtures. It covers a
+The merged [failure walkthrough and measurement-readiness note](docs/guides/d8-failure-walkthrough.md)
+uses disposable test fixtures on main. It covers a
 legitimate success control, stale consent, silent adapter failure, unavailable reads
 and exact lost-response retry. It does not measure labor savings or business value.
 
@@ -182,7 +187,7 @@ Then follow the [tag-pinned guide](https://github.com/Mehtapozkan/fieldruntime-c
 after its clone step. Use a separate fresh appliance volume; do not downgrade an
 upgraded database. The tag-pinned page alone does not select the cloned revision.
 
-Merging source changes does not update that immutable tag or release. This D9-A PR
+Merging source changes does not update that immutable tag or release. This D10-A docs-only PR
 publishes no new release or deployment. The source-clone appliance is the supported
 trial path; standalone installers, signed artifacts, SBOM/provenance and production
 operations remain future work. Workspace packages remain registry-private.

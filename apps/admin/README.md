@@ -5,9 +5,10 @@ simulated credit and independent-check APIs. D6, D7 and D8-A's read-only Case
 progress and evidence receipt are merged. D8-B’s
 [test-fixture failure walkthrough](../../docs/guides/d8-failure-walkthrough.md)
 merged in PR #27. D8-C operator-attention presentation merged in PR #28.
-D9-A merged in PR #29. This D9-B branch adds the [synthetic intake entry](../../docs/guides/synthetic-intake.md):
+D9-A/B merged in PRs #29/#30, adding the [synthetic intake entry](../../docs/guides/synthetic-intake.md):
 explicit file preparation, inspected target, atomic Case evidence commit and reopening.
-Real customer activation remains unapproved.
+The [D10-A brief/review design](../../docs/architecture/d10-discovery-preparation-review.md)
+is Accepted, with no new screen implemented. Real customer activation remains unapproved.
 Accepted [D-032](../../docs/architecture/d6-authority-request-lifecycle.md)
 and [D-033](../../docs/architecture/d7-simulated-credit-verification.md) are unchanged.
 Opening, refreshing or revisiting creates no durable records. Intake preparation

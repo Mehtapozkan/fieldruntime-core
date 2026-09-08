@@ -2,7 +2,7 @@
 
 Status: **Accepted for synthetic implementation; real customer activation remains
 unapproved.** Human approval of PR #29 at `e5e8273c210325b82635975a67af6b4e1ff55d16`
-is recorded below. D9-B is implemented on PR #30’s review branch. The subsequent
+is recorded below. D9-B merged in PR #30 at `ca9543289894fffdaa40ecfe794d83addc2c19de`. The subsequent
 request-key amendment below is also Accepted for synthetic implementation.
 This is the single intake contract, first proposed during D8-B;
 [the canonical specification](../product/workflow-discovery.md),
@@ -26,7 +26,7 @@ An explicit intake commit produces a **new operator-review occurrence**, represe
 as a WorkEvent whose source is Field Runtime intake. It does not pretend that a
 queue snapshot is a historical dispute event. Source times remain separately
 qualified in the retained material. This explicit adapter convention is part of
-the accepted synthetic decision, implemented on PR #30's review branch.
+the accepted synthetic decision, implemented and merged in PR #30.
 
 Keep ECC shadow-only and the frozen corpus unchanged. Do not create another pack,
 extend Orchid's D-033 action enrollment to imported Cases, import approvals or

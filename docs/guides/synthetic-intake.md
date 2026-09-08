@@ -1,6 +1,6 @@
 # Synthetic invoice-dispute intake
 
-D9-B on this review branch implements Accepted [D-034](../architecture/d9-assisted-intake-boundary.md).
+D9-B merged in PR #30 and implements Accepted [D-034](../architecture/d9-assisted-intake-boundary.md).
 D6–D8 and D9-A are merged; this importer is not in the historical evaluation
 prerelease. **Real customer activation remains unapproved.** Use synthetic files only.
 
@@ -9,7 +9,7 @@ prerelease. **Real customer activation remains unapproved.** Use synthetic files
 Use Node 24, pnpm 11.24.0 and Docker Compose from the repository:
 
 ```sh
-git switch feat/d9b-synthetic-intake
+git switch main
 pnpm install --frozen-lockfile
 pnpm fr init ecc --demo
 pnpm fr up
@@ -175,9 +175,10 @@ Actual local/final-head CI results are recorded in [STATUS](../../STATUS.md) and
 PR. These tests establish synthetic behavior, not customer outcomes or all Discovery requirements.
 [Screenshots and visual/keyboard scope](../evidence/d9b/README.md).
 
-Next bounded work is D10 Discovery: use these retained claims to prepare a cited
-normal route, alternatives, missing-evidence questions and the seven Discovery
-records/six loop outputs for operator review. No worker allocation, new authority,
+[D10-A's proposed design](../architecture/d10-discovery-preparation-review.md) uses
+these retained claims for a cited brief, missing-evidence questions and seven records/
+six outputs. The snapshot does not establish a normal historical route; that stays
+unknown until separately evidenced. D10-B is not implemented. No worker allocation, new authority,
 closure rule or real-data activation follows automatically from successful intake.
 
 The PR #30 retry repair adds focused checks for both operations: fresh no-op key →
@@ -187,4 +188,4 @@ forged request/result references and 0005→0006 upgrade fail closed or preserve
 expected result. Six browser scenarios include atomic competing tab claims,
 completion in one tab, conditional clearing after a late response and reload recovery.
 [Final-head validation](../../STATUS.md#d9-b-implementation-and-validation) and the PR
-record actual local versus CI results. D10-A has not started.
+record actual local versus CI results. D10-A is docs-only; D-035 is Accepted; D10-B follows normal PR #31 merge.
