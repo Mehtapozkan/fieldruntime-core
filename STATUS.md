@@ -1181,6 +1181,13 @@ remains unavailable, so pinned PostgreSQL/Compose/container restart evidence com
 CI. Actual desktop/390px scope captures and the existing review-state captures were
 refreshed and inspected. No D11, real-data, release or deployment work is included.
 
+The first scoping-repair CI run passed the new applicability assertions and retained
+D6–D9 suites, but rejected the two archival-export tests: floating Node 24 selected
+24.20.0 / tzdata `2026c`, while the original intake archive binds `2026b`.
+CI now pins the compatible Node 24.19.0 interpreter; the README, guide and fixture
+record that replay requirement. The fixture, hashes and fail-closed version check
+remain unchanged. Supporting a different timezone interpreter is a separate upgrade.
+
 ## Next
 
 Review D10-B without merging it in this task. D11 retains one reviewed Runtime Pack and

@@ -7,6 +7,10 @@ references DEL-4 and DEL-5 with opposing supplied/not-supplied notes about diffe
 deliveries. An explicit intake commit, descriptive answer and confirmation were
 recorded before read-only export. All bytes are synthetic.
 
+Recorded runtime: Node **24.19.0**, ICU **78.3**, timezone data **2026b**. The intake
+bundle binds `iana-offset.v1:2026b`; use that compatible runtime for this archive.
+CI pins Node 24.19.0. Newer timezone data is not silently substituted during replay.
+
 Original canonical export hash:
 `sha256:8ac985fd5c5bb8af71d1a45ac45e676e947433b87339cf38688d9925eb80d9c5`.
 

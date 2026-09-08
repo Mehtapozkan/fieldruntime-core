@@ -9,7 +9,7 @@ It uses zero model calls. Real-customer activation remains unapproved.
 
 ## Short operator walkthrough
 
-Use Node 24, pnpm 11.24.0 and Docker Compose. From this branch:
+Use Node **24.19.0**, pnpm 11.24.0 and Docker Compose. From this branch:
 
 ```sh
 git fetch origin
@@ -110,6 +110,12 @@ verbatim as historical material. Current v2 reads do not reuse that answer or co
 Fresh review requires an explicit new annotation and separate confirmation. Original-key
 retries still return the exact old receipt without writes; an unsent stale v1 preview
 cannot become a new confirmation. Mixed v1/v2 histories reconstruct after restart/export.
+
+The retained intake interpreter also binds timezone data: this fixture uses `2026b`
+from Node 24.19.0, which CI pins. Node 24.20.0 supplies `2026c` and correctly rejects
+that historical intake export. Use the recorded compatible runtime for replay; do not
+rewrite version fields or hashes. A timezone-interpreter upgrade remains separate
+from this Discovery projection repair.
 
 This repair adds no migration and changes no applied checksum, including 0007. Existing
 Case-wide concurrency, record-specific applicability, conservative business-input

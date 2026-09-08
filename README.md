@@ -50,7 +50,7 @@ current permission.
 
 ## Try current source
 
-Requirements: Node.js 24, pnpm **11.24.0**, Docker with Compose v2 and a running
+Requirements: Node.js **24.19.0** (retained intake replay uses tzdata `2026b`), pnpm **11.24.0**, Docker with Compose v2 and a running
 daemon, and free local ports 3210/5432. If needed, install the pinned pnpm with
 `npm install --global pnpm@11.24.0`.
 
