@@ -827,6 +827,36 @@ async function rollback(
   throw originalError;
 }
 
+/** Caller owns the transaction and singleton writer lock. Reuse the exact Case
+ * append validation, persistence, read-back and revision update as ordinary commands. */
+export async function persistCaseCommandResult(
+  client: SqlClient,
+  before: CaseEngineState,
+  result: CaseCommandResult,
+): Promise<void> {
+  if (result.status === "applied" || result.status === "rejected") {
+    const append = validateAppendDelta(before, result);
+    await persistAppend(client, before, append);
+    const persisted = await loadTrustedEngineState(client);
+    if (!sameEngineState(persisted, result.state)) {
+      throw new PostgresStoreError(
+        "STORE_INTEGRITY",
+        "persisted state differs from the engine result",
+      );
+    }
+    assertAffected(
+      await client.query(
+        `/* fr:increment-writer-revision */
+             UPDATE runtime_writer_lock
+             SET revision = revision + 1
+             WHERE singleton_id = 1`,
+      ),
+      1,
+      "writer revision update",
+    );
+  }
+}
+
 export class PostgresCaseStore {
   readonly #pool: SqlPool;
 
@@ -864,27 +894,7 @@ export class PostgresCaseStore {
       commandExecuting = true;
       const result = executeCaseCommand(before, command, dependencies);
       commandExecuting = false;
-      if (result.status === "applied" || result.status === "rejected") {
-        const append = validateAppendDelta(before, result);
-        await persistAppend(client, before, append);
-        const persisted = await loadTrustedEngineState(client);
-        if (!sameEngineState(persisted, result.state)) {
-          throw new PostgresStoreError(
-            "STORE_INTEGRITY",
-            "persisted state differs from the engine result",
-          );
-        }
-        assertAffected(
-          await client.query(
-            `/* fr:increment-writer-revision */
-             UPDATE runtime_writer_lock
-             SET revision = revision + 1
-             WHERE singleton_id = 1`,
-          ),
-          1,
-          "writer revision update",
-        );
-      }
+      await persistCaseCommandResult(client, before, result);
       await client.query("COMMIT");
       transactionOpen = false;
       return result;

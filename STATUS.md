@@ -1,11 +1,20 @@
 # Status
 
-Current milestone: **D9-A minimum synthetic intake/provenance contract design**,
-accepted for synthetic implementation on `docs/d9a-synthetic-intake-contract`.
-The owner approved D-034 as reviewed at `e5e8273c210325b82635975a67af6b4e1ff55d16`
-and authorized D9-B. Real customer activation remains unapproved. This approval
-update changes Markdown only; no importer, endpoint, active schema or migration
-is implemented yet.
+Current milestone: **D9-B synthetic intake implemented for review** on
+`feat/d9b-synthetic-intake`. Accepted D-034 was approved at `e5e8273c`; its approval
+update `6ce63aa1` passed required [CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34170508390).
+PR #29 merged normally at **`f96d6cc7fc943d53854c619e719d1dc53c93c69b`** after checking
+its head, reviews and protections. Required PR/check/up-to-date/force-push/deletion
+rules were preserved; no bypass. Real customer activation remains unapproved.
+
+This branch adds strict intake contracts, original scoped byte retention, pinned
+parsing, inspectable candidates/coverage, explicit Case create/attach and immutable
+provenance receipts through the API and existing Workbench. Migration 0005 adds
+three supporting tables; the approved retry amendment adds only no-op command
+metadata in migration 0006. All previous checksums/Case semantics/frozen ECC remain unchanged.
+No catalog, credit authority, Action Gateway, worker, real-data processing or closure
+permission is added. [Executable walkthrough and acceptance map](docs/guides/synthetic-intake.md).
+Validation and handoff evidence for this branch appear below.
 
 D8-C PR #28 merged normally at `555ac0214b006350b049d96567cb98b92ebc25f8`, preserving
 reviewed head `1f2d9a2da9ae70273b0a6e057c05cf03cbfc2659`. There were no subsequent
@@ -533,10 +542,10 @@ identity-history system, external writes, connectors or generic workflow is adde
   network deployment are not implemented.
 - `fr up` intentionally runs only from a cloned Field Runtime Core repository root;
   a standalone installer and signed distributable remain D14 scope.
-- Event attachment currently requires an explicitly selected Case. Automatic Case
-  formation, candidate matching, and ambiguous-merge handling are not implemented.
-- Importing or mapping an existing external Case while preserving its upstream
-  system of record is not implemented.
+- D9-B offers scoped synthetic candidates and explicit reviewed create/attach.
+  Automatic matches, committed retarget/split/merge and real external ingestion
+  remain unsupported. Upstream references/owner claims are retained separately
+  from preserved canonical Case ownership.
 - Operational Legibility evaluation is not implemented.
 - The runtime-backed packet uses one compiled synthetic catalog/profile. There is
   no public catalog editor, live identity verification, production authentication
@@ -894,7 +903,7 @@ effectiveness claim is made. The
 links before/after desktop and 390px captures and the executable journey. D-034
 remains Proposed; no customer data, D9 implementation, release or deployment.
 
-## D9-A synthetic decision accepted
+## D9-A synthetic decision accepted (historical PR #29 evidence)
 
 The existing [D-034](docs/architecture/d9-assisted-intake-boundary.md)
 is Accepted for synthetic implementation, with the owner's approval retained verbatim.
@@ -956,16 +965,81 @@ The approved design head passed [final-head CI](https://github.com/Mehtapozkan/f
 including eight D7 browser scenarios, eight D6 browser scenarios, Compose and
 appliance/restart. The approval update must pass its own required check before merge.
 
+## D9-B implementation and validation
+
+The implementation follows the accepted technical scope: one fixed synthetic profile,
+strict versioned intake boundaries, server-selected context, lossless original bytes,
+pinned CSV/plain-text derivation, full artifact scope, review material and source
+locators. Explicit preparation retains no Case; one reviewed commit atomically
+appends the existing Case engine result and provenance receipt. Reordered/renamed
+material does not duplicate history; changed material needs current C/prior binding
+and fresh consent. R/S and Orchid enrollment remain untouched. No import grants
+financial authority, and standalone journal replay does not claim source-byte replay.
+
+Local `pnpm validate` passes **285 tests**, formatting, lint, typecheck and release
+audit. Real local PostgreSQL **18.4** passes **26 intake/API tests** (including
+nested tamper variants) and **six Chromium browser scenarios**: prepare/inspect/
+commit, exact lost-response recovery, restart, stale or edited inspection and retained
+confirmed evidence after refresh failure. The documented example commands and
+portable export checker execute successfully; a forged export fails. Unit intake
+coverage is eleven tests, included in the 285. **63 retained D6 PostgreSQL/API tests
+pass**. The **115 retained D7/D8 PostgreSQL/API tests**, including all eight
+Workbench browser scenarios, also pass locally. Final-head CI evidence is recorded
+in the PR and required before handoff. CI uses the repository's pinned PostgreSQL
+image and retains all existing Compose/appliance/restart/Workbench coverage.
+
+ECC passes **620/620** with unchanged corpus/gold hashes. Its negative control exits
+**1 at 152/620** from the intended failed assertions, not setup or a crash.
+`git diff --check` passes. Docker is unavailable locally: `docker compose config
+--quiet` exits **127**; no local container success is claimed.
+
+[Desktop/390px captures](docs/evidence/d9b/README.md) were inspected for readable
+source amount/entity, uncertainty, target/reason and explicit controls. Browser
+coverage includes focus/keyboard traversal and no mobile horizontal overflow. This
+is not a screen-reader, cross-browser or customer usability study. The initial
+mobile navigation overlap and an edit-during-inspection race were reproduced and
+corrected before final captures. A separate reproduced presentation regression
+keeps repeated invalid rows inspectable beside valid candidates by reconciling their
+exact retained order/locators. Full source/receipt content remains expandable.
+
+PR review reproduced HTTP 500 on equivalent decoded preparation routes, premature
+large-upload rejection, and unsupported bare CR inside quoted CSV. Shared route
+decoding and strict LF/CRLF validation correct these with regression coverage.
+The owner approved the narrow D-034 retry amendment after `209bf5f7`; its original
+approval history remains retained. Before repair, both preparation and commit
+accepted changed valid bodies under fresh no-op keys (HTTP 200). They now return
+409 `IDEMPOTENCY_CONFLICT`. Original keys remain in bundles/business receipts;
+new no-op keys bind their request fingerprint, byte-referencing request metadata,
+original result reference and checked time atomically in `intake_request_bindings`.
+First bindings change writer metadata only; exact retries return the original
+outcome with no further writes. No source version, WorkEvent, Case, receipt or C/R/S
+is duplicated. Migration 0006 preserves 0001–0005 and needs no fabricated backfill:
+unknown historical no-op keys remain unknown. Export v2 includes new bindings;
+strict historical v1 conformance retains only its original-key guarantees.
+
+Two actual tabs reproduced the shared-slot failure. The browser now claims the
+single IndexedDB slot atomically before sending, rejects competing commands and
+clears only the exact expected command. Reload and explicit recovery retain the
+original bytes/key; a late completion cannot delete a newer saved command. Storage
+claim failure sends nothing. This adds no inbox, automatic retries or authority.
+
+Requirements I1 and supporting R1/R2/R3/R5/R6, P2/P6 and L4 now link actual synthetic
+acceptance evidence in the existing matrix. They are not complete customer Discovery,
+measurement or activation requirements. [Walkthrough, migration and A1–A12 scope](docs/guides/synthetic-intake.md).
+
 ## Next
 
-Validate this approval update and merge PR #29 through normal protections.
-The owner has authorized D9-B from updated main: build only prepare → inspect candidates/provenance/coverage →
-explicit create/attach → inspect receipt and safe reimport. The affected files and
-acceptance gates are listed in D-034. Keep existing Orchid review/action/check intact.
-No general matching, worker, new authority policy, external write or Case closure.
-Unknown customer details do not block synthetic design; real samples require the
-separate completed customer-scoped approval.
+Finish review of the two D9-B retry repairs; leave PR #30 open and unmerged.
+D10-A has not started. After review, the next bounded design is **D10-A
+Discovery preparation and operator review**: reuse retained citations for one normal
+route, alternatives, missing-evidence questions, accountable owners and the seven
+Discovery records/six loop outputs. Do not add a worker or new execution/closure
+permission before those needs and boundaries are reviewed.
 
-Customer acceptance, real impact, active effort, comparable cohorts and full costs
-remain missing. Packet acceptance, simulated effect verification, business close
-and Case resolution stay distinct. No D9-B implementation, release or deployment.
+Real customer activation still requires named custody, access, classification,
+retention, deletion and export arrangements. Complete-dataset disposal ends replay;
+no selective erasure, general restore endpoint or retention service exists. Unknown
+business occurrence, population coverage, effort, comparable baseline, customer
+acceptance, real impact and full costs remain missing. Source status is not a
+lifecycle transition; reported disputed value is not savings or recovered revenue.
+No customer samples, release or deployment are included.

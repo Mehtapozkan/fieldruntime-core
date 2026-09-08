@@ -1,5 +1,7 @@
+import { MAX_INTAKE_HTTP_BYTES } from "../../../packages/runtime/src/intake.js";
 import { createServer, type IncomingHttpHeaders, type Server } from "node:http";
 import {
+  decodePath,
   handleApiRequest,
   type ApiDependencies,
   type ApiRequest,
@@ -32,6 +34,7 @@ function normalizeHeaders(
 export function createApiServer(
   dependencies: ApiDependencies,
   workbenchAssets: WorkbenchAssets,
+  ingestionClock: () => Date = () => new Date(),
 ): Server {
   return createServer((request, response) => {
     const method = request.method?.toUpperCase() ?? "GET";
@@ -51,12 +54,16 @@ export function createApiServer(
       }
     }
 
+    const preparation =
+      method === "POST" &&
+      decodePath(request.url ?? "/")?.join("/") === "v1/intake/preparations";
+    const bodyLimit = preparation ? MAX_INTAKE_HTTP_BYTES : MAX_BODY_BYTES;
     const chunks: Buffer[] = [];
     let size = 0;
     let oversized = false;
     request.on("data", (chunk: Buffer) => {
       size += chunk.length;
-      if (size <= MAX_BODY_BYTES + 1) chunks.push(chunk);
+      if (size <= bodyLimit + 1) chunks.push(chunk);
       else oversized = true;
     });
     request.on("end", () => {
@@ -64,14 +71,15 @@ export function createApiServer(
         method: request.method ?? "GET",
         path: request.url ?? "/",
         headers: normalizeHeaders(request.headers),
+        ...(preparation ? { receivedAt: ingestionClock().toISOString() } : {}),
         body: oversized
-          ? "x".repeat(MAX_BODY_BYTES + 1)
+          ? "x".repeat(bodyLimit + 1)
           : Buffer.concat(chunks).toString("utf8"),
       };
       void handleApiRequest(apiRequest, dependencies)
         .then((result) => {
           response.writeHead(result.status, result.headers);
-          response.end(`${JSON.stringify(result.body)}\n`);
+          response.end(result.rawBody ?? `${JSON.stringify(result.body)}\n`);
         })
         .catch(() => {
           response.writeHead(500, {

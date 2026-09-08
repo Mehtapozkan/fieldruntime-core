@@ -2,7 +2,8 @@
 
 Status: **Accepted for synthetic implementation; real customer activation remains
 unapproved.** Human approval of PR #29 at `e5e8273c210325b82635975a67af6b4e1ff55d16`
-is recorded below. D9-B is authorized but not implemented by this approval update.
+is recorded below. D9-B is implemented on PR #30’s review branch. The subsequent
+request-key amendment below is also Accepted for synthetic implementation.
 This is the single intake contract, first proposed during D8-B;
 [the canonical specification](../product/workflow-discovery.md),
 [requirement/gaps matrix](../product/requirements-implementation-matrix.md) and
@@ -25,7 +26,7 @@ An explicit intake commit produces a **new operator-review occurrence**, represe
 as a WorkEvent whose source is Field Runtime intake. It does not pretend that a
 queue snapshot is a historical dispute event. Source times remain separately
 qualified in the retained material. This explicit adapter convention is part of
-the accepted synthetic decision; it is not implemented by this approval update.
+the accepted synthetic decision, implemented on PR #30's review branch.
 
 Keep ECC shadow-only and the frozen corpus unchanged. Do not create another pack,
 extend Orchid's D-033 action enrollment to imported Cases, import approvals or
@@ -297,16 +298,18 @@ action or authority-catalog entry. GET/open/refresh/expansion reads one consiste
 read-only database snapshot: no writer lock, preview persistence, IDs or clock updates.
 Candidates are derived from retained material plus current Case/binding reads.
 
-Proposed minimum storage is three supporting tables in the **same PostgreSQL**:
+The original accepted storage design uses three supporting tables in the **same PostgreSQL**:
 scoped immutable `intake_artifacts` (bounded `bytea`), `intake_bundles` (canonical
 JSONB, preparation identity/key, first ingestion and retention times) and `intake_commits` (canonical
 JSONB, material/record/upstream bindings and Case-journal foreign key). No new database,
 blob service, queue or candidate/packet aggregate. Scoped artifact hashes, semantic
 bundle identity and (tenant, M) have unique indexes. Retain original display names
-in the first bundle; a no-op reimport need not record a filename alias.
+in the first bundle; a no-op reimport creates no business alias. The approved amendment
+below additionally retains its command fingerprint and reconstructable request metadata.
 
-Use one additive checksum-bound migration in D9-B, after current 0004. Preserve all
-old migration checksums and Case/review/action histories. A narrow transaction-owned
+Migration 0005 implements that original storage design; additive migration 0006
+implements the approved request-key amendment below. Preserve all previous migration
+checksums and Case/review/action histories. A narrow transaction-owned
 Case-append helper may be extracted from `PostgresCaseStore`; both existing commands
 and intake must retain its validation, SQL constraints and replay checks. Do not
 call the transaction-owning `execute` twice or write a receipt after Case commit.
@@ -322,7 +325,8 @@ For `commitIntake(selection)`:
    “validated”, “approved”, actor, normalized payload or hash as authority.
 3. Enforce one K/upstream mapping to a target and unique M. A fresh command key for
    material already committed returns `ALREADY_COMMITTED` plus the original receipt;
-   no alias row, new WorkEvent or new permission. This historical no-op is resolved
+   no duplicate business material, WorkEvent or permission. Minimal successful-command
+   bookkeeping is required by the approved amendment below. This historical no-op is resolved
    before current Case C/prior-binding checks, and does not accept a new reason or
    fresh consent. A different target conflicts. For **new** material, check expected
    Case C and prior intake binding hash (null for first binding) before consuming
@@ -491,7 +495,7 @@ fault controls. All results below are requirements for D9-B implementation.
 | Vector                                    | Before → input / attempted operation                                                                                                                    | Expected result and permitted recovery                                                                                                                                                                                                                                                                                                                                                                    |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | A1 Legitimate snapshot/control            | Above bundle; reviewer attaches north row to existing coherent C=4 Case                                                                                 | Sources, unknown time, owner claim and coverage inspectable before write. One explicit commit → C=5, same Case owner/severity, one internal-classified review WorkEvent, immutable receipt. New creation uses medium severity/null owner and complete profile seed. Restart reconstructs bytes/derived material/journal. No action, review approval or closure.                                           |
-| A2 Identical / renamed reimport           | Same files and claims; rename local CSV, new preparation key; then try same material with a new commit key                                              | Original bundle/material references, original ingestion/receipt; `ALREADY_RETAINED` / `ALREADY_COMMITTED`, no alias or Case/event/version duplication. Exact original key/body retry returns original result; same key with changed body conflicts.                                                                                                                                                       |
+| A2 Identical / renamed reimport           | Same files and claims; rename local CSV, new preparation key; then try same material with a new commit key                                              | Original bundle/material references, original ingestion/receipt; `ALREADY_RETAINED` / `ALREADY_COMMITTED`, no duplicate business material or Case/event/version. Every successful key is durably bound, including fresh no-op keys; exact retry returns its original outcome/reference and changed body conflicts. First no-op key retention is metadata only; subsequent exact retries write nothing.    |
 | A3 Reordered rows / headers               | Reverse the two rows or reorder columns without changing cells/claims                                                                                   | New byte hash, bundle and locators; same K/V/M per row, two distinct entity identities. Previously committed material links original receipts; no duplicate Case/event. New transport evidence is not a historical-event delta.                                                                                                                                                                           |
 | A4 Changed source content                 | dispute-17 r1 amount changes; or r2 source status changes; or note bytes change                                                                         | New V or M, old material retained. Same declared r1 with different cells shows contradiction; reviewer must acknowledge both with reason. Propose same-Case attachment, never newer-wins truth. Explicit append C+1 stales approvals; unchanged prior receipt remains.                                                                                                                                    |
 | A5 Same invoice across entities           | North and south both INV-101; caller tries to conflate them                                                                                             | Distinct object/K/root identities. Cross-entity target denied; same number is insufficient matching evidence. Correct scoped candidates remain inspectable.                                                                                                                                                                                                                                               |
@@ -585,6 +589,52 @@ and journal semantics. D-013/D-017/D-033 keep execution/closure guards unchanged
 D-005/D-023 and the frozen constitution do **not** authorize real samples: item 2
 is the smallest explicit data-boundary amendment, not production authentication.
 The recorded approval changes only the specified synthetic intake boundary.
+
+## Accepted request-key amendment — PR #30
+
+On 2026-09-07, after PR #30 head `209bf5f75dc3d356170e02512f7e34b1074c5b86`,
+the owner approved this narrow amendment (verbatim):
+
+> Every successful intake preparation or commit request—including `already_retained` and `already_committed`—must durably bind its idempotency key, scoped to the trusted tenant/intake scope and operation, to its request fingerprint and original result/reference.
+>
+> “No alias” continues to prohibit duplicate business material, Cases, WorkEvents and business receipts. It no longer prohibits the minimal command bookkeeping needed to preserve successful request-key bindings.
+>
+> Real customer activation remains unapproved. All other accepted boundaries remain intact.
+
+The original approval and design history above remain retained. The original A2
+no-alias rule was implemented as leaving fresh successful no-op keys unreserved.
+That permitted the same key to accept different material later. This amendment
+supersedes that interpretation, for both preparation and commit; D-016's raw v0
+Case-command rule is unchanged.
+
+Reuse original keys/fingerprints/results already retained in bundles and business
+receipts. Add only an immutable intake-specific binding for each fresh successful
+no-op key, in the same writer transaction. Its trusted tenant, intake namespace and
+operation scope cannot come from uploaded data. Retain the normalized request
+fingerprint, minimal reconstructable request metadata (byte references, not another
+copy of uploaded bytes), original result/reference and checked recording time.
+Original bundles, source versions, receipts and C/R/S remain unchanged. A first
+no-op key binding advances only writer metadata; exact retries return the recorded
+outcome/reference without new writes, IDs or clock changes. Inspection, preview,
+GET and export remain read-only.
+
+Use additive migration **0006**, preserving 0001–0005 checksums. Original retained
+keys remain binding on upgrade through their existing records. Never invent earlier
+no-op keys that were not stored. Versioned export includes the additional bindings;
+legacy v1 exports retain original-key guarantees only. Reconstruction must verify
+request fingerprints, scope, original references, hash agreement and time before
+returning success. A metadata persistence failure rolls back that entire write.
+
+The browser keeps one outstanding intake command across tabs. IndexedDB must claim
+that slot atomically and compare the exact expected command when clearing it. A
+competing tab cannot overwrite recovery or send a different command after losing
+the claim. Recovery is explicit, preserves original bytes/key across reload and
+uncertain responses, and never automatically replaces a key or resubmits.
+
+Acceptance extends A2/A9/A10/A12: both no-op key → changed-body failures; concurrent
+same-key submissions; exact/lost-response restart retry; metadata rollback; unchanged
+business histories; original-key upgrade/export compatibility; tampered bindings;
+and two real tabs competing, completing and reopening the one recovery slot.
 
 ## Authorized D9-B implementation handoff
 

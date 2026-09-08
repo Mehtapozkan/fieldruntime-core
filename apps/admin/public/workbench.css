@@ -2297,3 +2297,115 @@ button {
 .case-receipt pre {
   max-width: 100%;
 }
+
+/* Intake reuses the review cards and controls; source text is always inert. */
+.intake-entry {
+  color: var(--ink);
+  font-size: 0.85rem;
+  margin-left: auto;
+  margin-right: 1rem;
+}
+.intake-workbench label {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0;
+}
+.intake-workbench input,
+.intake-workbench select,
+.intake-workbench textarea {
+  max-width: 100%;
+  min-width: 0;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+}
+.intake-workbench input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+.intake-workbench label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: start;
+  gap: 0.65rem;
+}
+.intake-workbench pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 24rem;
+  overflow-y: auto;
+  font-size: 0.8rem;
+}
+.intake-workbench summary {
+  cursor: pointer;
+  padding: 0.7rem 0;
+  font-weight: 600;
+}
+.intake-workbench .intake-details {
+  margin-top: 0.75rem;
+  padding: 0.7rem 1rem;
+}
+.intake-file,
+.intake-candidate,
+.intake-source {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.intake-workbench .button {
+  margin: 0.35rem 0.5rem 0.35rem 0;
+  white-space: normal;
+  text-align: left;
+}
+.intake-workbench h2 {
+  font-size: 1.2rem;
+  margin-top: 0;
+}
+.intake-workbench .review-card > a {
+  display: block;
+  margin-top: 0.8rem;
+}
+.intake-confirmed {
+  border-left: 4px solid var(--accent);
+}
+.intake-workbench :focus-visible {
+  outline: 3px solid #875f35;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .intake-entry {
+    margin-right: 0;
+  }
+  .intake-workbench .review-card,
+  .intake-workbench .review-form {
+    padding: 1rem;
+  }
+  .intake-workbench .button {
+    width: 100%;
+  }
+}
+.intake-shell .stage-rail {
+  position: static;
+  align-self: start;
+}
+.intake-shell #stage-navigation {
+  display: grid;
+  gap: 0.5rem;
+}
+.intake-shell #stage-navigation a {
+  display: block;
+  min-height: 44px;
+  text-align: left;
+  padding: 0.65rem;
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+@media (max-width: 1050px) {
+  .intake-shell #stage-navigation {
+    grid-template-columns: 1fr 1fr;
+  }
+  .intake-shell .stage-rail {
+    padding: 0.4rem 1rem;
+  }
+}

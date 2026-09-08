@@ -1737,6 +1737,13 @@ if (typeof document !== "undefined") {
     "legacy"
   ) {
     bootstrapBrowserWorkbench();
+  } else if (
+    new globalThis.URL(window.location.href).searchParams.get("view") ===
+    "intake"
+  ) {
+    void import("./intake-workbench.js").then(({ mountIntakeWorkbench }) =>
+      mountIntakeWorkbench(),
+    );
   } else {
     void import("./authority-workbench.js")
       .then(({ mountAuthorityWorkbench }) => mountAuthorityWorkbench())

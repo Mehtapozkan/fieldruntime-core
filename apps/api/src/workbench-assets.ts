@@ -12,6 +12,10 @@ export interface WorkbenchAssets {
   readonly authorityClient?: WorkbenchAsset;
   readonly authorityWorkbench?: WorkbenchAsset;
   readonly creditClient?: WorkbenchAsset;
+  readonly intakeClient?: WorkbenchAsset;
+  readonly intakeWorkbench?: WorkbenchAsset;
+  readonly intakeCsv?: WorkbenchAsset;
+  readonly intakeNote?: WorkbenchAsset;
 }
 
 function asset(body: Buffer, contentType: string): WorkbenchAsset {
@@ -30,6 +34,10 @@ export async function loadWorkbenchAssets(): Promise<WorkbenchAssets> {
     authorityClient,
     authorityWorkbench,
     creditClient,
+    intakeClient,
+    intakeWorkbench,
+    intakeCsv,
+    intakeNote,
   ] = await Promise.all([
     readFile(new URL("../../admin/public/index.html", import.meta.url)),
     readFile(new URL("../../admin/public/workbench.css", import.meta.url)),
@@ -41,6 +49,16 @@ export async function loadWorkbenchAssets(): Promise<WorkbenchAssets> {
       new URL("../../admin/public/authority-workbench.js", import.meta.url),
     ),
     readFile(new URL("../../admin/public/credit-client.js", import.meta.url)),
+    readFile(new URL("../../admin/public/intake-client.js", import.meta.url)),
+    readFile(
+      new URL("../../admin/public/intake-workbench.js", import.meta.url),
+    ),
+    readFile(
+      new URL("../../admin/public/intake-sample/orchid.csv", import.meta.url),
+    ),
+    readFile(
+      new URL("../../admin/public/intake-sample/note-17.txt", import.meta.url),
+    ),
   ]);
 
   return Object.freeze({
@@ -53,6 +71,10 @@ export async function loadWorkbenchAssets(): Promise<WorkbenchAssets> {
       "text/javascript; charset=utf-8",
     ),
     creditClient: asset(creditClient, "text/javascript; charset=utf-8"),
+    intakeClient: asset(intakeClient, "text/javascript; charset=utf-8"),
+    intakeWorkbench: asset(intakeWorkbench, "text/javascript; charset=utf-8"),
+    intakeCsv: asset(intakeCsv, "text/csv; charset=utf-8"),
+    intakeNote: asset(intakeNote, "text/plain; charset=utf-8"),
   });
 }
 
@@ -82,6 +104,14 @@ export function getWorkbenchAsset(
       return assets.authorityClient;
     case "/authority-workbench.js":
       return assets.authorityWorkbench;
+    case "/intake-client.js":
+      return assets.intakeClient;
+    case "/intake-workbench.js":
+      return assets.intakeWorkbench;
+    case "/intake-sample/orchid.csv":
+      return assets.intakeCsv;
+    case "/intake-sample/note-17.txt":
+      return assets.intakeNote;
     case "/credit-client.js":
       return assets.creditClient;
     default:

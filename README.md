@@ -12,19 +12,20 @@ checks its source through the Workbench, with explicit actions and recoverable
 retries. History provides a compact, inspectable Case progress and evidence receipt.
 The merged failure walkthrough demonstrates the safeguards with isolated test fixtures.
 Merged D8-C clarifies current attention, Case ownership and the selected reviewer’s
-policy requirement in the same view. This D9-A branch documents the
-[Accepted synthetic intake contract](docs/architecture/d9-assisted-intake-boundary.md);
-it adds no importer or runtime capability.
+policy requirement in the same view. This D9-B review branch adds explicit synthetic
+CSV/document preparation, reviewed Case create/attach, retained provenance and safe
+reimport under [Accepted D-034](docs/architecture/d9-assisted-intake-boundary.md).
+Real customer activation remains unapproved.
 
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external writes.
 > Not production software. Selecting a synthetic reviewer seat is not authentication.
 
 ## What works today
 
-“Main” includes D8-C [PR #28](https://github.com/Mehtapozkan/fieldruntime-core/pull/28)
-at `555ac0214b006350b049d96567cb98b92ebc25f8`. **D9-A is docs-only, accepted for synthetic implementation;
-D9-B intake is not implemented.** The historical prerelease has
-a smaller boundary described under [Distribution](#distribution).
+“Main” includes D9-A [PR #29](https://github.com/Mehtapozkan/fieldruntime-core/pull/29)
+at `f96d6cc7fc943d53854c619e719d1dc53c93c69b`. **D9-B synthetic intake is implemented
+on this review branch, not yet merged.** The historical prerelease has a smaller
+boundary described under [Distribution](#distribution).
 
 | Functionality                                    | Workbench                                                                                                | API / runtime                                                                             | Availability                                                                          |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -35,6 +36,7 @@ a smaller boundary described under [Distribution](#distribution).
 | ECC and legacy illustration                      | Separate Acme fixture story; illustrated action, verification and outcome screens                        | Thirty frozen synthetic cases and deterministic evaluation                                | Main and historical prerelease; legacy screens never invoke runtime action/check APIs |
 | Case progress and evidence receipt               | Expand proposal, attributed decisions, action, independent observation and unresolved gaps in History    | Reuses existing Case, review and action/check reads; no new records or permission         | Main (D8-A)                                                                           |
 | Failure walkthrough and measurement readiness    | Existing failure/result views remain unchanged                                                           | Five selected PostgreSQL/API control and failure fixtures with evidence output            | Main (D8-B)                                                                           |
+| Synthetic file intake                            | Explicit prepare, review target, commit and reopen; source citations and gaps                            | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay   | D9-B review branch; real data unapproved                                              |
 | Accepted outcome, economics and complete closure | Unavailable                                                                                              | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof            | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
@@ -97,7 +99,13 @@ These commands alone do not start persistent review or test PostgreSQL. Reposito
 CI also exercises real PostgreSQL/API, restart, Compose and Workbench browser paths.
 [Validation evidence and remaining limits](STATUS.md).
 
-## Two separate walkthroughs
+To try this branch’s intake, switch to `feat/d9b-synthetic-intake` before building,
+then open `/?view=intake`. Use **Use synthetic sample → Prepare selected synthetic
+files → Review this candidate → Inspect exact commit → Commit reviewed material**.
+[Exact API/retry/export walkthrough and migration limits](docs/guides/synthetic-intake.md).
+Intake does not enroll imported Cases for credit review or execution.
+
+## Separate walkthroughs
 
 **Persistent Orchid review:** the default page uses canonical runtime evidence,
 requests and human decisions. Finance/Executive progress is read from the API;
