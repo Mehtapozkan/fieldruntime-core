@@ -25,10 +25,13 @@ activation remains unapproved. PR #29 merged normally at `f96d6cc7`; D9-B PR #30
 merged normally at `ca9543289894fffdaa40ecfe794d83addc2c19de` from reviewed head
 `9d250707`, with required CI passing and all findings resolved. The approved retry
 amendment, successful no-op key bindings, cross-tab recovery and migration compatibility
-are preserved. D10-A is a docs-only accepted design on `docs/d10a-discovery-preparation`;
-[Accepted D-035](docs/architecture/d10-discovery-preparation-review.md) records the human approval and D10-B authorization after normal PR #31 merge;
-this update implements no runtime behavior. The canonical specification and all
-19 matrix entries remain the product plan. No release or deployment is included.
+are preserved. D10-A / Accepted D-035 merged normally in PR #31 at
+`222b2842b44efc1da219c1409d5111a55e62641a` after approval-head CI passed.
+**D10-B is implemented on this review branch:** deterministic cited preparation and
+Case-linked descriptive review with exact retry/stale-input/replay controls. The
+[walkthrough](docs/guides/synthetic-discovery.md) states the actual scope and gaps.
+The canonical specification and all 19 matrix entries remain the product plan.
+No model/worker, real-data activation, release or deployment is included.
 
 The published `v0.1.0-evaluation-preview.0` is a historical snapshot at `3db1b4bf`,
 before D6/D7; merges do not update it. This plan describes current source and future
@@ -217,17 +220,18 @@ D-013 and D-033 remain unchanged; measured economics stays unimplemented.
    [Walkthrough and A1–A12 evidence](docs/guides/synthetic-intake.md). No nullable v0 fields,
    automatic matching, policy enrollment, transferred approval or real customer activation.
    Whole-dataset disposal ends replay; selective erasure is absent.
-3. **D10-A — accepted design awaiting normal merge:** [Accepted D-035](docs/architecture/d10-discovery-preparation-review.md)
-   supplies the worked invoice-dispute brief, gap-driven interviews, seven records/six
-   outputs, source/variant disagreements, readiness/support, baseline and redesign before
-   allocation. A compact screen is proposed; no Discovery functionality is implemented.
-4. **D10-B — authorized after PR #31 merge:** implement the fixed-profile deterministic brief and
-   typed descriptive review using existing intake/Case evidence and the proposed minimal
-   supporting history. Execute T1–T12 plus varied customer/amount/delivery-evidence controls through
-   PostgreSQL/API and browser; preserve all
-   A1–A12/retry/migration, D6–D8, ECC and closure safeguards. No model calls or workers.
-   Operators can save/correct/confirm a description and reopen it; historical routes,
-   source rules, population/effort coverage and business outcomes remain incomplete.
+3. **D10-A — merged in PR #31:** [Accepted D-035](docs/architecture/d10-discovery-preparation-review.md)
+   and its human approval preserve the narrow descriptive boundary and varied-input
+   acceptance criteria. Documentation alone did not implement Discovery.
+4. **D10-B — implemented for review:** the existing intake Workbench/API now prepares
+   a cited brief, all seven records and six loop outputs, consequential questions and
+   redesign hypotheses, with zero model calls. Operators explicitly save unknown/disputed
+   answers, correct findings and confirm a stated descriptive purpose. One additive
+   history retains exact Case/input/revision bindings, attribution, retries and portable
+   reconstruction. Stale answers remain historical; carry-forward requires explicit new
+   annotation and confirmation. [T1–T12 walkthrough and limits](docs/guides/synthetic-discovery.md).
+   Full normal/exception routes, governing source/variant rules, population/effort/cost
+   coverage, customer acceptance and measured usefulness remain incomplete.
 5. **D11 then D12:** review/publish one Runtime Pack, then integrate one useful bounded
    replaceable worker and minimum approved proof/correction capture. A Discovery
    confirmation never installs policy or authorizes execution. Hermes remains a candidate,

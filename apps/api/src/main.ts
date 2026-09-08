@@ -1,3 +1,4 @@
+import { PostgresDiscoveryStore } from "../../../packages/runtime/src/postgres-discovery-store.js";
 import { PostgresIntakeStore } from "../../../packages/runtime/src/postgres-intake-store.js";
 import { TransactionalIntakeWorker } from "../../worker/src/intake-service.js";
 import { PostgresCreditVerificationStore } from "../../../packages/runtime/src/postgres-credit-verification-store.js";
@@ -149,6 +150,7 @@ async function start(): Promise<void> {
     verificationMigrationSql,
     intakeMigrationSql,
     intakeKeysMigrationSql,
+    discoveryMigrationSql,
     fixtureDocument,
     walkthroughDocument,
   ] = await Promise.all([
@@ -196,6 +198,13 @@ async function start(): Promise<void> {
     ),
     readFile(
       new URL(
+        "../../../packages/runtime/migrations/0007_discovery_review.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
         "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
         import.meta.url,
       ),
@@ -224,6 +233,7 @@ async function start(): Promise<void> {
       "0006_intake_request_bindings",
       intakeKeysMigrationSql,
     ),
+    createMigrationSource("0007_discovery_review", discoveryMigrationSql),
   );
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
   const walkthrough = createGuidedWalkthroughRecord(
@@ -253,7 +263,13 @@ async function start(): Promise<void> {
     new PostgresCreditVerificationStore(pool, new PgPoolAdapter(readerPgPool)),
   );
   const intakeStore = new PostgresIntakeStore(pool);
-  const intakeWorker = new TransactionalIntakeWorker(intakeStore);
+  const discoveryStore = new PostgresDiscoveryStore(pool);
+  const intakeWorker = new TransactionalIntakeWorker(
+    intakeStore,
+    undefined,
+    discoveryStore,
+  );
+  await discoveryStore.assertReady();
   await intakeStore.assertReady();
   const workbenchAssets = await loadWorkbenchAssets();
   const server = createApiServer(
@@ -264,6 +280,7 @@ async function start(): Promise<void> {
         await creditStore.assertReady();
         await store.assertReady();
         await intakeStore.assertReady();
+        await discoveryStore.assertReady();
         await authorityStore.assertReady(SYNTHETIC_AUTHORITY_TENANT);
         return true;
       },

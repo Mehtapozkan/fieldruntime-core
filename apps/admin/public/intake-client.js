@@ -123,7 +123,7 @@ export function pendingIntakeStorage() {
           result = true;
         } else {
           failure = new Error(
-            "Another tab has an unresolved intake command. Recover the saved original submission before starting another; nothing new was submitted.",
+            "Another tab has an unresolved intake or Discovery command. Recover the saved original submission before starting another; nothing new was submitted.",
           );
           tx.abort();
         }
@@ -160,6 +160,9 @@ export function createIntakeClient({
     error: null,
     needsRefresh: false,
     draftRevision: 0,
+    discovery: null,
+    discoveryTarget: null,
+    discoveryConfirmed: null,
   };
   async function request(path, body) {
     const abort = new globalThis.AbortController(),
@@ -211,12 +214,33 @@ export function createIntakeClient({
       : null;
     state.list = list.bundles;
     state.view = view;
+    if (
+      state.discoveryTarget &&
+      state.discoveryTarget.bundle_id !== view?.bundle.id
+    ) {
+      state.discovery = null;
+      state.discoveryTarget = null;
+      window.localStorage.removeItem("fieldruntime.discovery.navigation.v1");
+    }
     state.needsRefresh = false;
     if (view)
       window.localStorage.setItem(
         "fieldruntime.intake.navigation.v1",
         view.bundle.id,
       );
+  }
+  async function refreshDiscovery(target = state.discoveryTarget) {
+    if (!target) return;
+    const path = `${ROOT}/bundles/${target.bundle_id}/discovery?record_key=${encodeURIComponent(target.record_key)}${target.case_id ? `&case_id=${encodeURIComponent(target.case_id)}` : ""}`;
+    const brief = await validateDiscoveryBrief(await request(path), target);
+    state.discovery = brief;
+    state.discoveryTarget = { ...target };
+    state.needsRefresh = false;
+    window.localStorage.setItem(
+      "fieldruntime.discovery.navigation.v1",
+      JSON.stringify(target),
+    );
+    return brief;
   }
   async function run(operation) {
     if (state.busy) return;
@@ -237,7 +261,11 @@ export function createIntakeClient({
   async function submitPending(recovering = false) {
     const saved = state.pending;
     requireData(
-      saved && [`${ROOT}/preparations`, `${ROOT}/commits`].includes(saved.path),
+      saved &&
+        ([`${ROOT}/preparations`, `${ROOT}/commits`].includes(saved.path) ||
+          /^\/v1\/intake\/bundles\/intake_bundle_[a-f0-9]{64}\/discovery-reviews$/.test(
+            saved.path,
+          )),
     );
     try {
       // Claim again on explicit recovery: another tab may have completed this
@@ -252,9 +280,19 @@ export function createIntakeClient({
       state.error = error.message;
       return undefined;
     }
+    state.needsRefresh = true;
     try {
       const result = await request(saved.path, saved.body);
-      if (saved.path.endsWith("commits")) {
+      const isDiscovery = saved.path.endsWith("discovery-reviews");
+      if (isDiscovery) {
+        await validateDiscoveryResult(result, JSON.parse(saved.body));
+        state.discoveryConfirmed = result;
+        state.discoveryTarget = {
+          bundle_id: result.entry.command.bundle_id,
+          record_key: result.entry.command.record_key,
+          case_id: result.entry.case_id,
+        };
+      } else if (saved.path.endsWith("commits")) {
         requireData(
           result.schema_version === "intake-commit-result.v1" &&
             ["committed", "duplicate", "already_committed"].includes(
@@ -271,7 +309,8 @@ export function createIntakeClient({
             ) &&
             /^intake_bundle_[a-f0-9]{64}$/.test(result.bundle_id),
         );
-      state.confirmed = result;
+      if (!isDiscovery) state.confirmed = result;
+      state.needsRefresh = true;
       state.recovered = recovering;
       try {
         await storage.clear(saved);
@@ -282,10 +321,15 @@ export function createIntakeClient({
       }
       state.preview = null;
       try {
-        await refresh(result.receipt?.selection.bundle_id ?? result.bundle_id);
+        await refresh(
+          isDiscovery
+            ? result.entry.command.bundle_id
+            : (result.receipt?.selection.bundle_id ?? result.bundle_id),
+        );
+        if (state.discoveryTarget) await refreshDiscovery();
       } catch (error) {
         state.needsRefresh = true;
-        state.error = `Confirmed ${result.receipt ? "Case receipt" : "preparation"} retained. Current view could not be refreshed: ${error.message}`;
+        state.error = `Confirmed ${isDiscovery ? "descriptive review" : result.receipt ? "Case receipt" : "preparation"} retained. Current view could not be refreshed: ${error.message}`;
       }
       return result;
     } catch (error) {
@@ -303,6 +347,11 @@ export function createIntakeClient({
   return {
     state,
     invalidate,
+    closeDiscovery: () => {
+      state.discovery = null;
+      state.discoveryTarget = null;
+      window.localStorage.removeItem("fieldruntime.discovery.navigation.v1");
+    },
     load: () =>
       run(async () => {
         state.pending = (await storage.get()) ?? null;
@@ -310,8 +359,57 @@ export function createIntakeClient({
           window.localStorage.getItem("fieldruntime.intake.navigation.v1") ??
             undefined,
         );
+        const nav = window.localStorage.getItem(
+          "fieldruntime.discovery.navigation.v1",
+        );
+        if (nav) {
+          const target = JSON.parse(nav);
+          if (target.bundle_id === state.view?.bundle.id)
+            await refreshDiscovery(target);
+        }
       }),
-    refresh: (id) => run(() => refresh(id)),
+    refresh: (id) =>
+      run(async () => {
+        state.needsRefresh = true;
+        try {
+          await refresh(id);
+          if (state.discoveryTarget?.bundle_id === state.view?.bundle.id)
+            await refreshDiscovery();
+          else {
+            state.discovery = null;
+            state.discoveryTarget = null;
+            window.localStorage.removeItem(
+              "fieldruntime.discovery.navigation.v1",
+            );
+          }
+        } catch (error) {
+          state.needsRefresh = true;
+          throw error;
+        }
+      }),
+    openDiscovery: (target) =>
+      run(async () => {
+        state.needsRefresh = true;
+        try {
+          return await refreshDiscovery(target);
+        } catch (error) {
+          state.needsRefresh = true;
+          throw error;
+        }
+      }),
+    writeDiscovery: (command) =>
+      run(async () => {
+        requireData(
+          !state.pending &&
+            !state.needsRefresh &&
+            state.discovery?.current.can_record,
+        );
+        state.pending = {
+          path: `${ROOT}/bundles/${command.bundle_id}/discovery-reviews`,
+          body: JSON.stringify(command),
+        };
+        return submitPending();
+      }),
     preview: (review) =>
       run(async () => {
         state.preview = null;
@@ -348,4 +446,125 @@ export function createIntakeClient({
 }
 function structuredCloneSafe(v) {
   return JSON.parse(JSON.stringify(v));
+}
+
+const discoveryVersions = {
+  projection: "discovery.invoice-dispute.v1",
+  template: "discovery.questions.v1",
+  interpretation: "discovery.source-claims.v1",
+};
+const equal = (a, b) =>
+  JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
+export async function validateDiscoveryEntry(e) {
+  requireData(
+    e?.schema_version === "discovery-review-entry.v1" &&
+      e.tenant_id === "tenant_intake_demo" &&
+      e.intake_scope_id === "scope_invoice_disputes" &&
+      e.actor?.identity_id === "identity_intake_operator" &&
+      e.actor.status === "active" &&
+      e.actor.identity_kind === "human" &&
+      equal(e.versions, discoveryVersions) &&
+      e.case_id === e.command?.case_id &&
+      e.sequence === e.command.expected_discovery_revision + 1 &&
+      e.previous_entry_hash === e.command.expected_previous_entry_hash &&
+      e.idempotency_key === e.command.idempotency_key &&
+      e.operation === e.command.operation &&
+      e.result?.authority_granted === false &&
+      e.result.closure_permission === false &&
+      e.result.status === "recorded" &&
+      e.result.discovery_revision === e.sequence &&
+      e.result.material_hash === e.material_hash,
+  );
+  await bound(e);
+  requireData(
+    e.command_fingerprint === (await intakeHash(e.command)) &&
+      e.material_hash === (await intakeHash(e.material)) &&
+      e.id === `discovery_review_${e.command_fingerprint.slice(7)}` &&
+      e.material?.manifest.case_id === e.case_id &&
+      e.material.manifest.bundle_id === e.command.bundle_id &&
+      e.material.manifest.record_key === e.command.record_key &&
+      e.material.manifest.case_version === e.command.expected_case_version &&
+      e.material.manifest.intake_receipt_hash ===
+        e.command.expected_intake_receipt_hash,
+  );
+  if (e.operation === "confirm")
+    requireData(
+      e.material_hash === e.command.expected_material_hash &&
+        ["discovery_description", "improvement_discussion"].includes(
+          e.command.purpose,
+        ),
+    );
+  else
+    requireData(e.operation === "annotate" && Array.isArray(e.command.changes));
+  return e;
+}
+export async function validateDiscoveryBrief(v, target) {
+  requireData(
+    v?.schema_version === "discovery-brief.v1" &&
+      v.authority_granted === false &&
+      v.closure_permission === false &&
+      Array.isArray(v.history) &&
+      v.material?.schema_version === "discovery-material.v1" &&
+      v.material.model_calls === 0 &&
+      v.material.assignment.independently_verified === false &&
+      v.material.findings?.length === 7 &&
+      v.material.loop_outputs?.length === 6 &&
+      equal(v.material.manifest.versions, discoveryVersions) &&
+      v.material.manifest.tenant_id === "tenant_intake_demo",
+  );
+  await bound(v);
+  requireData(v.material_hash === (await intakeHash(v.material)));
+  const m = v.material.manifest,
+    b = v.binding;
+  requireData(
+    m.bundle_id === target.bundle_id &&
+      m.record_key === target.record_key &&
+      m.case_id === target.case_id &&
+      b.bundle_id === m.bundle_id &&
+      b.record_key === m.record_key &&
+      b.case_id === m.case_id &&
+      b.expected_case_version === m.case_version &&
+      b.expected_intake_receipt_hash === m.intake_receipt_hash &&
+      b.expected_material_hash === v.material_hash,
+  );
+  let last = null;
+  for (const e of v.history) {
+    await validateDiscoveryEntry(e);
+    requireData(
+      e.case_id === m.case_id &&
+        e.sequence === (last?.sequence ?? 0) + 1 &&
+        e.previous_entry_hash === (last?.hash ?? null),
+    );
+    last = e;
+  }
+  requireData(
+    b.expected_discovery_revision === (last?.sequence ?? 0) &&
+      b.expected_previous_entry_hash === (last?.hash ?? null),
+  );
+  const purposes = [
+    ...new Set(
+      v.history
+        .filter(
+          (e) =>
+            e.operation === "confirm" && e.material_hash === v.material_hash,
+        )
+        .map((e) => e.command.purpose),
+    ),
+  ].sort();
+  requireData(
+    equal(purposes, v.current.confirmed_purposes) &&
+      v.current.can_record === (m.case_id !== null),
+  );
+  return v;
+}
+export async function validateDiscoveryResult(v, command) {
+  requireData(
+    v?.schema_version === "discovery-review-result.v1" &&
+      v.status === "recorded" &&
+      v.authority_granted === false &&
+      v.closure_permission === false,
+  );
+  await validateDiscoveryEntry(v.entry);
+  requireData(equal(v.entry.command, command));
+  return v;
 }

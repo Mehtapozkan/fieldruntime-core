@@ -2409,3 +2409,49 @@ button {
     padding: 0.4rem 1rem;
   }
 }
+
+/* D-035 uses the existing intake cards; consequential review stays beside its brief. */
+.discovery-focus {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 1rem;
+}
+.discovery-brief {
+  min-width: 0;
+}
+.discovery-brief .review-card,
+.discovery-brief .review-form {
+  min-width: 0;
+}
+.discovery-brief p,
+.discovery-brief label {
+  overflow-wrap: anywhere;
+}
+.discovery-question {
+  font-size: 0.95rem;
+}
+.discovery-controls select {
+  text-overflow: ellipsis;
+}
+.discovery-intake-details {
+  margin-top: 1rem;
+}
+.discovery-result {
+  border-left: 3px solid var(--accent, #617459);
+}
+@media (max-width: 700px) {
+  .discovery-focus {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.4rem;
+  }
+  .discovery-focus .review-card p {
+    margin-block: 0.55rem;
+  }
+  .discovery-controls textarea {
+    min-height: 3rem;
+  }
+}
+.intake-shell .case-header {
+  margin-bottom: 1rem;
+}

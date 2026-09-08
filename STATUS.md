@@ -1,13 +1,23 @@
 # Status
 
-Current milestone: **D-035 Accepted; D10-B authorized after normal PR #31 merge, not implemented.**
-[Accepted D-035](docs/architecture/d10-discovery-preparation-review.md) specifies one
-cited workflow brief, R1–R7, six loop outputs, gap-driven questions, descriptive
-correction/review and a proposed improvement before work allocation. Its new review
-boundary was explicitly approved by the human owner against current PR #31 head
-`814b415e`. The approval also requires a second supported synthetic input and
-changed delivery-evidence controls in T1–T3. No implementation is claimed by this update.
-The canonical specification and single 19-entry matrix remain authoritative.
+Current milestone: **D10-B implemented for review; complete Discovery remains incomplete.**
+D10-A / [Accepted D-035](docs/architecture/d10-discovery-preparation-review.md)
+merged normally in PR #31 at `222b2842b44efc1da219c1409d5111a55e62641a`, preserving
+approval head `53e3ddd5d0c3752c4f3f98dcd6a3190830f0f006` and
+[passing required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34182770322).
+No unresolved review findings remained; required PR/up-to-date checks and force-push/
+deletion protections were preserved without bypass. The human approval and proposal
+history remain recorded in D-035 and DECISIONS.
+
+This branch implements a deterministic cited brief, all seven descriptive records and
+six loop outputs, gap agenda, explicit answers/corrections and two descriptive
+confirmation purposes. One Case-linked PostgreSQL history retains exact bindings,
+trusted synthetic attribution and portable replay. Case/authority/intake business
+histories are unchanged by descriptive review. The existing Workbench and one atomic
+IndexedDB recovery slot serve intake and Discovery. Reads remain side-effect free.
+[Executable walkthrough, limits and screenshots](docs/guides/synthetic-discovery.md).
+The canonical specification and single 19-entry matrix remain authoritative. No models,
+worker integration, real customer activation, release or deployment are included.
 
 **D9-B merged in PR #30 at `ca9543289894fffdaa40ecfe794d83addc2c19de`.** The reviewed
 head was exactly `9d250707458adfdc481a6c9259608f5d6d3f4cc7`, with all three findings
@@ -22,8 +32,7 @@ Main now provides strict synthetic intake, original bytes and pinned derivation,
 inspectable coverage/candidates and explicit atomic Case/provenance commits through
 API/Workbench. Migrations 0005/0006 are merged; all older checksums, Case semantics and
 frozen ECC remain intact. [Executable intake walkthrough](docs/guides/synthetic-intake.md).
-This branch changes only documentation: no runtime, contracts, migration, worker,
-authority, execution, closure, release or deployment behavior. Validation appears below.
+The D10-B additions and validation are recorded below; D9-B behavior and checksums are preserved.
 
 D8-C PR #28 merged normally at `555ac0214b006350b049d96567cb98b92ebc25f8`, preserving
 reviewed head `1f2d9a2da9ae70273b0a6e057c05cf03cbfc2659`. There were no subsequent
@@ -1038,7 +1047,7 @@ Requirements I1 and supporting R1/R2/R3/R5/R6, P2/P6 and L4 now link actual synt
 acceptance evidence in the existing matrix. They are not complete customer Discovery,
 measurement or activation requirements. [Walkthrough, migration and A1–A12 scope](docs/guides/synthetic-intake.md).
 
-## D10-A design, approval and validation
+## D10-A design, approval and validation (historical)
 
 The [D-035 worked example and proposed boundary](docs/architecture/d10-discovery-preparation-review.md)
 uses the existing north/south Orchid CSV and plain-text delivery note. The source
@@ -1075,17 +1084,59 @@ Compose and appliance suites remain required there. No new D10 screen, local bro
 inspection or implementation acceptance is claimed. The wireframe is a proposal;
 T1–T12 have not been implemented or executed as Discovery tests.
 
+## D10-B implementation and validation
+
+The [strict Discovery contract](packages/contracts/schemas/discovery.v1.schema.json),
+[runtime projection/replay](packages/runtime/src/discovery.ts), supporting store and
+[API guide](docs/guides/synthetic-discovery.md) implement the approved descriptive
+boundary. Migration **0007_discovery_review** adds one append-only Case-linked journal;
+0001–0006 are unchanged. It retains commands, input manifests/material, annotation
+lineage, results, synthetic actor, UTC time and versions atomically. Current eligibility
+for financial action and Case closure remain separate and unchanged.
+
+The manifest conservatively binds all business intake bundle/commit hashes, exact Case
+and original receipt anchors and versions; fresh no-op intake-key metadata does not
+invalidate it. Confirmation advances descriptive revision without changing material.
+Changed Case (including D-014), new business intake or annotations require fresh review.
+Old answers and citations stay historical; carry-forward needs an explicit new save and
+separate confirmation. Exact retry returns the original receipt with no additional write;
+changed key bodies conflict. New no-change/already-reviewed submissions are non-success.
+
+Findings derive from retained inputs. The second Cedar fixture changes customer, IDs,
+amount, row count and missing/reported/conflicting/ambiguous delivery conditions. Source
+reports are not independent facts. Unparsed material stays retained-only. Unknown routes,
+field rules, variants, effort, population, support and outcomes remain visible. Proposed
+redesign comes before allocation; no model/agent/worker or business value is fabricated.
+
+Initial positive/strict-input API tests failed on merged main with **404 instead of
+200/400** before implementation. Local `pnpm validate` passes **293/293** plus format,
+lint, typecheck and the public-release check. Real PostgreSQL 18.4 passes **14 Discovery
+API/replay tests**, **5 Discovery browser scenarios**, retained **26 intake API + 6 intake
+browser**, **63 authority** and **115 action/verification/receipt tests** (including eight
+D7 browser scenarios). Fresh/0006 upgrade, portable reconstruction, restart, cross-tab
+recovery and injected failures are included. Earlier parallel local runs encountered
+HTTP timeouts; serial reruns passed without changing those deadlines or assertions.
+
+ECC passes **620/620**; the answer-only negative control exits **1** with **152/620** and
+failed hard gates, not a setup crash. Documentation checks pass 206 local links, all
+19 matrix IDs and T1–T12 example/source checks; `git diff --check` passes. Docker is
+unavailable locally (`docker compose config --quiet`: command not found, exit 127).
+The PR records final-head pinned PostgreSQL 17.11, retained D6 browser, Compose and
+container appliance/restart CI evidence; local PostgreSQL tests do not substitute for it.
+
+Actual Chromium desktop/390px captures cover initial review, correction, confirmations,
+stale inputs, uncertain submission and a confirmed receipt with failed refresh. Keyboard
+focus, readable source disclosures and horizontal bounds are exercised. These are
+synthetic operator checks, not customer usefulness or performance measurements.
+
 ## Next
 
-Merge the approved D10-A documentation normally after its required checks pass.
-Then implement D10-B: a deterministic cited brief
-and short agenda with explicit, replayable descriptive answers/corrections/confirmation
-in the existing intake Workbench/API. Approval is recorded; implementation must prove
-T1–T12 and varied customer/amount/evidence inputs, without fixed Orchid conclusions.
-Descriptions and confirmations grant no business authority or independent verification. D11 owns reviewed Runtime
-Pack publication and applicable policy changes; D12 owns one bounded worker and minimum
-approved proof. Representative routes, baseline/effort/cost capture, operator usefulness,
-customer acceptance and measured economics remain incomplete.
+Review D10-B without merging it in this task. D11 retains one reviewed Runtime Pack and
+applicable rule publication; D12 retains one bounded replaceable worker and approved
+proof/correction integration. Descriptive confirmation is not permission for either.
+Representative normal/exception routes, governing field/variant rules, baseline/effort/
+cost collection, operator usefulness/support and customer acceptance remain incomplete.
+Measured economics and complete Case closure are not implemented.
 
 Real customer activation still requires named custody, access, classification,
 retention, deletion and export arrangements. Complete-dataset disposal ends replay;

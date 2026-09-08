@@ -22,24 +22,25 @@ Real customer activation remains unapproved.
 
 ## What works today
 
-Main includes D9-B [PR #30](https://github.com/Mehtapozkan/fieldruntime-core/pull/30)
-at `ca9543289894fffdaa40ecfe794d83addc2c19de`. This branch adds only the
-[D10-A Discovery design](docs/architecture/d10-discovery-preparation-review.md);
-its descriptive-review boundary is Accepted and no D10 capability is implemented.
-The historical prerelease has a smaller
-boundary described under [Distribution](#distribution).
+Main includes D9-B (PR #30) and the Accepted D10-A design (PR #31, merged at
+`222b2842b44efc1da219c1409d5111a55e62641a`). **This review branch implements D10-B**:
+a cited synthetic workflow brief, consequential questions and persistent descriptive
+answers/corrections/confirmations. It uses zero model calls. See the
+[Discovery walkthrough](docs/guides/synthetic-discovery.md). The historical prerelease
+has the smaller boundary described under [Distribution](#distribution).
 
-| Functionality                                    | Workbench                                                                                                | API / runtime                                                                             | Availability                                                                          |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Case and evidence history                        | Explicit Orchid initialization; retained sources, uncertainty and changed-evidence demonstration         | Canonical PostgreSQL Case commands and replay                                             | Main                                                                                  |
-| Decision Packet and human review                 | Finance/Executive approve; reject, modify or escalate; reload history                                    | Deterministic authority, exact C/R/S and immutable consent; replacements start unapproved | Main (D6)                                                                             |
-| Record simulated credit                          | Explicit preparation and **Record simulated credit**                                                     | Scoped enrollment, one bound $15,000 Orchid credit, atomic source/action history          | Main (D7-B/D7-D)                                                                      |
-| Independently check credit                       | **Check simulated source**; match, mismatch or inconclusive result; exact retry after uncertain response | Separate verifier and source read; retained evidence and restart replay                   | Main (D7-C/D7-D)                                                                      |
-| ECC and legacy illustration                      | Separate Acme fixture story; illustrated action, verification and outcome screens                        | Thirty frozen synthetic cases and deterministic evaluation                                | Main and historical prerelease; legacy screens never invoke runtime action/check APIs |
-| Case progress and evidence receipt               | Expand proposal, attributed decisions, action, independent observation and unresolved gaps in History    | Reuses existing Case, review and action/check reads; no new records or permission         | Main (D8-A)                                                                           |
-| Failure walkthrough and measurement readiness    | Existing failure/result views remain unchanged                                                           | Five selected PostgreSQL/API control and failure fixtures with evidence output            | Main (D8-B)                                                                           |
-| Synthetic file intake                            | Explicit prepare, review target, commit and reopen; source citations and gaps                            | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay   | Main (D9-B); real data unapproved                                                     |
-| Accepted outcome, economics and complete closure | Unavailable                                                                                              | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof            | Future                                                                                |
+| Functionality                                     | Workbench                                                                                                | API / runtime                                                                                           | Availability                                                                          |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Case and evidence history                         | Explicit Orchid initialization; retained sources, uncertainty and changed-evidence demonstration         | Canonical PostgreSQL Case commands and replay                                                           | Main                                                                                  |
+| Decision Packet and human review                  | Finance/Executive approve; reject, modify or escalate; reload history                                    | Deterministic authority, exact C/R/S and immutable consent; replacements start unapproved               | Main (D6)                                                                             |
+| Record simulated credit                           | Explicit preparation and **Record simulated credit**                                                     | Scoped enrollment, one bound $15,000 Orchid credit, atomic source/action history                        | Main (D7-B/D7-D)                                                                      |
+| Independently check credit                        | **Check simulated source**; match, mismatch or inconclusive result; exact retry after uncertain response | Separate verifier and source read; retained evidence and restart replay                                 | Main (D7-C/D7-D)                                                                      |
+| ECC and legacy illustration                       | Separate Acme fixture story; illustrated action, verification and outcome screens                        | Thirty frozen synthetic cases and deterministic evaluation                                              | Main and historical prerelease; legacy screens never invoke runtime action/check APIs |
+| Case progress and evidence receipt                | Expand proposal, attributed decisions, action, independent observation and unresolved gaps in History    | Reuses existing Case, review and action/check reads; no new records or permission                       | Main (D8-A)                                                                           |
+| Failure walkthrough and measurement readiness     | Existing failure/result views remain unchanged                                                           | Five selected PostgreSQL/API control and failure fixtures with evidence output                          | Main (D8-B)                                                                           |
+| Synthetic file intake                             | Explicit prepare, review target, commit and reopen; source citations and gaps                            | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay                 | Main (D9-B); real data unapproved                                                     |
+| Cited workflow preparation and descriptive review | Open retained intake, inspect seven records/six outputs, answer/correct/confirm and reopen history       | Deterministic brief, exact Case/material/review bindings, one immutable journal and portable provenance | This review branch (D10-B); not released; complete Discovery remains pending          |
+| Accepted outcome, economics and complete closure  | Unavailable                                                                                              | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof                          | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
 credit row's expected account, Case, amount, currency and originating attempt. It
@@ -82,6 +83,12 @@ refreshing creates nothing. Pending commands survive reopening in the same brows
 profile; retain site storage while a response is uncertain. For the merged APIs,
 use the [API walkthrough](docs/guides/simulated-credit-api.md). Neither walkthrough
 silently resets an occupied credit slot or moves a changed Case.
+
+For this branch's **synthetic Discovery**, open the existing intake entry at
+<http://127.0.0.1:3210/?view=intake>. Explicitly prepare the sample, review its Case
+commit, then **Open workflow brief**. Save a descriptive answer and confirm its
+stated purpose separately. [Executable API steps, migration and desktop/390px captures](docs/guides/synthetic-discovery.md).
+This does not enroll intake Cases for financial actions or publish a Runtime Pack.
 
 The API and PostgreSQL are loopback-only. `fr up` builds the selected source and
 applies checksum-bound migrations; it refuses unsafe configuration. For an existing
@@ -140,11 +147,13 @@ history. They remain isolated from Orchid.
   uncertainty, permitted interventions and recovery remain. [Walkthrough and captures](apps/admin/README.md#d8-c-operator-attention-and-visual-review).
 - **D9 — Synthetic intake:** merged in PR #30, including retained bytes, explicit
   Case create/attach, successful-key bindings and cross-tab recovery. [Try intake](docs/guides/synthetic-intake.md).
-- **D10–D12:** [D10-A design in review](docs/architecture/d10-discovery-preparation-review.md)
-  covers seven records, six outputs, Operational Legibility, gap-driven questions
-  and redesign. D10-B's
-  descriptive review is authorized after PR #31 merges; D11 supplies a reviewed Runtime
-  Pack, D12 one bounded worker. No Discovery runtime or real-data permission exists today.
+- **D10–D12:** [D10-A / Accepted D-035](docs/architecture/d10-discovery-preparation-review.md)
+  is merged. This review branch implements the bounded D10-B cited brief and descriptive
+  review with seven record views, six outputs, gap-driven questions and redesign.
+  The broader Operational Legibility requirements remain incomplete.
+  [Try Discovery](docs/guides/synthetic-discovery.md). Full evidenced routes, governing
+  rules and measurement coverage remain incomplete. D11 supplies a reviewed Runtime
+  Pack; D12 supplies a bounded worker. Real-data activation remains unapproved.
 - **D13 — Customer proof:** planned 25-Case Challenge and Operating Capacity Map.
   Assisted evaluations may begin during D9–D12 within an approved data boundary;
   measured quality, total effort and repeat use determine continuation. Connected
@@ -187,7 +196,7 @@ Then follow the [tag-pinned guide](https://github.com/Mehtapozkan/fieldruntime-c
 after its clone step. Use a separate fresh appliance volume; do not downgrade an
 upgraded database. The tag-pinned page alone does not select the cloned revision.
 
-Merging source changes does not update that immutable tag or release. This D10-A docs-only PR
+Merging source changes does not update that immutable tag or release. This D10-B implementation PR
 publishes no new release or deployment. The source-clone appliance is the supported
 trial path; standalone installers, signed artifacts, SBOM/provenance and production
 operations remain future work. Workspace packages remain registry-private.

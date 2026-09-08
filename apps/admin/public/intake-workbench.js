@@ -518,6 +518,456 @@ export function mountIntakeWorkbench() {
     box.append(detail("Source claims and precise row locators", c.record));
     return box;
   }
+  let discoveryDraft = null;
+  function discoveryFocus() {
+    const n = stage.querySelector(
+      ".discovery-result h2, [role=alert], .discovery-brief h2",
+    );
+    n?.setAttribute("tabindex", "-1");
+    n?.focus();
+  }
+  function discoveryPanel(s) {
+    const v = s.discovery,
+      m = v.material,
+      a = m.assignment,
+      box = el("section", undefined, "discovery-brief");
+    const shell = el("div", undefined, "discovery-focus"),
+      summary = el("section", undefined, "review-card"),
+      controls = el("section", undefined, "review-form discovery-controls");
+    summary.append(
+      el(
+        "p",
+        "Revenue-linked assignment · Synthetic descriptive review",
+        "review-muted",
+      ),
+      el("h2", `${a.customer_ref} / ${a.invoice_id}`),
+      el(
+        "p",
+        `${new Intl.NumberFormat("en-US", { style: "currency", currency: a.currency }).format(a.amount_minor / 100)} reported dispute · ${entity(a.entity)}`,
+        "review-issue",
+      ),
+      el("p", a.objective),
+    );
+    const dependency = m.findings.find((f) => f.id === "R3"),
+      conflict = m.findings.find((f) => f.id === "R4");
+    summary.append(el("p", dependency.text, "review-notice"));
+    if (conflict.claim_state === "disputed")
+      summary.append(el("p", conflict.text, "review-notice"));
+    const correction = m.annotations.find((n) => n.target_id === "R3");
+    if (correction)
+      summary.append(
+        el(
+          "p",
+          `Operator-reported correction (${correction.state}): ${correction.text}`,
+        ),
+      );
+    summary.append(
+      el(
+        "p",
+        `Accountable owner unconfirmed${a.reported_owner ? `; source reports ${a.reported_owner}` : ""}. Customer impact and a valid disposition remain unproven.`,
+      ),
+    );
+    const sources = el("details", undefined, "intake-source");
+    sources.append(el("summary", "Cited evidence for this finding"));
+    const refSet = new Set([
+      ...dependency.citation_ids,
+      ...(conflict.claim_state === "disputed" ? conflict.citation_ids : []),
+    ]);
+    for (const c of m.sources.filter((c) => refSet.has(c.id)))
+      sources.append(
+        el("strong", c.name),
+        el("p", c.excerpt ?? "Retained only — no content extraction"),
+        detail("Original source locator", c),
+      );
+    summary.append(sources);
+    const current = !s.needsRefresh && !s.pending,
+      purposes = current ? v.current.confirmed_purposes : [];
+    const next = !v.current.can_record
+      ? "Commit this record to an explicitly chosen Case before saving answers."
+      : !current
+        ? "Refresh and inspect current inputs, or recover the saved original submission."
+        : purposes.includes("discovery_description")
+          ? purposes.includes("improvement_discussion")
+            ? "Descriptions recorded. Resolve the evidence and ownership gaps before any proposed handoff."
+            : "Review the proposed improvement; its controls and baseline remain unconfirmed."
+          : m.annotations.length
+            ? "Review the saved answers, then explicitly confirm the description or continue correcting it."
+            : "Clarify the consequential delivery-evidence question; unknown and disputed answers are allowed.";
+    controls.append(el("h3", "Next: descriptive review"), el("p", next));
+    if (v.current.requires_fresh_review)
+      controls.append(el("p", v.current.reasons.join(" "), "review-notice"));
+    if (v.current.can_record) {
+      if (
+        !discoveryDraft ||
+        discoveryDraft.material !== v.material_hash ||
+        discoveryDraft.revision !== v.binding.expected_discovery_revision
+      )
+        discoveryDraft = {
+          material: v.material_hash,
+          revision: v.binding.expected_discovery_revision,
+          target: "Q1",
+          state: "unknown",
+          text: "",
+          reason: "",
+          purpose: "discovery_description",
+          confirmReason: "",
+        };
+      const d = discoveryDraft,
+        form = el("div"),
+        target = select(
+          "Answer a question or correct a finding",
+          [
+            ...m.questions.map((q) => [q.id, `${q.id} · ${q.prompt}`]),
+            ...m.findings.map((f) => [f.id, `${f.id} · Correct ${f.title}`]),
+          ],
+          d.target,
+        );
+      const prompt = el(
+        "p",
+        m.questions.find((q) => q.id === d.target)?.prompt ??
+          m.findings.find((f) => f.id === d.target)?.text,
+        "discovery-question",
+      );
+      target.node.addEventListener("change", () => {
+        d.target = target.node.value;
+        prompt.textContent =
+          m.questions.find((q) => q.id === d.target)?.prompt ??
+          m.findings.find((f) => f.id === d.target)?.text;
+      });
+      const state = select(
+        "Answer state",
+        [
+          ["answered", "Answered — operator reported"],
+          ["unknown", "Unknown"],
+          ["disputed", "Disputed"],
+        ],
+        d.state,
+      );
+      state.node.addEventListener("change", () => (d.state = state.node.value));
+      const answer = el("label", "Descriptive answer or correction"),
+        text = el("textarea");
+      text.rows = 3;
+      text.maxLength = 2000;
+      text.value = d.text;
+      text.addEventListener("input", () => (d.text = text.value));
+      answer.append(text);
+      const reason = el("label", "Reason and evidence limits"),
+        r = el("textarea");
+      r.rows = 2;
+      r.maxLength = 2000;
+      r.value = d.reason;
+      r.addEventListener("input", () => (d.reason = r.value));
+      reason.append(r);
+      form.append(target.wrap, prompt, state.wrap, answer, reason);
+      const cite = el("details");
+      cite.append(el("summary", "Select supporting citations (optional)"));
+      const selected = new Set(d.citations ?? []);
+      for (const c of m.sources) {
+        const item = input(
+          `${c.name} · ${c.locator.record === null ? "document" : `source row ${c.locator.record}`}`,
+          "checkbox",
+        );
+        item.node.checked = selected.has(c.id);
+        item.node.addEventListener("change", () => {
+          if (item.node.checked) selected.add(c.id);
+          else selected.delete(c.id);
+          d.citations = [...selected];
+        });
+        cite.append(item.wrap);
+      }
+      form.append(cite);
+      const save = button(
+        "Save descriptive answer",
+        act(async () => {
+          if (!d.text.trim() || !d.reason.trim())
+            throw new Error(
+              "Give an answer (unknown is valid) and explain its evidence limits.",
+            );
+          if (selected.size > 16)
+            throw new Error(
+              "Select at most 16 supporting citations for this answer.",
+            );
+          await client.writeDiscovery({
+            schema_version: "discovery-review-command.v1",
+            ...v.binding,
+            operation: "annotate",
+            idempotency_key: uid(),
+            reason: d.reason,
+            changes: [
+              {
+                target_id: d.target,
+                state: d.state,
+                text: d.text,
+                reason: d.reason,
+                citation_ids: [...selected],
+              },
+            ],
+          });
+          discoveryFocus();
+        }),
+        !purposes.includes("discovery_description"),
+      );
+      save.disabled = s.busy || !!s.pending || s.needsRefresh;
+      form.append(save);
+      if (purposes.includes("discovery_description")) {
+        const more = el("details");
+        more.append(
+          el("summary", "Answer or correct the recorded description"),
+          form,
+        );
+        controls.append(more);
+      } else controls.append(form);
+      const consent = el("details", undefined, "discovery-consent");
+      consent.append(
+        el("summary", "Confirm a description or improvement discussion"),
+        el(
+          "p",
+          "Save answers first, then review the refreshed material. This records descriptive consent only; it does not resolve disagreements or grant authority.",
+        ),
+      );
+      const purpose = select(
+        "Descriptive purpose",
+        [
+          ["discovery_description", "Workflow description"],
+          ["improvement_discussion", "Improvement discussion"],
+        ],
+        d.purpose,
+      );
+      purpose.node.addEventListener(
+        "change",
+        () => (d.purpose = purpose.node.value),
+      );
+      const why = input("Confirmation reason", "text", d.confirmReason);
+      why.node.maxLength = 2000;
+      why.node.addEventListener(
+        "input",
+        () => (d.confirmReason = why.node.value),
+      );
+      const confirm = button(
+        "Record descriptive confirmation",
+        act(async () => {
+          if (!d.confirmReason.trim())
+            throw new Error(
+              "Explain why this description is suitable for the selected purpose.",
+            );
+          await client.writeDiscovery({
+            schema_version: "discovery-review-command.v1",
+            ...v.binding,
+            operation: "confirm",
+            purpose: d.purpose,
+            reason: d.confirmReason,
+            idempotency_key: uid(),
+          });
+          discoveryFocus();
+        }),
+      );
+      confirm.disabled = s.busy || !!s.pending || s.needsRefresh;
+      consent.append(purpose.wrap, why.wrap, confirm);
+      controls.append(consent);
+    } else
+      controls.append(
+        el(
+          "p",
+          "Use “Review this candidate”, inspect the exact intake commit, and explicitly create or select a Case. Discovery does not create one automatically.",
+        ),
+      );
+    if (!v.current.can_record)
+      controls.append(
+        button(
+          "Review Case preparation",
+          () => {
+            candidateIndex = s.view.candidates.findIndex(
+              (c) => c.record_key === v.binding.record_key,
+            );
+            draft = null;
+            client.closeDiscovery();
+            render();
+            stage
+              .querySelector(".intake-review h2")
+              ?.setAttribute("tabindex", "-1");
+            stage.querySelector(".intake-review h2")?.focus();
+          },
+          true,
+        ),
+      );
+    shell.append(summary, controls);
+    box.append(shell);
+    if (
+      s.discoveryConfirmed?.entry.case_id === v.binding.case_id &&
+      s.discoveryConfirmed.entry.command.bundle_id === v.binding.bundle_id &&
+      s.discoveryConfirmed.entry.command.record_key === v.binding.record_key
+    ) {
+      const e = s.discoveryConfirmed.entry,
+        result = el("section", undefined, "review-card discovery-result");
+      result.role = "status";
+      result.dataset.revision = String(e.sequence);
+      result.append(
+        el(
+          "h2",
+          e.operation === "annotate"
+            ? "Descriptive answer recorded"
+            : "Descriptive confirmation recorded",
+        ),
+        el(
+          "p",
+          `Recorded by the synthetic intake operator at ${new Date(e.recorded_at).toLocaleString()}. ${current ? (e.material_hash === v.material_hash ? "This receipt matches the refreshed descriptive material." : "This receipt is historical; it does not confirm the current material.") : "The receipt is confirmed; current applicability has not been refreshed."}`,
+        ),
+        detail("Exact historical receipt", e),
+      );
+      box.append(result);
+    }
+    const progress = el(
+      "p",
+      !current
+        ? "Current descriptive status is unconfirmed. Retained receipts remain historical evidence."
+        : purposes.length
+          ? `Recorded for: ${purposes.map((p) => (p === "discovery_description" ? "workflow description" : "improvement discussion")).join(" and ")}. This is not completed Discovery or a verified outcome.`
+          : "Draft description — explicit confirmation remains available; questions may remain unknown or disputed.",
+      "review-muted",
+    );
+    box.append(progress);
+    if (m.annotations.length) {
+      const notes = el("section", undefined, "review-card");
+      notes.append(el("h3", "Current operator-reported answers"));
+      for (const n of m.annotations)
+        notes.append(
+          el("p", `${n.target_id} · ${n.state}: ${n.text}`),
+          el("p", `Reason: ${n.reason}`, "review-muted"),
+        );
+      box.append(notes);
+    }
+    const records = el("details", undefined, "review-card");
+    records.append(
+      el("summary", "Seven Discovery records and six loop outputs"),
+    );
+    for (const f of m.findings) {
+      const part = el("section", undefined, "intake-source");
+      part.append(
+        el("h3", `${f.id} · ${f.title}`),
+        el("p", f.text),
+        el(
+          "p",
+          `${f.process_view} process · ${f.evidence_type} evidence · ${f.claim_state} claim`,
+          "review-muted",
+        ),
+      );
+      const q = m.questions.filter((q) => q.record_id === f.id);
+      for (const x of q)
+        part.append(
+          el("p", x.prompt),
+          el(
+            "p",
+            `Needed: ${x.needed_evidence}. Proposed owner: ${x.proposed_owner} (unconfirmed).`,
+          ),
+        );
+      records.append(part);
+    }
+    for (const o of m.loop_outputs)
+      records.append(
+        el("h3", o.id),
+        el("p", o.text),
+        el("p", `${o.process_view} · ${o.claim_state}`, "review-muted"),
+      );
+    box.append(records);
+    const improvement = el("details", undefined, "review-card");
+    improvement.append(
+      el("summary", "Proposed improvement — redesign before allocation"),
+    );
+    for (const p of m.improvements)
+      improvement.append(
+        el("h3", p.change.charAt(0).toUpperCase() + p.change.slice(1)),
+        el("p", p.proposal),
+        el("p", `Retained control: ${p.control}`),
+        el("p", `Then allocate: ${p.allocation}`),
+        el("p", `Evidence needed: ${p.measurement_needed}`, "review-muted"),
+      );
+    improvement.append(el("p", m.measurement_note));
+    box.append(improvement);
+    const evidence = el("details", undefined, "review-card");
+    evidence.append(
+      el("summary", "Complete cited sources and competing claims"),
+    );
+    for (const c of m.sources) {
+      const part = el("details", undefined, "intake-source");
+      part.append(
+        el("summary", c.name),
+        el("pre", c.excerpt ?? "Retained only — no extraction"),
+      );
+      const link = el("a", "Download original source bytes");
+      link.href = `/v1/intake/artifacts/${c.artifact_hash.slice(7)}`;
+      part.append(link, detail("Citation, scope and source time", c));
+      evidence.append(part);
+    }
+    evidence.append(
+      detail("Source-reported values and evidence conditions", m.source_claims),
+    );
+    box.append(evidence);
+    const history = el("details", undefined, "review-card");
+    history.append(
+      el("summary", `Descriptive review history (${v.history.length} entries)`),
+    );
+    for (const e of v.history) {
+      const part = el("section", undefined, "intake-source"),
+        applicable = e.material_hash === v.material_hash && current;
+      part.append(
+        el(
+          "h3",
+          `${e.operation === "annotate" ? "Annotation" : "Confirmation"} · ${new Date(e.recorded_at).toLocaleString()}`,
+        ),
+        el(
+          "p",
+          `Synthetic intake operator · ${applicable ? "matches this material" : "historical material; no current confirmation inferred"}`,
+        ),
+      );
+      if (e.operation === "annotate")
+        for (const change of e.command.changes) {
+          part.append(
+            el("p", `${change.target_id} · ${change.state}: ${change.text}`),
+            el("p", `Reason: ${change.reason}`),
+          );
+          const carry = button("Use this answer in a new draft", () => {
+            if (!discoveryDraft) return;
+            discoveryDraft = {
+              ...discoveryDraft,
+              target: change.target_id,
+              state: change.state,
+              text: change.text,
+              reason: change.reason,
+              citations: change.citation_ids.filter((id) =>
+                m.sources.some((c) => c.id === id),
+              ),
+            };
+            render();
+            stage.querySelector(".discovery-controls textarea")?.focus();
+          });
+          carry.disabled =
+            !v.current.can_record || s.busy || !!s.pending || s.needsRefresh;
+          part.append(carry);
+        }
+      part.append(
+        detail("Original reviewed material, citations and attribution", e),
+      );
+      history.append(part);
+    }
+    history.append(
+      el(
+        "p",
+        "Historical answers remain inspectable. Carry-forward only fills a new draft; save it against refreshed inputs and confirm separately.",
+      ),
+    );
+    box.append(
+      history,
+      detail("Technical bindings and implementation versions", {
+        binding: v.binding,
+        manifest: m.manifest,
+        current: v.current,
+      }),
+    );
+    const download = el("a", "Download portable Discovery evidence");
+    download.href = `/v1/intake/bundles/${v.binding.bundle_id}/discovery?record_key=${encodeURIComponent(v.binding.record_key)}${v.binding.case_id ? `&case_id=${v.binding.case_id}` : ""}&representation=export`;
+    box.append(download);
+    return box;
+  }
   function render() {
     const s = client.state;
     stage.replaceChildren();
@@ -526,7 +976,10 @@ export function mountIntakeWorkbench() {
       "Turn a synthetic dispute export into explicitly reviewed Case evidence. Customer impact, ownership and population completeness may remain unknown.",
       "review-issue",
     );
-    stage.append(intro);
+    if (!s.discovery) stage.append(intro);
+    heading.querySelector("h1").textContent = s.discovery
+      ? "Invoice disputes / Workflow brief"
+      : "Invoice disputes / Review received evidence";
     if (s.error || localError) {
       const notice = el("div", s.error ?? localError, "review-notice");
       notice.role = "alert";
@@ -538,7 +991,7 @@ export function mountIntakeWorkbench() {
         el("h2", "Original submission needs recovery"),
         el(
           "p",
-          "One intake command is shared across tabs. Recover these exact saved bytes and key; completion in another tab does not authorize a different submission.",
+          "One intake or Discovery command is shared across tabs. Recover these exact saved bytes and key; completion in another tab does not authorize a different submission.",
         ),
         button(
           "Recover original submission",
@@ -549,7 +1002,7 @@ export function mountIntakeWorkbench() {
       );
       stage.append(recovery);
     }
-    if (s.confirmed) {
+    if (s.confirmed && !s.discovery) {
       const r = s.confirmed.receipt,
         confirmed = el("section", undefined, "review-card intake-confirmed");
       confirmed.setAttribute("role", "status");
@@ -583,7 +1036,14 @@ export function mountIntakeWorkbench() {
     );
     refresh.disabled = s.busy;
     stage.append(refresh);
+    if (s.discovery) stage.append(discoveryPanel(s));
     if (s.view) {
+      const retained = el("details", undefined, "discovery-intake-details");
+      retained.append(
+        el("summary", "Intake records, Case preparation and original sources"),
+      );
+      if (s.discovery) stage.append(retained);
+      const intakeStage = s.discovery ? retained : stage;
       const v = s.view,
         cover = v.bundle.coverage,
         coverage = el("section", undefined, "review-card");
@@ -602,10 +1062,10 @@ export function mountIntakeWorkbench() {
         ),
         detail("Preparation, parser versions and four time meanings", v.bundle),
       );
-      stage.append(coverage);
+      intakeStage.append(coverage);
       if (candidateIndex !== null) {
         const form = review(s);
-        if (form) stage.append(form);
+        if (form) intakeStage.append(form);
       }
       const candidates = el("section", undefined, "review-card");
       candidates.append(el("h2", "Choose a candidate to review"));
@@ -636,6 +1096,7 @@ export function mountIntakeWorkbench() {
           () => {
             candidateIndex = i;
             draft = null;
+            client.closeDiscovery();
             client.invalidate();
             render();
             stage
@@ -647,13 +1108,31 @@ export function mountIntakeWorkbench() {
         );
         choose.disabled = !c.can_review || s.busy || !!s.pending;
         card.append(choose);
+        const openBrief = button(
+          "Open workflow brief",
+          act(async () => {
+            const receipt = c.commits
+              .filter((r) => r.selection.bundle_id === v.bundle.id)
+              .at(-1);
+            await client.openDiscovery({
+              bundle_id: v.bundle.id,
+              record_key: c.record_key,
+              case_id: receipt?.case_id ?? null,
+            });
+            discoveryDraft = null;
+            render();
+            discoveryFocus();
+          }),
+        );
+        openBrief.disabled = !c.can_review || s.busy;
+        card.append(openBrief);
         if (c.commits.length)
           card.append(
             detail("Earlier requests to create or attach evidence", c.commits),
           );
         candidates.append(card);
       }
-      stage.append(candidates);
+      intakeStage.append(candidates);
       const evidence = el("section", undefined, "review-card");
       evidence.append(
         el("h2", "Retained sources"),
@@ -663,13 +1142,13 @@ export function mountIntakeWorkbench() {
         ),
       );
       for (const a of v.bundle.artifacts) evidence.append(source(a));
-      stage.append(evidence);
+      intakeStage.append(evidence);
       const again = el("details");
       again.append(
         el("summary", "Prepare another export or repeat import"),
         newPreparation(s),
       );
-      stage.append(again);
+      intakeStage.append(again);
     } else stage.append(newPreparation(s));
     if (s.list.length) {
       const history = el("section", undefined, "review-card");
