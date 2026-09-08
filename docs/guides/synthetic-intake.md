@@ -68,6 +68,12 @@ command/key before submission; localStorage retains a navigation ID. Clearing si
 storage loses unconfirmed retry information, not canonical history. No new key is
 chosen automatically. A confirmed receipt remains visible if its refresh fails.
 
+D-034’s no-alias reimport rule returns the original bundle/receipt for unchanged
+material. A fresh key yielding `already_retained` or `already_committed` is not
+reserved: only the original retained command key is durably bound to its exact
+body. Always recover an uncertain submission with its unchanged command. Do not
+treat a historical no-op as acceptance of a new key, filename, reason or consent.
+
 | Operation         | Endpoint                                      | Durable effect                                                  |
 | ----------------- | --------------------------------------------- | --------------------------------------------------------------- |
 | Prepare           | `POST /v1/intake/preparations`                | Original scoped bytes + immutable bundle; no Case/review/action |

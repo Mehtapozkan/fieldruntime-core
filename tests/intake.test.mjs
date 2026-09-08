@@ -222,3 +222,18 @@ test("D9-B A8 presentation: repeated invalid rows remain inspectable beside a va
     await import("../apps/admin/public/intake-client.js");
   await assert.doesNotReject(validateIntakeView(view));
 });
+
+test("D9-B CSV grammar: quoted newlines accept LF/CRLF and reject bare CR", async () => {
+  for (const newline of ["\n", "\r\n", "\r"]) {
+    const input = editQueue(await intakeInput(), (rows) => {
+      rows[0].activity = `first${newline}second`;
+    });
+    const parse = () => prepareIntake(input, INTAKE_START, INTAKE_START);
+    if (newline === "\r")
+      assert.throws(parse, (error) => error.code === "INVALID_FORMAT");
+    else {
+      const result = parse();
+      assert.equal(result.bundle.records[0].locators[0].line_end, 3);
+    }
+  }
+});

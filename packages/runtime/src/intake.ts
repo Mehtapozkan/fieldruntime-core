@@ -241,6 +241,12 @@ export function parseIntakeCsv(bytes: Buffer): {
           closed = true;
         }
       } else {
+        if (b === 13)
+          requireIntake(
+            bytes[i + 1] === 10,
+            "INVALID_FORMAT",
+            "Use LF or CRLF",
+          );
         field.push(present(b));
         if (b === 10) line++;
       }

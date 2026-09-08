@@ -224,6 +224,8 @@ export class PostgresIntakeStore {
         return preparedResult("duplicate", prior);
       }
       const identical = state.bundles.find((b) => b.id === parsed.bundle.id);
+      // D-034 A2 retains the original bundle/key without a fresh-key alias.
+      // This no-op does not reserve the submitted key or accept new metadata.
       if (identical) return preparedResult("already_retained", identical);
       const at = checkedTime(state, now),
         prepared = prepareIntake(input, ingestedAt, at);

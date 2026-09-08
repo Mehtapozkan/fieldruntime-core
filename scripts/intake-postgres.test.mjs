@@ -5,6 +5,31 @@ import { intakeHost } from "../tests/helpers/intake-postgres.mjs";
 import { intakeInput } from "../tests/helpers/intake.mjs";
 import { validateIntakeExport } from "../dist/packages/runtime/src/intake-integrity.js";
 const root = "/v1/intake";
+test("D9-B preparation routes share decoded paths, ingestion attribution and bounded upload size", async (t) => {
+  const h = await intakeHost(t);
+  for (const [index, path] of [
+    `${root}/preparations/`,
+    `${root}/%70reparations?source=synthetic`,
+  ].entries()) {
+    await h.ok(path, await intakeInput(`small-route-${index}`));
+    const input = await intakeInput(`route-${index}`);
+    input.artifacts[1] = {
+      ...input.artifacts[1],
+      name: "retention.pdf",
+      media_type: "application/pdf",
+      bytes_base64: Buffer.from(
+        `%PDF-1.7\n${"x".repeat(800_000)}${index}`,
+      ).toString("base64"),
+    };
+    assert.ok(Buffer.byteLength(JSON.stringify(input)) > 1_048_576);
+    const result = await h.ok(path, input);
+    const view = await h.ok(`${root}/bundles/${result.bundle_id}`);
+    assert.equal(view.bundle.ingested_at, "2026-09-07T16:05:00.000Z");
+  }
+  const before = await h.snapshot();
+  assert.equal((await h.call(`${root}/%ZZ`, await intakeInput())).status, 400);
+  assert.deepEqual(await h.snapshot(), before);
+});
 test("D9-B A1/A9/A12 PostgreSQL/API: explicit prepare, preview, atomic commit, restart and portable reconstruction", async (t) => {
   const h = await intakeHost(t),
     view = await h.prepare();
@@ -56,6 +81,9 @@ test("D9-B A2 PostgreSQL: renamed bytes are retained once and changed-key bodies
   const same = await h.ok(`${root}/preparations`, input);
   assert.equal(same.status, "already_retained");
   assert.equal(same.bundle_id, view.bundle.id);
+  assert.deepEqual(await h.snapshot(), before);
+  await h.restart();
+  assert.deepEqual(await h.ok(`${root}/preparations`, input), same);
   assert.deepEqual(await h.snapshot(), before);
   input.idempotency_key = "prepare-1";
   assert.equal((await h.call(`${root}/preparations`, input)).status, 409);

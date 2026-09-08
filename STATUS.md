@@ -975,13 +975,13 @@ material does not duplicate history; changed material needs current C/prior bind
 and fresh consent. R/S and Orchid enrollment remain untouched. No import grants
 financial authority, and standalone journal replay does not claim source-byte replay.
 
-Local `pnpm validate` passes **283 tests**, formatting, lint, typecheck and release
-audit. Real local PostgreSQL **18.4** passes **18 intake/API tests** (including
+Local `pnpm validate` passes **284 tests**, formatting, lint, typecheck and release
+audit. Real local PostgreSQL **18.4** passes **19 intake/API tests** (including
 nested tamper variants) and **three Chromium browser scenarios**: prepare/inspect/
 commit, exact lost-response recovery, restart, stale or edited inspection and retained
 confirmed evidence after refresh failure. The documented example commands and
 portable export checker execute successfully; a forged export fails. Unit intake
-coverage is nine tests, included in the 283. **63 retained D6 PostgreSQL/API tests
+coverage is ten tests, included in the 284. **63 retained D6 PostgreSQL/API tests
 pass**. The **115 retained D7/D8 PostgreSQL/API tests**, including all eight
 Workbench browser scenarios, also pass locally. Final-head CI evidence is recorded
 in the PR and required before handoff. CI uses the repository's pinned PostgreSQL
@@ -1000,6 +1000,14 @@ mobile navigation overlap and an edit-during-inspection race were reproduced and
 corrected before final captures. A separate reproduced presentation regression
 keeps repeated invalid rows inspectable beside valid candidates by reconciling their
 exact retained order/locators. Full source/receipt content remains expandable.
+
+PR review reproduced HTTP 500 on equivalent decoded preparation routes, premature
+large-upload rejection, and unsupported bare CR inside quoted CSV. Shared route
+decoding and strict LF/CRLF validation correct these with regression coverage.
+The requested fresh-key reservation for unchanged reimports remains a review
+question: Accepted D-034 A2 specifies original receipts with no alias. The current
+implementation durably binds original retained keys, leaves no-op keys unreserved,
+and documents that limit rather than silently adding a key registry.
 
 Requirements I1 and supporting R1/R2/R3/R5/R6, P2/P6 and L4 now link actual synthetic
 acceptance evidence in the existing matrix. They are not complete customer Discovery,

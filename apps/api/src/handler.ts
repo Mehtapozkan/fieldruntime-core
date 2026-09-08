@@ -109,7 +109,7 @@ function isObject(value: JsonValue): value is JsonObject {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-function decodePath(path: string): string[] | undefined {
+export function decodePath(path: string): string[] | undefined {
   const pathname = path.split("?", 1)[0] ?? "";
   try {
     const segments = pathname

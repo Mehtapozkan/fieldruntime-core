@@ -1,6 +1,7 @@
 import { MAX_INTAKE_HTTP_BYTES } from "../../../packages/runtime/src/intake.js";
 import { createServer, type IncomingHttpHeaders, type Server } from "node:http";
 import {
+  decodePath,
   handleApiRequest,
   type ApiDependencies,
   type ApiRequest,
@@ -55,7 +56,7 @@ export function createApiServer(
 
     const preparation =
       method === "POST" &&
-      request.url?.split("?", 1)[0] === "/v1/intake/preparations";
+      decodePath(request.url ?? "/")?.join("/") === "v1/intake/preparations";
     const bodyLimit = preparation ? MAX_INTAKE_HTTP_BYTES : MAX_BODY_BYTES;
     const chunks: Buffer[] = [];
     let size = 0;
