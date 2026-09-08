@@ -54,18 +54,14 @@ export async function validateIntakeView(v) {
       v.candidates.length === v.bundle.records.length,
   );
   await bound(v.bundle);
-  for (const c of v.candidates) {
+  for (const [index, c] of v.candidates.entries()) {
+    // Invalid rows may have no key and identical cells but distinct byte locators.
+    // Reconcile the server's preserved row order, not an arbitrary first key match.
     requireData(
-      JSON.stringify(canonical(c.record)) ===
-        JSON.stringify(
-          canonical(
-            v.bundle.records.find(
-              (r) =>
-                r.record_key === c.record_key &&
-                r.source_revision === c.record.source_revision,
-            ),
-          ),
-        ) &&
+      c.record_key === c.record.record_key &&
+        c.can_review === c.record.valid &&
+        JSON.stringify(canonical(c.record)) ===
+          JSON.stringify(canonical(v.bundle.records[index])) &&
         Array.isArray(c.targets) &&
         Array.isArray(c.commits),
     );

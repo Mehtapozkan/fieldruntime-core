@@ -1,8 +1,9 @@
 # D9-B visual handoff
 
 These captures come from Chromium against the real local PostgreSQL/API fixture,
-using the synthetic files in this branch. They accompany this PR's code; the PR
-records the final source commit. Reproduce with:
+using the synthetic files in this branch. They capture implementation head `fa928ab0b5718f9c9311da6e72696fee97fa29e8`;
+the later invalid-row reconciliation fix does not change these layouts. The PR
+records the final validated source commit. Reproduce with:
 
 ```sh
 D9_SCREENSHOT_DIR=docs/evidence/d9b \

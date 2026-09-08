@@ -204,3 +204,21 @@ test("D9-B A11: reviewed exclusions change consent and material; arbitrary links
   ];
   assert.throws(() => buildIntakeMaterial(s, b, []));
 });
+
+test("D9-B A8 presentation: repeated invalid rows remain inspectable beside a valid independent candidate", async () => {
+  const input = editQueue(await intakeInput(), (rows, headers) => ({
+    rows: [
+      { ...rows[0], source_record_id: "" },
+      { ...rows[0], source_record_id: "" },
+      rows[1],
+    ],
+    headers,
+  }));
+  const bundle = prepare(input),
+    view = readIntakeView(bundle, empty, []);
+  assert.equal(view.bundle.coverage.invalid_records, 2);
+  assert.equal(view.candidates[2].can_review, true);
+  const { validateIntakeView } =
+    await import("../apps/admin/public/intake-client.js");
+  await assert.doesNotReject(validateIntakeView(view));
+});

@@ -38,8 +38,20 @@ async function choose(page) {
     .fill(
       "Reviewed North entity, unconfirmed delivery and unknown occurrence. Create a coordination Case; no credit authority.",
     );
-  await page.getByLabel("I reviewed the source gaps", { exact: false }).check();
-  await page.getByRole("button", { name: "Inspect exact commit" }).click();
+  await page.getByLabel("Review reason / corrections or exclusions").focus();
+  await page.keyboard.press("Tab");
+  await expect(
+    page.getByLabel("I reviewed the source gaps", { exact: false }),
+  ).toBeFocused();
+  await page.keyboard.press("Space");
+  await expect(
+    page.getByLabel("I reviewed the source gaps", { exact: false }),
+  ).toBeChecked();
+  await page.keyboard.press("Tab");
+  await expect(
+    page.getByRole("button", { name: "Inspect exact commit" }),
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByRole("button", { name: "Commit reviewed material" }),
   ).toBeVisible();

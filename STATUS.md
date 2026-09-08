@@ -975,15 +975,16 @@ material does not duplicate history; changed material needs current C/prior bind
 and fresh consent. R/S and Orchid enrollment remain untouched. No import grants
 financial authority, and standalone journal replay does not claim source-byte replay.
 
-Local `pnpm validate` passes **282 tests**, formatting, lint, typecheck and release
+Local `pnpm validate` passes **283 tests**, formatting, lint, typecheck and release
 audit. Real local PostgreSQL **18.4** passes **18 intake/API tests** (including
 nested tamper variants) and **three Chromium browser scenarios**: prepare/inspect/
 commit, exact lost-response recovery, restart, stale or edited inspection and retained
 confirmed evidence after refresh failure. The documented example commands and
 portable export checker execute successfully; a forged export fails. Unit intake
-coverage is eight tests, included in the 282. **63 retained D6 PostgreSQL/API tests
-pass**. D7/D8 PostgreSQL/browser and final-head CI evidence are recorded in the PR;
-completion is required before handoff. CI uses the repository's pinned PostgreSQL
+coverage is nine tests, included in the 283. **63 retained D6 PostgreSQL/API tests
+pass**. The **115 retained D7/D8 PostgreSQL/API tests**, including all eight
+Workbench browser scenarios, also pass locally. Final-head CI evidence is recorded
+in the PR and required before handoff. CI uses the repository's pinned PostgreSQL
 image and retains all existing Compose/appliance/restart/Workbench coverage.
 
 ECC passes **620/620** with unchanged corpus/gold hashes. Its negative control exits
@@ -996,7 +997,9 @@ source amount/entity, uncertainty, target/reason and explicit controls. Browser
 coverage includes focus/keyboard traversal and no mobile horizontal overflow. This
 is not a screen-reader, cross-browser or customer usability study. The initial
 mobile navigation overlap and an edit-during-inspection race were reproduced and
-corrected before final captures. Full source/receipt content remains expandable.
+corrected before final captures. A separate reproduced presentation regression
+keeps repeated invalid rows inspectable beside valid candidates by reconciling their
+exact retained order/locators. Full source/receipt content remains expandable.
 
 Requirements I1 and supporting R1/R2/R3/R5/R6, P2/P6 and L4 now link actual synthetic
 acceptance evidence in the existing matrix. They are not complete customer Discovery,
