@@ -1,10 +1,10 @@
 {
   "example_only": true,
-  "artifact_hash": "sha256:5865131c79715c962f29360222628d46be2d18075671acf898616bc39dc27e68",
+  "artifact_hash": "sha256:bc54d0a07cd76ccaa80887de0024632260d368d810649ffa9e74f43224e28bcd",
   "artifact": {
     "format": "runtime-pack.invoice-dispute.v1",
     "pack_id": "pack_synthetic_invoice_dispute_north",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "mode": "preparation_only",
     "workflow": {
       "objective": "Prepare and coordinate an evidence-backed invoice-dispute disposition.",
@@ -322,58 +322,51 @@
     ],
     "loop_outputs": [
       {
-        "citation_ids": [
-          "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81"
-        ],
+        "citation_ids": [],
         "claim_state": "unknown",
         "id": "Trigger",
         "process_view": "proposed",
-        "text": "An entity-qualified reported invoice dispute is received; actual business start semantics need confirmation."
+        "text": "Proposed trigger: receive an entity-qualified invoice dispute for scoped preparation. The business start event and eligibility rule still need confirmation."
       },
       {
-        "citation_ids": [
-          "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81"
-        ],
+        "citation_ids": [],
         "claim_state": "unknown",
         "id": "Objective",
         "process_view": "proposed",
-        "text": "Prepare an evidence-backed disposition for Orchid / INV-101 in entity_north."
+        "text": "Proposed objective: prepare and coordinate an evidence-backed invoice-dispute disposition. This is the template assignment, not a result established by the queue."
       },
       {
         "citation_ids": [
-          "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81"
+          "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81",
+          "sha256:d2bb5dfa3905c9f8f2d101bf856fac5a076c15f68f01df26e3663eda856198dd"
         ],
-        "claim_state": "unknown",
+        "claim_state": "supported",
         "id": "Population",
-        "process_view": "proposed",
-        "text": "2 distinct records in this upload; recurring eligible cohort, coverage and window remain unconfirmed."
+        "process_view": "observed",
+        "text": "Two distinct entity-qualified records are present in this retained upload: North dispute-17 and South dispute-18. This is an upload count, not the recurring eligible population or evidence of complete coverage."
       },
       {
-        "citation_ids": [
-          "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81"
-        ],
+        "citation_ids": [],
         "claim_state": "unknown",
         "id": "Close Event",
         "process_view": "proposed",
-        "text": "Candidate: accountable owner/customer accepts an agreed disposition independently evidenced in its governing source. Settlement versus matched cash remains unresolved. No Case closure is granted."
+        "text": "Proposed close requirement: accountable owner/customer accepts an agreed disposition independently evidenced in its governing source. Settlement versus matched cash remains unresolved. This is not a source-established event or Case closure permission."
       },
       {
         "citation_ids": [
-          "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81"
+          "sha256:bdfdf67eb06b728d516f38c8d2de0e9a33fb4e8f18ddeb5e58126192bb88f975"
         ],
-        "claim_state": "unknown",
+        "claim_state": "supported",
         "id": "Human Intervention Map",
-        "process_view": "proposed",
-        "text": "DEL-4: A supplied note reports that delivery confirmation is not supplied. Source reports are not independent verification. Absence from this upload does not prove non-delivery; underlying proof and customer impact remain unverified. Evidence owner and governing terms need confirmation. Financial authority is absent; no automatic owner assignment."
+        "process_view": "observed",
+        "text": "The note explicitly associated with North dispute-17 reports that DEL-4 delivery confirmation is not supplied. This supports the source report only; it does not prove non-delivery or customer impact. Identifying an evidence owner and obtaining governing terms remain proposed follow-up questions."
       },
       {
-        "citation_ids": [
-          "sha256:ae1db2dd250c56dc314f2bf79e7d3b41fe4fbdca5dee810f4626b9a926539e81"
-        ],
+        "citation_ids": [],
         "claim_state": "unknown",
         "id": "Correction Path",
         "process_view": "proposed",
-        "text": "Append a cited descriptive correction and reason; preserve the original. Promotion to rules, evaluation or worker behavior requires later reviewed work."
+        "text": "Proposed correction path: reuse an applicable D10 descriptive review; genuinely changed descriptions append a cited or explicitly operator-reported correction and require fresh descriptive confirmation plus separate pack publication approval. D-035 preserves originals; no rule or worker behavior promotes automatically."
       }
     ],
     "simplification_before_allocation": [
@@ -454,31 +447,34 @@
       },
       {
         "id": "S3",
-        "label": "Review findings and coordinate missing-evidence questions",
+        "label": "Reuse applicable descriptive review; intervene only when the description changes",
         "mechanism": "person",
         "depends_on": ["S2"],
         "subject_binding": "selected record_key; claims preserve their own entity/kind/id and explicit source associations",
         "inputs": [
-          "Exact cited material and gap agenda",
+          "Exact bound material and currently applicable selected-record D10 descriptive confirmation",
           "Canonical synthetic operator identity; proposed recipients remain unconfirmed"
         ],
-        "output": "D10 descriptive answers/corrections/confirmation and a proposed follow-up agenda",
+        "output": "Reference the existing applicable review and proposed follow-up agenda; a genuine correction branches to fresh review and pack publication",
         "acceptance": [
-          "Changes append with reason, attribution and relevant citations",
-          "New material requires fresh annotation and separate confirmation",
-          "No task/message dispatch or automatic owner assignment"
+          "Normal path reuses the completed D10 review; opening or acknowledging it performs no identical confirmation write",
+          "A genuine correction advances the Case-wide Discovery revision and makes the old pack ineligible for current use",
+          "Refresh, append the necessary descriptive annotation and separate confirmation, derive a new artifact/version and obtain separate publication approval before S4 uses the changed basis",
+          "No task/message dispatch, approval carry-forward or automatic owner assignment"
         ],
         "accountable_owner": "identity_intake_operator (synthetic descriptive-review seat)",
         "exception_owner": "identity_pack_reviewer_demo (proposed synthetic support seat)",
         "allowed_actions": [
-          "Existing annotate/confirm commands",
+          "Read the already applicable D10 review",
+          "Use existing annotate/confirm commands only for genuine descriptive changes under D-035, independently of old pack permission",
           "Draft a follow-up agenda for a person"
         ],
         "authority_mode": "scoped_read_propose_only",
         "intervention_and_stop": [
           "JUDGMENT only for evidenced trade-offs; do not infer it from missing approval",
           "No response/deadline evidence means follow-up remains unconfirmed; operator may pause",
-          "Existing exact retry and cross-tab recovery; never auto-resubmit"
+          "Existing exact retry and cross-tab recovery; never auto-resubmit",
+          "Changed basis stops progression under the old pack; D11-B displays fresh-review/publication prerequisites, while D12 owns worker execution"
         ],
         "verification_and_evaluations": ["Discovery T5-T9/T11/T12", "D11 T2/T5"]
       },
@@ -489,11 +485,12 @@
         "depends_on": ["S2", "S3"],
         "subject_binding": "selected record_key; claims preserve their own entity/kind/id and explicit source associations",
         "inputs": [
-          "Latest exact material and descriptive history",
+          "Exact material, applicable descriptive review and currently eligible published pack sharing the same basis",
           "Unresolved items and separate authority/close requirements"
         ],
         "output": "Read/propose disposition packet: supported options or explicit abstention",
         "acceptance": [
+          "Require one coherent exact basis across S2, S3 and current pack selection; never combine new material with historical permission",
           "Every factual claim has applicable citations; hypotheses labeled",
           "No unsupported amount recommendation",
           "Human task acceptance, when captured later, binds exact packet/step/pack and does not authorize an action"
@@ -657,7 +654,38 @@
       "discovery_confirmation_is_sufficient": false,
       "current_selection": "none",
       "effective_period": "Set and bound in explicit publication command; no backdating or automatic activation",
-      "worker_or_action_activation": false
+      "worker_or_action_activation": false,
+      "operations": {
+        "publish": {
+          "current_basis_required": true,
+          "compatible_artifact_required": true,
+          "current_eligible_reviewer_required": true,
+          "exact_selection_head_required": true,
+          "effectivity": "New server-started interval ending within the current reviewer grant"
+        },
+        "rollback": {
+          "current_basis_required": true,
+          "compatible_artifact_required": true,
+          "current_eligible_reviewer_required": true,
+          "exact_selection_head_required": true,
+          "effectivity": "New explicit selection interval; a retained artifact cannot bypass current basis or grant checks"
+        },
+        "withdraw": {
+          "current_basis_required": false,
+          "currently_usable_artifact_required": false,
+          "current_eligible_reviewer_required": true,
+          "exact_selected_artifact_required": true,
+          "exact_selection_head_required": true,
+          "effectivity": "Ignore stale business inputs and expired pack effectivity; never ignore expired or revoked reviewer authority",
+          "forbidden_command_fields": [
+            "expected_basis",
+            "effective_until",
+            "effective_until_source_timezone"
+          ],
+          "result": "Select nothing; grant no permission"
+        }
+      },
+      "descriptive_review_transition": "Reuse current completed D10 review. Changed description loses old pack current-use eligibility; new material/version needs fresh descriptive review and a separate publication command."
     }
   },
   "example_basis_export_hash": "sha256:f94c9f4348a2e12d52a66145fd354f6e53a908827466194a7fec33a5a85d385e"

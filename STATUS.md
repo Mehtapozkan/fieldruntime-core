@@ -11,7 +11,8 @@ D10-A / Accepted D-035 and its original human approval history remain unchanged.
 Main provides a deterministic cited brief, seven descriptive records and six loop
 outputs, gap questions, explicit answers/corrections and descriptive confirmation.
 One Case-linked PostgreSQL history retains exact bindings and synthetic attribution.
-Current v2 preserves record/delivery applicability and relevant citations; old v1
+Current v2 preserves record/delivery applicability in scoped claims/findings, but its
+loop helper still assigns selected-record citations to every loop output (gap below). Old v1
 reviews/exports retain their original semantics. Node 24.19.0 / tzdata 2026b remains
 required for those archives. Case/authority/intake histories, successful no-op keys,
 atomic cross-tab recovery and migration checksums remain intact. Reads do not write.
@@ -1221,6 +1222,50 @@ PostgreSQL/API/browser tests, eight separate D6 browser cases, Compose and appli
 restart checks using pinned Node 24.19.0 and PostgreSQL 17.11. These are merged
 implementation checks. D11-A's required CI runs on its PR; no D11 publication or
 T1–T9 implementation pass is claimed by the design or example reproduction.
+
+## D11-A design correction (PR #33)
+
+Starting head `b773162a` had two provenance failures: the Human Intervention Map
+cited only the queue row for the DEL-4 note report, and the two-record count cited
+only North's row. The corrected proposed example cites the associated note and both
+entity-qualified rows respectively; proposed objectives/process rules carry no fabricated
+source proof. Its version advances to 0.1.1 and its artifact hash is recomputed.
+All six outputs are audited; the documented check now tests citation relevance,
+not just hash validity. The original Discovery material/export hashes remain unchanged.
+
+The existing `projectDiscovery` loop helper still applies `ownRefs` to every output.
+This is an upstream runtime gap, **not fixed by this documentation change**. D11-B's
+fixed pack projection must derive relevant scoped-claim/coverage support rather than
+copy that fallback. A later upstream repair needs an explicit interpreter version
+and preserved v1/v2 history/replay; no runtime file or migration changes here.
+
+One operation table governs publication: publish/rollback require current basis and
+compatible artifacts; withdraw requires an eligible current reviewer, exact selected
+artifact and stream head, regardless of stale evidence/expired pack effectivity.
+Revoked/expired reviewer grants still deny withdrawal. T7 covers stale-pack withdrawal,
+unauthorized withdrawal, competing stale-head commands and unchanged business histories.
+
+S3 reuses completed applicable D10 review without another Confirm. A new annotation
+advances D, stales the pack, and requires fresh descriptive confirmation followed by
+a new artifact/version and separate publication approval before S4 uses the changed
+basis. D11-B only exposes this transition; D12 still supplies worker execution.
+D-036 remains Proposed. The supporting journal/publication boundary is unapproved.
+
+Local correction validation passes `pnpm validate` **297/297** plus format/lint/
+typecheck/release audit. ECC is **620/620**; its intended negative control exits **1**
+at **152/620**, not a setup failure. The stronger documented example check fails on
+`b773162a`'s queue citation and passes on the corrected artifact, through disposable
+PostgreSQL 18.4/API. It checks six-output provenance, original archive hashes, read-only
+reuse at D=1, new information at D=2, fresh confirmation at D=3 and restart/export
+preservation. It also explicitly confirms that the upstream helper remains unfixed.
+
+Static checks pass **158 local links**, all **19 matrix IDs**, source-byte/hash citations,
+three operation-specific gate descriptions and retained T1–T9 identifiers. The example
+artifact hash is `sha256:bc54d0a07cd76ccaa80887de0024632260d368d810649ffa9e74f43224e28bcd`.
+`git diff --check` passes. Docker remains unavailable locally (`docker compose config
+--quiet`: exit 127). Hosted CI must be reported against the final PR #33 head; these
+local checks do not establish a final-head CI pass. No future
+publication acceptance test or upstream runtime repair is claimed as implemented.
 
 ## Next
 

@@ -78,6 +78,12 @@ field/variant rules, owner responses, cohort/effort/cost evidence and customer a
 are still needed. Queue snapshots and ingestion/review times do not establish a route,
 waiting duration, active effort or savings. D10 creates no independently verified fact.
 
+Known remaining provenance gap: the runtime's six loop-output summaries all inherit
+selected-record citations. The intervention note and upload-wide count can therefore
+lack their relevant note/other-record references. Inspect the scoped source claims
+and full retained inputs; D11-A corrects its proposed pack example/derivation only.
+A future runtime helper repair must version interpretation and preserve old reviews/exports.
+
 ## Delivery and record evidence scoping repair
 
 Current briefs use the exact implementation tuple `discovery.invoice-dispute.v2`,

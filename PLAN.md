@@ -239,6 +239,11 @@ D-013 and D-033 remain unchanged; measured economics stays unimplemented.
 5. **D11-A — design for review:** [Proposed D-036](docs/architecture/d11-reviewed-runtime-pack.md)
    supplies a populated four-step preparation pack, separately scoped publication role,
    exact input/version bindings, selection/supersession/rollback and T1–T9 gates.
+   The corrected example derives claim-level citations, keeps withdrawal independent of
+   stale business basis, and reuses current D10 review. Genuine correction stales the
+   old pack until fresh descriptive review and separate publication of a new version.
+   The upstream D10 loop-citation fallback remains a documented gap; fixing that helper
+   later must preserve recorded v1/v2 interpretation. No extra planning stage is added.
    D11-B implements one pack review/publication path only after acceptance; no worker
    or consequential-rule execution. Then D12 integrates one useful bounded
    replaceable worker and minimum approved proof/correction capture. A Discovery

@@ -79,7 +79,10 @@ seat. A descriptive Confirm control never becomes Publish. D11-A adds neither UI
 The four retained steps are S1 bind/inspect → S2 compare/ask → S3 human descriptive
 review → S4 draft disposition packet. S2 can continue listing unaffected findings
 while S3 seeks proof. S4 can produce a useful **gap packet** while abstaining from a
-recommended disposition. The JSON specifies inputs, outputs, acceptance, dependencies,
+recommended disposition. On the normal path S3 reuses the already completed,
+currently applicable D10 descriptive review; it is not another confirmation command.
+A genuine change follows the correction transition below before S4 can use it.
+The JSON specifies inputs, outputs, acceptance, dependencies,
 accountable/exception owners, allowed actions, stops and evaluations for each step.
 The synthetic support seat is a proposed demo responsibility, not evidence that Taylor
 or a real business owner accepted work. No business due date or escalation SLA is known.
@@ -109,6 +112,52 @@ Different amounts on different records are not contradictions. Explicitly shared
 object evidence can apply to several records, subject to the whole artifact's read
 scope. Unknown association remains ambiguous. PDF/image retention is not parsing.
 A queue snapshot cannot establish a historical route, waiting time or active effort.
+
+### Claim-level provenance: all six outputs
+
+| Output                 | Source claim or proposed requirement                                                                                                                   | Relevant support in the example                                                                                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Trigger                | Proposed intake/start rule; the actual business trigger is unknown.                                                                                    | No factual source citation. R1 and this reviewed template define the proposal; the queue supplies context, not proof of a start event.                                               |
+| Objective              | Proposed assignment, not an observed customer outcome.                                                                                                 | No factual source citation. The workflow objective in this artifact is the proposed requirement.                                                                                     |
+| Population             | Derived count of two distinct records in this retained upload, not a recurring cohort.                                                                 | Both entity-qualified queue-row citations (`ae1db…` North and `d2bb5…` South), validated against the bound bundle coverage. Neither record becomes evidence for the other's dispute. |
+| Close Event            | Proposed proof/acceptance rule; no close event is established.                                                                                         | No factual source citation. The outcome requirements below state the unresolved source/owner and preserved closure denial.                                                           |
+| Human Intervention Map | The associated note reports missing supplied DEL-4 confirmation; the underlying fact remains unverified. Owner/terms questions are proposed follow-up. | DEL-4 note citation `bdfdf…`, with North dispute-17 association. The CSV row does not establish this report.                                                                         |
+| Correction Path        | Proposed pack transition using D-035's accepted append/review rules.                                                                                   | No factual source citation. D-035 and this decision supply requirements, not evidence of an intervention already performed.                                                          |
+
+The example uses `process_view: proposed` and no factual citations for normative
+outputs; `observed`/`supported` means only the specific retained source report or
+reproducible upload count is supported, never independent business verification.
+Mixed prose must separate the source-supported statement from proposed follow-up.
+
+**Upstream gap, not repaired here.** In
+[`projectDiscovery`'s loop helper](../../packages/runtime/src/discovery.ts), every
+loop output receives selected-record `ownRefs`. That leaves the Human Intervention
+Map without the delivery-note citation and gives Population only the selected row,
+even when its count spans other records. The pack example previously copied these
+references. Hash/replay checks preserve that mistake; they do not prove relevance.
+This correction changes the proposed artifact and pack derivation specification only.
+The runtime helper, D10 v1/v2 material, saved reviews and export hashes are unchanged.
+
+D11-B's fixed pack projection must derive each factual clause from canonical
+`source_claims` filtered by its entity/record/delivery subject and explicit
+`source_associations`/`applicable_record_key`, collecting only those claim citations.
+Derive counts from the validated retained bundle coverage and distinct record keys:
+cite all contributing records, or bind the coverage value and membership to the exact
+bundle/material hash with an inspectable locator. If the existing brief omits a needed
+row, use its canonical retained bundle under the full artifact read scope; do not infer
+coverage from whichever related records happen to be displayed. Missing or ambiguous
+support produces an explicit unknown, not a selected-row fallback. Proposed objectives,
+close rules and correction rules come from the fixed template and remain proposals.
+Do not copy `loop_outputs.citation_ids` or relabel source reports as verification.
+
+This is one local projection in the preparation template, not a provenance framework.
+Its version and canonical input bindings belong in the proposed pack interpreter.
+The revised unpublished example is version **0.1.1**; the original 0.1.0 artifact stays
+inspectable at PR head `b773162a`. No pack has been published. If a later change repairs
+the Discovery helper itself, introduce an explicit new projection/interpreter version
+and regression evidence: old v1/v2 handlers, material, confirmations, exact retries
+and exports must retain their original meaning. Never rewrite an existing tuple or
+silently reinterpret old confirmation as review of corrected material.
 
 Missing bytes, trusted scope, valid locator or supported interpreter blocks the
 preparation depending on it. Missing delivery proof/terms allows a cited question,
@@ -170,23 +219,37 @@ read-only database snapshot. No writer lock, ID reservation, preview row, revisi
 or durable clock write. The current-use result is derived separately from historical
 publication; an old approval or client hash never grants current permission.
 
-**Command (proposed strict v1).** One publication POST accepts only operation
-`publish | rollback | withdraw`, pack ID, exact candidate/target artifact hash,
-expected pack-journal revision/head, expected basis bindings and profile hash,
-reviewed effective-until instant/timezone, reason and idempotency key. `withdraw`
-requires the exact selected artifact and head; no new basis/effectivity. `rollback`
-references a retained artifact; it cannot submit rewritten content. Operation-specific
-schemas reject extra identity, approval, policy, success or executable-content fields.
-The server recomputes all hashes from canonical material. No endpoint exists yet.
+**Operation-specific commands (proposed strict v1).** The common fields are schema
+version, operation, pack ID, expected selection revision/head, expected current
+publication-profile hash, reason and idempotency key. The table defines the additional
+fields and gates for a first successful submission; one union with three strict
+branches rejects fields belonging to another operation. It is not an implemented API.
+
+| Operation  | Additional command fields                                                                      | Validation under the writer lock                                                                                                                                                                                                                                                                                                         | Result                                                                                                            |
+| ---------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `publish`  | Candidate artifact hash, exact expected basis, effective-until instant/timezone.               | Exact expected selection head; server-recomputed compatible artifact and applicable **current** Case/Discovery/business basis, including the current descriptive review; current profile and eligible publication reviewer with full read/publication scope and valid identity/grant. New effectivity must end within the current grant. | Append approval/selection for this artifact; supersede prior selection for future use only.                       |
+| `rollback` | Retained artifact hash, exact expected basis, effective-until instant/timezone.                | Same current-basis, compatibility, current-reviewer/profile and exact-head gates as publish; additionally require the exact retained artifact, never caller-rewritten content. Validate a new selection interval under the current grant.                                                                                                | Append a fresh approval/selection of that retained artifact; historical approval is not reused.                   |
+| `withdraw` | Exact currently selected artifact hash only. No expected business basis or effectivity fields. | Current eligible publication reviewer/profile and scope, exact selected artifact and exact stream head. **Do not require fresh business evidence, an unexpired selected pack or current-use compatibility of its business basis.** Retained selection identity/hash and stream integrity must still validate.                            | Append selection of nothing. No permission is granted. An expired/revoked reviewer grant still denies withdrawal. |
+
+Every branch rejects supplied identities, approval flags, policy bodies, success
+claims or executable content. The example's `publication_requirements.operations`
+mirrors these gates. An outdated pack and an ineligible reviewer are distinct: stale
+business evidence or expired pack effectivity cannot prevent an authorized withdrawal;
+neither condition restores an expired/revoked publication grant.
 
 Under the existing writer transaction: look up the trusted tenant/pack/operation/key
-first; exact retry returns its original result, changed body conflicts. Then validate
-expected pack head, current profile/identity/scope/time, current Case/Discovery/business
-inputs and all disabled-action constraints. Publication starts at server evaluation
-time; expiry must be later and within the profile grant. No scheduled or backdated
-activation. The recorded time must not precede the prior pack entry or any bound
-input; relevant clock regression fails closed. C/R/S are unchanged. Only the pack
-stream and existing writer coordination revision advance.
+first; an exact retry returns its original historical result without any write or new
+permission, while changed body conflicts. For a new command apply **only its table row**,
+in addition to common strict validation and immutable stream integrity. Publish and
+rollback recompute hashes from canonical material and check current basis. Withdrawal
+compares the retained selected hash/head; it does not rebind or revalidate stale business
+inputs as a precondition to deselecting them. No operation may repair corrupt history.
+
+Publish/rollback effectivity starts at server evaluation time; expiry must be later
+and within the current grant. No scheduled or backdated activation. Withdraw has no
+new effectivity interval. Recording time must not precede the prior pack entry or
+applicable bound inputs; existing clock integrity remains. C/R/S and all business
+histories are unchanged. Only the pack stream and writer coordination revision advance.
 
 Append one entry with command/fingerprint/key, full immutable artifact (or existing
 artifact reference for withdraw/rollback), exact input material/manifest and immutable
@@ -207,10 +270,11 @@ No universal idempotency service or durable drafts are needed.
 **Selection and staleness.** Journal revision is separate from C/R/S and Discovery's
 Case-wide revision. Initial revision 0 selects nothing. A successful publish at 1
 selects artifact A; publication B at 2 supersedes A for future use only. Any content,
-scope, dependency or profile change invalidates a reviewed submission. Preserve
-Discovery's conservative business-input invalidation; no-op command bookkeeping
-is not business material. Any relevant C/Discovery head change requires refresh and
-fresh publication approval, even if visible fields or material hash look unchanged.
+scope, dependency or profile change invalidates a reviewed publish/rollback submission.
+Preserve Discovery's conservative business-input invalidation; no-op command bookkeeping
+is not business material. Any relevant C/Discovery head change stales current use;
+reuse requires refresh and fresh publication approval, even if visible fields or
+material hash look unchanged. Withdrawal instead follows its own table row.
 No automatic approval carry-forward. Published A remains historical when stale,
 expired, withdrawn or superseded; it cannot start new work. Scope expansion beyond
 the approved profile is denied, not merely solved by a new hash.
@@ -220,9 +284,10 @@ current expected stream head and original artifact hash. The old artifact's comp
 basis must still be current and compatible. Otherwise propose a new version using
 the old template with fresh inputs, then review/publish it. A conservative rollback
 that is refused is preferable to restoring stale consent. Withdraw can remove current
-selection even when its business basis is stale; it still checks current publication
-reviewer and exact stream head. Neither operation rewrites old entries or resurrects
-a revoked grant. Existing Cases/reviews/attempts retain their original bindings.
+selection even when its business basis is stale or its selection effectivity expired;
+it checks the current eligible publication reviewer, exact selected artifact and stream
+head, as defined in the operation table. It grants no permission. Neither operation
+rewrites old entries or resurrects a revoked grant. Existing Cases/reviews/attempts retain their original bindings.
 
 **Replay/export.** Reconstruct original artifacts, selection fold and historical
 validation under recorded versions, trusted snapshots and time. Validate dependency
@@ -235,6 +300,36 @@ v1 meaning; new publication uses current v2. Unknown interpreters fail closed, i
 Node/tzdata mismatch; retain Node **24.19.0 / 2026b** for existing archives. No general
 restore endpoint or identity-status-history system. Complete-dataset disposal still
 ends replay under D-034; real data/private knowledge is not authorized for this appliance.
+
+## S3: reuse review, or change basis and obtain new approval
+
+Use **D** for Discovery's Case-wide revision and **P** for this proposed selection
+stream, separately from Case C and authority-request R/catalog S. Publication requires
+an applicable selected-record D10 description already reviewed. On the normal path,
+S3 references that existing confirmation/material; a read or acknowledgment does not
+advance D or P and does not submit another identical Confirm. “Review complete” is a
+derived state, not a new receipt. Existing D10 `ALREADY_REVIEWED` behavior is preserved.
+
+A genuine correction is an existing D-035 descriptive operation, allowed under its
+own prerequisites even when the old pack becomes stale. It does **not** run S4 under
+historical pack approval. D11-B displays the historical pack, changed basis and explicit
+fresh-review/publication steps; D12 still owns worker execution and result bindings.
+
+The example begins with already confirmed material M1 at C=1/D=1. The following
+publication states are proposed test expectations; no publication API runs in D11-A:
+
+| Point                                                                                                                                                                    | C / D / P | Current use and next action                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Normal path: M1 descriptively confirmed; pack A version 0.1.1 separately published.                                                                                      | 1 / 1 / 1 | S3 reuses the applicable D10 review. Reads do not write. S4 may use only M1 and A's exact basis, subject to current selection/reviewer-profile/effectivity gates.                                                                                                                              |
+| New information: operator reports a warehouse contact can locate DEL-4 support, but no underlying proof has been supplied; save this as a new descriptive annotation M2. | 1 / 2 / 1 | Operator-reported evidence, not verified delivery or canonical owner assignment. M1, its confirmation and A's publication stay historical. A loses current-use eligibility immediately; no S4 continuation with M2 plus A. C is unchanged because this is a D10 annotation, not a Case event.  |
+| Read M2 and separately confirm the changed description.                                                                                                                  | 1 / 3 / 1 | M2 has fresh descriptive review; A is still stale. Confirmation alone cannot publish or authorize the changed basis. If actual source bytes arrive instead, explicitly retain/commit them through D9 first and include the changed business/Case anchors; do not annotate them into existence. |
+| Derive B version 0.1.2 bound to M2 and D=3; inspect its diff and explicitly publish with an eligible publication reviewer and expected P=1/head A.                       | 1 / 3 / 2 | B has a new artifact hash and separate approval; A is preserved as superseded history. Only after success can subsequent work use B/M2. No transferred approvals or old S2/S3 results against a different basis.                                                                               |
+
+S4 requires coherent exact material, review and selected-pack bindings; any intervening
+C/D/business/profile/selection change, expiry, or inconsistent read stops current-use
+claims until refreshed and explicitly reviewed. A gap-only draft may still be inspected
+as **unpublished/current permission unavailable**, never as work authorized by A.
+No background republishing, automatic confirmation or presentation-driven write.
 
 ## Proof and corrections after preparation
 
@@ -267,17 +362,17 @@ savings/recovered revenue. No economic or accepted-outcome completion claim is m
 These are **required future tests**, not tests passed by a document. Reuse current
 intake/Discovery helpers, API and PostgreSQL hosts; no new harness or ECC mutations.
 
-| ID / scenario                                        | Expected result and evidence                                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T1 bounded path and repeatability                    | Exact example inputs produce the bound v2 brief at C=1, Discovery revision=1; same template/basis produces identical artifact hash. Separate eligible reviewer publishes at pack revision=1. Read/diff/export repeat without writes. The operator can inspect a gap packet; no step dispatch, action or C/R/S increment.                                                            |
-| T2 descriptive confirmation / unapproved publication | Existing intake operator, caller-supplied approval/identity, missing grant, expired/revoked/conflicting identity, wrong purpose or out-of-scope reader cannot publish. D10 confirmation alone selects nothing. No financial authority or Case enrollment follows successful publication either.                                                                                     |
-| T3 separate and shared subjects                      | Reuse PR32 A/B, same-delivery, explicit shared-object and reversed-order fixtures. DEL-4 supplied versus DEL-5 missing remain separate; two North records sharing INV-101 keep their own amounts/support. Explicit delivery sharing remains applicable with relevant citations; mismatched scope denies reads/publication.                                                          |
-| T4 missing/genuine conflicting evidence              | Missing DEL-4 proof produces an evidence-owner question and no supported credit recommendation. Opposing claims about the same scoped delivery retain both sources and block adjudication, not all useful preparation. Retained-only/error/ambiguous observations never become verification or absence.                                                                             |
-| T5 stale submission                                  | Review artifact A, then change template, Case C (including rejected transition), Discovery revision, business inputs or profile. Publishing A with old expected values fails without mutation. Fresh no-op intake keys leave business hashes unchanged. Changed contract/scope within the approved boundary requires a new artifact and explicit approval; broader scope is denied. |
-| T6 atomicity, concurrency and retries                | Two publication commands sharing expected head: one wins; the other conflicts. Same successful key/body before/after restart returns one original receipt; changed body conflicts. Inject failure during entry/index retention and commit acknowledgment: rollback or exact receipt recovery, never partial selection. Exact retry after supersession is historical only.           |
-| T7 supersede, withdraw, rollback                     | A at revision 1 → B at 2 preserves A. Withdraw at 3 selects nothing. Fresh eligible rollback at 4 can select retained A only if all current basis/profile/compatibility gates still pass. Changed basis requires new artifact C, not old approval reuse. No earlier Case/history mutation.                                                                                          |
-| T8 replay, exports and compatibility                 | Fresh/additive install retains all old migration checksums and histories. Restart/export reconstructs artifact, decision and selection. Tampered body/index/hash, forged older basis or unknown version fails integrity/current use. Retain the golden v1 archive unchanged; v2 is required for new publications. Node 24.19.0/2026b compatibility remains enforced.                |
-| T9 boundaries and operator clarity                   | Confirm/read/publish cannot invoke credit, verification, worker or closure. Existing D6–D8, intake A1–A12, Discovery T1–T12 and ECC/negative control remain. UI shows proposed versus published-for-preparation versus historical/stale, exact diff/unknowns, read failure and original-command recovery; never claims task execution, customer acceptance or time saved.           |
+| ID / scenario                                        | Expected result and evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T1 bounded path and repeatability                    | Exact example inputs produce the bound v2 brief at C=1/D=1; the corrected pack projection derives relevant claims and reproduces its hash. An eligible reviewer separately publishes at P=1. S3 reuses the existing applicable D10 review; no duplicate Confirm, revision or receipt merely to advance presentation. Reads/diffs/exports do not write. No worker dispatch/action or C/R/S increment.                                                                                                                                                                                                                                                                                                      |
+| T2 descriptive confirmation / unapproved publication | Existing intake operator, caller-supplied approval/identity, missing grant, expired/revoked/conflicting identity, wrong purpose or out-of-scope reader cannot publish. D10 confirmation alone selects nothing. No financial authority or Case enrollment follows successful publication either.                                                                                                                                                                                                                                                                                                                                                                                                           |
+| T3 separate and shared subjects                      | Reuse PR32 A/B, same-delivery, shared-object and reversed-order fixtures. Preserve record/delivery applicability and relevant citations. Audit all six pack loop outputs: DEL-4 intervention cites its associated note; upload count cites both records or exact bound coverage/membership; proposed objectives/process rules carry no fabricated source proof. A valid hash with irrelevant citations fails the pack projection acceptance check.                                                                                                                                                                                                                                                        |
+| T4 missing/genuine conflicting evidence              | Missing DEL-4 proof produces an evidence-owner question and no supported credit recommendation. Opposing claims about the same scoped delivery retain both sources and block adjudication, not all useful preparation. Retained-only/error/ambiguous observations never become verification or absence.                                                                                                                                                                                                                                                                                                                                                                                                   |
+| T5 stale submission                                  | Change template, Case C (including rejection), D, business inputs or profile: old publish/rollback submission fails without mutation; no-op intake key metadata alone does not stale business hashes. Execute the S3 M1/D1 → M2/D2 → fresh confirmation D3 → new version/separate publication P2 example: old pack/review stay historical, S4 cannot combine M2 with A, and inspection/restart preserve this distinction. Broader scope still denied.                                                                                                                                                                                                                                                     |
+| T6 atomicity, concurrency and retries                | Two publication commands sharing expected head: one wins; the other conflicts. Same successful key/body before/after restart returns one original receipt; changed body conflicts. Inject failure during entry/index retention and commit acknowledgment: rollback or exact receipt recovery, never partial selection. Exact retry after supersession is historical only.                                                                                                                                                                                                                                                                                                                                 |
+| T7 supersede, withdraw, rollback                     | A at P1 → B at P2 preserves A. Make B stale by changing Case/business evidence and let its pack effectivity expire while the publication grant remains valid. Unauthorized or expired/revoked-reviewer withdrawal is denied with no append. Eligible withdrawal of exact B/head P2 succeeds at P3 despite stale/expired pack, selects nothing and grants no permission. A competing command expecting P2 fails unchanged; exact retry of the successful withdrawal returns its receipt without writes. Fresh rollback at P4 needs a compatible retained artifact, applicable current basis and eligible reviewer; otherwise new artifact/review/publication is required. Business histories never change. |
+| T8 replay, exports and compatibility                 | Retain all migration checksums/histories. Restart/export reconstructs artifact/selection and stale-after-correction state. Reject tampered body/index/hash or forged basis. Preserve the original D10 v1/v2 loop material/reviews/exports and exact retries; corrected pack outputs are a separately bound derivation. A later Discovery-helper repair requires a new interpreter tuple, not rewriting existing ones. Node 24.19.0/2026b remains enforced.                                                                                                                                                                                                                                                |
+| T9 boundaries and operator clarity                   | No confirm/read/publish/withdraw invokes credit, verification, worker or closure. Preserve D6–D8, intake A1–A12, Discovery T1–T12 and ECC. Show reused review, historical/stale pack, fresh descriptive review awaiting separate publication, and coherent current selection. Withdraw remains accessible under its own reviewer/head gates even when business evidence is stale. No invented work, acceptance or time saved.                                                                                                                                                                                                                                                                             |
 
 ## Smallest D11-B handoff
 
@@ -286,7 +381,10 @@ After human acceptance, deliver one focused implementation PR:
 1. Define strict versioned artifact, operation-specific publication command, journal,
    read and export envelopes for the **one fixed template** above, using the existing
    validator registry and canonical hashing. Validate existing identity/Discovery/
-   intake fragments explicitly. Hard-deny executable business rules and unknown versions.
+   intake fragments explicitly. Derive six loop outputs from relevant scoped claims and
+   bound coverage as specified above; do not copy the D10 helper’s citation fallback.
+   Hard-deny executable business rules and unknown versions. This does not require
+   changing the upstream Discovery projector or rewriting historical material.
 2. Add only the pack-selection supporting journal with a new checksum-bound migration;
    retain inputs/profile snapshots atomically and reuse existing transaction/replay
    patterns. Do not edit applied migrations or introduce a duplicate blob/Case ledger.
@@ -295,7 +393,9 @@ After human acceptance, deliver one focused implementation PR:
    server. Reuse the existing atomic IndexedDB pending-command pattern, including
    cross-tab claims/compare-and-clear and exact bytes/key recovery; no inbox/framework.
 4. Extend the existing intake brief with a compact preparation-pack diff/review panel,
-   unresolved rules and explicit current-selection status. No visual workflow builder.
+   unresolved rules and explicit current-selection status. Reuse the applicable D10 review;
+   expose correction → stale pack → fresh review → new artifact/separate publication,
+   plus operation-specific withdrawal. No worker execution or visual workflow builder.
    Run T1–T9 through real PostgreSQL/API and relevant browser paths, all retained suites,
    ECC/negative control, Compose/appliance/restart and applicable docs/hash checks.
 
@@ -317,7 +417,7 @@ history and preparation-only scope described under **Decision requested**.
 ## Reproduce the example basis
 
 This uses the existing **disposable** local PostgreSQL/API test host, not an evaluator's
-Case. Its one descriptive confirmation is test-generated, not proof of human inspection.
+Case. Its descriptive confirmations are test-generated, not proof of human inspection.
 No pack command runs. With Node 24.19.0, installed dependencies, local PostgreSQL and
 `D9_POSTGRES_URL` pointing to a disposable loopback test database:
 
@@ -345,6 +445,34 @@ try {
   assert.deepEqual(brief.binding, basis.binding);
   assert.deepEqual(brief.material.manifest, basis.manifest);
   assert.deepEqual(brief.material.sources, example.artifact.evidence.citations);
+  // Validate relevance, not only that a citation exists and hashes correctly.
+  const material = brief.material, pack = example.artifact;
+  const byId = id => pack.loop_outputs.find(output => output.id === id);
+  const deliveryClaims = material.source_claims.filter(claim =>
+    claim.subject.entity === "entity_north" && claim.subject.kind === "delivery" &&
+    claim.subject.id === "DEL-4" && claim.applicable_record_key === basis.binding.record_key &&
+    claim.meaning === "source_reports_missing" && claim.source_associations.some(association =>
+      association.entity === "entity_north" && association.kind === "record" && association.id === "dispute-17"));
+  const noteRefs = [...new Set(deliveryClaims.flatMap(claim => claim.citation_ids))].sort();
+  assert.equal(noteRefs.length, 1);
+  assert.deepEqual([...byId("Human Intervention Map").citation_ids].sort(), noteRefs);
+  const recordKeys = [...new Set(view.bundle.records.map(record => record.record_key))];
+  assert.equal(recordKeys.length, 2);
+  assert.equal(material.coverage.distinct_records, recordKeys.length);
+  const rowRefs = material.sources.filter(source => source.interpretation === "csv" &&
+    recordKeys.includes(source.record_key)).map(source => source.id).sort();
+  assert.equal(rowRefs.length, 2);
+  assert.deepEqual([...byId("Population").citation_ids].sort(), rowRefs);
+  for (const id of ["Trigger", "Objective", "Close Event", "Correction Path"]) {
+    assert.equal(byId(id).process_view, "proposed");
+    assert.deepEqual(byId(id).citation_ids, []);
+  }
+  for (const id of ["Population", "Human Intervention Map"])
+    assert.equal(byId(id).process_view, "observed");
+  // Preserve and expose the upstream gap; this is not a runtime-projector repair.
+  const originalIntervention = material.loop_outputs.find(output => output.id === "Human Intervention Map");
+  assert.ok(!originalIntervention.citation_ids.includes(noteRefs[0]));
+  console.log("CONFIRMED: proposed pack citations corrected; unchanged D10 helper still has the reported gap");
   const archive = await h.ok(path + "&representation=export");
   assert.equal(sha256Json(archive), example.example_basis_export_hash);
   const before = await h.snapshot();
@@ -352,7 +480,35 @@ try {
   assert.deepEqual((await h.ok(path)).binding, basis.binding);
   assert.equal(sha256Json(await h.ok(path + "&representation=export")), example.example_basis_export_hash);
   assert.deepEqual(await h.snapshot(), before);
-  console.log("PASS: example hash, canonical basis, citations, restart and read-only export; no pack published");
+  // S3's normal path reused the already applicable review via reads; D remains 1.
+  assert.equal(brief.binding.expected_discovery_revision, 1);
+  assert.deepEqual(brief.current.confirmed_purposes, ["discovery_description"]);
+  const originalConfirmation = brief.history[0];
+  h.setTime("2026-09-07T16:06:00.000Z");
+  const correction = discoveryCommand(brief, "d11-example-new-information", "annotate");
+  correction.changes = [{ target_id: "Q1", state: "unknown",
+    text: "Operator reports a warehouse contact can locate DEL-4 support; no underlying proof is supplied and the accountable owner remains unconfirmed.",
+    reason: "New operator-reported information changes the descriptive follow-up; it is not source verification.", citation_ids: [] }];
+  await h.ok(reviewPath(view), correction);
+  brief = await h.ok(path);
+  assert.equal(brief.binding.expected_case_version, 1);
+  assert.equal(brief.binding.expected_discovery_revision, 2);
+  assert.notEqual(brief.material_hash, basis.binding.expected_material_hash);
+  assert.deepEqual(brief.current.confirmed_purposes, []);
+  assert.deepEqual(brief.history[0], originalConfirmation);
+  const changedMaterialHash = brief.material_hash;
+  h.setTime("2026-09-07T16:07:00.000Z");
+  await h.ok(reviewPath(view), discoveryCommand(brief, "d11-example-fresh-confirm", "confirm"));
+  brief = await h.ok(path);
+  assert.equal(brief.binding.expected_discovery_revision, 3);
+  assert.equal(brief.material_hash, changedMaterialHash);
+  assert.deepEqual(brief.current.confirmed_purposes, ["discovery_description"]);
+  const changedArchive = await h.ok(path + "&representation=export");
+  assert.deepEqual(changedArchive.intake, archive.intake);
+  await h.restart();
+  assert.deepEqual((await h.ok(path)).history, brief.history);
+  assert.deepEqual(await h.ok(path + "&representation=export"), changedArchive);
+  console.log("PASS: corrected example hash/provenance; D1 review reused; D2 correction/D3 fresh confirmation preserve history across restart; no pack published");
 } finally {
   for (const close of cleanup.reverse()) await close();
 }
@@ -362,4 +518,7 @@ JS
 The port is the existing local test-host example, not the appliance default; adjust
 only the connection string for your disposable PostgreSQL. The helper drops its own
 random test schema. Example verification is evidence for existing D9/D10 behavior and
-document consistency, not implemented D11 publication or passed T1–T9.
+document consistency and the existing D10 correction transition, not implemented
+D11 publication or passed T1–T9. The script intentionally exposes the unchanged
+upstream citation gap; its corrected pack assertions would fail on the old example.
+Publication gates and P transitions in the worked case remain future acceptance tests.
