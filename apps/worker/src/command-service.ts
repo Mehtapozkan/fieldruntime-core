@@ -53,6 +53,20 @@ export class TransactionalCaseWorker {
 
   async execute(command: unknown): Promise<CaseCommandResult> {
     try {
+      if (command !== null && typeof command === "object") {
+        const value = command as Record<string, unknown>;
+        const event = value.trigger_event ?? value.work_event;
+        if (
+          event !== null &&
+          typeof event === "object" &&
+          (event as Record<string, unknown>).source === "fieldruntime_intake"
+        )
+          throw new CaseCommandInputError({
+            cause: new Error(
+              "Intake review events require an atomic intake commit",
+            ),
+          });
+      }
       return await this.#store.execute(command, this.#dependencies.create());
     } catch (error) {
       if (isCommandInputError(error)) {

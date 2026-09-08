@@ -1,3 +1,5 @@
+import { PostgresIntakeStore } from "../../../packages/runtime/src/postgres-intake-store.js";
+import { TransactionalIntakeWorker } from "../../worker/src/intake-service.js";
 import { PostgresCreditVerificationStore } from "../../../packages/runtime/src/postgres-credit-verification-store.js";
 import { TransactionalCreditVerificationWorker } from "../../worker/src/credit-verification-service.js";
 import { PostgresSimulatedCreditStore } from "../../../packages/runtime/src/postgres-simulated-credit-store.js";
@@ -145,6 +147,7 @@ async function start(): Promise<void> {
     authorityMigrationSql,
     creditMigrationSql,
     verificationMigrationSql,
+    intakeMigrationSql,
     fixtureDocument,
     walkthroughDocument,
   ] = await Promise.all([
@@ -178,6 +181,13 @@ async function start(): Promise<void> {
     ),
     readFile(
       new URL(
+        "../../../packages/runtime/migrations/0005_synthetic_intake.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
         "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
         import.meta.url,
       ),
@@ -201,6 +211,7 @@ async function start(): Promise<void> {
   migrations.push(
     createMigrationSource("0003_simulated_credit", creditMigrationSql),
     createMigrationSource("0004_credit_verification", verificationMigrationSql),
+    createMigrationSource("0005_synthetic_intake", intakeMigrationSql),
   );
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
   const walkthrough = createGuidedWalkthroughRecord(
@@ -229,13 +240,18 @@ async function start(): Promise<void> {
   const verificationWorker = new TransactionalCreditVerificationWorker(
     new PostgresCreditVerificationStore(pool, new PgPoolAdapter(readerPgPool)),
   );
+  const intakeStore = new PostgresIntakeStore(pool);
+  const intakeWorker = new TransactionalIntakeWorker(intakeStore);
+  await intakeStore.assertReady();
   const workbenchAssets = await loadWorkbenchAssets();
   const server = createApiServer(
     {
+      intake: intakeWorker,
       isReady: async () => {
         if (!(await applianceIsReady(pool, migrations, fixture))) return false;
         await creditStore.assertReady();
         await store.assertReady();
+        await intakeStore.assertReady();
         await authorityStore.assertReady(SYNTHETIC_AUTHORITY_TENANT);
         return true;
       },

@@ -1,3 +1,8 @@
+import {
+  IntakeInputError,
+  type TransactionalIntakeWorker,
+} from "../../worker/src/intake-service.js";
+import { MAX_INTAKE_HTTP_BYTES } from "../../../packages/runtime/src/intake.js";
 import { CreditCommandInputError } from "../../worker/src/simulated-credit-service.js";
 import type {
   CaseAggregate,
@@ -19,12 +24,14 @@ export interface ApiRequest {
   readonly path: string;
   readonly headers?: Readonly<Record<string, string | undefined>>;
   readonly body?: string;
+  readonly receivedAt?: string;
 }
 
 export interface ApiResponse {
   readonly status: number;
   readonly headers: Readonly<Record<string, string>>;
   readonly body: JsonValue;
+  readonly rawBody?: Buffer;
 }
 
 export interface EvaluationFixtureRecord {
@@ -44,6 +51,7 @@ export interface GuidedWalkthroughRecord {
 }
 
 export interface ApiDependencies {
+  readonly intake?: TransactionalIntakeWorker;
   readonly credit?: {
     readonly verify?: (command: unknown) => Promise<JsonObject>;
     readonly execute: (command: unknown) => Promise<JsonObject>;
@@ -151,6 +159,7 @@ function safeCommandResult(result: CaseCommandResult): JsonObject {
 
 function parseCommand(
   request: ApiRequest,
+  limit = MAX_BODY_BYTES,
 ): { readonly error: ApiResponse } | { readonly command: JsonObject } {
   const type = contentType(request.headers);
   const mediaType = type?.split(";", 1)[0]?.trim();
@@ -158,7 +167,7 @@ function parseCommand(
     return { error: response(415, { error: "application_json_required" }) };
   }
   const body = request.body ?? "";
-  if (Buffer.byteLength(body, "utf8") > MAX_BODY_BYTES) {
+  if (Buffer.byteLength(body, "utf8") > limit) {
     return { error: response(413, { error: "payload_too_large" }) };
   }
   try {
@@ -179,6 +188,95 @@ export async function handleApiRequest(
   const method = request.method.toUpperCase();
   const segments = decodePath(request.path);
   if (segments === undefined) return response(400, { error: "invalid_path" });
+
+  if (segments[0] === "v1" && segments[1] === "intake" && dependencies.intake) {
+    const intake = dependencies.intake;
+    try {
+      if (
+        method === "GET" &&
+        segments.length === 3 &&
+        segments[2] === "bundles"
+      )
+        return response(200, await intake.list());
+      if (
+        method === "GET" &&
+        segments.length === 4 &&
+        segments[2] === "bundles" &&
+        CANONICAL_ID.test(segments[3] ?? "")
+      )
+        return response(200, await intake.read(segments[3] ?? ""));
+      if (method === "GET" && segments.length === 3 && segments[2] === "export")
+        return {
+          ...response(200, await intake.export()),
+          headers: {
+            ...JSON_HEADERS,
+            "content-disposition":
+              "attachment; filename=synthetic-intake-export.json",
+          },
+        };
+      if (
+        method === "GET" &&
+        segments.length === 4 &&
+        segments[2] === "artifacts" &&
+        /^[0-9a-f]{64}$/.test(segments[3] ?? "")
+      ) {
+        const rawBody = await intake.artifact(`sha256:${segments[3] ?? ""}`);
+        return {
+          status: 200,
+          body: null,
+          rawBody,
+          headers: {
+            ...JSON_HEADERS,
+            "content-type": "application/octet-stream",
+            "content-disposition": "attachment; filename=retained-evidence.bin",
+            "x-content-type-options": "nosniff",
+          },
+        };
+      }
+      if (
+        method === "POST" &&
+        ((segments.length === 3 &&
+          ["preparations", "commits"].includes(segments[2] ?? "")) ||
+          (segments.length === 4 &&
+            segments[2] === "selections" &&
+            segments[3] === "preview"))
+      ) {
+        const parsed = parseCommand(
+          request,
+          segments[2] === "preparations"
+            ? MAX_INTAKE_HTTP_BYTES
+            : MAX_BODY_BYTES,
+        );
+        if ("error" in parsed) return parsed.error;
+        if (segments[2] === "preparations") {
+          if (!request.receivedAt)
+            throw new Error("Server ingestion timestamp missing");
+          return response(
+            200,
+            await intake.prepare(parsed.command, request.receivedAt),
+          );
+        }
+        return response(
+          200,
+          segments[2] === "commits"
+            ? await intake.commit(parsed.command)
+            : await intake.preview(parsed.command),
+        );
+      }
+      return response(404, { error: "not_found" });
+    } catch (error) {
+      if (error instanceof IntakeInputError)
+        return response(
+          error.code === "NOT_FOUND"
+            ? 404
+            : /CONFLICT|REQUIRED|REGRESSION/.test(error.code)
+              ? 409
+              : 400,
+          { error: error.code, message: error.message },
+        );
+      throw error;
+    }
+  }
 
   if (method === "GET" && segments.length === 1 && segments[0] === "healthz") {
     return response(200, { status: "alive" });

@@ -1,0 +1,240 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Synthetic intake API",
+    "version": "1",
+    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:3210"
+    }
+  ],
+  "paths": {
+    "/v1/intake/preparations": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Validated canonical synthetic response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/intake.v1.schema.json#/$defs/prepare_result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input rejected"
+          },
+          "409": {
+            "description": "Binding/version/key conflict; refresh and explicitly review new material"
+          },
+          "500": {
+            "description": "Integrity or persistence unavailable; no success assumed"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/intake.v1.schema.json#/$defs/prepare"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/intake/selections/preview": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Validated canonical synthetic response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/intake.v1.schema.json#/$defs/preview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input rejected"
+          },
+          "409": {
+            "description": "Binding/version/key conflict; refresh and explicitly review new material"
+          },
+          "500": {
+            "description": "Integrity or persistence unavailable; no success assumed"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/intake.v1.schema.json#/$defs/review"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/intake/commits": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Validated canonical synthetic response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/intake.v1.schema.json#/$defs/commit_result"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input rejected"
+          },
+          "409": {
+            "description": "Binding/version/key conflict; refresh and explicitly review new material"
+          },
+          "500": {
+            "description": "Integrity or persistence unavailable; no success assumed"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/intake.v1.schema.json#/$defs/selection"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/intake/bundles": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Validated canonical synthetic response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/intake.v1.schema.json#/$defs/list"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input rejected"
+          },
+          "409": {
+            "description": "Binding/version/key conflict; refresh and explicitly review new material"
+          },
+          "500": {
+            "description": "Integrity or persistence unavailable; no success assumed"
+          }
+        }
+      }
+    },
+    "/v1/intake/bundles/{id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Validated canonical synthetic response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/intake.v1.schema.json#/$defs/view"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input rejected"
+          },
+          "409": {
+            "description": "Binding/version/key conflict; refresh and explicitly review new material"
+          },
+          "500": {
+            "description": "Integrity or persistence unavailable; no success assumed"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^intake_bundle_[0-9a-f]{64}$"
+            }
+          }
+        ]
+      }
+    },
+    "/v1/intake/export": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Validated canonical synthetic response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/intake.v1.schema.json#/$defs/export"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input rejected"
+          },
+          "409": {
+            "description": "Binding/version/key conflict; refresh and explicitly review new material"
+          },
+          "500": {
+            "description": "Integrity or persistence unavailable; no success assumed"
+          }
+        }
+      }
+    },
+    "/v1/intake/artifacts/{hash}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Original received bytes as an attachment; fixed synthetic context checks full artifact scope",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unavailable scoped artifact"
+          },
+          "500": {
+            "description": "Integrity failure is not absence evidence"
+          }
+        }
+      }
+    }
+  }
+}

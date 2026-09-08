@@ -1,0 +1,2498 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.dev/schemas/intake.v1.schema.json",
+  "title": "D-034 synthetic intake contracts v1",
+  "$defs": {
+    "strings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 8192
+      },
+      "maxItems": 2000
+    },
+    "association": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "entity": {
+          "enum": [
+            "entity_north",
+            "entity_south"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "record",
+            "invoice",
+            "order",
+            "delivery"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "entity",
+        "kind",
+        "id"
+      ]
+    },
+    "link": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "entity": {
+          "enum": [
+            "entity_north",
+            "entity_south"
+          ]
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 260
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 260
+        },
+        "qualification": {
+          "enum": [
+            "reported",
+            "reviewed"
+          ]
+        }
+      },
+      "required": [
+        "entity",
+        "from",
+        "to",
+        "qualification"
+      ]
+    },
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "raw": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "instant": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timezone": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quality": {
+          "enum": [
+            "reported",
+            "unknown",
+            "invalid"
+          ]
+        }
+      },
+      "required": [
+        "raw",
+        "instant",
+        "timezone",
+        "quality"
+      ]
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "snapshot_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot_timezone": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverage": {
+          "enum": [
+            "full",
+            "partial",
+            "unknown"
+          ]
+        },
+        "population_count": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "population_window": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "end": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [
+                "start",
+                "end",
+                "timezone"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "snapshot_at",
+        "snapshot_timezone",
+        "coverage",
+        "population_count",
+        "population_window"
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "csv": {
+          "const": "csv.invoice-dispute.v1"
+        },
+        "text": {
+          "const": "text.utf8.v1"
+        },
+        "mapping": {
+          "const": "mapping.invoice-dispute.v1"
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "csv",
+        "text",
+        "mapping",
+        "timezone"
+      ]
+    },
+    "artifact_input": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "queue",
+            "support"
+          ]
+        },
+        "document_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "media_type": {
+          "enum": [
+            "text/csv",
+            "text/plain",
+            "text/markdown",
+            "application/pdf",
+            "image/png",
+            "image/jpeg"
+          ]
+        },
+        "bytes_base64": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 6990512
+        },
+        "declared_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "associations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/association"
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "role",
+        "document_id",
+        "name",
+        "media_type",
+        "bytes_base64",
+        "declared_hash",
+        "associations"
+      ]
+    },
+    "prepare": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-prepare.v1"
+        },
+        "profile_id": {
+          "const": "invoice-dispute-intake.v1"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "claims": {
+          "$ref": "#/$defs/claims"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/artifact_input"
+          },
+          "maxItems": 17
+        }
+      },
+      "required": [
+        "schema_version",
+        "profile_id",
+        "idempotency_key",
+        "claims",
+        "artifacts"
+      ]
+    },
+    "locator": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "record": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "line_start": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "line_end": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "byte_start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "byte_end": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "artifact_hash",
+        "record",
+        "line_start",
+        "line_end",
+        "byte_start",
+        "byte_end",
+        "field"
+      ]
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "queue",
+            "support"
+          ]
+        },
+        "document_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "media_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "byte_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "declared_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+          },
+          "maxItems": 2
+        },
+        "associations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/association"
+          },
+          "maxItems": 100
+        },
+        "interpretation": {
+          "enum": [
+            "csv",
+            "text",
+            "retained_only"
+          ]
+        },
+        "parser_version": {
+          "enum": [
+            "csv.invoice-dispute.v1",
+            "text.utf8.v1",
+            "none"
+          ]
+        },
+        "derived_text": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 524288
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "derived_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "derived_from": {
+          "$ref": "#/$defs/locator"
+        }
+      },
+      "required": [
+        "role",
+        "document_id",
+        "name",
+        "media_type",
+        "byte_hash",
+        "byte_length",
+        "declared_hash",
+        "scope_ids",
+        "associations",
+        "interpretation",
+        "parser_version",
+        "derived_text",
+        "derived_hash",
+        "derived_from"
+      ]
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "gap",
+            "conflict"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "code",
+        "field",
+        "severity",
+        "message"
+      ]
+    },
+    "business_object": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "const": "synthetic_ar_queue"
+        },
+        "entity": {
+          "enum": [
+            "entity_north",
+            "entity_south"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "invoice",
+            "order",
+            "delivery",
+            "customer"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "qualification": {
+          "const": "reported"
+        },
+        "citation": {
+          "$ref": "#/$defs/locator"
+        }
+      },
+      "required": [
+        "source",
+        "entity",
+        "kind",
+        "id",
+        "qualification",
+        "citation"
+      ]
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "record_key": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_revision": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source_system": {
+          "const": "synthetic_ar_queue"
+        },
+        "source_record_id": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 8192
+        },
+        "reported_source_version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entity": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 8192
+        },
+        "cells": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "source_record_id": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "source_version": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "legal_entity_id": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "customer_ref": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "invoice_id": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "amount_minor": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "currency": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "source_status": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "activity": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "reported_actor": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "reported_role": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "upstream_case_id": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "upstream_owner": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "order_ids": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "delivery_ids": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "source_occurred_at": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            "source_timezone": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "source_record_id",
+            "source_version",
+            "legal_entity_id",
+            "customer_ref",
+            "invoice_id",
+            "amount_minor",
+            "currency",
+            "source_status",
+            "activity",
+            "reported_actor",
+            "reported_role",
+            "upstream_case_id",
+            "upstream_owner",
+            "order_ids",
+            "delivery_ids",
+            "source_occurred_at",
+            "source_timezone"
+          ]
+        },
+        "source_occurrence": {
+          "$ref": "#/$defs/time"
+        },
+        "source_snapshot": {
+          "$ref": "#/$defs/time"
+        },
+        "ingested_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "upstream_case_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "source": {
+                  "const": "synthetic_ar_queue"
+                },
+                "entity": {
+                  "type": "string",
+                  "minLength": 0,
+                  "maxLength": 8192
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 0,
+                  "maxLength": 8192
+                }
+              },
+              "required": [
+                "source",
+                "entity",
+                "id"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reported_owner": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reported_activity": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reported_actor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reported_role": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 8192
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reported_status": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 8192
+        },
+        "business_objects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/business_object"
+          },
+          "maxItems": 42
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/link"
+          },
+          "maxItems": 80
+        },
+        "locators": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/locator"
+          },
+          "maxItems": 2000
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/finding"
+          },
+          "maxItems": 50
+        },
+        "measurement_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 128
+          },
+          "maxItems": 20
+        },
+        "valid": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "record_key",
+        "source_revision",
+        "source_system",
+        "source_record_id",
+        "reported_source_version",
+        "entity",
+        "cells",
+        "source_occurrence",
+        "source_snapshot",
+        "ingested_at",
+        "upstream_case_ref",
+        "reported_owner",
+        "reported_activity",
+        "reported_actor",
+        "reported_role",
+        "reported_status",
+        "business_objects",
+        "relationships",
+        "locators",
+        "findings",
+        "measurement_gaps",
+        "valid"
+      ]
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "physical_records": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "distinct_records": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicate_records": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "valid_records": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "invalid_records": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "source_population_claim": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_coverage_claim": {
+          "enum": [
+            "full",
+            "partial",
+            "unknown"
+          ]
+        },
+        "measurement_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 128
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "physical_records",
+        "distinct_records",
+        "duplicate_records",
+        "valid_records",
+        "invalid_records",
+        "source_population_claim",
+        "source_coverage_claim",
+        "measurement_gaps"
+      ]
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-bundle.v1"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "identity_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "profile_id": {
+          "const": "invoice-dispute-intake.v1"
+        },
+        "profile_version": {
+          "const": "1"
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+          },
+          "maxItems": 2
+        },
+        "versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "preparation_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "preparation_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "claims": {
+          "$ref": "#/$defs/claims"
+        },
+        "ingested_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "retained_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/artifact"
+          },
+          "maxItems": 17
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/record"
+          },
+          "maxItems": 2000
+        },
+        "coverage": {
+          "$ref": "#/$defs/coverage"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "hash",
+        "identity_hash",
+        "tenant_id",
+        "profile_id",
+        "profile_version",
+        "scope_ids",
+        "versions",
+        "preparation_key",
+        "preparation_fingerprint",
+        "claims",
+        "ingested_at",
+        "retained_at",
+        "artifacts",
+        "records",
+        "coverage"
+      ]
+    },
+    "target": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "create"
+            },
+            "expected_case_version": {
+              "const": 0
+            }
+          },
+          "required": [
+            "mode",
+            "expected_case_version"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "attach"
+            },
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+            },
+            "expected_case_version": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "mode",
+            "case_id",
+            "expected_case_version"
+          ]
+        }
+      ]
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-review.v1"
+        },
+        "bundle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_bundle_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "record_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "expected_source_revision": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "support_document_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 16
+        },
+        "reviewed_links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/link"
+          },
+          "maxItems": 100
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "expected_prior_intake_binding": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prior_selection_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "acknowledgments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 128
+          },
+          "maxItems": 30
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "schema_version",
+        "bundle_id",
+        "expected_bundle_hash",
+        "record_key",
+        "expected_source_revision",
+        "support_document_ids",
+        "reviewed_links",
+        "target",
+        "expected_prior_intake_binding",
+        "prior_selection_hash",
+        "acknowledgments",
+        "reason"
+      ]
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-selection.v1"
+        },
+        "bundle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_bundle_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "record_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "expected_source_revision": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "support_document_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 16
+        },
+        "reviewed_links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/link"
+          },
+          "maxItems": 100
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "expected_prior_intake_binding": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prior_selection_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "acknowledgments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 128
+          },
+          "maxItems": 30
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "expected_material_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "expected_consent_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "schema_version",
+        "bundle_id",
+        "expected_bundle_hash",
+        "record_key",
+        "expected_source_revision",
+        "support_document_ids",
+        "reviewed_links",
+        "target",
+        "expected_prior_intake_binding",
+        "prior_selection_hash",
+        "acknowledgments",
+        "reason",
+        "expected_material_key",
+        "expected_consent_hash",
+        "idempotency_key"
+      ]
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "identity-reference.v0"
+        },
+        "identity_id": {
+          "const": "identity_intake_operator"
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "identity_kind": {
+          "const": "human"
+        },
+        "status": {
+          "const": "active"
+        }
+      },
+      "required": [
+        "schema_version",
+        "identity_id",
+        "tenant_id",
+        "identity_kind",
+        "status"
+      ]
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "source": {
+          "const": "fieldruntime_intake"
+        },
+        "source_event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_type": {
+          "const": "intake.material_reviewed"
+        },
+        "actor_identity_id": {
+          "const": "identity_intake_operator"
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+          },
+          "maxItems": 1
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_timezone": {
+          "const": "UTC"
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "payload_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "classification": {
+          "const": "internal"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "source",
+        "source_event_id",
+        "event_type",
+        "actor_identity_id",
+        "scope_ids",
+        "occurred_at",
+        "source_timezone",
+        "content_hash",
+        "payload_ref",
+        "classification",
+        "idempotency_key"
+      ]
+    },
+    "case_seed": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tenant": {
+          "$ref": "https://fieldruntime.ai/schemas/ecc-canonical-data-model-v0.schema.json#/$defs/Tenant"
+        },
+        "workflow_version": {
+          "$ref": "https://fieldruntime.ai/schemas/ecc-canonical-data-model-v0.schema.json#/$defs/WorkflowVersion"
+        },
+        "case": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+            },
+            "tenant_id": {
+              "const": "tenant_intake_demo"
+            },
+            "workflow_version_id": {
+              "const": "workflow_ecc_v0_1_0"
+            },
+            "customer_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "issue_fingerprint": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "severity": {
+              "const": "medium"
+            },
+            "owner_identity_id": {
+              "const": null
+            },
+            "scope_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+              },
+              "maxItems": 1
+            }
+          },
+          "required": [
+            "id",
+            "tenant_id",
+            "workflow_version_id",
+            "customer_ref",
+            "issue_fingerprint",
+            "severity",
+            "owner_identity_id",
+            "scope_ids"
+          ]
+        }
+      },
+      "required": [
+        "tenant",
+        "workflow_version",
+        "case"
+      ]
+    },
+    "case_command": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "case.create"
+            },
+            "tenant_id": {
+              "const": "tenant_intake_demo"
+            },
+            "expected_case_version": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "actor_identity_id": {
+              "const": "identity_intake_operator"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "correlation_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "case_seed": {
+              "$ref": "#/$defs/case_seed"
+            },
+            "trigger_event": {
+              "$ref": "#/$defs/event"
+            }
+          },
+          "required": [
+            "type",
+            "tenant_id",
+            "expected_case_version",
+            "actor_identity_id",
+            "idempotency_key",
+            "correlation_id",
+            "case_seed",
+            "trigger_event"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "case.attach_work_event"
+            },
+            "tenant_id": {
+              "const": "tenant_intake_demo"
+            },
+            "expected_case_version": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "actor_identity_id": {
+              "const": "identity_intake_operator"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "correlation_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "case_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+            },
+            "work_event": {
+              "$ref": "#/$defs/event"
+            }
+          },
+          "required": [
+            "type",
+            "tenant_id",
+            "expected_case_version",
+            "actor_identity_id",
+            "idempotency_key",
+            "correlation_id",
+            "case_id",
+            "work_event"
+          ]
+        }
+      ]
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "source": {
+          "const": "fieldruntime_intake"
+        },
+        "resource_uri": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+          },
+          "maxItems": 2
+        },
+        "authority_rank": {
+          "const": 5
+        },
+        "freshness_status": {
+          "const": "unknown"
+        }
+      },
+      "required": [
+        "id",
+        "tenant_id",
+        "source",
+        "resource_uri",
+        "content_hash",
+        "scope_ids",
+        "authority_rank",
+        "freshness_status"
+      ]
+    },
+    "material": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-material.v1"
+        },
+        "profile_id": {
+          "const": "invoice-dispute-intake.v1"
+        },
+        "profile_version": {
+          "const": "1"
+        },
+        "versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "bundle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "bundle_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "record_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source_revision": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "material_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "record": {
+          "$ref": "#/$defs/record"
+        },
+        "support": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/artifact"
+          },
+          "maxItems": 16
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/citation"
+          },
+          "maxItems": 17
+        },
+        "reviewed_links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/link"
+          },
+          "maxItems": 100
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "target_case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "case_root": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "expected_prior_intake_binding": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prior_selection_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "acknowledgments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 128
+          },
+          "maxItems": 30
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "schema_version",
+        "profile_id",
+        "profile_version",
+        "versions",
+        "bundle_id",
+        "bundle_hash",
+        "record_key",
+        "source_revision",
+        "material_key",
+        "record",
+        "support",
+        "citations",
+        "reviewed_links",
+        "target",
+        "target_case_id",
+        "case_root",
+        "expected_prior_intake_binding",
+        "prior_selection_hash",
+        "acknowledgments",
+        "reason"
+      ]
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-commit.v1"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "record_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "material_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "case_root": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "upstream_key": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "case_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actor": {
+          "$ref": "#/$defs/actor"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "command_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "selection": {
+          "$ref": "#/$defs/selection"
+        },
+        "review_material": {
+          "$ref": "#/$defs/material"
+        },
+        "review_material_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "adapted_command": {
+          "$ref": "#/$defs/case_command"
+        },
+        "journal_entry_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "journal_entry_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "previous_intake_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "hash",
+        "sequence",
+        "tenant_id",
+        "record_key",
+        "material_key",
+        "case_root",
+        "upstream_key",
+        "case_id",
+        "case_version",
+        "recorded_at",
+        "actor",
+        "idempotency_key",
+        "command_fingerprint",
+        "selection",
+        "review_material",
+        "review_material_hash",
+        "adapted_command",
+        "journal_entry_id",
+        "journal_entry_hash",
+        "previous_intake_hash"
+      ]
+    },
+    "candidate_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "case_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "owner_identity_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "enum": [
+            "record_binding",
+            "upstream_binding",
+            "exact_customer_entity",
+            "new_scoped_root"
+          ]
+        }
+      },
+      "required": [
+        "case_id",
+        "case_version",
+        "owner_identity_id",
+        "reason"
+      ]
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "record_key": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "record": {
+          "$ref": "#/$defs/record"
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/candidate_target"
+          },
+          "maxItems": 2000
+        },
+        "proposed_case_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prior_intake_binding": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "required_acknowledgments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 128
+          },
+          "maxItems": 30
+        },
+        "support_document_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 128
+          },
+          "maxItems": 16
+        },
+        "reviewed_links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/link"
+          },
+          "maxItems": 100
+        },
+        "commits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/receipt"
+          },
+          "maxItems": 2000
+        },
+        "can_review": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "record_key",
+        "record",
+        "targets",
+        "proposed_case_id",
+        "prior_intake_binding",
+        "required_acknowledgments",
+        "support_document_ids",
+        "reviewed_links",
+        "commits",
+        "can_review"
+      ]
+    },
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-view.v1"
+        },
+        "bundle": {
+          "$ref": "#/$defs/bundle"
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/candidate"
+          },
+          "maxItems": 2000
+        },
+        "coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "distinct_records": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "committed_records": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "uncommitted_records": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "unmatched_records": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "ambiguous_records": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "distinct_records",
+            "committed_records",
+            "uncommitted_records",
+            "unmatched_records",
+            "ambiguous_records"
+          ]
+        },
+        "authority_granted": {
+          "const": false
+        },
+        "closure_permission": {
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "bundle",
+        "candidates",
+        "coverage",
+        "authority_granted",
+        "closure_permission"
+      ]
+    },
+    "preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-preview.v1"
+        },
+        "review_material": {
+          "$ref": "#/$defs/material"
+        },
+        "consent_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "material_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "required_acknowledgments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 128
+          },
+          "maxItems": 30
+        },
+        "authority_granted": {
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "review_material",
+        "consent_hash",
+        "material_key",
+        "required_acknowledgments",
+        "authority_granted"
+      ]
+    },
+    "prepare_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-prepare-result.v1"
+        },
+        "status": {
+          "enum": [
+            "prepared",
+            "duplicate",
+            "already_retained"
+          ]
+        },
+        "bundle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "bundle_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "status",
+        "bundle_id",
+        "bundle_hash"
+      ]
+    },
+    "commit_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-commit-result.v1"
+        },
+        "status": {
+          "enum": [
+            "committed",
+            "duplicate",
+            "already_committed"
+          ]
+        },
+        "receipt": {
+          "$ref": "#/$defs/receipt"
+        },
+        "authority_granted": {
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "status",
+        "receipt",
+        "authority_granted"
+      ]
+    },
+    "list": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-list.v1"
+        },
+        "bundles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "ingested_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "retained_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "records": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "preparation_key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            },
+            "required": [
+              "id",
+              "hash",
+              "name",
+              "ingested_at",
+              "retained_at",
+              "records",
+              "preparation_key"
+            ]
+          },
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "schema_version",
+        "bundles"
+      ]
+    },
+    "export": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "intake-export.v1"
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+          },
+          "maxItems": 2
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "byte_hash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "bytes_base64": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 6990512
+              }
+            },
+            "required": [
+              "byte_hash",
+              "bytes_base64"
+            ]
+          },
+          "maxItems": 17000
+        },
+        "bundles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/bundle"
+          },
+          "maxItems": 10000
+        },
+        "commits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/receipt"
+          },
+          "maxItems": 100000
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "case_state": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cases": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "tenant_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                  },
+                  "case_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                  },
+                  "document": {
+                    "$ref": "https://fieldruntime.ai/schemas/ecc-canonical-data-model-v0.schema.json"
+                  },
+                  "journal": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "https://fieldruntime.ai/schemas/case-journal-entry.v0.schema.json"
+                    },
+                    "maxItems": 100000
+                  }
+                },
+                "required": [
+                  "tenant_id",
+                  "case_id",
+                  "document",
+                  "journal"
+                ]
+              },
+              "maxItems": 100000
+            },
+            "idempotency_records": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "tenant_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                  },
+                  "idempotency_key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  },
+                  "command_fingerprint": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  },
+                  "case_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                  },
+                  "journal_entry_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                  },
+                  "result_status": {
+                    "enum": [
+                      "applied",
+                      "rejected"
+                    ]
+                  }
+                },
+                "required": [
+                  "tenant_id",
+                  "idempotency_key",
+                  "command_fingerprint",
+                  "case_id",
+                  "journal_entry_id",
+                  "result_status"
+                ]
+              },
+              "maxItems": 100000
+            },
+            "source_event_records": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "tenant_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  },
+                  "source_event_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  },
+                  "work_event_fingerprint": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  },
+                  "case_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                  },
+                  "create_binding_fingerprint": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  }
+                },
+                "required": [
+                  "tenant_id",
+                  "source",
+                  "source_event_id",
+                  "work_event_fingerprint",
+                  "case_id"
+                ]
+              },
+              "maxItems": 100000
+            }
+          },
+          "required": [
+            "cases",
+            "idempotency_records",
+            "source_event_records"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "scope_ids",
+        "artifacts",
+        "bundles",
+        "commits",
+        "hash",
+        "case_state"
+      ]
+    }
+  }
+}

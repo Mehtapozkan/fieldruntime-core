@@ -1,3 +1,4 @@
+import intakeSchema from "../schemas/intake.v1.schema.json" with { type: "json" };
 import simulatedCreditSchema from "../schemas/simulated-credit.v1.schema.json" with { type: "json" };
 import simulatedCreditV2Schema from "../schemas/simulated-credit.v2.schema.json" with { type: "json" };
 import Ajv2020Module, {
@@ -84,6 +85,51 @@ const creditValidators = Object.fromEntries(
   "command" | "envelope" | "journal" | "source" | "read",
   ValidateFunction
 >;
+ajv.addSchema(intakeSchema);
+const intakeValidators = Object.fromEntries(
+  (
+    [
+      "prepare",
+      "bundle",
+      "review",
+      "selection",
+      "material",
+      "case_command",
+      "receipt",
+      "view",
+      "preview",
+      "prepare_result",
+      "commit_result",
+      "list",
+      "export",
+    ] as const
+  ).map((kind) => [
+    kind,
+    ajv.compile({ $ref: `${intakeSchema.$id}#/$defs/${kind}` }),
+  ]),
+) as Record<
+  | "prepare"
+  | "bundle"
+  | "review"
+  | "selection"
+  | "material"
+  | "case_command"
+  | "receipt"
+  | "view"
+  | "preview"
+  | "prepare_result"
+  | "commit_result"
+  | "list"
+  | "export",
+  ValidateFunction
+>;
+export function assertValidIntakeContract(
+  kind: keyof typeof intakeValidators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(intakeValidators[kind], value, `intake.v1/${kind}`);
+}
+
 export function assertValidSimulatedCreditContract(
   kind: keyof typeof creditValidators,
   value: unknown,
