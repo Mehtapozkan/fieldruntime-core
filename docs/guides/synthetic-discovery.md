@@ -3,17 +3,18 @@
 D10-A and Accepted [D-035](../architecture/d10-discovery-preparation-review.md)
 merged in PR #31 at `222b2842b44efc1da219c1409d5111a55e62641a` after
 [required CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34182770322).
-**D10-B is implemented on this review branch, not merged or released.** It adds a
+**D10-B merged in PR #32 at `953d49ec`; it is not in the historical prerelease.** It adds a
 deterministic brief and immutable descriptive review in the existing intake interface.
 It uses zero model calls. Real-customer activation remains unapproved.
 
 ## Short operator walkthrough
 
-Use Node **24.19.0**, pnpm 11.24.0 and Docker Compose. From this branch:
+Use Node **24.19.0**, pnpm 11.24.0 and Docker Compose. From updated main:
 
 ```sh
 git fetch origin
-git switch feat/d10b-discovery-review
+git switch main
+git pull --ff-only
 pnpm install --frozen-lockfile
 pnpm fr init ecc --demo
 pnpm fr up

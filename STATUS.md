@@ -1,23 +1,29 @@
 # Status
 
-Current milestone: **D10-B implemented for review; complete Discovery remains incomplete.**
-D10-A / [Accepted D-035](docs/architecture/d10-discovery-preparation-review.md)
-merged normally in PR #31 at `222b2842b44efc1da219c1409d5111a55e62641a`, preserving
-approval head `53e3ddd5d0c3752c4f3f98dcd6a3190830f0f006` and
-[passing required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34182770322).
-No unresolved review findings remained; required PR/up-to-date checks and force-push/
-deletion protections were preserved without bypass. The human approval and proposal
-history remain recorded in D-035 and DECISIONS.
+Current milestone: **D10-B merged; D11-A is a docs-only design for review.**
+PR #32 merged normally at `953d49ece70f7828935bb0f4636299d7601f16d5`, preserving
+reviewed head `4f86e2f5502f4b7227d7ff7823d372b1e8614faa`. Both review findings were
+resolved and [required head CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34195404986).
+The effective main rules required a PR, strict up-to-date `validate`, and force-push/
+deletion protections, with zero required approving reviews. No bypass was used.
+D10-A / Accepted D-035 and its original human approval history remain unchanged.
 
-This branch implements a deterministic cited brief, all seven descriptive records and
-six loop outputs, gap agenda, explicit answers/corrections and two descriptive
-confirmation purposes. One Case-linked PostgreSQL history retains exact bindings,
-trusted synthetic attribution and portable replay. Case/authority/intake business
-histories are unchanged by descriptive review. The existing Workbench and one atomic
-IndexedDB recovery slot serve intake and Discovery. Reads remain side-effect free.
-[Executable walkthrough, limits and screenshots](docs/guides/synthetic-discovery.md).
-The canonical specification and single 19-entry matrix remain authoritative. No models,
-worker integration, real customer activation, release or deployment are included.
+Main provides a deterministic cited brief, seven descriptive records and six loop
+outputs, gap questions, explicit answers/corrections and descriptive confirmation.
+One Case-linked PostgreSQL history retains exact bindings and synthetic attribution.
+Current v2 preserves record/delivery applicability and relevant citations; old v1
+reviews/exports retain their original semantics. Node 24.19.0 / tzdata 2026b remains
+required for those archives. Case/authority/intake histories, successful no-op keys,
+atomic cross-tab recovery and migration checksums remain intact. Reads do not write.
+[Executable Discovery walkthrough and screenshots](docs/guides/synthetic-discovery.md).
+
+This branch adds [Proposed D-036](docs/architecture/d11-reviewed-runtime-pack.md)
+and a populated preparation-only Runtime Pack example. It proposes a separate synthetic
+publication approval, immutable selection history, current-input checks, supersession
+and guarded rollback; it implements none of them. D11-B awaits human approval;
+D12 worker/packet-proof/correction integration remains planned. Complete Discovery,
+real customer activation, business outcome acceptance and Case closure remain incomplete.
+The canonical specification and single 19-entry matrix remain the product plan.
 
 **D9-B merged in PR #30 at `ca9543289894fffdaa40ecfe794d83addc2c19de`.** The reviewed
 head was exactly `9d250707458adfdc481a6c9259608f5d6d3f4cc7`, with all three findings
@@ -1188,11 +1194,41 @@ CI now pins the compatible Node 24.19.0 interpreter; the README, guide and fixtu
 record that replay requirement. The fixture, hashes and fail-closed version check
 remain unchanged. Supporting a different timezone interpreter is a separate upgrade.
 
+## D11-A proposed preparation pack
+
+The design binds a four-step read/propose assignment to existing retained bytes,
+scoped source claims, exact Case/intake/Discovery history and interpreter versions.
+It specifies seven records, six loop outputs, owners/questions, disabled business
+rules and separate packet/effect/business-close/Case-resolution evidence. The example
+uses actual disposable D9/D10 API output; its synthetic confirmation is not human
+publication approval. D11-B acceptance gates cover reproducibility, unapproved/stale
+publication, scoped conflicts, retry/atomicity, rollback and historical compatibility.
+No runtime, contract schema, migration, dependency, UI or frozen ECC changes are made.
+
+Local D11-A validation: `pnpm validate` passes **297/297**, formatting, lint,
+typecheck and release audit; ECC passes **620/620**, and its negative control exits
+**1 at 152/620** for intended unsafe-acceptance assertions. The documented example
+command passes through disposable PostgreSQL 18.4/API: exact artifact/basis hashes,
+source citations, restart reconstruction and unchanged read/export snapshots.
+Documentation checks validate **157 local links**, all **19 matrix IDs**, four step
+contracts/dependencies, R1–R7/six outputs and original byte/hash citations.
+`git diff --check` passes. `docker compose config --quiet` cannot run locally
+(exit 127: Docker is not installed); no local Compose/container pass is claimed.
+
+[PR #32 CI at the merged reviewed head](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34195404986)
+passed 297 repository tests, 63 D6, 115 D7/D8, 32 intake and 30 Discovery
+PostgreSQL/API/browser tests, eight separate D6 browser cases, Compose and appliance/
+restart checks using pinned Node 24.19.0 and PostgreSQL 17.11. These are merged
+implementation checks. D11-A's required CI runs on its PR; no D11 publication or
+T1–T9 implementation pass is claimed by the design or example reproduction.
+
 ## Next
 
-Review D10-B without merging it in this task. D11 retains one reviewed Runtime Pack and
-applicable rule publication; D12 retains one bounded replaceable worker and approved
-proof/correction integration. Descriptive confirmation is not permission for either.
+Review Proposed D-036 and the populated pack. After explicit human acceptance, D11-B
+can implement the one preparation publication/selection path and T1–T9. Business
+source/variant/authority rules remain disabled; D12 retains one bounded replaceable
+worker and separately reviewed minimum proof/correction integration. Descriptive
+confirmation is not permission for either.
 Representative normal/exception routes, governing field/variant rules, baseline/effort/
 cost collection, operator usefulness/support and customer acceptance remain incomplete.
 Measured economics and complete Case closure are not implemented.
