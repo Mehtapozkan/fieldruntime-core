@@ -75,6 +75,16 @@ test("D12 W5 browser shared-Case A to B to A prepares the selected record", asyn
         .click();
     }
     await publish(page, i === 2);
+    if (i === 2)
+      await page.route(`**${WORK}?**`, async (route) => {
+        const response = await route.fetch();
+        // A's earlier packet can still be visible while the new receipt's
+        // read-only refresh is pending. It must not enable task acceptance.
+        await expect(
+          page.getByRole("button", { name: /^Accept preparation packet/ }),
+        ).toBeDisabled();
+        await route.fulfill({ response });
+      });
     // Lose B's response after the real server commits, then recover after restart.
     if (i === 1)
       await page.route(`**${WORK}/commands`, async (route) => {
@@ -130,6 +140,12 @@ test("D12 W5 browser shared-Case A to B to A prepares the selected record", asyn
     await expect(page.locator(".work-progress")).toContainText(
       "human task review needed",
     );
+    // Wait for the confirmed command's final validated refresh, not the
+    // earlier A packet's identical progress label, before inspecting/capturing.
+    await expect(
+      page.getByRole("button", { name: /^Accept preparation packet/ }),
+    ).toBeEnabled();
+    if (i === 2) await page.unroute(`**${WORK}?**`);
     await expect(page.locator(".work-preview")).toContainText(
       i === 1 ? "DEL-5" : "DEL-4",
     );

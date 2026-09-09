@@ -1489,3 +1489,12 @@ checks were not run. All 19 original matrix IDs, 76 local Markdown targets, unch
 runtime/contracts/migrations/frozen corpus and `git diff --check` pass. Docker remains
 absent locally (Compose exit 127); final-commit CI evidence for Compose, PostgreSQL/
 container restart and the additional appliance browser gates is linked in PR #38.
+
+The first repair-head CI run passed all 341 PostgreSQL/API/browser tests but timed out
+at the existing three-second appliance readiness check after PostgreSQL restart.
+Its unchanged rerun confirmed A → B → A returned 200 for all starts, then exposed a
+screenshot race: A's prior packet had the same progress label while the new read-only
+refresh was finishing. The browser regression now holds that refresh, requires task
+acceptance to remain disabled, and waits for verified eligibility before inspection
+and capture. No runtime or health-check deadline changed. Both earlier CI results and
+the final-head result are retained in the PR handoff.
