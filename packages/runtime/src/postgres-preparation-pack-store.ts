@@ -79,7 +79,13 @@ export class PostgresPreparationPackStore {
   ) {}
   private snapshotContext(): PackContext {
     const context = this.context();
-    return { ...context, profile: immutableJson(context.profile) };
+    return {
+      ...context,
+      profile: immutableJson(context.profile),
+      ...(context.worker_profile
+        ? { worker_profile: immutableJson(context.worker_profile) }
+        : {}),
+    };
   }
   read(target: PackTarget, now: () => Date): Promise<IntakeObject> {
     return authorityTransaction(this.pool, true, async (c) =>

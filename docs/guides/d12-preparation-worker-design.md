@@ -1,7 +1,11 @@
 # D12-A: one useful preparation result
 
-**Design only.** [Accepted D-037](../architecture/d12-bounded-preparation-worker.md)
-was approved at `7ac9f9db` on 2026-09-08; no worker/capture API is implemented. D11-B merged normally in
+**Historical D12-A design checkpoint.** The implemented D12-B journey and evidence
+are in [the runtime guide](synthetic-preparation-worker.md). The examples and checks
+below preserve the reviewed design-time interpretation, not current feature status.
+
+[Accepted D-037](../architecture/d12-bounded-preparation-worker.md)
+was approved at `7ac9f9db` on 2026-09-08; no worker/capture API existed at that checkpoint. D11-B merged normally in
 PR #34 at `6bfc94e24d2a2980b369fc0aea487e32313b5f78`, preserving reviewed head
 `b284279c` and [passing required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34279140329).
 No open findings remained; main's required PR, strict up-to-date validation and

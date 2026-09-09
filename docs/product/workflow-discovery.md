@@ -282,7 +282,7 @@ human, tool, support or setup cost. Any cost per outcome must disclose its exact
 or verified denominator; with no qualifying outcomes the ratio is unavailable.
 
 Definitions belong here now. Minimum manual, synthetic evidence/attention/cost capture
-is proposed for separately approved D12 work in the existing supporting-history pattern;
+is implemented for synthetic D12-B review in one supporting history under Accepted D-037;
 it is not a telemetry platform, payroll model or ROI dashboard. D13 owns customer
 comparison/reporting, including failed/open work and all attributable human effort,
 only after the custody/access/deletion boundary is approved.
@@ -380,10 +380,12 @@ D18 connected shadow operation, D19 enterprise controls and D20 production write
 remain gated future work. No enterprise-wide process mining, workforce scoring,
 novelty engine, general attention allocator, nested loops or autonomous policy.
 
-D11-B is merged in PR #34: one fixed preparation publication path. D12-A now proposes
-one bounded zero-model worker, exact task/result/correction proof and the five separate
-measures under [D-037](../architecture/d12-bounded-preparation-worker.md). This remains
-design only; v1 packs do not authorize worker dispatch. [Worked operator result](../guides/d12-preparation-worker-design.md).
+D11-B is merged in PR #34. D12-A / Accepted D-037 merged in PR #37 at `7b3b3e12`.
+D12-B implements one bounded zero-model preparation worker, exact start/result/task
+review, correction and independent evaluation review, plus manual synthetic notes for
+the five separate measures. This is a review-branch implementation, not completed
+customer proof. v1 packs retain dispatch prohibition; v2 needs fresh publication.
+[Implemented operator journey and limits](../guides/synthetic-preparation-worker.md).
 
 Every implementation handoff must report requirement IDs, changed files/contracts,
 actual user behavior, validation evidence, gaps and next dependencies. Update the

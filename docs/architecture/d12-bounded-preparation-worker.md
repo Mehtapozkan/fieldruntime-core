@@ -1,6 +1,7 @@
 # D-037 — One bounded synthetic preparation worker and its proof
 
-Status: **Accepted — no D12 runtime, contract registration or migration implemented.**
+Status: **Accepted.** The D12-B review branch implements the bounded slice; see
+[actual runtime, contracts, migration and validation](../guides/synthetic-preparation-worker.md).
 Based on main `6bfc94e24d2a2980b369fc0aea487e32313b5f78`, the normal merge of PR #34
 at reviewed head `b284279c`. [D-036](d11-reviewed-runtime-pack.md) remains Accepted.
 The [worked packet and operator path](../guides/d12-preparation-worker-design.md)

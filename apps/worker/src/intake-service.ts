@@ -1,3 +1,4 @@
+import { PostgresPreparationWorkStore } from "../../../packages/runtime/src/postgres-preparation-work-store.js";
 import { PostgresPreparationPackStore } from "../../../packages/runtime/src/postgres-preparation-pack-store.js";
 import type { PackTarget } from "../../../packages/runtime/src/preparation-pack.js";
 import { PostgresDiscoveryStore } from "../../../packages/runtime/src/postgres-discovery-store.js";
@@ -33,6 +34,7 @@ export class TransactionalIntakeWorker {
     }),
     readonly discovery?: PostgresDiscoveryStore,
     readonly pack?: PostgresPreparationPackStore,
+    readonly work?: PostgresPreparationWorkStore,
   ) {}
   private async json(
     operation: () => Promise<IntakeObject>,
@@ -122,6 +124,32 @@ export class TransactionalIntakeWorker {
           "Preparation publication is unavailable",
         );
       return this.pack.submit(command, seat, this.dependencies().now);
+    });
+  }
+  readWork(
+    caseId: string,
+    recordKey: string,
+    exporting = false,
+  ): Promise<JsonObject> {
+    return this.json(() => {
+      if (!this.work)
+        throw new IntakeInputError(
+          "NOT_FOUND",
+          "Preparation work is unavailable",
+        );
+      return exporting
+        ? this.work.export(caseId, recordKey, this.dependencies().now)
+        : this.work.read(caseId, recordKey, this.dependencies().now);
+    });
+  }
+  submitWork(command: unknown): Promise<JsonObject> {
+    return this.json(() => {
+      if (!this.work)
+        throw new IntakeInputError(
+          "NOT_FOUND",
+          "Preparation work is unavailable",
+        );
+      return this.work.submit(command, this.dependencies().now);
     });
   }
   async artifact(hash: string): Promise<Buffer> {

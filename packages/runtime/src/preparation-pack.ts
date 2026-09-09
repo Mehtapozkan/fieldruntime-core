@@ -1,7 +1,13 @@
+import templateV2 from "../../contracts/src/preparation-template.v2.json" with { type: "json" };
+import {
+  syntheticWorkerProfile,
+  workActor,
+} from "./preparation-worker-profile.js";
 // Accepted D-036: one synthetic preparation configuration, never worker or business authority.
 import template from "../../contracts/src/preparation-template.v1.json" with { type: "json" };
 import {
   assertValidPreparationPackContract,
+  assertValidPreparationPackV2Contract,
   assertValidIdentityReference,
   canonicalJson,
   immutableJson,
@@ -37,6 +43,11 @@ export const PACK_VERSIONS = immutableJson({
   selection: "pack-selection.v1",
 });
 export const PREPARATION_TEMPLATE = immutableJson(template);
+export const PREPARATION_TEMPLATE_V2 = immutableJson(templateV2);
+export const PACK_V2_VERSIONS = immutableJson({
+  projection: "preparation-pack.v2",
+  selection: "pack-selection.v2",
+});
 export interface PackState {
   readonly discovery: DiscoveryState;
   readonly entries: readonly Obj[];
@@ -49,6 +60,7 @@ export interface PackTarget {
 export interface PackContext {
   readonly profile: Obj;
   readonly template_id: string;
+  readonly worker_profile?: Obj;
 }
 const same = (a: unknown, b: unknown): boolean =>
   canonicalJson(a) === canonicalJson(b);
@@ -60,9 +72,35 @@ const checked = (
   kind: "profile" | "artifact" | "journal" | "read" | "result" | "export",
   value: Obj,
 ): Obj => {
-  assertValidPreparationPackContract(kind, value);
+  validatePack(kind, value);
   return immutableJson(value);
 };
+function validatePack(
+  kind:
+    | "profile"
+    | "artifact"
+    | "command"
+    | "journal"
+    | "read"
+    | "result"
+    | "export",
+  value: unknown,
+): asserts value is Obj {
+  if (
+    o(value).schema_version === `preparation-pack.v2` ||
+    (String(o(value).schema_version).startsWith("pack-selection-") &&
+      String(o(value).schema_version).endsWith(".v2"))
+  )
+    assertValidPreparationPackV2Contract(kind, value);
+  else assertValidPreparationPackContract(kind, value);
+}
+export function syntheticWorkerPackContext(): PackContext {
+  return {
+    ...syntheticPackContext(),
+    template_id: "invoice-dispute-preparation.v2",
+    worker_profile: syntheticWorkerProfile(),
+  };
+}
 export function syntheticPackContext(): PackContext {
   return {
     template_id: "invoice-dispute-preparation.v1",
@@ -159,7 +197,7 @@ function reviewer(profile: Obj, at: string, seat = "publication"): Obj {
   return actor;
 }
 export function normalizePackCommand(input: unknown): Obj {
-  assertValidPreparationPackContract("command", input);
+  validatePack("command", input);
   ensure(
     String(input.reason).trim() &&
       String(input.idempotency_key).trim() &&
@@ -244,8 +282,18 @@ export function projectPreparationPack(
   context: PackContext = syntheticPackContext(),
 ): Obj {
   reader(context.profile);
+  const selectedTemplate =
+    context.template_id === PREPARATION_TEMPLATE_V2.template_id
+      ? PREPARATION_TEMPLATE_V2
+      : PREPARATION_TEMPLATE;
+  const v2 = selectedTemplate === PREPARATION_TEMPLATE_V2;
   ensure(
-    context.template_id === PREPARATION_TEMPLATE.template_id,
+    !v2 || context.worker_profile,
+    "PACK_COMPATIBILITY_REQUIRED",
+    "Worker-capable preparation requires its exact server profile",
+  );
+  ensure(
+    context.template_id === selectedTemplate.template_id,
     "PACK_COMPATIBILITY_REQUIRED",
     "Current preparation template is unavailable; retained history is not reinterpreted",
   );
@@ -332,7 +380,7 @@ export function projectPreparationPack(
       "Trigger",
       "Proposed: receive an entity-qualified dispute for scoped preparation. The actual business trigger and eligibility rule remain unknown.",
     ),
-    loop("Objective", PREPARATION_TEMPLATE.objective),
+    loop("Objective", selectedTemplate.objective),
     loop(
       "Population",
       `${String(o(bundle.coverage).distinct_records)} distinct records in this retained upload (${String(o(bundle.coverage).invalid_records)} invalid). Recurring population and coverage remain unconfirmed.`,
@@ -368,14 +416,17 @@ export function projectPreparationPack(
       o(e.command).purpose === "discovery_description",
   );
   const content = {
-    schema_version: "preparation-pack.v1",
+    schema_version: v2 ? "preparation-pack.v2" : "preparation-pack.v1",
     pack_id: PREPARATION_PACK_ID,
-    template: PREPARATION_TEMPLATE,
+    template: selectedTemplate,
     binding: {
       discovery: view.binding,
       manifest,
       confirmation_entry_hash: confirmation?.hash ?? null,
       publication_profile_hash: sha256Json(context.profile),
+      ...(v2
+        ? { worker_profile_hash: sha256Json(context.worker_profile) }
+        : {}),
     },
     material,
     coverage: coverage.coverage,
@@ -395,7 +446,7 @@ export function projectPreparationPack(
   };
   return checked("artifact", {
     ...content,
-    version: `pack-v1-${sha256Json(content).slice(7)}`,
+    version: `pack-v${v2 ? "2" : "1"}-${sha256Json(content).slice(7)}`,
   });
 }
 function orderedDiscovery(entries: readonly Obj[]): Obj[] {
@@ -405,7 +456,7 @@ function orderedDiscovery(entries: readonly Obj[]): Obj[] {
       Number(a.sequence) - Number(b.sequence),
   );
 }
-function supportManifest(state: DiscoveryState): Obj {
+export function packSupportManifest(state: DiscoveryState): Obj {
   const caseIds = new Set(state.intake.commits.map((c) => String(c.case_id)));
   return {
     bundle_hashes: state.intake.bundles.map((b) => b.hash),
@@ -424,7 +475,7 @@ function supportManifest(state: DiscoveryState): Obj {
       .sort((a, b) => a.case_id.localeCompare(b.case_id)),
   };
 }
-function historicalSupport(
+export function historicalPackSupport(
   state: DiscoveryState,
   m: Obj,
   at: string,
@@ -662,6 +713,8 @@ export function appendPackSelection(
     // Deliberately do not call currentBasis or require unexpired pack effectivity.
   } else {
     currentBasis(state, artifact, context);
+    if (artifact.schema_version === "preparation-pack.v2")
+      workActor(o(context.worker_profile), "prepare_disposition_packet", at);
     ensure(
       same(command.expected_basis, artifact.binding),
       "PACK_BINDING_CONFLICT",
@@ -693,7 +746,9 @@ export function appendPackSelection(
   return checked(
     "journal",
     withHash({
-      schema_version: "pack-selection-entry.v1",
+      schema_version: String(command.schema_version).endsWith(".v2")
+        ? "pack-selection-entry.v2"
+        : "pack-selection-entry.v1",
       tenant_id: INTAKE_TENANT,
       pack_id: PREPARATION_PACK_ID,
       case_id: targetOf(artifact).case_id,
@@ -707,8 +762,11 @@ export function appendPackSelection(
       command,
       artifact_hash: command.artifact_hash,
       artifact: command.operation === "publish" ? artifact : null,
-      input_manifest: supportManifest(state.discovery),
+      input_manifest: packSupportManifest(state.discovery),
       profile: context.profile,
+      ...(String(command.schema_version).endsWith(".v2")
+        ? { worker_profile: context.worker_profile ?? syntheticWorkerProfile() }
+        : {}),
       actor,
       result: {
         operation: command.operation,
@@ -718,13 +776,18 @@ export function appendPackSelection(
         authority_granted: false,
         closure_permission: false,
       },
-      versions: PACK_VERSIONS,
+      versions: String(command.schema_version).endsWith(".v2")
+        ? PACK_V2_VERSIONS
+        : PACK_VERSIONS,
     }),
   );
 }
 export function packResult(entry: Obj): Obj {
   return checked("result", {
-    schema_version: "pack-selection-result.v1",
+    schema_version:
+      entry.schema_version === "pack-selection-entry.v2"
+        ? "pack-selection-result.v2"
+        : "pack-selection-result.v1",
     status: "recorded",
     entry,
     historical_receipt: true,
@@ -737,7 +800,7 @@ export function assertPackState(state: PackState): void {
   const previous: Obj[] = [],
     keys = new Set<string>();
   for (const entry of state.entries) {
-    assertValidPreparationPackContract("journal", entry);
+    validatePack("journal", entry);
     const key = canonicalJson([
       entry.tenant_id,
       entry.pack_id,
@@ -747,12 +810,17 @@ export function assertPackState(state: PackState): void {
     ensure(
       !keys.has(key) &&
         entry.hash === sha256Json(withoutHash(entry)) &&
-        same(entry.versions, PACK_VERSIONS),
+        same(
+          entry.versions,
+          entry.schema_version === "pack-selection-entry.v2"
+            ? PACK_V2_VERSIONS
+            : PACK_VERSIONS,
+        ),
       "PACK_INTEGRITY",
       "Selection identity, versions or hash changed",
     );
     keys.add(key);
-    const discovery = historicalSupport(
+    const discovery = historicalPackSupport(
       state.discovery,
       o(entry.input_manifest),
       String(entry.recorded_at),
@@ -763,7 +831,13 @@ export function assertPackState(state: PackState): void {
       String(entry.recorded_at),
       {
         profile: o(entry.profile),
-        template_id: "invoice-dispute-preparation.v1",
+        template_id:
+          entry.schema_version === "pack-selection-entry.v2"
+            ? "invoice-dispute-preparation.v2"
+            : "invoice-dispute-preparation.v1",
+        ...(entry.schema_version === "pack-selection-entry.v2"
+          ? { worker_profile: o(entry.worker_profile) }
+          : {}),
       },
     );
     ensure(
@@ -816,6 +890,12 @@ export function readPack(
     publishReasons.push(
       ...reasons(() => {
         currentBasis(state, candidate, context);
+        if (candidate.schema_version === "preparation-pack.v2")
+          workActor(
+            o(context.worker_profile),
+            "prepare_disposition_packet",
+            at,
+          );
       }),
     );
   const currentReasons = selected
@@ -823,6 +903,12 @@ export function readPack(
         ...eligibleReviewer,
         ...reasons(() => {
           currentBasis(state, selected, context);
+          if (selected.schema_version === "preparation-pack.v2")
+            workActor(
+              o(context.worker_profile),
+              "prepare_disposition_packet",
+              at,
+            );
         }),
       ]
     : [];
@@ -864,6 +950,12 @@ export function readPack(
       ...eligibleReviewer,
       ...reasons(() => {
         currentBasis(state, artifact, context);
+        if (artifact.schema_version === "preparation-pack.v2")
+          workActor(
+            o(context.worker_profile),
+            "prepare_disposition_packet",
+            at,
+          );
       }),
     ];
     return {
@@ -885,7 +977,13 @@ export function readPack(
   return checked(
     "read",
     withHash({
-      schema_version: "pack-selection-read.v1",
+      schema_version:
+        context.template_id === "invoice-dispute-preparation.v2" ||
+        state.entries.some(
+          (e) => e.schema_version === "pack-selection-entry.v2",
+        )
+          ? "pack-selection-read.v2"
+          : "pack-selection-read.v1",
       pack_id: PREPARATION_PACK_ID,
       evaluated_at: at,
       target: { ...target },
@@ -921,17 +1019,25 @@ export function exportPackState(state: PackState): Obj {
   return checked(
     "export",
     withHash({
-      schema_version: "pack-selection-export.v1",
+      schema_version: state.entries.some(
+        (e) => e.schema_version === "pack-selection-entry.v2",
+      )
+        ? "pack-selection-export.v2"
+        : "pack-selection-export.v1",
       discovery: exportDiscoveryState(state.discovery),
       entries: [...state.entries],
-      versions: PACK_VERSIONS,
+      versions: state.entries.some(
+        (e) => e.schema_version === "pack-selection-entry.v2",
+      )
+        ? PACK_V2_VERSIONS
+        : PACK_VERSIONS,
       authority_granted: false,
       closure_permission: false,
     }),
   );
 }
 export function validatePackExport(input: unknown): PackState {
-  assertValidPreparationPackContract("export", input);
+  validatePack("export", input);
   ensure(
     input.hash === sha256Json(withoutHash(input)),
     "PACK_INTEGRITY",
