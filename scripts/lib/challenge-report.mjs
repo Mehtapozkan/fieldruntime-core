@@ -367,7 +367,7 @@ ${r.packet ? `<h3>Actual unsent follow-up</h3><p>${esc(r.packet.follow_up.draft)
 <p><small>Historical task acceptance still applicable under the reconstructed snapshot: ${esc(r.historical_acceptance_currently_usable_in_snapshot)}. Check the live Workbench before acting.</small></p>
 ${disclosure("Why attention is needed, missing inputs and proposed allocation", { attention: r.attention, missing_inputs: r.missing_inputs, proposed_allocation: r.proposed_allocation, snapshot_reasons: r.snapshot_reasons })}
 ${disclosure("Source versions, exact Case attachments and descriptive findings", { material: r.material, intake_receipts: r.intake_receipts, brief: r.brief })}
-${r.attempts.map((a) => disclosure(`Attempt ${a.sequence}: ${a.outcome}; review ${a.review_decision ?? "not recorded"} — ${a.recorded_at}`, a, `attempt-${a.invocation_id}`)).join("")}</section>`,
+${r.attempts.map((a) => disclosure(`Invocation at work revision ${a.sequence}: ${a.outcome}; review ${a.review_decision ?? "not recorded"} — ${a.recorded_at}`, a, `attempt-${a.invocation_id}`)).join("")}</section>`,
   )
   .join("")}
 <h2>Five separate proof measures</h2><p>All aggregate measures remain unestablished. Retained notes below are synthetic reports; negative values, reversals, reopens and overlapping contributions are preserved without adding them together. A simulated credit is not cash collected.</p>
