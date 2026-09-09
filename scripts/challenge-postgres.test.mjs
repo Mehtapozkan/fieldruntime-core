@@ -394,6 +394,17 @@ test("D13 Challenge: real API rehearsal, exact retries, failed/open work, reprod
             ),
             true,
           );
+          if (width === 390)
+            assert.ok(
+              (
+                await page
+                  .locator("#capacity tbody tr")
+                  .first()
+                  .locator("td")
+                  .last()
+                  .boundingBox()
+              ).width > 300,
+            );
           if (process.env.D13_REPORT_DIR)
             await page.screenshot({
               path: resolve(process.env.D13_REPORT_DIR, `report-${width}.png`),
