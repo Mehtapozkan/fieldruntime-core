@@ -1,6 +1,6 @@
 # Bounded synthetic preparation worker
 
-D12-B is implemented on this review branch under [Accepted D-037](../architecture/d12-bounded-preparation-worker.md).
+D12-B merged in PR #38 at `7db84da7` under [Accepted D-037](../architecture/d12-bounded-preparation-worker.md).
 PR #37 merged at `7b3b3e125591212a6392504298d9b467f1e2f464` after required checks.
 This page describes implemented synthetic behavior, not the historical evaluation prerelease.
 No real-customer activation, model calls, external tools/messages or business authority.
@@ -246,3 +246,6 @@ D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/f
 Actual final-head local/CI results and screenshot handoff are recorded in STATUS and
 the implementation PR. Docker unavailability must not be described as a local Compose
 pass. No customer effort savings, impact, acceptance, financial effect or closure is proved.
+
+The first bounded D13 [Challenge report](challenge-report.md) reconstructs retained
+preparation exports offline; it does not run a worker or grant permission.
