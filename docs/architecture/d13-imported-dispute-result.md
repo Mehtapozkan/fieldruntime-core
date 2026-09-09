@@ -123,6 +123,22 @@ business consent in this synthetic slice; also enforce source-specific validity 
 non-future times. This is a test policy, not a customer SLA. Expiry leaves historical
 evidence intact but requires an explicit fresh check before new permission or
 acceptance. An old observation is not proof that the source is still unchanged.
+
+The expected outside disposition changes AR version 0 to 1. That change makes the
+old request unusable for **another decision**, but does not erase the valid O3
+no-action receipt. A result check and separate business acceptance may follow that
+receipt only if the independent source proves the narrow `open` →
+`upheld_no_adjustment` transition from the exact prior AR hash/version, with the
+same subject, no adjustment, no credit and the exact decision reference. Original
+POD/terms must remain unchanged and valid; the complete grounds view must move only
+the authorized non-delivery ground to disposed, with no additional active grounds.
+The example retains both AR versions and this lineage. Acceptance binds the **new
+result-source head**, not the obsolete pre-disposition AR head, and requires current
+C/S, prerequisite evidence, recipient eligibility and fresh observation. Missing
+lineage/coverage is inconclusive; an unexpected transition or added ground is mismatch.
+Neither condition permits acceptance. This operation-specific rule never renews
+execution authority or allows a changed POD, terms, subject or amount to pass.
+
 The new material adapter must have its own pinned interpretation version; old D6
 material/evaluations continue replaying under their recorded versions.
 
@@ -130,16 +146,16 @@ Use one Case-wide supporting result revision/head **O**, with record-specific
 applicability. O never replaces C, R, S or another record's identity. Each strict
 operation binds the expected O/head and its applicable exact immutable references:
 
-| Proposed operation             | Checks and durable result                                                                                                                                                                                                                                                                             |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bind candidate / check basis   | Select an already committed record; fixed sources and full read scope. Append candidate or independent observation; no authority or business acceptance.                                                                                                                                              |
-| Request authority              | Current C/S/source/basis and successful basis proof. A bounded new material adapter creates an existing Authority Request v1 with immutable consent and separate R. It does not reinterpret the current credit-only create payload.                                                                   |
-| Review authority               | Existing D6 approve/reject/modify/escalate semantics, current eligibility, exact request and C/R/S. A replacement gets no approvals.                                                                                                                                                                  |
-| Record justified no-action     | Exact O/head and request/R, current C/S, source/POD/terms and resolver authorization under the writer transaction. Record `no_financial_action_recorded`; do not fabricate an executed ActionReceipt or assert an external effect.                                                                    |
-| Report off-runtime disposition | Current reporting grant, exact recorded no-action reference and source object/version claimed by the human, reported occurrence/timezone, evidence and reason. Append **reported**, never verified. No API writes the AR source.                                                                      |
-| Check result                   | Bind the committed no-action/report reference and expected O/head. Current verifier permission is independent of current execution permission: historical work remains checkable after authority becomes stale or rejected. Independently compare current source; append match/mismatch/inconclusive. |
-| Accept/reject business result  | Current recipient grant, exact candidate outcome, latest matching result observation, no-action/reference, current basis/C/S/source heads and O/head. A task approval cannot satisfy this operation. Record accepted or rejected with reason and commitments.                                         |
-| Reopen/reverse                 | Current scoped recipient or decision-owner intervention grant, exact affected result/acceptance and O/head, reason and evidence. Allow intervention despite stale business basis; never revive an expired/revoked grant. Append lineage and remove current accepted-result status.                    |
+| Proposed operation             | Checks and durable result                                                                                                                                                                                                                                                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bind candidate / check basis   | Select an already committed record; fixed sources and full read scope. Append candidate or independent observation; no authority or business acceptance.                                                                                                                                                                              |
+| Request authority              | Current C/S/source/basis and successful basis proof. A bounded new material adapter creates an existing Authority Request v1 with immutable consent and separate R. It does not reinterpret the current credit-only create payload.                                                                                                   |
+| Review authority               | Existing D6 approve/reject/modify/escalate semantics, current eligibility, exact request and C/R/S. A replacement gets no approvals.                                                                                                                                                                                                  |
+| Record justified no-action     | Exact O/head and request/R, current C/S, source/POD/terms and resolver authorization under the writer transaction. Record `no_financial_action_recorded`; do not fabricate an executed ActionReceipt or assert an external effect.                                                                                                    |
+| Report off-runtime disposition | Current reporting grant, exact recorded no-action reference and source object/version claimed by the human, reported occurrence/timezone, evidence and reason. Append **reported**, never verified. No API writes the AR source.                                                                                                      |
+| Check result                   | Bind the committed no-action/report reference and expected O/head. Current verifier permission is independent of current execution permission: historical work remains checkable after authority becomes stale or rejected. Independently compare current source; append match/mismatch/inconclusive.                                 |
+| Accept/reject business result  | Current recipient grant, exact candidate outcome, latest matching result observation, no-action/reference, current C/S and unchanged disposition prerequisites, the exact expected AR transition/new source head, and O/head. A task approval cannot satisfy this operation. Record accepted or rejected with reason and commitments. |
+| Reopen/reverse                 | Current scoped recipient or decision-owner intervention grant, exact affected result/acceptance and O/head, reason and evidence. Allow intervention despite stale business basis; never revive an expired/revoked grant. Append lineage and remove current accepted-result status.                                                    |
 
 Authority creation/review keeps its existing R history and does not append O; the
 new material adapter checks the current result basis/head at submission. Result
@@ -241,16 +257,16 @@ recovery primitives. A derived read view supplies the compact operator story;
 Workbench controls may follow, without another dashboard. No general OutcomeEvent,
 scheduler, connector, financial write or arbitrary-source framework.
 
-| ID                             | Required actual PostgreSQL/API assertion for that future PR                                                                                                                                                                                                 |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BR1 success                    | Import same Case/record, retain both packets, independent original-proof/terms check, exact D6 approval, no-action receipt, reported action, independent result, separate acceptance. Zero financial effects; DEL-5 unchanged; closure denied.              |
-| BR2 wrong subject              | Same invoice/customer with another record/delivery, wrong entity, partial allocation and explicitly shared delivery controls. Only applicable complete evidence can count.                                                                                  |
-| BR3 stale authority            | Case/D-014, catalog/identity/grant/terms/source change before submission and during observation/writer wait. No stale no-action or acceptance; historical check still allowed under current verifier grant.                                                 |
-| BR4 missing or uncertain proof | Status-only note, missing original bytes, absent terms, conflicting grounds, unavailable/malformed/incomplete/changing observation. Denial/mismatch/inconclusive are distinct; no error becomes absence.                                                    |
-| BR5 review separation          | Old/new task acceptance, preparer/decider/reporter self-verification and unauthorized recipient fail; business rejection terminal; new candidate gets no transferred approvals.                                                                             |
-| BR6 reversal                   | Later authoritative retraction/reopen, later inconclusive check and rejected/reversed result preserve original history while removing current success. Deduplicate record/period coverage.                                                                  |
-| BR7 persistence/recovery       | Fresh/upgrade migration, failures at insert/commit/read-back, concurrent shared-Case commands, exact lost-response retries after restart, stale-head denial, source races and coherently altered proof. GET/export does not write; replay is deterministic. |
-| BR8 product safeguards         | All five measures, commitments/unknowns, old interpreters/migrations/ECC, D6–D13 coverage, two-bundle preflight and authority/closure guards unchanged. No assumed D7 enrollment.                                                                           |
+| ID                             | Required actual PostgreSQL/API assertion for that future PR                                                                                                                                                                                                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| BR1 success                    | Import same Case/record, retain both packets, independent original-proof/terms check, exact D6 approval, no-action receipt, reported action, independent result with exact AR 0→1 lineage, separate acceptance without renewing old execution permission. Zero financial effects; DEL-5 unchanged; closure denied. |
+| BR2 wrong subject              | Same invoice/customer with another record/delivery, wrong entity, partial allocation and explicitly shared delivery controls. Only applicable complete evidence can count.                                                                                                                                         |
+| BR3 stale authority            | Case/D-014, catalog/identity/grant/terms/source change before submission and during observation/writer wait; expected AR transition cannot excuse changed grounds/POD/terms. No stale no-action or acceptance; historical check still allowed under current verifier grant.                                        |
+| BR4 missing or uncertain proof | Status-only note, missing original bytes, absent terms, conflicting grounds, unavailable/malformed/incomplete/changing observation. Denial/mismatch/inconclusive are distinct; no error becomes absence.                                                                                                           |
+| BR5 review separation          | Old/new task acceptance, preparer/decider/reporter self-verification and unauthorized recipient fail; business rejection terminal; new candidate gets no transferred approvals.                                                                                                                                    |
+| BR6 reversal                   | Later authoritative retraction/reopen, later inconclusive check and rejected/reversed result preserve original history while removing current success. Deduplicate record/period coverage.                                                                                                                         |
+| BR7 persistence/recovery       | Fresh/upgrade migration, failures at insert/commit/read-back, concurrent shared-Case commands, exact lost-response retries after restart, stale-head denial, source races and coherently altered proof. GET/export does not write; replay is deterministic.                                                        |
+| BR8 product safeguards         | All five measures, commitments/unknowns, old interpreters/migrations/ECC, D6–D13 coverage, two-bundle preflight and authority/closure guards unchanged. No assumed D7 enrollment.                                                                                                                                  |
 
 Cash collected remains unknown; this operation issues no credit, which does not prove
 the complete credits-issued measure is zero. Only the synthetic accepted-disposition
@@ -294,6 +310,13 @@ for (const [i, entry] of q.proposed_journal.entries()) {
   previous = hash;
 }
 assert.equal(q.ar_result_source.decision_reference, q.no_action_record.hash);
+assert.equal(q.ar_result_source.prior_source_hash, sha256Json(q.ar_basis_source));
+assert.equal(q.ar_result_source.prior_source_version, q.ar_basis_source.source_version);
+assert.deepEqual(q.ar_result_source.disposed_grounds, q.disposition_payload.grounds);
+assert.deepEqual(q.ar_result_source.other_active_grounds, []);
+assert.equal(q.result_observation.data.source_heads.ar, sha256Json(q.ar_result_source));
+for (const [key, value] of Object.entries(q.result_observation.data.expected))
+  assert.deepEqual(q.result_observation.data.observed[key], value);
 assert.equal(q.business_acceptance.observation_hash, q.result_observation.hash);
 assert.equal(q.business_acceptance.outcome_hash, sha256Json(q.outcome_projection_before_acceptance));
 assert.equal(q.business_acceptance.expected_result_head, q.proposed_journal[4].hash);

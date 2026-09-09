@@ -1657,6 +1657,9 @@ claims. The plan/specification and existing 19-entry matrix retain the distincti
 between task usefulness, authorized no-action, independent business-source checks,
 business acceptance and still-denied Case closure. Real-customer prerequisites,
 unknown proof/cost values and the original release boundary remain unchanged.
+The worked result binds the independently observed expected AR transition to its prior
+source hash/version. Separate acceptance uses that new result head without renewing
+old execution permission; changed delivery, terms or grounds still block acceptance.
 
 Local evidence for this follow-up: `pnpm validate` passes 318 tests; the complete
 D-038 PostgreSQL/API/Chromium suite passes 23/23. ECC remains 620/620; its negative

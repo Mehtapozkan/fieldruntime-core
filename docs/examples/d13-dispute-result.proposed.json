@@ -251,7 +251,12 @@
       "complete_for_requested_disposition": true,
       "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
       "source_occurred_at": "2026-09-07T16:13:00.000Z",
-      "source_timezone": "UTC"
+      "source_timezone": "UTC",
+      "prior_source_hash": "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63",
+      "prior_source_version": 0,
+      "disposed_grounds": ["non_delivery"],
+      "other_active_grounds": [],
+      "complete_grounds_for_record": true
     },
     "result_observation": {
       "example_only": true,
@@ -282,7 +287,7 @@
         "source_heads": {
           "pod": "sha256:9d1c03bd267e60c07e1a5ee1394c115bdc57f633a8b29001ce7b484065f67f61",
           "terms": "sha256:42f05d173c73018ceb946d826de5c47f216dfee2c74ff52628dc9d09c1064b7b",
-          "ar": "sha256:385bb82f5a1fcfc744bd4ac843f7f4c80906493268dd30ec955223caeaf3fa92"
+          "ar": "sha256:1faf1b2c7f53de65f808357586295098742c5319e0bbae05fa9e635086bb48b9"
         },
         "expected": {
           "subject": {
@@ -302,7 +307,12 @@
           "adjustment_minor": 0,
           "credit_ids": [],
           "complete_for_requested_disposition": true,
-          "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2"
+          "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+          "prior_source_hash": "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63",
+          "prior_source_version": 0,
+          "disposed_grounds": ["non_delivery"],
+          "other_active_grounds": [],
+          "complete_grounds_for_record": true
         },
         "observed": {
           "source_id": "AR-dispute-17",
@@ -326,7 +336,12 @@
           "complete_for_requested_disposition": true,
           "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
           "source_occurred_at": "2026-09-07T16:13:00.000Z",
-          "source_timezone": "UTC"
+          "source_timezone": "UTC",
+          "prior_source_hash": "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63",
+          "prior_source_version": 0,
+          "disposed_grounds": ["non_delivery"],
+          "other_active_grounds": [],
+          "complete_grounds_for_record": true
         },
         "comparison": "match",
         "verified_by_identity": {
@@ -337,7 +352,7 @@
           "status": "active"
         }
       },
-      "hash": "sha256:9e595d6f4822ba9d5216c6593fec5823c4dd210349fb462095b5363d5ed81dbd"
+      "hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5"
     },
     "outcome_projection_before_acceptance": {
       "id": "outcome_dispute_example_01",
@@ -386,10 +401,10 @@
         "currency": "USD"
       },
       "outcome_hash": "sha256:4127cd2fb5bbc865fbc154c2b9f3b4ecd516330360a3d76962f22e0fd1228d64",
-      "observation_hash": "sha256:9e595d6f4822ba9d5216c6593fec5823c4dd210349fb462095b5363d5ed81dbd",
+      "observation_hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
       "disposition_hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
       "expected_result_revision": 5,
-      "expected_result_head": "sha256:9e595d6f4822ba9d5216c6593fec5823c4dd210349fb462095b5363d5ed81dbd",
+      "expected_result_head": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
       "decision": "accept",
       "remaining_commitments": [
         {
@@ -659,7 +674,7 @@
           "source_heads": {
             "pod": "sha256:9d1c03bd267e60c07e1a5ee1394c115bdc57f633a8b29001ce7b484065f67f61",
             "terms": "sha256:42f05d173c73018ceb946d826de5c47f216dfee2c74ff52628dc9d09c1064b7b",
-            "ar": "sha256:385bb82f5a1fcfc744bd4ac843f7f4c80906493268dd30ec955223caeaf3fa92"
+            "ar": "sha256:1faf1b2c7f53de65f808357586295098742c5319e0bbae05fa9e635086bb48b9"
           },
           "expected": {
             "subject": {
@@ -679,7 +694,12 @@
             "adjustment_minor": 0,
             "credit_ids": [],
             "complete_for_requested_disposition": true,
-            "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2"
+            "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+            "prior_source_hash": "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63",
+            "prior_source_version": 0,
+            "disposed_grounds": ["non_delivery"],
+            "other_active_grounds": [],
+            "complete_grounds_for_record": true
           },
           "observed": {
             "source_id": "AR-dispute-17",
@@ -703,7 +723,12 @@
             "complete_for_requested_disposition": true,
             "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
             "source_occurred_at": "2026-09-07T16:13:00.000Z",
-            "source_timezone": "UTC"
+            "source_timezone": "UTC",
+            "prior_source_hash": "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63",
+            "prior_source_version": 0,
+            "disposed_grounds": ["non_delivery"],
+            "other_active_grounds": [],
+            "complete_grounds_for_record": true
           },
           "comparison": "match",
           "verified_by_identity": {
@@ -714,14 +739,14 @@
             "status": "active"
           }
         },
-        "hash": "sha256:9e595d6f4822ba9d5216c6593fec5823c4dd210349fb462095b5363d5ed81dbd"
+        "hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5"
       },
       {
         "example_only": true,
         "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
         "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
         "sequence": 6,
-        "previous_entry_hash": "sha256:9e595d6f4822ba9d5216c6593fec5823c4dd210349fb462095b5363d5ed81dbd",
+        "previous_entry_hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
         "event": "business_accepted",
         "recorded_at": "2026-09-07T16:15:00.000Z",
         "data": {
@@ -749,10 +774,10 @@
             "currency": "USD"
           },
           "outcome_hash": "sha256:4127cd2fb5bbc865fbc154c2b9f3b4ecd516330360a3d76962f22e0fd1228d64",
-          "observation_hash": "sha256:9e595d6f4822ba9d5216c6593fec5823c4dd210349fb462095b5363d5ed81dbd",
+          "observation_hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
           "disposition_hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
           "expected_result_revision": 5,
-          "expected_result_head": "sha256:9e595d6f4822ba9d5216c6593fec5823c4dd210349fb462095b5363d5ed81dbd",
+          "expected_result_head": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
           "decision": "accept",
           "remaining_commitments": [
             {
@@ -767,19 +792,19 @@
           ],
           "recorded_at": "2026-09-07T16:15:00.000Z"
         },
-        "hash": "sha256:a3ec9810baab144fb183b6c0492f4471672648c0125d3c83b8b65ceaa8421929"
+        "hash": "sha256:4da0dcb694af57e97c46e24701344090076031180433baf58896ce1bb7d333f8"
       },
       {
         "example_only": true,
         "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
         "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
         "sequence": 7,
-        "previous_entry_hash": "sha256:a3ec9810baab144fb183b6c0492f4471672648c0125d3c83b8b65ceaa8421929",
+        "previous_entry_hash": "sha256:4da0dcb694af57e97c46e24701344090076031180433baf58896ce1bb7d333f8",
         "event": "result_observed",
         "recorded_at": "2026-09-08T09:01:00.000Z",
         "data": {
           "no_action_entry_hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
-          "prior_observation_hash": "sha256:9e595d6f4822ba9d5216c6593fec5823c4dd210349fb462095b5363d5ed81dbd",
+          "prior_observation_hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
           "observed": {
             "source_id": "AR-dispute-17",
             "source_version": 2,
@@ -821,19 +846,19 @@
             "status": "active"
           }
         },
-        "hash": "sha256:66ee652a6e413a4eea5fbba36d2590a3d705f249781d869a09045257e99b353b"
+        "hash": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc"
       },
       {
         "example_only": true,
         "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
         "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
         "sequence": 8,
-        "previous_entry_hash": "sha256:66ee652a6e413a4eea5fbba36d2590a3d705f249781d869a09045257e99b353b",
+        "previous_entry_hash": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc",
         "event": "reopened",
         "recorded_at": "2026-09-08T09:02:00.000Z",
         "data": {
-          "prior_acceptance_entry_hash": "sha256:a3ec9810baab144fb183b6c0492f4471672648c0125d3c83b8b65ceaa8421929",
-          "observation_hash": "sha256:66ee652a6e413a4eea5fbba36d2590a3d705f249781d869a09045257e99b353b",
+          "prior_acceptance_entry_hash": "sha256:4da0dcb694af57e97c46e24701344090076031180433baf58896ce1bb7d333f8",
+          "observation_hash": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc",
           "actor": {
             "schema_version": "identity-reference.v0",
             "identity_id": "identity_dispute_recipient",
@@ -842,10 +867,10 @@
             "status": "active"
           },
           "expected_result_revision": 7,
-          "expected_result_head": "sha256:66ee652a6e413a4eea5fbba36d2590a3d705f249781d869a09045257e99b353b",
+          "expected_result_head": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc",
           "reason": "Authoritative synthetic source rescinded the delivery proof and reopened the same dispute"
         },
-        "hash": "sha256:3822201e2b79bd9aeeb4f5c206349a3ab2185cc96a88abeb0ffa50894bfa829c"
+        "hash": "sha256:89b5af057907b178208a63f1ee8d7b38b7444a5b611a8e14550e801e1dbf7fcf"
       }
     ]
   },
@@ -915,5 +940,5 @@
       "expected": "Inconclusive, not absence, no current verified label and no new business acceptance. Current coverage unknown; original match/acceptance remain historical."
     }
   ],
-  "example_hash": "sha256:539f8a56d4c8f3b0d7c39c4b37db1a3e41124bf2af29822745d77b902236b38c"
+  "example_hash": "sha256:f9dcba901735b583ddc17f17b2e681fc50ad4cc83571bc4d55a82138295dfa78"
 }
