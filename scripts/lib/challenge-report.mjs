@@ -354,7 +354,22 @@ const esc = (v) =>
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
-const json = (v) => `<pre>${esc(JSON.stringify(v, null, 2))}</pre>`;
+// Property order is not evidence ordering. Keep arrays/journals in recorded order.
+const json = (v) =>
+  `<pre>${esc(
+    JSON.stringify(
+      v,
+      (_key, item) =>
+        item && typeof item === "object" && !Array.isArray(item)
+          ? Object.fromEntries(
+              Object.keys(item)
+                .sort()
+                .map((key) => [key, item[key]]),
+            )
+          : item,
+      2,
+    ),
+  )}</pre>`;
 const disclosure = (label, v, id = "") =>
   `<details${id ? ` id="${esc(id)}"` : ""}><summary>${esc(label)}</summary>${json(v)}</details>`;
 const citations = (ids = []) =>

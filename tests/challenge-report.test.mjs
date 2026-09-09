@@ -144,7 +144,7 @@ test("D13 presentation escapes source content and never installs scripts or exte
 
 import { prepareIntake } from "../dist/packages/runtime/src/intake.js";
 import { exportWorkState } from "../dist/packages/runtime/src/preparation-work.js";
-import { buildReport } from "../scripts/lib/challenge-report.mjs";
+import { buildReport, reportJson } from "../scripts/lib/challenge-report.mjs";
 import { intakeInput, editQueue, INTAKE_START } from "./helpers/intake.mjs";
 test("D13 invalid rows without identities remain distinct source material, never invented records or eligible coverage", async () => {
   const input = editQueue(
@@ -187,6 +187,14 @@ test("D13 invalid rows without identities remain distinct source material, never
     evaluated_at: INTAKE_START,
     cohort: "all_retained_records",
   });
+  const portableArchive = JSON.parse(reportJson(archive));
+  const portableManifest = JSON.parse(reportJson(r.manifest));
+  const portable = await buildReport(portableArchive, portableManifest);
+  assert.equal(reportJson(portable), reportJson(r));
+  assert.equal(
+    renderReport(portable, portableArchive),
+    renderReport(r, archive),
+  );
   assert.equal(r.summary.retained_records, 2);
   assert.equal(r.summary.unidentified_source_rows, 2);
   assert.equal(r.summary.worker_scope_records, 1);

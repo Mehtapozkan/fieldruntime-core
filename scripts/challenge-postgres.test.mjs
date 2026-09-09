@@ -324,7 +324,16 @@ test("D13 Challenge: real API rehearsal, exact retries, failed/open work, reprod
   assert.equal(report.authority_granted, false);
   assert.equal(report.closure_permission, false);
   const bytes = reportJson(report);
-  assert.equal(reportJson(await buildReport(archive, manifest)), bytes);
+  const portableArchive = JSON.parse(reportJson(archive));
+  const portable = await buildReport(
+    portableArchive,
+    JSON.parse(reportJson(manifest)),
+  );
+  assert.equal(reportJson(portable), bytes);
+  assert.equal(
+    renderReport(portable, portableArchive),
+    renderReport(report, archive),
+  );
   const changed = structuredClone(archive);
   changed.entries[0].record_key = "forged";
   await assert.rejects(() => buildReport(changed, manifest));

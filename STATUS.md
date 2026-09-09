@@ -1534,6 +1534,8 @@ A final audit reproduced a null-identity report crash with valid retained intake
 Unidentified rows now remain source material with exact locators, excluded from
 identified-record/eligible coverage; invalid identified rows remain inspectable.
 Focused pure replay and PostgreSQL/API regressions cover that missing-input path.
+Portable replay also normalizes HTML disclosure object keys, retaining journal/array
+order, so canonical file export reproduces both report JSON and HTML byte-for-byte.
 
 The disposable PostgreSQL 18.4/API rehearsal and Chromium report subtest pass:
 eight records / three Cases / seven attempts, three records prepared, four prepared
