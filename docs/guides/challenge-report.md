@@ -136,3 +136,11 @@ PostgreSQL/browser check along with retained D6–D12, ECC and appliance safegua
 The [customer protocol](challenge-customer-protocol.md) defines comparisons and the
 specific real-data decisions still required. D13 customer proof/economics remain
 incomplete; no release or deployment is performed by the report tool.
+
+## Continue with supplied evidence
+
+The completed report remains unchanged. [D13 follow-through](challenge-follow-through.md)
+adds a separate executable Orchid evidence-arrival scenario, exact historical/current
+bindings and one human improvement proposal. It documents the accepted one-bundle
+worker limit and Proposed D-038; it does not invent a second prepared packet or a
+business outcome. Customer comparisons and D14 remain later work.

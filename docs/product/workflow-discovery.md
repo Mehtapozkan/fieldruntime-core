@@ -411,3 +411,29 @@ returning/paid-continuation targets remain experiments; an exception-selected sa
 cannot determine the population exception rate. Real-data activation still requires
 completed D-034 custody/access/retention approval and explicit identity/scope fit.
 This implements a synthetic reporting slice, not all D13 customer proof or economics.
+
+### Bounded D13 follow-through (rehearsal and proposal for review)
+
+Preserve PR #39's delivered synthetic report and all 19 requirement IDs. The next
+objective is supplied-evidence follow-through and one evidence-backed **proposed**
+improvement decision, not D14. [The executable scenario and contract map](../guides/challenge-follow-through.md)
+introduce an explicitly associated DEL-4 note through supported intake, show stale
+history, fresh description and separate publication, and keep DEL-5 unaffected.
+Retained evidence, unsupported/unattempted retrieval and human access/ownership/judgment
+must remain distinct. A draft was not sent; a source report is not independent proof.
+
+D-037's one-bundle worker limit blocks renewed execution when the artifact cites the
+old and new bundle. Current read eligibility lacks that resource preflight. Preserve
+this denial and history; [D-038](../architecture/d13-bounded-follow-through.md) is a
+Proposed explicit two-bundle version, not approved runtime functionality. A person
+can inspect the fresh brief and follow up manually today. Task usefulness never
+establishes financial authority, a business disposition, customer acceptance or closure.
+
+The proposed improvement combines initial proof/access/owner/terms questions and
+parallelizes only independently permitted human work. Cite actual scoped observations,
+coverage, costs/feasibility/alternatives and unresolved assumptions; leave selection
+to a process owner. Test a comparable subsequent batch with quality and complete
+preparation/review/correction/verification/support costs, including failed/open work.
+Five proof measures remain separate and unknown without their own evidence. Customer
+comparisons and improvement proof remain unperformed; real data still requires named
+participants, approved arrangements and a pre-intervention baseline.

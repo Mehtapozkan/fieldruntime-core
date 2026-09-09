@@ -490,3 +490,313 @@ test("D13 API export retains unidentified rows without fabricating record covera
   await h.restart();
   assert.deepEqual(await h.ok(path), archive);
 });
+
+test("D13 follow-through: supplied DEL-4 evidence requires fresh review, preserves history and grants no business outcome", async (t) => {
+  const h = await intakeHost(t, { work: true });
+  let tick = 0;
+  h.setWorkMonotonic(() => ++tick); // Synthetic clock; no effort/performance measurement.
+  const input = editQueue(
+    await intakeInput("follow-through-before"),
+    (rows, headers) => {
+      rows[1].legal_entity_id = "entity_north";
+      return { rows, headers };
+    },
+  );
+  input.artifacts = input.artifacts.slice(0, 1);
+  let v = await h.prepare(input);
+  const first = (
+    await h.ok(
+      "/v1/intake/commits",
+      await h.selection(v, 0, { key: "ft-attach-a" }),
+    )
+  ).receipt;
+  v = await h.ok(`/v1/intake/bundles/${v.bundle.id}`);
+  const second = (
+    await h.ok(
+      "/v1/intake/commits",
+      await h.selection(v, 1, {
+        key: "ft-attach-b",
+        target: {
+          mode: "attach",
+          case_id: first.case_id,
+          expected_case_version: first.case_version,
+        },
+      }),
+    )
+  ).receipt;
+  const path = `${WORK}?case_id=${first.case_id}&record_key=${first.record_key}`;
+  const packPath = (bundle) =>
+    `${PACK}?bundle_id=${bundle.bundle.id}&record_key=${first.record_key}&case_id=${first.case_id}`;
+  await h.ok(
+    reviewPath(v),
+    discoveryCommand(
+      await h.ok(discoveryPath(v, first.case_id)),
+      "ft-description-before",
+      "confirm",
+    ),
+  );
+  const p0 = await h.ok(packPath(v));
+  await h.ok(
+    `${PACK}/selections/publication`,
+    publication(p0, "ft-publish-before"),
+  );
+  const command0 = start(await h.ok(path), "ft-start-before");
+  const receipt0 = await h.ok(POST, command0);
+  const review0 = review(await h.ok(path), "approve", "ft-accept-before");
+  const accepted0 = await h.ok(POST, review0);
+  const before = await h.ok(path);
+  const run0 = before.invocations.at(-1);
+  const delivery = (run, id) =>
+    run.result.evidence_checklist.find((item) => item.subject.id === id);
+  assert.equal(delivery(run0, "DEL-4").status, "not_supplied");
+  assert.match(run0.result.follow_up.draft, /provide DEL-4 confirmation/);
+  const archive0 = await h.ok(path + "&representation=export");
+  const manifest = (archive, at) => ({
+    schema_version: "challenge-input.v1",
+    archive_hash: archive.hash,
+    evaluated_at: at,
+    cohort: "all_retained_records",
+  });
+  const report0 = await buildReport(archive0, manifest(archive0, AT));
+
+  // A person supplies a new local note. This is not a connector fetch or sent request.
+  const suppliedAt = "2026-09-07T16:06:00.000Z";
+  h.setTime(suppliedAt);
+  const supplied = structuredClone(input);
+  supplied.idempotency_key = "follow-through-supplied";
+  supplied.artifacts.push({
+    role: "support",
+    document_id: "del-4-supplied",
+    name: "del-4-supplied.txt",
+    media_type: "text/plain",
+    bytes_base64: Buffer.from(
+      "Delivery confirmation for DEL-4 is supplied.\n",
+    ).toString("base64"),
+    declared_hash: null,
+    associations: [
+      { entity: "entity_north", kind: "record", id: "dispute-17" },
+    ],
+  });
+  const v1 = await h.prepare(supplied);
+  const retained = await h.ok(path);
+  assert.equal(retained.invocations[0].current_usable, false);
+  const attach = await h.selection(v1, 0, {
+    key: "ft-attach-supplied",
+    target: {
+      mode: "attach",
+      case_id: first.case_id,
+      expected_case_version: second.case_version,
+    },
+  });
+  const attached = await h.ok("/v1/intake/commits", attach);
+  assert.equal(attached.receipt.case_id, first.case_id);
+  assert.ok(attached.receipt.case_version > second.case_version);
+  const stale = await h.ok(path);
+  const deniedSnapshot = await h.snapshot();
+  const denied = await h.call(POST, {
+    ...command0,
+    idempotency_key: "ft-stale-start",
+    expected_work_revision: stale.work_revision,
+    expected_work_head: stale.work_head,
+    replaces_invocation: run0.invocation_id,
+  });
+  assert.equal(denied.status, 409, JSON.stringify(denied.data));
+  assert.deepEqual(await h.snapshot(), deniedSnapshot);
+  assert.equal(stale.current.can_start, false);
+  assert.equal(stale.invocations[0].current_usable, false);
+  assert.deepEqual(stale.invocations[0].result, run0.result);
+  assert.deepEqual(stale.invocations[0].review, run0.review);
+
+  const freshBrief = await h.ok(discoveryPath(v1, first.case_id));
+  const otherBrief = await h.ok(discoveryPath(v1, null, 1));
+  assert.match(JSON.stringify(freshBrief.material), /DEL-4/);
+  await h.ok(
+    reviewPath(v1),
+    discoveryCommand(freshBrief, "ft-description-after", "confirm"),
+  );
+  const described = await h.ok(path);
+  assert.equal(
+    described.current.can_start,
+    false,
+    "Description alone is not publication",
+  );
+  const p1 = await h.ok(packPath(v1));
+  assert.notEqual(p1.candidate_hash, p0.candidate_hash);
+  await h.ok(
+    `${PACK}/selections/publication`,
+    publication(p1, "ft-publish-after"),
+  );
+  const ready = await h.ok(path);
+  assert.equal(ready.current.can_start, true);
+  const command1 = start(ready, "ft-start-after");
+  assert.equal(command1.replaces_invocation, run0.invocation_id);
+  assert.equal(
+    command1.binding.source_revision,
+    command0.binding.source_revision,
+    "Unchanged CSV row revision alone cannot bind newly supplied support",
+  );
+  assert.notEqual(
+    command1.binding.basis.manifest.bundle_hash,
+    command0.binding.basis.manifest.bundle_hash,
+  );
+  const beforeDenied = await h.snapshot();
+  const blocked = await h.call(POST, command1);
+  assert.equal(blocked.status, 400, JSON.stringify(blocked.data));
+  assert.equal(blocked.data.error, "WORK_INPUT_LIMIT");
+  assert.deepEqual(
+    await h.snapshot(),
+    beforeDenied,
+    "Denied work creates no start or accepted packet",
+  );
+  const suppliedClaims = freshBrief.material.source_claims.filter(
+    (claim) =>
+      claim.applicable_record_key === first.record_key &&
+      claim.subject.id === "DEL-4" &&
+      claim.meaning === "source_reports_confirmation",
+  );
+  assert.ok(suppliedClaims.length > 0);
+  assert.ok(
+    suppliedClaims.every(
+      (claim) =>
+        claim.independently_verified === false &&
+        claim.source_associations.some(
+          (a) => a.kind === "record" && a.id === "dispute-17",
+        ),
+    ),
+  );
+  const cited = new Set(suppliedClaims.flatMap((claim) => claim.citation_ids));
+  const sources = freshBrief.material.sources.filter((source) =>
+    cited.has(source.id),
+  );
+  assert.ok(
+    sources.some(
+      (source) =>
+        source.name === "del-4-supplied.txt" &&
+        source.bundle_id === v1.bundle.id,
+    ),
+  );
+  assert.equal(
+    otherBrief.material.source_claims.filter(
+      (claim) =>
+        claim.applicable_record_key === second.record_key &&
+        claim.meaning === "source_reports_confirmation",
+    ).length,
+    0,
+    "DEL-4 evidence does not transfer to dispute-18 / DEL-5",
+  );
+  assert.equal(
+    new Set(p1.candidate.sources.map((source) => source.bundle_id)).size,
+    2,
+  );
+  const state = await h.snapshot();
+  h.trace.length = 0;
+  const archive1 = await h.ok(path + "&representation=export");
+  const report1 = await buildReport(archive1, manifest(archive1, suppliedAt));
+  assert.ok(
+    !h.trace.some((sql) =>
+      /FOR UPDATE|INSERT|UPDATE runtime_writer_lock/.test(sql),
+    ),
+  );
+  assert.deepEqual(await h.snapshot(), state);
+  assert.equal(report1.summary.retained_records, 2);
+  assert.equal(report1.summary.attached_cases, 1);
+  assert.equal(report1.summary.invocation_attempts, 1);
+  assert.equal(report1.summary.records_ever_prepared, 1);
+  assert.equal(report1.summary.newly_attended_records, null);
+  assert.ok(
+    report1.measures.every((measure) => measure.aggregate_value === null),
+  );
+  assert.equal(report1.authority_granted, false);
+  assert.equal(report1.closure_permission, false);
+  assert.deepEqual(report1.case_states, { detected: 1 });
+  assert.ok(
+    report1.cases.every(
+      (entry) =>
+        (entry.document.outcomes ?? []).length === 0 &&
+        (entry.document.action_receipts ?? []).length === 0 &&
+        (entry.document.action_proposals ?? []).length === 0,
+    ),
+  );
+  assert.deepEqual(
+    archive1.entries.slice(0, archive0.entries.length),
+    archive0.entries,
+  );
+  assert.equal(
+    reportJson(await buildReport(archive0, manifest(archive0, AT))),
+    reportJson(report0),
+  );
+  await h.restart();
+  for (const [url, command, receipt] of [
+    [POST, command0, receipt0],
+    [POST, review0, accepted0],
+    ["/v1/intake/commits", attach, attached],
+  ])
+    assert.deepEqual(await h.ok(url, command), receipt);
+  assert.deepEqual(await h.snapshot(), state);
+  assert.deepEqual(await h.ok(path + "&representation=export"), archive1);
+  const observation = {
+    original_delivery: delivery(run0, "DEL-4"),
+    supplied_claims: suppliedClaims,
+    sources,
+    other_record_key: second.record_key,
+    retained_current: retained.current,
+    committed_current: stale.current,
+    stale_start: denied,
+    refreshed_start: blocked,
+    before_binding: run0.binding,
+    proposed_binding: command1.binding,
+    before_summary: report0.summary,
+    after_summary: report1.summary,
+    human_next_action:
+      "Inspect the supplied source report and obtain underlying proof, permitted access, accountable owner and governing terms. New worker preparation is blocked by the accepted one-bundle limit.",
+  };
+  t.diagnostic(
+    JSON.stringify({
+      original_delivery: observation.original_delivery.status,
+      supplied_claim: suppliedClaims[0].meaning,
+      supplied_citation: sources[0].id,
+      stale_start: denied.data.error,
+      fresh_start: blocked.data.error,
+      case_versions: [
+        run0.binding.basis.manifest.case_version,
+        command1.binding.basis.manifest.case_version,
+      ],
+      summary: report1.summary,
+      independent_business_verification: false,
+      restart_reproduced: true,
+    }),
+  );
+  if (process.env.D13_FOLLOW_THROUGH_DIR) {
+    const dir = resolve(process.env.D13_FOLLOW_THROUGH_DIR);
+    for (const [stage, archive, report, at] of [
+      ["before", archive0, report0, AT],
+      ["after", archive1, report1, suppliedAt],
+    ]) {
+      await mkdir(resolve(dir, stage), { recursive: true });
+      for (const [name, contents] of Object.entries({
+        "archive.json": reportJson(archive),
+        "manifest.json": reportJson(manifest(archive, at)),
+        "report.json": reportJson(report),
+        "report.html": renderReport(report, archive),
+      }))
+        await writeFile(resolve(dir, stage, name), contents);
+    }
+    await writeFile(
+      resolve(dir, "follow-through.json"),
+      reportJson({
+        supplied_input: supplied,
+        intake_receipt: attached,
+        prior_start: receipt0,
+        prior_review: accepted0,
+        stale_start: denied,
+        retained_current: retained.current,
+        committed_current: stale.current,
+        fresh_description: freshBrief,
+        other_record: otherBrief,
+        proposed_start: command1,
+        blocked_start: blocked,
+        observation,
+      }),
+    );
+  }
+});

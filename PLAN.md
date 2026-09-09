@@ -308,10 +308,35 @@ outcomes, unknown population/effort and all five proof measures. Failure/retry a
 restart assertions accompany exact-input report reconstruction. This is implemented
 for review; it is not a completed customer Challenge or measured economics.
 
-Next, agree the [comparison and activation protocol](docs/guides/challenge-customer-protocol.md):
-named buyer/process owner/custodian, narrow task, cohort, pre-intervention baseline,
-quality and cost coverage, fair manual/generic-assistant inputs, and approved private
-data custody/access/retention. Run real comparisons only after that approval. Record
-failed/open work and missing outcomes; then evaluate the ten-minute packet and
-returning/paid-continuation hypotheses. No general worker, customer authentication,
-real-data activation, financial action or closure expansion belongs in this slice.
+The completed synthetic report was delivered in open PR #39 at `859b0fe9`; preserve
+its calculation and failure-case coverage. This is reporting delivery, not customer
+follow-through or improvement proof.
+
+**Current bounded continuation:** [executable follow-through and proposed improvement](docs/guides/challenge-follow-through.md).
+Supply Orchid's DEL-4 evidence through existing intake, inspect scoped changes,
+retain historical packets/decisions and require fresh descriptive review/publication.
+The existing one-bundle worker correctly refuses the new two-bundle artifact;
+manual follow-through remains possible. [Proposed D-038](docs/architecture/d13-bounded-follow-through.md)
+defines the smallest versioned two-bundle extension and preflight, pending approval.
+No runtime boundary change or D14 work is authorized by the rehearsal.
+
+**After that approval:** one bounded implementation slice, not another framework:
+compatible artifact/input versions, aggregate limits, resource-aware read preflight,
+current start/terminal gates, original-key recovery and existing Workbench packet
+inspection. Execute F1–F7; preserve v1/v2 interpretation and all historical receipts.
+No imported-dispute business disposition, financial bridge, customer acceptance or
+closure permission is included. Those missing contracts must be separately specified
+and approved before implementation.
+
+**Improvement decision:** a process owner considers the cited proposal to combine
+proof/access/owner/terms questions and parallelize independent human clarification.
+Use a pre-registered comparable batch to test quality, all effort/costs and failed/open
+work. Expected benefit is a hypothesis, not savings. No experiment is selected for a
+person and no production process is changed here.
+
+**Customer proof still remaining:** agree the [comparison and activation protocol](docs/guides/challenge-customer-protocol.md):
+named buyer/process owner/custodian, cohort, baseline, quality and cost coverage, fair
+manual/generic-assistant inputs, approved private data custody/access/retention and
+separate business outcome evidence. Run comparisons only after approval. Preserve
+five distinct proof measures and missing/negative/reversal/reopen/overlap data;
+the ten-minute and returning/paid-continuation targets remain experiments.
