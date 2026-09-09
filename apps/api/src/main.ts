@@ -1,3 +1,5 @@
+import { PostgresPreparationWorkStore } from "../../../packages/runtime/src/postgres-preparation-work-store.js";
+import { syntheticWorkerPackContext } from "../../../packages/runtime/src/preparation-pack.js";
 import { PostgresPreparationPackStore } from "../../../packages/runtime/src/postgres-preparation-pack-store.js";
 import { PostgresDiscoveryStore } from "../../../packages/runtime/src/postgres-discovery-store.js";
 import { PostgresIntakeStore } from "../../../packages/runtime/src/postgres-intake-store.js";
@@ -153,6 +155,7 @@ async function start(): Promise<void> {
     intakeKeysMigrationSql,
     discoveryMigrationSql,
     packMigrationSql,
+    workMigrationSql,
     fixtureDocument,
     walkthroughDocument,
   ] = await Promise.all([
@@ -214,6 +217,13 @@ async function start(): Promise<void> {
     ),
     readFile(
       new URL(
+        "../../../packages/runtime/migrations/0009_preparation_work.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
         "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
         import.meta.url,
       ),
@@ -244,6 +254,7 @@ async function start(): Promise<void> {
     ),
     createMigrationSource("0007_discovery_review", discoveryMigrationSql),
     createMigrationSource("0008_preparation_pack_selection", packMigrationSql),
+    createMigrationSource("0009_preparation_work", workMigrationSql),
   );
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
   const walkthrough = createGuidedWalkthroughRecord(
@@ -274,15 +285,20 @@ async function start(): Promise<void> {
   );
   const intakeStore = new PostgresIntakeStore(pool);
   const discoveryStore = new PostgresDiscoveryStore(pool);
-  const packStore = new PostgresPreparationPackStore(pool);
+  const packStore = new PostgresPreparationPackStore(
+    pool,
+    syntheticWorkerPackContext,
+  );
+  const workStore = new PostgresPreparationWorkStore(pool);
   const intakeWorker = new TransactionalIntakeWorker(
     intakeStore,
     undefined,
     discoveryStore,
     packStore,
+    workStore,
   );
   // Pack readiness includes complete Discovery and intake integrity checks.
-  await packStore.assertReady();
+  await workStore.assertReady();
   const workbenchAssets = await loadWorkbenchAssets();
   const server = createApiServer(
     {
@@ -291,7 +307,7 @@ async function start(): Promise<void> {
         if (!(await applianceIsReady(pool, migrations, fixture))) return false;
         await creditStore.assertReady();
         await store.assertReady();
-        await packStore.assertReady();
+        await workStore.assertReady();
         await authorityStore.assertReady(SYNTHETIC_AUTHORITY_TENANT);
         return true;
       },

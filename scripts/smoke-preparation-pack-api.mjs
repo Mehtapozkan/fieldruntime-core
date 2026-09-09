@@ -3,8 +3,15 @@ import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
 import { intakeInput, boundSelection } from "../tests/helpers/intake.mjs";
 import { discoveryCommand } from "../tests/helpers/discovery.mjs";
-import { assertValidPreparationPackContract } from "../dist/packages/contracts/src/index.js";
+import {
+  assertValidPreparationPackContract,
+  assertValidPreparationPackV2Contract,
+} from "../dist/packages/contracts/src/index.js";
 import { validatePackExport } from "../dist/packages/runtime/src/preparation-pack.js";
+const validatePack = (kind, v) =>
+  (v.schema_version.endsWith(".v2")
+    ? assertValidPreparationPackV2Contract
+    : assertValidPreparationPackContract)(kind, v);
 const [mode, evidenceFile] = process.argv.slice(2),
   base = process.env.FIELD_RUNTIME_URL ?? "http://127.0.0.1:3210",
   url = new URL(base);
@@ -70,9 +77,11 @@ if (mode === "applied") {
   );
   const path = `${root}?${query}`,
     candidate = await call(path);
-  assertValidPreparationPackContract("read", candidate);
+  validatePack("read", candidate);
   const command = {
-    schema_version: "pack-selection-command.v1",
+    schema_version: candidate.schema_version.endsWith(".v2")
+      ? "pack-selection-command.v2"
+      : "pack-selection-command.v1",
     operation: "publish",
     pack_id: candidate.pack_id,
     expected_selection_revision: candidate.selection_revision,
@@ -89,7 +98,7 @@ if (mode === "applied") {
     effective_until_source_timezone: "UTC",
   };
   const receipt = await call(post, command);
-  assertValidPreparationPackContract("result", receipt);
+  validatePack("result", receipt);
   const archive = await call(path + "&representation=export");
   validatePackExport(archive);
   await writeFile(
@@ -108,7 +117,7 @@ if (mode === "applied") {
     saved.archive,
   );
   const v = await call(saved.path);
-  assertValidPreparationPackContract("read", v);
+  validatePack("read", v);
   assert.equal(v.selection_head, saved.receipt.entry.hash);
   validatePackExport(saved.archive);
   console.log(

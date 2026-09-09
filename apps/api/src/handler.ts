@@ -226,6 +226,55 @@ export async function handleApiRequest(
   if (segments[0] === "v1" && segments[1] === "intake" && dependencies.intake) {
     const intake = dependencies.intake;
     try {
+      if (segments[2] === "preparation-work") {
+        const params = new URL(request.path, "http://localhost").searchParams;
+        if (
+          method === "POST" &&
+          segments.length === 4 &&
+          segments[3] === "commands"
+        ) {
+          if (params.size) return response(400, { error: "invalid_query" });
+          const parsed = parseCommand(request, 131072, true);
+          if ("error" in parsed) return parsed.error;
+          return response(200, await intake.submitWork(parsed.command));
+        }
+        if (method === "GET" && segments.length === 3) {
+          const caseId = params.get("case_id"),
+            key = params.get("record_key");
+          if (
+            !caseId ||
+            !CANONICAL_ID.test(caseId) ||
+            !key ||
+            !/^sha256:[a-f0-9]{64}$/.test(key) ||
+            [...params.keys()].some(
+              (k) =>
+                !["case_id", "record_key", "representation"].includes(k) ||
+                params.getAll(k).length !== 1,
+            ) ||
+            (params.has("representation") &&
+              params.get("representation") !== "export")
+          )
+            return response(400, { error: "invalid_query" });
+          const result = response(
+            200,
+            await intake.readWork(
+              caseId,
+              key,
+              params.get("representation") === "export",
+            ),
+          );
+          return params.get("representation") === "export"
+            ? {
+                ...result,
+                headers: {
+                  ...JSON_HEADERS,
+                  "content-disposition":
+                    "attachment; filename=synthetic-preparation-work-export.json",
+                },
+              }
+            : result;
+        }
+      }
       if (
         segments[2] === "preparation-packs" &&
         segments[3] === "pack_synthetic_invoice_dispute_north"
@@ -417,7 +466,7 @@ export async function handleApiRequest(
         return response(
           error.code === "NOT_FOUND"
             ? 404
-            : /CONFLICT|REQUIRED|REGRESSION|NO_CHANGE|ALREADY_REVIEWED/.test(
+            : /CONFLICT|REQUIRED|REGRESSION|NO_CHANGE|ALREADY_REVIEWED|WORK_PENDING|WORK_TERMINAL|WORK_REVIEW_TERMINAL/.test(
                   error.code,
                 )
               ? 409

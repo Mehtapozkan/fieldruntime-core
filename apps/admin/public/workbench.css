@@ -2499,3 +2499,41 @@ button {
     margin-block: 0.6rem;
   }
 }
+
+/* Preparation uses the existing cream review surface; controls precede disclosures. */
+.work-focus {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 1fr);
+  gap: 24px;
+}
+.work-focus > * {
+  min-width: 0;
+}
+.work-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.preparation-work {
+  overflow-wrap: anywhere;
+}
+.preparation-work pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.preparation-work textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+.preparation-work summary {
+  cursor: pointer;
+}
+@media (max-width: 700px) {
+  .work-focus {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .work-controls {
+    padding: 12px;
+  }
+}

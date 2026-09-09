@@ -123,7 +123,7 @@ export function pendingIntakeStorage() {
           result = true;
         } else {
           failure = new Error(
-            "Another tab has an unresolved intake, Discovery or pack command. Recover the saved original submission before starting another; nothing new was submitted.",
+            "Another tab has an unresolved intake, Discovery, pack or preparation-work command. Recover the saved original submission before starting another; nothing new was submitted.",
           );
           tx.abort();
         }
@@ -167,6 +167,10 @@ export function createIntakeClient({
     packConfirmed: null,
     packError: null,
     packNeedsRefresh: true,
+    work: null,
+    workConfirmed: null,
+    workError: null,
+    workNeedsRefresh: true,
   };
   async function request(path, body) {
     const abort = new globalThis.AbortController(),
@@ -245,6 +249,11 @@ export function createIntakeClient({
       JSON.stringify(target),
     );
     await refreshPack(brief, target);
+    if (
+      state.pack?.schema_version === "pack-selection-read.v2" &&
+      target.case_id
+    )
+      await refreshWork(target);
     return brief;
   }
   async function refreshPack(brief, target) {
@@ -266,6 +275,32 @@ export function createIntakeClient({
       state.packNeedsRefresh = false;
     } catch (error) {
       state.packError = error.message;
+    }
+  }
+  async function refreshWork(target) {
+    state.workNeedsRefresh = true;
+    state.workError = null;
+    try {
+      const view = await validateWorkView(
+        await request(workPath(target)),
+        target,
+      );
+      state.work = view;
+      requireData(
+        !state.packNeedsRefresh &&
+          view.selection_head === state.pack.selection_head &&
+          view.selection_revision === state.pack.selection_revision,
+      );
+      if (view.candidate_binding)
+        requireData(
+          equal(
+            view.candidate_binding.basis.discovery,
+            state.discovery.binding,
+          ),
+        );
+      state.workNeedsRefresh = false;
+    } catch (error) {
+      state.workError = `Current preparation could not be reconciled: ${error.message}`;
     }
   }
   async function run(operation) {
@@ -291,6 +326,7 @@ export function createIntakeClient({
         ([
           `${ROOT}/preparations`,
           `${ROOT}/commits`,
+          `${ROOT}/preparation-work/commands`,
           `${PACK_ROOT}/selections/publication`,
         ].includes(saved.path) ||
           /^\/v1\/intake\/bundles\/intake_bundle_[a-f0-9]{64}\/discovery-reviews$/.test(
@@ -313,9 +349,23 @@ export function createIntakeClient({
     state.needsRefresh = true;
     try {
       const result = await request(saved.path, saved.body);
-      const isDiscovery = saved.path.endsWith("discovery-reviews"),
+      const isWork = saved.path === `${ROOT}/preparation-work/commands`,
+        isDiscovery = saved.path.endsWith("discovery-reviews"),
         isPack = saved.path === `${PACK_ROOT}/selections/publication`;
-      if (isPack) {
+      if (isWork) {
+        await validateWorkReceipt(result, JSON.parse(saved.body));
+        state.workConfirmed = result;
+        const b =
+          result.entry.command.operation === "start"
+            ? result.entry.command.binding
+            : null;
+        if (b)
+          state.discoveryTarget = {
+            bundle_id: b.basis.discovery.bundle_id,
+            record_key: b.record_key,
+            case_id: b.case_id,
+          };
+      } else if (isPack) {
         await validatePackResult(result, JSON.parse(saved.body));
         state.packConfirmed = result;
         const artifact = result.entry.artifact ?? state.pack?.selected_artifact;
@@ -350,7 +400,7 @@ export function createIntakeClient({
             ) &&
             /^intake_bundle_[a-f0-9]{64}$/.test(result.bundle_id),
         );
-      if (!isDiscovery && !isPack) state.confirmed = result;
+      if (!isDiscovery && !isPack && !isWork) state.confirmed = result;
       state.needsRefresh = true;
       state.recovered = recovering;
       try {
@@ -362,8 +412,28 @@ export function createIntakeClient({
       }
       state.preview = null;
       try {
+        if (isWork && result.entry.command.operation !== "start") {
+          // A different tab may have navigated elsewhere. Recover the original
+          // invocation's canonical target through a read, never a guessed binding.
+          const target = {
+            case_id: result.entry.case_id,
+            record_key: result.entry.record_key,
+          };
+          const view = await validateWorkView(
+            await request(workPath(target)),
+            target,
+          );
+          const run = view.invocations.find(
+            (r) => r.invocation_id === result.entry.invocation_id,
+          );
+          requireData(run);
+          state.discoveryTarget = {
+            ...target,
+            bundle_id: run.binding.basis.discovery.bundle_id,
+          };
+        }
         await refresh(
-          isPack
+          isPack || isWork
             ? state.discoveryTarget?.bundle_id
             : isDiscovery
               ? result.entry.command.bundle_id
@@ -372,7 +442,7 @@ export function createIntakeClient({
         if (state.discoveryTarget) await refreshDiscovery();
       } catch (error) {
         state.needsRefresh = true;
-        state.error = `Confirmed ${isPack ? "publication receipt" : isDiscovery ? "descriptive review" : result.receipt ? "Case receipt" : "preparation"} retained. Current view could not be refreshed: ${error.message}`;
+        state.error = `Confirmed ${isWork ? "preparation-work receipt" : isPack ? "publication receipt" : isDiscovery ? "descriptive review" : result.receipt ? "Case receipt" : "preparation"} retained. Current view could not be refreshed: ${error.message}`;
       }
       return result;
     } catch (error) {
@@ -439,6 +509,20 @@ export function createIntakeClient({
           state.needsRefresh = true;
           throw error;
         }
+      }),
+    writeWork: (command) =>
+      run(async () => {
+        requireData(
+          !state.pending &&
+            !state.needsRefresh &&
+            !state.workNeedsRefresh &&
+            state.work,
+        );
+        state.pending = {
+          path: `${ROOT}/preparation-work/commands`,
+          body: JSON.stringify(command),
+        };
+        return submitPending();
       }),
     writePack: (command) =>
       run(async () => {
@@ -654,11 +738,16 @@ const packVersions = {
 };
 async function validatePackArtifact(a, hash) {
   requireData(
-    a?.schema_version === "preparation-pack.v1" &&
+    ["preparation-pack.v1", "preparation-pack.v2"].includes(
+      a?.schema_version,
+    ) &&
       a.pack_id === "pack_synthetic_invoice_dispute_north" &&
       a.authority_granted === false &&
       a.closure_permission === false &&
-      a.template?.template_id === "invoice-dispute-preparation.v1" &&
+      a.template?.template_id ===
+        (a.schema_version.endsWith(".v2")
+          ? "invoice-dispute-preparation.v2"
+          : "invoice-dispute-preparation.v1") &&
       a.material?.model_calls === 0 &&
       a.findings?.length === 7 &&
       a.loop_outputs?.length === 6 &&
@@ -666,7 +755,8 @@ async function validatePackArtifact(a, hash) {
   );
   const { version, ...content } = a;
   requireData(
-    version === `pack-v1-${(await intakeHash(content)).slice(7)}` &&
+    version ===
+      `pack-${a.schema_version.endsWith(".v2") ? "v2" : "v1"}-${(await intakeHash(content)).slice(7)}` &&
       hash === (await intakeHash(a)),
   );
   requireData(
@@ -683,13 +773,23 @@ async function validatePackArtifact(a, hash) {
 }
 export async function validatePackEntry(e) {
   requireData(
-    e?.schema_version === "pack-selection-entry.v1" &&
+    ["pack-selection-entry.v1", "pack-selection-entry.v2"].includes(
+      e?.schema_version,
+    ) &&
       e.tenant_id === "tenant_intake_demo" &&
       e.pack_id === "pack_synthetic_invoice_dispute_north" &&
       e.actor?.identity_id === "identity_pack_reviewer_demo" &&
       e.actor.status === "active" &&
       e.actor.identity_kind === "human" &&
-      equal(e.versions, packVersions) &&
+      equal(
+        e.versions,
+        e.schema_version.endsWith(".v2")
+          ? {
+              projection: "preparation-pack.v2",
+              selection: "pack-selection.v2",
+            }
+          : packVersions,
+      ) &&
       e.operation === e.command?.operation &&
       e.idempotency_key === e.command.idempotency_key &&
       e.sequence === e.command.expected_selection_revision + 1 &&
@@ -720,7 +820,9 @@ export async function validatePackEntry(e) {
 }
 export async function validatePackResult(v, command) {
   requireData(
-    v?.schema_version === "pack-selection-result.v1" &&
+    ["pack-selection-result.v1", "pack-selection-result.v2"].includes(
+      v?.schema_version,
+    ) &&
       v.status === "recorded" &&
       v.historical_receipt === true &&
       v.authority_granted === false &&
@@ -732,7 +834,9 @@ export async function validatePackResult(v, command) {
 }
 export async function validatePackView(v, target) {
   requireData(
-    v?.schema_version === "pack-selection-read.v1" &&
+    ["pack-selection-read.v1", "pack-selection-read.v2"].includes(
+      v?.schema_version,
+    ) &&
       v.pack_id === "pack_synthetic_invoice_dispute_north" &&
       v.authority_granted === false &&
       v.closure_permission === false &&
@@ -786,5 +890,140 @@ export async function validatePackView(v, target) {
     v.current.eligible === (v.current.status === "published_for_preparation") &&
       (!v.current.can_withdraw || v.selected_artifact_hash !== null),
   );
+  return v;
+}
+
+export function workPath(target) {
+  return `${ROOT}/preparation-work?case_id=${encodeURIComponent(target.case_id)}&record_key=${encodeURIComponent(target.record_key)}`;
+}
+export async function validateWorkEntry(e) {
+  requireData(
+    e?.schema_version === "preparation-work-entry.v1" &&
+      e.tenant_id === "tenant_intake_demo" &&
+      e.authority_granted === false &&
+      e.closure_permission === false,
+  );
+  await bound(e);
+  const id = ["started", "terminal_result"].includes(e.event)
+    ? "identity_disposition_worker_demo"
+    : e.event === "evaluation_review"
+      ? "identity_pack_reviewer_demo"
+      : "identity_intake_operator";
+  requireData(
+    e.actor?.identity_id === id &&
+      e.actor.status === "active" &&
+      e.actor.identity_kind ===
+        (id === "identity_disposition_worker_demo" ? "service" : "human") &&
+      (e.event === "terminal_result" ||
+        e.worker_profile.identities.some((i) => equal(i, e.actor))),
+  );
+  if (e.command)
+    requireData(
+      e.command_fingerprint === (await intakeHash(e.command)) &&
+        e.idempotency_key === e.command.idempotency_key &&
+        e.sequence === e.command.expected_work_revision + 1 &&
+        e.previous_entry_hash === e.command.expected_work_head,
+    );
+  if (e.result) {
+    requireData(
+      e.event === "terminal_result" &&
+        e.result_hash === (await intakeHash(e.result)) &&
+        e.result.invocation_id === e.invocation_id &&
+        e.result.started_entry_hash === e.started_entry_hash &&
+        e.result.binding_hash === e.binding_hash &&
+        e.result.financial_authority === false &&
+        e.result.case_closure_permission === false &&
+        e.result.follow_up.sent === false &&
+        e.result.disposition.recommended_credit_minor === null &&
+        e.result.execution_facts.model_calls === 0,
+    );
+  }
+  return e;
+}
+export async function validateWorkReceipt(v, command) {
+  requireData(
+    v?.schema_version === "preparation-work-receipt.v1" &&
+      v.historical_receipt === true &&
+      v.authority_granted === false &&
+      v.closure_permission === false,
+  );
+  await validateWorkEntry(v.entry);
+  requireData(equal(v.entry.command, command));
+  return v;
+}
+export async function validateWorkView(v, target) {
+  requireData(
+    v?.schema_version === "preparation-work-read.v1" &&
+      v.case_id === target.case_id &&
+      v.record_key === target.record_key &&
+      v.authority_granted === false &&
+      v.closure_permission === false &&
+      Array.isArray(v.history) &&
+      Array.isArray(v.invocations) &&
+      Array.isArray(v.sources),
+  );
+  await bound(v);
+  let last = null;
+  const starts = new Map(),
+    terminals = new Map(),
+    reviews = new Map();
+  for (const e of v.history) {
+    await validateWorkEntry(e);
+    requireData(
+      e.case_id === v.case_id &&
+        e.sequence === (last?.sequence ?? 0) + 1 &&
+        e.previous_entry_hash === (last?.hash ?? null),
+    );
+    last = e;
+    if (e.event === "started") {
+      requireData(e.binding_hash === (await intakeHash(e.command.binding)));
+      starts.set(e.invocation_id, e);
+    } else {
+      const start = starts.get(e.invocation_id);
+      requireData(
+        start &&
+          e.started_entry_hash === start.hash &&
+          e.binding_hash === start.binding_hash,
+      );
+      if (e.event === "terminal_result")
+        requireData(equal(e.actor, start.actor));
+      if (["terminal_result", "interrupt"].includes(e.event)) {
+        requireData(!terminals.has(e.invocation_id));
+        terminals.set(e.invocation_id, e);
+      }
+      if (e.event === "task_review") {
+        requireData(
+          !reviews.has(e.invocation_id) &&
+            e.command.result_hash ===
+              terminals.get(e.invocation_id)?.result_hash,
+        );
+        reviews.set(e.invocation_id, e);
+      }
+    }
+  }
+  requireData(
+    v.work_revision === (last?.sequence ?? 0) &&
+      v.work_head === (last?.hash ?? null),
+  );
+  const selected = [...starts.values()].filter(
+    (e) => e.record_key === v.record_key,
+  );
+  requireData(selected.length === v.invocations.length);
+  for (const [i, r] of v.invocations.entries()) {
+    const start = selected[i],
+      terminal = terminals.get(r.invocation_id),
+      review = reviews.get(r.invocation_id);
+    requireData(
+      start.invocation_id === r.invocation_id &&
+        start.hash === r.started_entry_hash &&
+        equal(r.binding, start.command.binding) &&
+        equal(r.result, terminal?.result ?? null) &&
+        r.result_hash === (terminal?.result_hash ?? null) &&
+        r.terminal_entry_hash === (terminal?.hash ?? null) &&
+        r.outcome === (terminal?.outcome ?? "started") &&
+        equal(r.review, review ?? null),
+    );
+    requireData(!r.can_accept || (r.current_usable && !review));
+  }
   return v;
 }

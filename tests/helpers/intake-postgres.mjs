@@ -1,3 +1,6 @@
+import { PostgresPreparationWorkStore } from "../../dist/packages/runtime/src/postgres-preparation-work-store.js";
+import { syntheticWorkContext } from "../../dist/packages/runtime/src/preparation-work.js";
+import { fixedPreparationPort } from "../../dist/packages/runtime/src/preparation-worker-port.js";
 import { PostgresPreparationPackStore } from "../../dist/packages/runtime/src/postgres-preparation-pack-store.js";
 import { syntheticPackContext } from "../../dist/packages/runtime/src/preparation-pack.js";
 import { PostgresDiscoveryStore } from "../../dist/packages/runtime/src/postgres-discovery-store.js";
@@ -26,6 +29,7 @@ export const migrationNames = [
   "0006_intake_request_bindings",
   "0007_discovery_review",
   "0008_preparation_pack_selection",
+  "0009_preparation_work",
 ];
 export const migrations = await Promise.all(
   migrationNames.map(async (name) =>
@@ -43,7 +47,12 @@ export const migrations = await Promise.all(
 );
 export async function intakeHost(
   t,
-  { upgrade = false, beforePack = false } = {},
+  {
+    upgrade = false,
+    beforePack = false,
+    beforeWork = false,
+    work = false,
+  } = {},
 ) {
   const url = process.env.D9_POSTGRES_URL ?? process.env.D6_POSTGRES_URL;
   assert.ok(
@@ -58,7 +67,8 @@ export async function intakeHost(
     admin = new Pool({ connectionString: url });
   await admin.query(`CREATE SCHEMA ${schema}`);
   let serverPort = 0,
-    packEnabled = !upgrade && !beforePack;
+    packEnabled = !upgrade && !beforePack,
+    workEnabled = work && !beforeWork;
   let pg,
     pool,
     store,
@@ -70,7 +80,10 @@ export async function intakeHost(
     clockReads = 0,
     hook,
     fault,
-    packContext = syntheticPackContext();
+    workContext = syntheticWorkContext(),
+    workPort = fixedPreparationPort,
+    workMonotonic = () => globalThis.performance.now(),
+    packContext = workEnabled ? workContext.pack : syntheticPackContext();
   const trace = [],
     discarded = [];
   const now = () => {
@@ -130,12 +143,25 @@ export async function intakeHost(
         packEnabled
           ? new PostgresPreparationPackStore(pool, () => packContext)
           : undefined,
+        workEnabled
+          ? new PostgresPreparationWorkStore(
+              pool,
+              () => workContext,
+              (input) => workPort(input),
+              () => workMonotonic(),
+            )
+          : undefined,
       );
     server = createApiServer(
       {
         intake: iw,
         isReady: async () => {
-          if (packEnabled)
+          if (workEnabled)
+            await new PostgresPreparationWorkStore(
+              pool,
+              () => workContext,
+            ).assertReady();
+          else if (packEnabled)
             await new PostgresPreparationPackStore(
               pool,
               () => packContext,
@@ -178,7 +204,9 @@ export async function intakeHost(
       ? migrations.slice(0, 4)
       : beforePack
         ? migrations.slice(0, 7)
-        : migrations,
+        : beforeWork
+          ? migrations.slice(0, 8)
+          : migrations,
   );
   if (!upgrade) await start();
 
@@ -263,6 +291,7 @@ export async function intakeHost(
         "intake_request_bindings",
         "discovery_review_journal",
         ...(packEnabled ? ["preparation_pack_selection"] : []),
+        ...(workEnabled ? ["preparation_work_journal"] : []),
       ];
       const out = {};
       for (const table of tables)
@@ -299,6 +328,16 @@ export async function intakeHost(
       return clockReads;
     },
     dependencies,
+    setWorkContext: (value) => {
+      workContext = value;
+      packContext = value.pack;
+    },
+    setWorkPort: (value) => {
+      workPort = value;
+    },
+    setWorkMonotonic: (value) => {
+      workMonotonic = value;
+    },
     setPackContext: (value) => {
       packContext = value;
     },
@@ -330,6 +369,10 @@ export async function intakeHost(
       }
       await migrate(migrations.slice(4));
       packEnabled = true;
+      if (work || beforeWork) {
+        workEnabled = true;
+        packContext = workContext.pack;
+      }
       await start();
     },
   };

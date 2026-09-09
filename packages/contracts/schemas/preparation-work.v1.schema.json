@@ -1,0 +1,2489 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json",
+  "title": "Accepted D-037 bounded synthetic preparation work",
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "synthetic-preparation-worker.v1"
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "profile_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "implementation_id": {
+          "enum": [
+            "disposition-code.v1",
+            "disposition-code.v2"
+          ]
+        },
+        "identities": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+          },
+          "maxItems": 10
+        },
+        "read_scope_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 2
+        },
+        "work_scope_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 2
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "identity_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+              },
+              "purpose": {
+                "enum": [
+                  "prepare_disposition_packet",
+                  "review_preparation_task",
+                  "review_synthetic_evaluation_candidate"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "revoked",
+                  "inactive"
+                ]
+              },
+              "effective_from": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "effective_until": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "identity_id",
+              "purpose",
+              "status",
+              "effective_from",
+              "effective_until"
+            ]
+          },
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "profile_id",
+        "implementation_id",
+        "identities",
+        "read_scope_ids",
+        "work_scope_ids",
+        "grants"
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "record_key": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "entity_id": {
+          "const": "entity_north"
+        },
+        "source_revision": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "pack_id": {
+          "const": "pack_synthetic_invoice_dispute_north"
+        },
+        "pack_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "artifact_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "selection_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selection_head": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "basis": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/binding"
+        },
+        "worker_implementation_id": {
+          "enum": [
+            "disposition-code.v1",
+            "disposition-code.v2"
+          ]
+        },
+        "worker_profile_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "case_id",
+        "record_key",
+        "entity_id",
+        "source_revision",
+        "pack_id",
+        "pack_version",
+        "artifact_hash",
+        "selection_revision",
+        "selection_head",
+        "basis",
+        "worker_implementation_id",
+        "worker_profile_hash"
+      ]
+    },
+    "start": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-work-command.v1"
+        },
+        "operation": {
+          "const": "start"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "expected_work_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expected_work_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "replaces_invocation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "binding",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "replaces_invocation"
+      ]
+    },
+    "interrupt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-interruption.v1"
+        },
+        "operation": {
+          "const": "interrupt"
+        },
+        "invocation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_work_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expected_work_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "invocation_id",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "reason"
+      ]
+    },
+    "task_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-task-review.v1"
+        },
+        "operation": {
+          "const": "task_review"
+        },
+        "purpose": {
+          "const": "preparation_usefulness"
+        },
+        "invocation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_work_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expected_work_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "result_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "decision": {
+          "enum": [
+            "approve",
+            "reject",
+            "modify",
+            "escalate"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "replacement_proposal": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "purpose",
+        "invocation_id",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "result_hash",
+        "decision",
+        "reason"
+      ]
+    },
+    "correction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "purpose_limited_preparation_correction.v1"
+        },
+        "operation": {
+          "const": "correction"
+        },
+        "purpose": {
+          "const": "preparation_usefulness"
+        },
+        "invocation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_work_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expected_work_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "original_result_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "before": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "after": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "classification": {
+          "enum": [
+            "knowledge_bearing",
+            "authority_only"
+          ]
+        },
+        "primary_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "AUTHORITY",
+                "JUDGMENT",
+                "MISSING_EVIDENCE",
+                "MISSING_KNOWLEDGE",
+                "NOVEL_CASE",
+                "SYSTEM_FAILURE"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "citation_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          },
+          "maxItems": 200
+        },
+        "evidence_limits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "purpose",
+        "invocation_id",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "binding_hash",
+        "original_result_hash",
+        "target",
+        "before",
+        "after",
+        "classification",
+        "primary_reason",
+        "reason",
+        "citation_ids",
+        "evidence_limits"
+      ]
+    },
+    "evaluation_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-evaluation-review.v1"
+        },
+        "operation": {
+          "const": "evaluation_review"
+        },
+        "purpose": {
+          "const": "synthetic_evaluation_candidate"
+        },
+        "invocation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_work_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expected_work_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "correction_entry_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "candidate_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_candidate_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expected_test_case_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "decision": {
+          "enum": [
+            "approve",
+            "reject"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "test_references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "purpose",
+        "invocation_id",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "correction_entry_hash",
+        "candidate_id",
+        "expected_candidate_revision",
+        "expected_test_case_hash",
+        "decision",
+        "reason",
+        "test_references"
+      ]
+    },
+    "note": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "definition_version": {
+          "const": "invoice-dispute-proof.v1"
+        },
+        "measure": {
+          "enum": [
+            "cash_collected",
+            "disputes_resolved",
+            "credits_issued",
+            "work_newly_attended_to",
+            "human_attention_released",
+            "cost_model_tool",
+            "cost_infrastructure",
+            "cost_human",
+            "cost_support",
+            "cost_setup"
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "enum": [
+            "currency_minor",
+            "records",
+            "person_minutes"
+          ]
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "qualification": {
+          "enum": [
+            "unknown",
+            "measured",
+            "estimated",
+            "hypothesis"
+          ]
+        },
+        "synthetic": {
+          "const": true
+        },
+        "cohort": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "period": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "source_timezone": {
+              "const": "UTC"
+            }
+          },
+          "required": [
+            "start",
+            "end",
+            "source_timezone"
+          ]
+        },
+        "coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "numerator": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "denominator": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "exclusions": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "numerator",
+            "denominator",
+            "exclusions"
+          ]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "cash_receipt",
+                "accepted_disposition",
+                "posted_credit",
+                "prior_coverage_and_progress",
+                "active_effort_comparison",
+                "cost_report",
+                "unknown"
+              ]
+            },
+            "reference": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "locator": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "observed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "reference",
+            "locator",
+            "observed_at"
+          ]
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "measurement_owner": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "uncertainty": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "treatment": {
+          "enum": [
+            "not_applicable",
+            "recurring",
+            "one_time"
+          ]
+        },
+        "baseline_person_minutes": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actual_person_minutes": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prior_coverage_known": {
+          "type": "boolean"
+        },
+        "substantive_progress": {
+          "type": "boolean"
+        },
+        "supersedes_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reversal_of_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reopens_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "overlap_entry_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          },
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "definition_version",
+        "measure",
+        "value",
+        "unit",
+        "currency",
+        "qualification",
+        "synthetic",
+        "cohort",
+        "period",
+        "coverage",
+        "source",
+        "method",
+        "measurement_owner",
+        "uncertainty",
+        "treatment",
+        "baseline_person_minutes",
+        "actual_person_minutes",
+        "prior_coverage_known",
+        "substantive_progress",
+        "supersedes_entry_hash",
+        "reversal_of_entry_hash",
+        "reopens_entry_hash",
+        "overlap_entry_hashes"
+      ]
+    },
+    "proof_note": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-proof-note.v1"
+        },
+        "operation": {
+          "const": "proof_note"
+        },
+        "purpose": {
+          "const": "synthetic_measurement_readiness"
+        },
+        "invocation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_work_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expected_work_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "result_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "note": {
+          "$ref": "#/$defs/note"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "purpose",
+        "invocation_id",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "binding_hash",
+        "result_hash",
+        "note",
+        "reason"
+      ]
+    },
+    "command": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/start"
+        },
+        {
+          "$ref": "#/$defs/interrupt"
+        },
+        {
+          "$ref": "#/$defs/task_review"
+        },
+        {
+          "$ref": "#/$defs/correction"
+        },
+        {
+          "$ref": "#/$defs/evaluation_review"
+        },
+        {
+          "$ref": "#/$defs/proof_note"
+        }
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "disposition-preparation-result.v1"
+        },
+        "invocation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "started_entry_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "outcome": {
+          "enum": [
+            "prepared_gap_packet",
+            "prepared_packet",
+            "abstained"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "subject": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "entity_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "record_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "record_key": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "customer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "invoice": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "disputed_amount_minor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "currency": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3
+            },
+            "citation_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "maxItems": 1000
+            }
+          },
+          "required": [
+            "entity_id",
+            "record_id",
+            "record_key",
+            "customer",
+            "invoice",
+            "disputed_amount_minor",
+            "currency",
+            "citation_ids"
+          ]
+        },
+        "coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "distinct_upload_records": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "record_keys": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^sha256:[a-f0-9]{64}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "maxItems": 200
+            },
+            "citation_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "maxItems": 1000
+            },
+            "recurring_population": {
+              "const": "unknown"
+            }
+          },
+          "required": [
+            "distinct_upload_records",
+            "record_keys",
+            "citation_ids",
+            "recurring_population"
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "enum": [
+                  "S1",
+                  "S2",
+                  "S3",
+                  "S4"
+                ]
+              },
+              "result": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "citation_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                },
+                "maxItems": 1000
+              },
+              "confirmation_entry_hash": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^sha256:[a-f0-9]{64}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "result",
+              "citation_ids",
+              "confirmation_entry_hash"
+            ]
+          },
+          "maxItems": 4
+        },
+        "evidence_checklist": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "subject": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "entity_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "kind": {
+                    "enum": [
+                      "record",
+                      "delivery"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "applicable_record_key": {
+                    "type": "string",
+                    "pattern": "^sha256:[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "entity_id",
+                  "kind",
+                  "id",
+                  "applicable_record_key"
+                ]
+              },
+              "finding": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "evidence_type": {
+                "enum": [
+                  "source_report",
+                  "source_report_with_limit",
+                  "bounded_input_limit"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "reported_confirmation",
+                  "reported_gap",
+                  "conflicting",
+                  "ambiguous",
+                  "not_supplied",
+                  "owner_unconfirmed",
+                  "unknown"
+                ]
+              },
+              "citation_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                },
+                "maxItems": 1000
+              },
+              "independently_verified": {
+                "const": false
+              }
+            },
+            "required": [
+              "subject",
+              "finding",
+              "evidence_type",
+              "status",
+              "citation_ids",
+              "independently_verified"
+            ]
+          },
+          "maxItems": 100
+        },
+        "reconciliation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "subject": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "entity_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "kind": {
+                    "enum": [
+                      "record",
+                      "delivery"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "applicable_record_key": {
+                    "type": "string",
+                    "pattern": "^sha256:[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "entity_id",
+                  "kind",
+                  "id",
+                  "applicable_record_key"
+                ]
+              },
+              "field": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "values": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 4000
+                },
+                "maxItems": 200
+              },
+              "conflicting": {
+                "type": "boolean"
+              },
+              "citation_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                },
+                "maxItems": 1000
+              }
+            },
+            "required": [
+              "subject",
+              "field",
+              "values",
+              "conflicting",
+              "citation_ids"
+            ]
+          },
+          "maxItems": 200
+        },
+        "related_context": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "record_key": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "entity_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "record_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "disputed_amount_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "currency": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 3
+              },
+              "delivery_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "maxItems": 200
+              },
+              "applicable_to_selected_record": {
+                "const": false
+              },
+              "citation_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                },
+                "maxItems": 1000
+              }
+            },
+            "required": [
+              "record_key",
+              "entity_id",
+              "record_id",
+              "disputed_amount_minor",
+              "currency",
+              "delivery_ids",
+              "applicable_to_selected_record",
+              "citation_ids"
+            ]
+          },
+          "maxItems": 200
+        },
+        "follow_up": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sent": {
+              "const": false
+            },
+            "draft_citation_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "maxItems": 1000
+            },
+            "recipients": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "identity_id": {
+                    "const": null
+                  },
+                  "status": {
+                    "const": "unconfirmed"
+                  }
+                },
+                "required": [
+                  "role",
+                  "identity_id",
+                  "status"
+                ]
+              },
+              "maxItems": 10
+            },
+            "requests": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^sha256:[a-f0-9]{64}$"
+                  },
+                  "subject": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 512
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "citation_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^sha256:[a-f0-9]{64}$"
+                    },
+                    "maxItems": 1000
+                  },
+                  "basis": {
+                    "const": "proposed evidence request"
+                  }
+                },
+                "required": [
+                  "id",
+                  "subject",
+                  "text",
+                  "citation_ids",
+                  "basis"
+                ]
+              },
+              "maxItems": 64
+            },
+            "draft": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32000
+            }
+          },
+          "required": [
+            "sent",
+            "draft_citation_ids",
+            "recipients",
+            "requests",
+            "draft"
+          ]
+        },
+        "disposition": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "const": "abstain_pending_evidence"
+            },
+            "recommended_credit_minor": {
+              "const": null
+            },
+            "available_preparation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "blocked_business_options": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "maxItems": 10
+            },
+            "missing": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "maxItems": 20
+            },
+            "independent_business_verification": {
+              "const": false
+            }
+          },
+          "required": [
+            "status",
+            "recommended_credit_minor",
+            "available_preparation",
+            "blocked_business_options",
+            "missing",
+            "independent_business_verification"
+          ]
+        },
+        "intervention": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "primary_reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "AUTHORITY",
+                    "JUDGMENT",
+                    "MISSING_EVIDENCE",
+                    "MISSING_KNOWLEDGE",
+                    "NOVEL_CASE",
+                    "SYSTEM_FAILURE"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "citation_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "maxItems": 1000
+            },
+            "step_id": {
+              "enum": [
+                "S1",
+                "S2",
+                "S3",
+                "S4"
+              ]
+            },
+            "other_blockers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "reason": {
+                    "enum": [
+                      "AUTHORITY",
+                      "JUDGMENT",
+                      "MISSING_EVIDENCE",
+                      "MISSING_KNOWLEDGE",
+                      "NOVEL_CASE",
+                      "SYSTEM_FAILURE"
+                    ]
+                  },
+                  "basis": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "reason",
+                  "basis"
+                ]
+              },
+              "maxItems": 6
+            },
+            "task_recipient_identity": {
+              "const": "identity_intake_operator"
+            },
+            "business_owner_identity": {
+              "const": null
+            }
+          },
+          "required": [
+            "primary_reason",
+            "citation_ids",
+            "step_id",
+            "other_blockers",
+            "task_recipient_identity",
+            "business_owner_identity"
+          ]
+        },
+        "proof_readiness": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "measure": {
+                "enum": [
+                  "cash_collected",
+                  "disputes_resolved",
+                  "credits_issued",
+                  "work_newly_attended_to",
+                  "human_attention_released"
+                ]
+              },
+              "status": {
+                "const": "unknown"
+              },
+              "value": {
+                "const": null
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "measure",
+              "status",
+              "value",
+              "basis"
+            ]
+          },
+          "maxItems": 5
+        },
+        "execution_facts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "model_calls": {
+              "const": 0
+            },
+            "external_tool_calls": {
+              "const": 0
+            },
+            "messages_sent": {
+              "const": 0
+            }
+          },
+          "required": [
+            "model_calls",
+            "external_tool_calls",
+            "messages_sent"
+          ]
+        },
+        "cost_evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "model_tool_amount": {
+              "const": null
+            },
+            "infrastructure_amount": {
+              "const": null
+            },
+            "human_amount": {
+              "const": null
+            },
+            "support_amount": {
+              "const": null
+            },
+            "setup_amount": {
+              "const": null
+            },
+            "status": {
+              "const": "unmeasured"
+            }
+          },
+          "required": [
+            "model_tool_amount",
+            "infrastructure_amount",
+            "human_amount",
+            "support_amount",
+            "setup_amount",
+            "status"
+          ]
+        },
+        "financial_authority": {
+          "const": false
+        },
+        "case_closure_permission": {
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "invocation_id",
+        "started_entry_hash",
+        "binding_hash",
+        "outcome",
+        "title",
+        "subject",
+        "coverage",
+        "steps",
+        "evidence_checklist",
+        "reconciliation",
+        "related_context",
+        "follow_up",
+        "disposition",
+        "intervention",
+        "proof_readiness",
+        "execution_facts",
+        "cost_evidence",
+        "financial_authority",
+        "case_closure_permission"
+      ]
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-worker-input.v1"
+        },
+        "invocation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "started_entry_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "artifact": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/artifact"
+        },
+        "selected_record": {
+          "$ref": "https://fieldruntime.dev/schemas/intake.v1.schema.json#/$defs/record"
+        },
+        "covered_records": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/intake.v1.schema.json#/$defs/record"
+          },
+          "maxItems": 200
+        },
+        "associated_support_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "parsed_utf8_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "schema_version",
+        "invocation_id",
+        "started_entry_hash",
+        "binding",
+        "artifact",
+        "selected_record",
+        "covered_records",
+        "associated_support_count",
+        "parsed_utf8_bytes"
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "worker": {
+          "enum": [
+            "disposition-code.v1",
+            "disposition-code.v2"
+          ]
+        },
+        "validator": {
+          "const": "preparation-result-validator.v1"
+        },
+        "journal": {
+          "const": "preparation-work.v1"
+        }
+      },
+      "required": [
+        "worker",
+        "validator",
+        "journal"
+      ]
+    },
+    "support": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "discovery": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/input_manifest"
+        },
+        "selection_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          },
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "discovery",
+        "selection_hashes"
+      ]
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "computation_started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "computation_completed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "computation_elapsed_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "computation_budget_ms": {
+          "const": 5000
+        },
+        "completed_within_budget": {
+          "type": "boolean"
+        },
+        "measurement_source": {
+          "const": "runtime_parent_monotonic_clock"
+        },
+        "validation_elapsed_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "writer_lock_wait_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "terminal_evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_timezone": {
+          "const": "UTC"
+        }
+      },
+      "required": [
+        "computation_started_at",
+        "computation_completed_at",
+        "computation_elapsed_ms",
+        "computation_budget_ms",
+        "completed_within_budget",
+        "measurement_source",
+        "validation_elapsed_ms",
+        "writer_lock_wait_ms",
+        "terminal_evaluated_at",
+        "source_timezone"
+      ]
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "revision": {
+          "const": 1
+        },
+        "status": {
+          "const": "not_reviewed"
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "original_result_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "expected_result_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "test_case_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "expected_text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "promotion": {
+          "const": "none"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "status",
+        "input_hash",
+        "original_result_hash",
+        "expected_result_hash",
+        "test_case_hash",
+        "target",
+        "expected_text",
+        "promotion"
+      ]
+    },
+    "journal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-work-entry.v1"
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "record_key": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "event": {
+          "enum": [
+            "started",
+            "terminal_result",
+            "interrupt",
+            "task_review",
+            "correction",
+            "evaluation_review",
+            "proof_note"
+          ]
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "previous_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "invocation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "command": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/command"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "command_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actor": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "worker_profile": {
+          "$ref": "#/$defs/profile"
+        },
+        "publication_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "profile": {
+              "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/profile"
+            },
+            "template_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "worker_profile": {
+              "$ref": "#/$defs/profile"
+            }
+          },
+          "required": [
+            "profile",
+            "template_id",
+            "worker_profile"
+          ]
+        },
+        "binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "started_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_manifest": {
+          "$ref": "#/$defs/support"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "computation_budget_ms": {
+          "const": 5000
+        },
+        "outcome": {
+          "enum": [
+            "started",
+            "prepared_gap_packet",
+            "prepared_packet",
+            "abstained",
+            "invalidated",
+            "failed",
+            "interrupted",
+            "recorded"
+          ]
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/result"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conformance": {
+          "enum": [
+            "not_run",
+            "passed",
+            "failed"
+          ]
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 20
+        },
+        "parent_timing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/timing"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/candidate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "authority_granted": {
+          "const": false
+        },
+        "closure_permission": {
+          "const": false
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "case_id",
+        "record_key",
+        "id",
+        "event",
+        "sequence",
+        "previous_entry_hash",
+        "invocation_id",
+        "command",
+        "idempotency_key",
+        "command_fingerprint",
+        "actor",
+        "worker_profile",
+        "publication_context",
+        "binding_hash",
+        "started_entry_hash",
+        "input_manifest",
+        "recorded_at",
+        "versions",
+        "computation_budget_ms",
+        "outcome",
+        "result",
+        "result_hash",
+        "conformance",
+        "diagnostics",
+        "parent_timing",
+        "candidate",
+        "authority_granted",
+        "closure_permission",
+        "hash"
+      ]
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-work-receipt.v1"
+        },
+        "status": {
+          "const": "recorded"
+        },
+        "entry": {
+          "$ref": "#/$defs/journal"
+        },
+        "historical_receipt": {
+          "const": true
+        },
+        "authority_granted": {
+          "const": false
+        },
+        "closure_permission": {
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "status",
+        "entry",
+        "historical_receipt",
+        "authority_granted",
+        "closure_permission"
+      ]
+    },
+    "invocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "invocation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "started_entry_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/result"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "terminal_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "current_usable": {
+          "type": "boolean"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 50
+        },
+        "review": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/journal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "can_accept": {
+          "type": "boolean"
+        },
+        "can_intervene": {
+          "type": "boolean"
+        },
+        "can_interrupt": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "invocation_id",
+        "started_entry_hash",
+        "binding",
+        "result",
+        "result_hash",
+        "terminal_entry_hash",
+        "outcome",
+        "current_usable",
+        "reasons",
+        "review",
+        "can_accept",
+        "can_intervene",
+        "can_interrupt"
+      ]
+    },
+    "read": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-work-read.v1"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "record_key": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "work_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "work_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidate_binding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/binding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selection_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selection_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "current": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "can_start": {
+              "type": "boolean"
+            },
+            "reasons": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "maxItems": 50
+            },
+            "pending_invocation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "can_start",
+            "reasons",
+            "pending_invocation"
+          ]
+        },
+        "invocations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/invocation"
+          },
+          "maxItems": 10000
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/journal"
+          },
+          "maxItems": 10000
+        },
+        "sources": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/artifact/properties/sources"
+        },
+        "authority_granted": {
+          "const": false
+        },
+        "closure_permission": {
+          "const": false
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "case_id",
+        "record_key",
+        "evaluated_at",
+        "work_revision",
+        "work_head",
+        "candidate_binding",
+        "selection_revision",
+        "selection_head",
+        "current",
+        "invocations",
+        "history",
+        "sources",
+        "authority_granted",
+        "closure_permission",
+        "hash"
+      ]
+    },
+    "export": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-work-export.v1"
+        },
+        "pack": {
+          "oneOf": [
+            {
+              "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/export"
+            },
+            {
+              "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/export"
+            }
+          ]
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/journal"
+          },
+          "maxItems": 10000
+        },
+        "authority_granted": {
+          "const": false
+        },
+        "closure_permission": {
+          "const": false
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "pack",
+        "entries",
+        "authority_granted",
+        "closure_permission",
+        "hash"
+      ]
+    }
+  }
+}

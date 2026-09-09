@@ -1,0 +1,2022 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json",
+  "title": "Accepted D-037 worker-capable preparation pack v2; v1 remains strict",
+  "$defs": {
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "simplification_before_allocation": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "change": {
+                  "const": "Remove copying queue fields into a second worksheet."
+                },
+                "retained_control": {
+                  "const": "Use original bytes, exact record identity, locators and source revision."
+                }
+              },
+              "required": [
+                "change",
+                "retained_control"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "change": {
+                  "const": "Combine support requests into one subject-scoped gap agenda."
+                },
+                "retained_control": {
+                  "const": "Each claim keeps explicit applicability; no invoice-label joins."
+                }
+              },
+              "required": [
+                "change",
+                "retained_control"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "change": {
+                  "const": "Collect delivery proof and governing terms in parallel when owners confirm independence."
+                },
+                "retained_control": {
+                  "const": "No messages are sent; overlapping waits cannot be added as independent savings."
+                }
+              },
+              "required": [
+                "change",
+                "retained_control"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "change": {
+                  "const": "Keep unknown source precedence visible instead of repeated informal adjudication."
+                },
+                "retained_control": {
+                  "const": "A person obtains an approved governing rule; no inferred winner."
+                }
+              },
+              "required": [
+                "change",
+                "retained_control"
+              ]
+            }
+          ],
+          "items": false,
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "steps": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "const": "S1"
+                },
+                "label": {
+                  "const": "Bind and inspect retained inputs"
+                },
+                "mechanism": {
+                  "const": "code"
+                },
+                "depends_on": {
+                  "type": "array",
+                  "maxItems": 0
+                },
+                "subject_binding": {
+                  "const": "selected record_key; claims preserve their own entity/kind/id and explicit source associations"
+                },
+                "inputs": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Validated intake and Discovery export at exact basis hashes"
+                    },
+                    {
+                      "const": "Full artifact read scopes, parsed bytes and supported interpreter versions"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "output": {
+                  "const": "Cited subject index; unknown and retained-only inputs explicit"
+                },
+                "acceptance": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Recompute hashes and locators"
+                    },
+                    {
+                      "const": "Do not parse retained-only documents or broaden scope"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "accountable_owner": {
+                  "const": "identity_intake_operator (synthetic preparation seat)"
+                },
+                "exception_owner": {
+                  "const": "identity_pack_reviewer_demo (synthetic publication support seat)"
+                },
+                "allowed_actions": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Read retained bytes"
+                    },
+                    {
+                      "const": "Derive scoped index"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "authority_mode": {
+                  "const": "scoped_read_propose_only"
+                },
+                "intervention_and_stop": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "SYSTEM_FAILURE: stop if bytes, scope or interpreter cannot be validated; preserve read error"
+                    },
+                    {
+                      "const": "Missing opaque content blocks only claims needing that content"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "verification_and_evaluations": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Existing intake A1/A3/A8/A12; Discovery T1/T12"
+                    },
+                    {
+                      "const": "D11 T1/T3/T8"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "mechanism",
+                "depends_on",
+                "subject_binding",
+                "inputs",
+                "output",
+                "acceptance",
+                "accountable_owner",
+                "exception_owner",
+                "allowed_actions",
+                "authority_mode",
+                "intervention_and_stop",
+                "verification_and_evaluations"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "const": "S2"
+                },
+                "label": {
+                  "const": "Compare claims and prepare the consequential gap agenda"
+                },
+                "mechanism": {
+                  "const": "code"
+                },
+                "depends_on": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "S1"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 1,
+                  "maxItems": 1
+                },
+                "subject_binding": {
+                  "const": "selected record_key; claims preserve their own entity/kind/id and explicit source associations"
+                },
+                "inputs": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Scoped record facts and delivery claims with explicit associations"
+                    },
+                    {
+                      "const": "R1-R7 and six loop outputs; separately identified proposed process"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "output": {
+                  "const": "Cited findings, material discrepancies and owner questions"
+                },
+                "acceptance": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Same subject and comparable field only for contradiction"
+                    },
+                    {
+                      "const": "Reported confirmation never becomes independent verification"
+                    },
+                    {
+                      "const": "Keep ambiguous and related material visible without transferring proof"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "accountable_owner": {
+                  "const": "identity_intake_operator (synthetic preparation seat)"
+                },
+                "exception_owner": {
+                  "const": "identity_pack_reviewer_demo (synthetic publication support seat)"
+                },
+                "allowed_actions": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Derive comparison"
+                    },
+                    {
+                      "const": "Propose evidence requests"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "authority_mode": {
+                  "const": "scoped_read_propose_only"
+                },
+                "intervention_and_stop": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "MISSING_EVIDENCE: ask for scoped delivery proof without concluding non-delivery"
+                    },
+                    {
+                      "const": "MISSING_KNOWLEDGE: no governing rule means no decisive source winner"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "verification_and_evaluations": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Discovery A/B, same-delivery, shared-object and ordering regressions"
+                    },
+                    {
+                      "const": "D11 T3/T4"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "mechanism",
+                "depends_on",
+                "subject_binding",
+                "inputs",
+                "output",
+                "acceptance",
+                "accountable_owner",
+                "exception_owner",
+                "allowed_actions",
+                "authority_mode",
+                "intervention_and_stop",
+                "verification_and_evaluations"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "const": "S3"
+                },
+                "label": {
+                  "const": "Reuse applicable descriptive review; intervene only when the description changes"
+                },
+                "mechanism": {
+                  "const": "person"
+                },
+                "depends_on": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "S2"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 1,
+                  "maxItems": 1
+                },
+                "subject_binding": {
+                  "const": "selected record_key; claims preserve their own entity/kind/id and explicit source associations"
+                },
+                "inputs": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Exact bound material and currently applicable selected-record D10 descriptive confirmation"
+                    },
+                    {
+                      "const": "Canonical synthetic operator identity; proposed recipients remain unconfirmed"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "output": {
+                  "const": "Reference the existing applicable review and proposed follow-up agenda; a genuine correction branches to fresh review and pack publication"
+                },
+                "acceptance": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Normal path reuses the completed D10 review; opening or acknowledging it performs no identical confirmation write"
+                    },
+                    {
+                      "const": "A genuine correction advances the Case-wide Discovery revision and makes the old pack ineligible for current use"
+                    },
+                    {
+                      "const": "Refresh, append the necessary descriptive annotation and separate confirmation, derive a new artifact/version and obtain separate publication approval before S4 uses the changed basis"
+                    },
+                    {
+                      "const": "No task/message dispatch, approval carry-forward or automatic owner assignment"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 4,
+                  "maxItems": 4
+                },
+                "accountable_owner": {
+                  "const": "identity_intake_operator (synthetic descriptive-review seat)"
+                },
+                "exception_owner": {
+                  "const": "identity_pack_reviewer_demo (synthetic publication support seat)"
+                },
+                "allowed_actions": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Read the already applicable D10 review"
+                    },
+                    {
+                      "const": "Use existing annotate/confirm commands only for genuine descriptive changes under D-035, independently of old pack permission"
+                    },
+                    {
+                      "const": "Draft a follow-up agenda for a person"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "authority_mode": {
+                  "const": "scoped_read_propose_only"
+                },
+                "intervention_and_stop": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "JUDGMENT only for evidenced trade-offs; do not infer it from missing approval"
+                    },
+                    {
+                      "const": "No response/deadline evidence means follow-up remains unconfirmed; operator may pause"
+                    },
+                    {
+                      "const": "Existing exact retry and cross-tab recovery; never auto-resubmit"
+                    },
+                    {
+                      "const": "Changed basis stops progression under the old pack; D11-B displays fresh-review/publication prerequisites, while D12 owns worker execution"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 4,
+                  "maxItems": 4
+                },
+                "verification_and_evaluations": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Discovery T5-T9/T11/T12"
+                    },
+                    {
+                      "const": "D11 T2/T5"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "mechanism",
+                "depends_on",
+                "subject_binding",
+                "inputs",
+                "output",
+                "acceptance",
+                "accountable_owner",
+                "exception_owner",
+                "allowed_actions",
+                "authority_mode",
+                "intervention_and_stop",
+                "verification_and_evaluations"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "const": "S4"
+                },
+                "label": {
+                  "const": "Prepare a disposition packet for task review"
+                },
+                "mechanism": {
+                  "const": "code"
+                },
+                "depends_on": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "S2"
+                    },
+                    {
+                      "const": "S3"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "subject_binding": {
+                  "const": "selected record_key; claims preserve their own entity/kind/id and explicit source associations"
+                },
+                "inputs": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Exact material, applicable descriptive review and currently eligible published pack sharing the same basis"
+                    },
+                    {
+                      "const": "Unresolved items and separate authority/close requirements"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "output": {
+                  "const": "Read/propose disposition packet: supported options or explicit abstention"
+                },
+                "acceptance": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Require one coherent exact basis across S2, S3 and current pack selection; never combine new material with historical permission"
+                    },
+                    {
+                      "const": "Every factual claim has applicable citations; hypotheses labeled"
+                    },
+                    {
+                      "const": "No unsupported amount recommendation"
+                    },
+                    {
+                      "const": "Human task acceptance, when captured later, binds exact packet/step/pack and does not authorize an action"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 4,
+                  "maxItems": 4
+                },
+                "accountable_owner": {
+                  "const": "identity_intake_operator (synthetic packet recipient)"
+                },
+                "exception_owner": {
+                  "const": "identity_pack_reviewer_demo (synthetic publication support seat)"
+                },
+                "allowed_actions": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Derive a draft packet"
+                    },
+                    {
+                      "const": "Present permitted next human action"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "authority_mode": {
+                  "const": "scoped_read_propose_only"
+                },
+                "intervention_and_stop": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "AUTHORITY blocks consequential action, not a valid cited gap packet"
+                    },
+                    {
+                      "const": "Missing terms, proof or business owner prevents a disposition conclusion"
+                    },
+                    {
+                      "const": "Stop at proposed packet; no effect or closure claim"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "verification_and_evaluations": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "Existing authority/closure/ECC safeguards"
+                    },
+                    {
+                      "const": "D11 T4/T9; D12 reviewed packet-quality and abstention cases"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "mechanism",
+                "depends_on",
+                "subject_binding",
+                "inputs",
+                "output",
+                "acceptance",
+                "accountable_owner",
+                "exception_owner",
+                "allowed_actions",
+                "authority_mode",
+                "intervention_and_stop",
+                "verification_and_evaluations"
+              ]
+            }
+          ],
+          "items": false,
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "rules": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "preparation_safety": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "basis": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "D-034"
+                    },
+                    {
+                      "const": "D-035 v2"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "requires_pack_publication_approval": {
+                  "const": true
+                },
+                "scope_match": {
+                  "const": "Exact tenant and entity-qualified record; full original artifact scopes for reads. Explicit delivery association for reusable support."
+                },
+                "source_precedence": {
+                  "const": "No business winner; preserve comparable scoped conflicts."
+                },
+                "variant_behavior": {
+                  "const": "Only selected North record is applicable; related South context is not a North variant rule."
+                }
+              },
+              "required": [
+                "basis",
+                "requires_pack_publication_approval",
+                "scope_match",
+                "source_precedence",
+                "variant_behavior"
+              ]
+            },
+            "business_field_precedence": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "approved_rule": {
+                  "const": null
+                },
+                "enabled": {
+                  "const": false
+                }
+              },
+              "required": [
+                "approved_rule",
+                "enabled"
+              ]
+            },
+            "business_variant_rules": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "approved_rule": {
+                  "const": null
+                },
+                "enabled": {
+                  "const": false
+                }
+              },
+              "required": [
+                "approved_rule",
+                "enabled"
+              ]
+            },
+            "consequential_authority": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "approved_policy": {
+                  "const": null
+                },
+                "enrollment": {
+                  "const": null
+                },
+                "allowed_actions": {
+                  "type": "array",
+                  "maxItems": 0
+                },
+                "enabled": {
+                  "const": false
+                }
+              },
+              "required": [
+                "approved_policy",
+                "enrollment",
+                "allowed_actions",
+                "enabled"
+              ]
+            }
+          },
+          "required": [
+            "preparation_safety",
+            "business_field_precedence",
+            "business_variant_rules",
+            "consequential_authority"
+          ]
+        },
+        "outcome_requirements": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "packet_acceptance": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "implemented_capture": {
+                  "const": true
+                },
+                "expected": {
+                  "const": "Named task recipient reviews exact cited packet for preparation usefulness"
+                },
+                "required_bindings": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "const": "case_id"
+                    },
+                    {
+                      "const": "case_version"
+                    },
+                    {
+                      "const": "record_key"
+                    },
+                    {
+                      "const": "pack_hash"
+                    },
+                    {
+                      "const": "step_id"
+                    },
+                    {
+                      "const": "packet_hash"
+                    },
+                    {
+                      "const": "acceptor_identity"
+                    },
+                    {
+                      "const": "decision"
+                    },
+                    {
+                      "const": "recorded_at"
+                    },
+                    {
+                      "const": "evidence_refs"
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 10,
+                  "maxItems": 10
+                },
+                "current_status": {
+                  "const": "requires_exact_task_review"
+                }
+              },
+              "required": [
+                "implemented_capture",
+                "expected",
+                "required_bindings",
+                "current_status"
+              ]
+            },
+            "effect_verification": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "applicable_operation": {
+                  "const": null
+                },
+                "current_status": {
+                  "const": "not_applicable; intake Cases are not enrolled in D-033"
+                },
+                "requirement": {
+                  "const": "Independent observation, exact attempt/target/payload and verifier eligibility; adapter acknowledgment never suffices."
+                }
+              },
+              "required": [
+                "applicable_operation",
+                "current_status",
+                "requirement"
+              ]
+            },
+            "business_close": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "const": "Agreed invoice-dispute disposition evidenced in its governing source (candidate only)"
+                },
+                "authoritative_source": {
+                  "const": null
+                },
+                "observation_method": {
+                  "const": null
+                },
+                "acceptance_owner": {
+                  "const": null
+                },
+                "freshness_window": {
+                  "const": null
+                },
+                "reopen_rule": {
+                  "const": "Changed or contradicted governing evidence invalidates current proof; append history."
+                },
+                "current_status": {
+                  "const": "unconfirmed; no close claim permitted"
+                }
+              },
+              "required": [
+                "name",
+                "authoritative_source",
+                "observation_method",
+                "acceptance_owner",
+                "freshness_window",
+                "reopen_rule",
+                "current_status"
+              ]
+            },
+            "case_resolution": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "allowed": {
+                  "const": false
+                },
+                "reason": {
+                  "const": "D-013 closure denial and all existing guards remain."
+                }
+              },
+              "required": [
+                "allowed",
+                "reason"
+              ]
+            }
+          },
+          "required": [
+            "packet_acceptance",
+            "effect_verification",
+            "business_close",
+            "case_resolution"
+          ]
+        },
+        "intervention_requirements": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "primary_reasons": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "AUTHORITY"
+                },
+                {
+                  "const": "JUDGMENT"
+                },
+                {
+                  "const": "MISSING_EVIDENCE"
+                },
+                {
+                  "const": "MISSING_KNOWLEDGE"
+                },
+                {
+                  "const": "NOVEL_CASE"
+                },
+                {
+                  "const": "SYSTEM_FAILURE"
+                }
+              ],
+              "items": false,
+              "minItems": 6,
+              "maxItems": 6
+            },
+            "unconfirmed_reason_label": {
+              "const": "Reason unconfirmed"
+            },
+            "bindings": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "case_id"
+                },
+                {
+                  "const": "record_key"
+                },
+                {
+                  "const": "pack_hash"
+                },
+                {
+                  "const": "step_id"
+                },
+                {
+                  "const": "primary_reason"
+                },
+                {
+                  "const": "other_blockers"
+                },
+                {
+                  "const": "evidence_refs"
+                },
+                {
+                  "const": "accountable_identity"
+                },
+                {
+                  "const": "exception_identity"
+                },
+                {
+                  "const": "recorded_at"
+                }
+              ],
+              "items": false,
+              "minItems": 10,
+              "maxItems": 10
+            },
+            "durable_capture": {
+              "const": "preparation_work_journal under Accepted D-037"
+            }
+          },
+          "required": [
+            "primary_reasons",
+            "unconfirmed_reason_label",
+            "bindings",
+            "durable_capture"
+          ]
+        },
+        "correction_requirements": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "reuse": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "Correction"
+                },
+                {
+                  "const": "LearningCandidate"
+                },
+                {
+                  "const": "Discovery annotation lineage"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "additional_bindings": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "record_key"
+                },
+                {
+                  "const": "pack_hash"
+                },
+                {
+                  "const": "step_id"
+                },
+                {
+                  "const": "basis_hash"
+                },
+                {
+                  "const": "authority_only_or_knowledge_bearing"
+                },
+                {
+                  "const": "original_reference"
+                },
+                {
+                  "const": "evaluation_candidate_status"
+                }
+              ],
+              "items": false,
+              "minItems": 7,
+              "maxItems": 7
+            },
+            "promotion": {
+              "const": "Append correction, manually review a synthetic evaluation candidate, propose a new pack version, pass held-out and retained regressions, obtain fresh publication approval. Never automatic."
+            },
+            "implemented_general_capture": {
+              "const": false
+            },
+            "minimum_capture": {
+              "const": "purpose_limited_preparation_correction.v1"
+            }
+          },
+          "required": [
+            "reuse",
+            "additional_bindings",
+            "promotion",
+            "implemented_general_capture",
+            "minimum_capture"
+          ]
+        },
+        "resource_limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "model_calls": {
+              "const": 0
+            },
+            "adaptive_agent_loops": {
+              "const": 0
+            },
+            "worker_dispatch": {
+              "const": true
+            },
+            "external_tools": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "maximum_input": {
+              "const": "Existing intake profile limits; no pack override"
+            },
+            "automatic_messages": {
+              "const": false
+            },
+            "deadline": {
+              "const": "Business due time unknown; no synthetic SLA. Existing HTTP timeout/recovery applies."
+            },
+            "worker_execution": {
+              "const": "fixed_in_process_preparation_only"
+            },
+            "worker_limits": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "selected_records": {
+                  "const": 1
+                },
+                "retained_bundles": {
+                  "const": 1
+                },
+                "coverage_rows": {
+                  "const": 200
+                },
+                "associated_support_artifacts": {
+                  "const": 20
+                },
+                "parsed_utf8_bytes": {
+                  "const": 2097152
+                },
+                "questions": {
+                  "const": 64
+                },
+                "result_bytes": {
+                  "const": 262144
+                },
+                "steps": {
+                  "const": 4
+                },
+                "computation_ms": {
+                  "const": 5000
+                }
+              },
+              "required": [
+                "selected_records",
+                "retained_bundles",
+                "coverage_rows",
+                "associated_support_artifacts",
+                "parsed_utf8_bytes",
+                "questions",
+                "result_bytes",
+                "steps",
+                "computation_ms"
+              ]
+            }
+          },
+          "required": [
+            "model_calls",
+            "adaptive_agent_loops",
+            "worker_dispatch",
+            "external_tools",
+            "maximum_input",
+            "automatic_messages",
+            "deadline",
+            "worker_execution",
+            "worker_limits"
+          ]
+        },
+        "measurement": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "baseline": {
+              "const": "Required before intervention, with agreed cohort, period, normal/exception variants and open/failed work"
+            },
+            "missing": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "active human effort"
+                },
+                {
+                  "const": "waiting/handoff chronology"
+                },
+                {
+                  "const": "comparable baseline"
+                },
+                {
+                  "const": "model/tool/human/support costs"
+                },
+                {
+                  "const": "customer acceptance"
+                },
+                {
+                  "const": "business impact"
+                }
+              ],
+              "items": false,
+              "minItems": 6,
+              "maxItems": 6
+            },
+            "rules": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "Overlapping waits need interval union, not a sum"
+                },
+                {
+                  "const": "Timestamp differences are not labor time or time saved"
+                },
+                {
+                  "const": "Missing measurements are not zero"
+                },
+                {
+                  "const": "Dispute or credit amount is not recovered revenue or savings"
+                }
+              ],
+              "items": false,
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "baseline",
+            "missing",
+            "rules"
+          ]
+        },
+        "template_id": {
+          "const": "invoice-dispute-preparation.v2"
+        },
+        "objective": {
+          "const": "Prepare and coordinate an evidence-backed invoice-dispute disposition."
+        },
+        "ecc_reference": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "const": "packages/ecc-pack/workflows/contract.v0.yaml"
+            },
+            "bytes_hash": {
+              "const": "sha256:b655e728036a340becdc97c209900e47388602184f1f2c7cd29b24ae12fa4676"
+            },
+            "workflow_id": {
+              "const": "customer_escalation_commitment_control"
+            },
+            "version": {
+              "const": "0.1.0"
+            },
+            "activation": {
+              "const": "unchanged; shadow/evaluation only"
+            }
+          },
+          "required": [
+            "path",
+            "bytes_hash",
+            "workflow_id",
+            "version",
+            "activation"
+          ]
+        }
+      },
+      "required": [
+        "simplification_before_allocation",
+        "steps",
+        "rules",
+        "outcome_requirements",
+        "intervention_requirements",
+        "correction_requirements",
+        "resource_limits",
+        "measurement",
+        "template_id",
+        "objective",
+        "ecc_reference"
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "projection": {
+          "const": "preparation-pack.v2"
+        },
+        "selection": {
+          "const": "pack-selection.v2"
+        }
+      },
+      "required": [
+        "projection",
+        "selection"
+      ]
+    },
+    "profile": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/profile"
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "discovery": {
+          "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/binding"
+        },
+        "manifest": {
+          "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/manifest"
+        },
+        "confirmation_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publication_profile_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "worker_profile_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "discovery",
+        "manifest",
+        "confirmation_entry_hash",
+        "publication_profile_hash",
+        "worker_profile_hash"
+      ]
+    },
+    "coverage": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/coverage"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-pack.v2"
+        },
+        "pack_id": {
+          "const": "pack_synthetic_invoice_dispute_north"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^pack-v2-[a-f0-9]{64}$"
+        },
+        "template": {
+          "$ref": "#/$defs/template"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "material": {
+          "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/material"
+        },
+        "coverage": {
+          "$ref": "#/$defs/coverage"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/source"
+          }
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/finding"
+          },
+          "minItems": 7,
+          "maxItems": 7
+        },
+        "loop_outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/loop_output"
+          },
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "authority_granted": {
+          "const": false
+        },
+        "closure_permission": {
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "pack_id",
+        "version",
+        "template",
+        "binding",
+        "material",
+        "coverage",
+        "sources",
+        "findings",
+        "loop_outputs",
+        "authority_granted",
+        "closure_permission"
+      ]
+    },
+    "command": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schema_version": {
+              "const": "pack-selection-command.v2"
+            },
+            "operation": {
+              "const": "publish"
+            },
+            "pack_id": {
+              "const": "pack_synthetic_invoice_dispute_north"
+            },
+            "expected_selection_revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "expected_selection_head": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "expected_publication_profile_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "artifact_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "expected_basis": {
+              "$ref": "#/$defs/binding"
+            },
+            "effective_until": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "effective_until_source_timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "schema_version",
+            "operation",
+            "pack_id",
+            "expected_selection_revision",
+            "expected_selection_head",
+            "expected_publication_profile_hash",
+            "reason",
+            "idempotency_key",
+            "artifact_hash",
+            "expected_basis",
+            "effective_until",
+            "effective_until_source_timezone"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schema_version": {
+              "const": "pack-selection-command.v2"
+            },
+            "operation": {
+              "const": "rollback"
+            },
+            "pack_id": {
+              "const": "pack_synthetic_invoice_dispute_north"
+            },
+            "expected_selection_revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "expected_selection_head": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "expected_publication_profile_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "artifact_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "expected_basis": {
+              "$ref": "#/$defs/binding"
+            },
+            "effective_until": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "effective_until_source_timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "schema_version",
+            "operation",
+            "pack_id",
+            "expected_selection_revision",
+            "expected_selection_head",
+            "expected_publication_profile_hash",
+            "reason",
+            "idempotency_key",
+            "artifact_hash",
+            "expected_basis",
+            "effective_until",
+            "effective_until_source_timezone"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schema_version": {
+              "const": "pack-selection-command.v2"
+            },
+            "operation": {
+              "const": "withdraw"
+            },
+            "pack_id": {
+              "const": "pack_synthetic_invoice_dispute_north"
+            },
+            "expected_selection_revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "expected_selection_head": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "expected_publication_profile_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "artifact_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "schema_version",
+            "operation",
+            "pack_id",
+            "expected_selection_revision",
+            "expected_selection_head",
+            "expected_publication_profile_hash",
+            "reason",
+            "idempotency_key",
+            "artifact_hash"
+          ]
+        }
+      ]
+    },
+    "input_manifest": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/input_manifest"
+    },
+    "outcome": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/outcome"
+    },
+    "journal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "pack-selection-entry.v2"
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "pack_id": {
+          "const": "pack_synthetic_invoice_dispute_north"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^pack_selection_[a-f0-9]{64}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "previous_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operation": {
+          "enum": [
+            "publish",
+            "rollback",
+            "withdraw"
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "command_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "command": {
+          "$ref": "#/$defs/command"
+        },
+        "artifact_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/artifact"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_manifest": {
+          "$ref": "#/$defs/input_manifest"
+        },
+        "profile": {
+          "$ref": "#/$defs/profile"
+        },
+        "actor": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "result": {
+          "$ref": "#/$defs/outcome"
+        },
+        "versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "worker_profile": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/profile"
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "pack_id",
+        "case_id",
+        "id",
+        "sequence",
+        "previous_entry_hash",
+        "operation",
+        "idempotency_key",
+        "command_fingerprint",
+        "recorded_at",
+        "command",
+        "artifact_hash",
+        "artifact",
+        "input_manifest",
+        "profile",
+        "actor",
+        "result",
+        "versions",
+        "hash",
+        "worker_profile"
+      ]
+    },
+    "current": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/current"
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "pattern": "^pack-v[12]-[0-9a-f]{64}$"
+        },
+        "eligible": {
+          "type": "boolean"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      },
+      "required": [
+        "artifact_hash",
+        "version",
+        "eligible",
+        "reasons"
+      ]
+    },
+    "read": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "pack-selection-read.v2"
+        },
+        "pack_id": {
+          "const": "pack_synthetic_invoice_dispute_north"
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bundle_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+            },
+            "record_key": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "case_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "bundle_id",
+            "record_key",
+            "case_id"
+          ]
+        },
+        "candidate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/artifact_any"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidate_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selection_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selection_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selected_artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/artifact_any"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selected_artifact_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "current": {
+          "$ref": "#/$defs/current"
+        },
+        "publication_profile_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "publication_reviewer": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comparison": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "field": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "before_hash": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "after_hash": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "field",
+              "before_hash",
+              "after_hash"
+            ]
+          }
+        },
+        "rollback_candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rollback"
+          }
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/journal_any"
+          }
+        },
+        "authority_granted": {
+          "const": false
+        },
+        "closure_permission": {
+          "const": false
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "pack_id",
+        "evaluated_at",
+        "target",
+        "candidate",
+        "candidate_hash",
+        "selection_revision",
+        "selection_head",
+        "selected_artifact",
+        "selected_artifact_hash",
+        "current",
+        "publication_profile_hash",
+        "publication_reviewer",
+        "comparison",
+        "rollback_candidates",
+        "history",
+        "authority_granted",
+        "closure_permission",
+        "hash"
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "pack-selection-result.v2"
+        },
+        "status": {
+          "const": "recorded"
+        },
+        "entry": {
+          "$ref": "#/$defs/journal"
+        },
+        "historical_receipt": {
+          "const": true
+        },
+        "authority_granted": {
+          "const": false
+        },
+        "closure_permission": {
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "status",
+        "entry",
+        "historical_receipt",
+        "authority_granted",
+        "closure_permission"
+      ]
+    },
+    "export": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "pack-selection-export.v2"
+        },
+        "discovery": {
+          "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/export"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/journal_any"
+          }
+        },
+        "versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "authority_granted": {
+          "const": false
+        },
+        "closure_permission": {
+          "const": false
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "discovery",
+        "entries",
+        "versions",
+        "authority_granted",
+        "closure_permission",
+        "hash"
+      ]
+    },
+    "artifact_any": {
+      "oneOf": [
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/artifact"
+        },
+        {
+          "$ref": "#/$defs/artifact"
+        }
+      ]
+    },
+    "journal_any": {
+      "oneOf": [
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/journal"
+        },
+        {
+          "$ref": "#/$defs/journal"
+        }
+      ]
+    }
+  }
+}

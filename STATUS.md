@@ -1,52 +1,49 @@
 # Status
 
-Current milestone: **D11-B merged; D12-A design Accepted on this branch. No D12
-worker, task review or proof/correction capture is implemented.**
+Current milestone: **D12-A / Accepted D-037 merged; D12-B implemented on this
+review branch.** No real-customer processing, financial authority or closure.
 
-PR #34 merged normally at `6bfc94e24d2a2980b369fc0aea487e32313b5f78`, preserving
-reviewed head `b284279c0445121fe9eb1494fa926a48af22c8df` and its
-[passing required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34279140329).
-No open review findings remained. The effective main rules required a PR, strict
-up-to-date `validate` and force-push/deletion protection; normal merge used no bypass.
-Accepted D-036, migration 0008 and all 0001–0007 checksums, replay and exact retries remain intact.
+PR #37 merged normally at `7b3b3e125591212a6392504298d9b467f1e2f464`, after the
+owner's approval of `7ac9f9db` was recorded at `0812e004`. Required
+[CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34293784728):
+307 repository and 273 PostgreSQL/API/browser tests, Compose and appliance restart
+checks. Both addressed findings were resolved. Required PR, strict up-to-date
+`validate`, non-fast-forward and deletion protections remained; no bypass was used.
 
-D11-B supplies one strict synthetic preparation template, claim-relevant pack
-projection, separate server-controlled publication profile and immutable PostgreSQL
-selection history. Publish/withdraw/guarded rollback have operation-specific checks;
-stale or expired packs remain withdrawable by a currently eligible reviewer. P changes,
-not Case C, Discovery D or R/S. Reads/diffs/exports are read-only; historical receipts
-reconstruct after restart and exact retries do not renew permission.
-[API/Workbench walkthrough, T1–T9 coverage and captures](docs/guides/synthetic-preparation-pack.md).
+D12-B adds one explicit, server-selected zero-model preparation worker. A separately
+published **v2** pack binds the worker profile; v1 keeps its dispatch prohibition.
+The result is a scoped checklist, reconciliation, questions and an unsent follow-up,
+with original source citations, material uncertainty and credit abstention. Orchid
+and varied Cedar/multi-delivery controls use their supplied facts. Missing delivery
+confirmation does not prove non-delivery. A person must obtain proof, establish
+terms/owners, review usefulness and independently authorize any business consequence.
 
-The intake panel reuses current descriptive review without another confirmation.
-Genuine corrections stale the old pack until fresh descriptive review and separate
-publication. Atomic IndexedDB claims protect commands across tabs; confirmed receipts
-survive failed refresh and mixed projections show unavailable. Two nonblocking UI
-observations carry into D12: completed descriptive review competes with the next action,
-and a published pack retains an inactive publication form. Proposed consolidation
-keeps completed details expandable and correction/withdrawal/recovery accessible.
+One additive migration **0009_preparation_work** retains start/result, interruption,
+terminal task review, correction/independent evaluation review and bounded manual
+synthetic proof notes. Exact keys, parent computation timing, current terminal
+permission, late-result fences and portable replay are enforced. No background
+resume, provider, scheduler or external tool/message exists. U changes; C/D/P/R/S do
+not. All earlier migration checksums, Case and Discovery v1/v2 semantics, v1 pack
+receipts, intake successful-key guarantees and frozen ECC remain intact.
 
-[Accepted D-037](docs/architecture/d12-bounded-preparation-worker.md) defines one
-zero-model worker assembling a cited evidence checklist, reconciliation, gap agenda and
-unsent follow-up. The [worked example](docs/guides/d12-preparation-worker-design.md)
-separates reproduced D11 material from hypothetical worker records. Existing pack v1
-explicitly forbids dispatch; proposed v2 needs fresh publication. One proposed supporting
-journal retains start/result, task review, correction/evaluation review and synthetic
-proof notes, without changing Case/review/selection history or granting business authority.
-The [five separate proof measures](docs/product/workflow-discovery.md#five-separate-proof-measures)
-are now defined in the canonical specification and existing matrix. Capture is approved for bounded synthetic D12-B implementation; customer comparisons remain D13 and real data unapproved.
+The existing intake Workbench leads with prepared work and human task review.
+Completed descriptive review/publication are expandable; correction, stale-pack
+withdrawal and cross-tab original-command recovery remain available. A failed refresh
+retains the confirmed receipt without claiming current permission. GETs, disclosures
+and exports do not acquire writer locks or change durable state.
+[Executable API/Workbench journey, migration and W1–W10 map](docs/guides/synthetic-preparation-worker.md).
 
-D10-B merged in PR #32 at `953d49ece70f7828935bb0f4636299d7601f16d5`.
-Historical Discovery v1/v2 retains its original loop-helper semantics; the new pack
-projection derives relevant citations from scoped claims and full upload coverage.
-The old helper remains a documented upstream gap, not silently repaired. Node 24.19.0 /
-tzdata 2026b is still required. All 19 canonical matrix entries remain; complete Discovery,
-source/variant rules, customer evidence and measurements remain incomplete.
+The five separate measures and model/tool, infrastructure, human, support and setup
+costs support only explicit synthetic notes. Unknown/negative/overlap/reversal/reopen
+and failed/open evidence are retained; no aggregate savings or outcome is computed.
+Task acceptance and evaluation approval are separate, confer no business proof and
+never automatically promote worker code, policy or a pack. Full customer comparison,
+source/variant rules, active effort/cost baselines and customer acceptance remain gaps.
 
-**Next: validate and normally merge the D-037 approval record, then implement one
-bounded D12-B PR using W1–W10.** D11-B does not execute the four-step assignment, invoke models,
-activate consequential rules, authorize a credit or allow Case closure. Real customer
-activation remains unapproved. No release or deployment is included.
+**Next:** review this D12-B implementation and its operator usefulness. D13 remains
+the next planned customer comparison/Capacity Map, subject to separately approved
+real-data custody/access/retention. No new planning milestone, release or deployment.
+The current source is Apache-2.0; the published evaluation prerelease remains historical.
 
 **D9-B merged in PR #30 at `ca9543289894fffdaa40ecfe794d83addc2c19de`.** The reviewed
 head was exactly `9d250707458adfdc481a6c9259608f5d6d3f4cc7`, with all three findings
@@ -1367,12 +1364,9 @@ CI is reported on the PR; these remain design assertions, not D12 implementation
 
 ## Next
 
-D11-B is merged. D-037 is now Accepted; merge its approval record before implementing the bounded D12-B worker,
-task/proof/correction history and explicit pack v2 publication. The W1–W10 design gates
-are not passing worker tests yet. Business source/variant/authority rules remain
-disabled; descriptive confirmation is not permission for worker execution or closure.
-Representative normal/exception routes, governing field/variant rules, baseline/effort/
-cost collection, operator usefulness/support and customer acceptance remain incomplete.
+Review the bounded D12-B implementation and retained W1–W10 evidence. D13 customer
+comparison remains planned; governing source/variant rules, baseline/effort/cost
+coverage, operator usefulness/support and customer acceptance remain incomplete.
 Measured economics and complete Case closure are not implemented.
 
 Real customer activation still requires named custody, access, classification,
@@ -1391,3 +1385,36 @@ in D-037. D12-B is authorized after the design merges with required checks. No w
 new registered contract, migration, task/proof/correction capture or UI behavior is
 implemented by this approval record. Individual publication/review, financial authority,
 real-customer activation and closure are not granted.
+
+## D12-B implementation validation
+
+Local Node 24.19.0 / tzdata 2026b and PostgreSQL 18.4:
+
+- `pnpm validate`: 311 repository tests passed, plus format/lint/typecheck/public
+  release checks. The initial restricted run could not bind its existing loopback
+  HTTP tests; rerunning with loopback permission passed.
+- `pnpm eval:ecc`: 620/620, 30/30. Negative control exited 1 for its intended
+  failed assertions (152/620, 0/30, hard gates FAIL), not a setup error.
+- The combined retained run passed 326 tests: 273 retained D6–D11 PostgreSQL/API/
+  browser scenarios plus the then-current 53 D12 cases, no skips. Final D12 expansion
+  separately passed 54 PostgreSQL/API and six real browser scenarios. This includes
+  exact correction-to-new-version output, original-record recovery after cross-tab
+  navigation, all terminal input changes, oversized output and clock rollback.
+- Actual appliance entry point on a new disposable PostgreSQL database passed the
+  documented intake → Case → descriptive review → publication → preparation →
+  task review → API restart → exact retries/export reconstruction sequence.
+- `git diff --check`, changed Markdown local links, all 19 matrix IDs and unchanged
+  migration 0001–0008/frozen corpus checks passed. Docker is absent locally:
+  `docker compose config --quiet` exits 127. Final-head CI remains the required
+  evidence for Compose, container/PostgreSQL restart and appliance browser gates.
+
+Desktop 1440px and mobile 390px Chromium captures cover before publication,
+eligibility, prepared/accepted packet, conflicting Cedar evidence, changed description
+and correction review. The actual desktop/mobile prepared views were inspected;
+proposal/uncertainty/progress/actions are readable with no horizontal overflow.
+Keyboard start via Enter and task-review focus order are exercised; browser tests
+also inspect citations, reload, failed refresh, two-tab recovery and correction/
+independent evaluation. Native screen-reader and other-browser checks were not run.
+Screenshots and the walkthrough are returned as downloadable handoff files; the guide
+includes reproduction commands. PR CI is reported against its exact head, separately
+from these local results. No release/deployment, real data or D13 work is included.

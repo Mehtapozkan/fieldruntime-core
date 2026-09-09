@@ -1,0 +1,38 @@
+{
+  "definition_version": "invoice-dispute-proof.v1",
+  "measure": "human_attention_released",
+  "value": null,
+  "unit": "person_minutes",
+  "currency": null,
+  "qualification": "unknown",
+  "synthetic": true,
+  "cohort": "Retained synthetic dispute records, including open and failed work",
+  "period": {
+    "start": "2026-09-07T16:00:00.000Z",
+    "end": "2026-09-07T16:05:00.000Z",
+    "source_timezone": "UTC"
+  },
+  "coverage": {
+    "numerator": 0,
+    "denominator": null,
+    "exclusions": "No qualifying active-effort sample has been supplied"
+  },
+  "source": {
+    "kind": "unknown",
+    "reference": "synthetic readiness review",
+    "locator": "active-effort evidence absent",
+    "observed_at": null
+  },
+  "method": "No comparable baseline or active effort supplied; leave unknown",
+  "measurement_owner": "synthetic intake operator",
+  "uncertainty": "No customer measurement or savings established",
+  "treatment": "not_applicable",
+  "baseline_person_minutes": null,
+  "actual_person_minutes": null,
+  "prior_coverage_known": false,
+  "substantive_progress": false,
+  "supersedes_entry_hash": null,
+  "reversal_of_entry_hash": null,
+  "reopens_entry_hash": null,
+  "overlap_entry_hashes": []
+}

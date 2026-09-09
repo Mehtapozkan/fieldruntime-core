@@ -1,4 +1,9 @@
-import { createIntakeClient, packPath } from "./intake-client.js";
+import {
+  createIntakeClient,
+  packPath,
+  workPath,
+  intakeHash,
+} from "./intake-client.js";
 const el = (tag, text, className) => {
   const n = document.createElement(tag);
   if (text !== undefined) n.textContent = text;
@@ -518,6 +523,504 @@ export function mountIntakeWorkbench() {
     box.append(detail("Source claims and precise row locators", c.record));
     return box;
   }
+  let workDraft = {};
+  function workPanel(s) {
+    const box = el("section", undefined, "review-card preparation-work"),
+      v = s.work,
+      target = s.discoveryTarget;
+    const matches =
+      v?.case_id === target.case_id && v?.record_key === target.record_key;
+    const current =
+      matches && !s.needsRefresh && !s.workNeedsRefresh && !s.packNeedsRefresh;
+    const confirmed =
+      s.workConfirmed?.entry.case_id === target.case_id &&
+      s.workConfirmed?.entry.record_key === target.record_key
+        ? s.workConfirmed.entry
+        : null;
+    const latest = matches ? v.invocations.at(-1) : null;
+    const newer =
+      confirmed?.event === "started" &&
+      !v?.history.some((e) => e.hash === confirmed.hash);
+    const r = newer ? null : latest?.result;
+    const title = r
+      ? `${r.subject.customer} / ${r.subject.record_id} — evidence-request packet`
+      : "Prepare the evidence request";
+    box.append(el("h2", title));
+    box.dataset.state = newer
+      ? "unrefreshed"
+      : latest?.review
+        ? `task-${latest.review.command.decision}`
+        : (latest?.outcome ?? "ready");
+    if (workDraft.target !== target.case_id + "|" + target.record_key)
+      workDraft = { target: target.case_id + "|" + target.record_key };
+    const d = workDraft;
+    const base = () => ({
+      invocation_id: latest.invocation_id,
+      expected_work_revision: v.work_revision,
+      expected_work_head: v.work_head,
+      idempotency_key: uid(),
+    });
+    const send = (command) =>
+      act(async () => {
+        await client.writeWork(command());
+        const focus =
+          stage.querySelector('[role="alert"]') ??
+          stage.querySelector(".preparation-work h2");
+        focus?.setAttribute("tabindex", "-1");
+        focus?.focus();
+      });
+    const blocked = !current || s.busy || !!s.pending;
+    const receiptNotice = confirmed
+      ? el(
+          "p",
+          `Confirmed ${human(confirmed.event)} receipt · ${new Date(confirmed.recorded_at).toLocaleString()}. ${current ? "Current status is shown below." : "Current permission is unconfirmed; the original receipt is retained."}`,
+          "work-confirmed review-notice",
+        )
+      : null;
+    if (s.workError) box.append(el("p", s.workError, "review-notice"));
+    const columns = el("div", undefined, "work-focus"),
+      summary = el("div"),
+      controls = el("section", undefined, "review-form work-controls");
+    if (r) {
+      summary.append(
+        el(
+          "p",
+          `${r.subject.currency} ${(r.subject.disputed_amount_minor / 100).toLocaleString("en-US")} disputed source amount. No credit is recommended.`,
+          "review-issue",
+        ),
+      );
+      const delivery = r.evidence_checklist.filter(
+        (c) => c.subject.kind === "delivery",
+      );
+      for (const c of delivery)
+        summary.append(el("p", `${c.subject.id}: ${c.finding}`));
+      summary.append(
+        el(
+          "p",
+          "Checklist, reconciliation and unsent follow-up prepared. Terms, accountable business owner and impact remain unconfirmed.",
+          "review-muted",
+        ),
+      );
+      const progress = latest.review
+        ? {
+            approve: "Task accepted for preparation",
+            reject: "Task rejected",
+            modify: "Modification requested",
+            escalate: "Task escalated — no message sent",
+          }[latest.review.command.decision]
+        : "Preparation complete — human task review needed";
+      summary.append(el("h3", progress, "work-progress"));
+      if (!current || !latest.current_usable)
+        summary.append(
+          el(
+            "p",
+            !current
+              ? "Current applicability could not be refreshed."
+              : "This result is historical and cannot currently be accepted or used. " +
+                  latest.reasons.join(" "),
+            "review-notice",
+          ),
+        );
+      controls.append(
+        el(
+          "p",
+          "Synthetic task reviewer: intake operator. Accept preparation usefulness only.",
+        ),
+      );
+      if (!latest.review) {
+        const reason = input("Task review reason", "text", d.reason ?? ""),
+          proposal = input(
+            "Proposed modification (required for modify)",
+            "text",
+            d.proposal ?? "",
+          );
+        reason.node.oninput = () => (d.reason = reason.node.value);
+        proposal.node.oninput = () => (d.proposal = proposal.node.value);
+        controls.append(reason.wrap);
+        const actions = el("div", undefined, "work-actions");
+        for (const [decision, label] of [
+          ["approve", "Accept preparation packet"],
+          ["reject", "Reject packet"],
+          ["modify", "Request modification"],
+          ["escalate", "Escalate for human attention"],
+        ]) {
+          const b = button(
+            label,
+            send(() => {
+              if (!d.reason?.trim())
+                throw new Error("Give a task review reason.");
+              return {
+                schema_version: "preparation-task-review.v1",
+                operation: "task_review",
+                purpose: "preparation_usefulness",
+                ...base(),
+                result_hash: latest.result_hash,
+                decision,
+                reason: d.reason,
+                ...(decision === "modify"
+                  ? { replacement_proposal: d.proposal ?? "" }
+                  : {}),
+              };
+            }),
+            decision === "approve",
+          );
+          b.disabled =
+            blocked ||
+            (decision === "approve"
+              ? !latest.can_accept
+              : !latest.can_intervene);
+          actions.append(b);
+        }
+        controls.append(actions, proposal.wrap);
+      } else
+        controls.append(
+          el(
+            "p",
+            `Recorded by synthetic ${human(latest.review.actor.identity_id.replace("identity_", ""))} at ${new Date(latest.review.recorded_at).toLocaleString()}. This task review is terminal; corrections remain available.`,
+          ),
+        );
+    } else {
+      const a = s.pack?.candidate,
+        selected = s.view?.candidates.find(
+          (c) => c.record_key === target.record_key,
+        )?.record;
+      summary.append(
+        el(
+          "p",
+          selected
+            ? `${selected.cells.customer_ref} / ${selected.source_record_id} · ${money(selected.cells.amount_minor)} disputed source amount.`
+            : "One selected synthetic record and its explicitly associated evidence.",
+          "review-issue",
+        ),
+      );
+      if (a)
+        summary.append(
+          el(
+            "p",
+            a.loop_outputs.find((o) => o.id === "Human Intervention Map").text,
+          ),
+        );
+      summary.append(
+        el(
+          "p",
+          "Prepare a cited checklist, scoped reconciliation and unsent evidence request. No credit recommendation, message or financial effect.",
+        ),
+      );
+      controls.append(
+        el(
+          "h3",
+          latest?.outcome === "started"
+            ? "Preparation pending — inspect or interrupt"
+            : latest?.outcome === "failed"
+              ? "Preparation failed — no usable packet"
+              : "Next: explicitly prepare this record",
+        ),
+      );
+      if (!current || !v?.current.can_start)
+        controls.append(
+          el(
+            "p",
+            (current
+              ? v.current.reasons
+              : ["Refresh to inspect current eligibility"]
+            ).join(" "),
+            "review-notice",
+          ),
+        );
+    }
+    const fresh = button(
+      latest ? "Prepare a fresh packet" : "Prepare evidence-request packet",
+      send(() => ({
+        schema_version: "preparation-work-command.v1",
+        operation: "start",
+        binding: v.candidate_binding,
+        expected_work_revision: v.work_revision,
+        expected_work_head: v.work_head,
+        replaces_invocation: v.invocations.at(-1)?.invocation_id ?? null,
+        idempotency_key: uid(),
+      })),
+      !r,
+    );
+    fresh.disabled = blocked || !v?.current.can_start;
+    if (!r) controls.append(fresh);
+    else {
+      const again = el("details");
+      again.append(
+        el("summary", "Prepare again — new explicit invocation"),
+        el(
+          "p",
+          "A new run retains the previous result and starts without task acceptance.",
+        ),
+        fresh,
+      );
+      controls.append(again);
+    }
+    if (latest?.can_interrupt) {
+      const reason = input("Interruption reason", "text", d.interrupt ?? "");
+      reason.node.oninput = () => (d.interrupt = reason.node.value);
+      const b = button(
+        "Interrupt pending preparation",
+        send(() => ({
+          schema_version: "preparation-interruption.v1",
+          operation: "interrupt",
+          ...base(),
+          reason: d.interrupt ?? "",
+        })),
+      );
+      b.disabled = blocked;
+      controls.append(reason.wrap, b);
+    }
+    columns.append(summary, controls);
+    box.append(columns);
+    if (receiptNotice) box.append(receiptNotice);
+    const cite = (ids) => {
+      const node = el("details", undefined, "intake-source");
+      node.append(el("summary", "Supporting citations"));
+      for (const id of [...new Set(ids)]) {
+        const source = v.sources.find((x) => x.id === id);
+        if (source) {
+          node.append(el("p", `${source.name} · ${source.interpretation}`));
+          if (source.excerpt) node.append(el("blockquote", source.excerpt));
+          node.append(detail("Source locator and binding", source));
+        }
+      }
+      return node;
+    };
+    if (r) {
+      const draft = el("details", undefined, "review-card work-draft");
+      draft.append(
+        el("summary", "Inspect the unsent follow-up"),
+        el("pre", r.follow_up.draft),
+        cite(r.follow_up.draft_citation_ids),
+      );
+      box.append(draft);
+      const evidence = el("details", undefined, "review-card work-evidence");
+      evidence.append(
+        el("summary", "Checklist, scoped reconciliation & step evidence"),
+      );
+      for (const c of r.evidence_checklist)
+        evidence.append(
+          el("h4", `${c.subject.id} · ${human(c.status)}`),
+          el("p", c.finding),
+          cite(c.citation_ids),
+        );
+      for (const c of r.reconciliation)
+        evidence.append(
+          el(
+            "p",
+            `${c.field}: ${c.values.map((x) => x || "(not supplied)").join(" / ")}${c.conflicting ? " — conflicting values" : ""}`,
+          ),
+          cite(c.citation_ids),
+        );
+      evidence.append(
+        detail("Bounded coverage, related context and completed steps", {
+          coverage: r.coverage,
+          related_context: r.related_context,
+          steps: r.steps,
+        }),
+      );
+      box.append(evidence);
+      const corrections = el(
+        "details",
+        undefined,
+        "review-card work-correction",
+      );
+      corrections.append(
+        el(
+          "summary",
+          "Correct preparation wording / review evaluation candidate",
+        ),
+      );
+      const after = input(
+          "Corrected first evidence request",
+          "text",
+          d.after ?? "",
+        ),
+        reason = input("Correction reason", "text", d.correctionReason ?? "");
+      after.node.oninput = () => (d.after = after.node.value);
+      reason.node.oninput = () => (d.correctionReason = reason.node.value);
+      const original = r.follow_up.requests[0];
+      corrections.append(
+        el("p", `Original: ${original.text}`),
+        el(
+          "p",
+          "Wording proposal only. New source facts require intake/description review and separate publication. This does not edit the result or promote a worker.",
+        ),
+        after.wrap,
+        reason.wrap,
+      );
+      const correct = button(
+        "Record wording correction",
+        act(async () => {
+          await client.writeWork({
+            schema_version: "purpose_limited_preparation_correction.v1",
+            operation: "correction",
+            purpose: "preparation_usefulness",
+            ...base(),
+            binding_hash: await intakeHash(latest.binding),
+            original_result_hash: latest.result_hash,
+            target: "/follow_up/requests/0/text",
+            before: original.text,
+            after: d.after ?? "",
+            classification: "knowledge_bearing",
+            primary_reason: "MISSING_KNOWLEDGE",
+            reason: d.correctionReason ?? "",
+            citation_ids: original.citation_ids,
+            evidence_limits: [
+              "Proposed wording; no new source fact or business authority",
+            ],
+          });
+        }),
+      );
+      correct.disabled = blocked;
+      corrections.append(correct);
+      const all = v.history.filter(
+        (e) => e.invocation_id === latest.invocation_id,
+      );
+      for (const e of all.filter((e) => e.event === "correction")) {
+        const reviewed = all.find(
+          (x) =>
+            x.event === "evaluation_review" &&
+            x.command.correction_entry_hash === e.hash,
+        );
+        corrections.append(
+          el(
+            "h4",
+            reviewed
+              ? `Evaluation candidate ${reviewed.command.decision === "approve" ? "accepted" : "rejected"} — no promotion`
+              : "Evaluation candidate awaits independent review",
+          ),
+          el("p", e.command.after),
+          detail("Original correction and candidate", e),
+        );
+        if (!reviewed) {
+          corrections.append(
+            el(
+              "p",
+              "Independent synthetic evaluation reviewer: preparation publication reviewer. This selects a regression candidate only.",
+            ),
+          );
+          const why = input(
+              "Evaluation review reason",
+              "text",
+              d.evalReason ?? "",
+            ),
+            tests = input("Synthetic test references", "text", d.tests ?? "");
+          why.node.oninput = () => (d.evalReason = why.node.value);
+          tests.node.oninput = () => (d.tests = tests.node.value);
+          corrections.append(why.wrap, tests.wrap);
+          for (const decision of ["approve", "reject"]) {
+            const b = button(
+              decision === "approve"
+                ? "Accept evaluation candidate"
+                : "Reject evaluation candidate",
+              send(() => ({
+                schema_version: "preparation-evaluation-review.v1",
+                operation: "evaluation_review",
+                purpose: "synthetic_evaluation_candidate",
+                ...base(),
+                correction_entry_hash: e.hash,
+                candidate_id: e.candidate.id,
+                expected_candidate_revision: e.candidate.revision,
+                expected_test_case_hash: e.candidate.test_case_hash,
+                decision,
+                reason: d.evalReason ?? "",
+                test_references: (d.tests ?? "").split("\n").filter(Boolean),
+              })),
+            );
+            b.disabled = blocked;
+            corrections.append(b);
+          }
+        }
+      }
+      box.append(corrections);
+    }
+    if (latest) {
+      const proof = el("details", undefined, "review-card work-proof");
+      proof.append(
+        el("summary", "Proof readiness & separate costs"),
+        el(
+          "p",
+          "Cash, resolved disputes, credits, newly attended work and human attention are separate. Missing measurements remain unknown; waiting is not human effort. No aggregate value or savings is computed.",
+        ),
+      );
+      if (r)
+        proof.append(
+          detail("Five readiness measures and named costs", {
+            measures: r.proof_readiness,
+            costs: r.cost_evidence,
+            execution: r.execution_facts,
+          }),
+        );
+      const notes = matches
+        ? v.history.filter((e) => e.event === "proof_note")
+        : [];
+      for (const e of notes) {
+        const n = e.command.note,
+          replaced = notes.some(
+            (x) =>
+              x.command.note.supersedes_entry_hash === e.hash ||
+              x.command.note.reversal_of_entry_hash === e.hash ||
+              x.command.note.reopens_entry_hash === e.hash,
+          );
+        proof.append(
+          el(
+            "p",
+            `${human(n.measure)}: ${n.value === null ? "unknown" : `${n.value} ${n.unit}`} · synthetic ${n.qualification}${replaced ? " · superseded / reversed / reopened history" : ""}${n.overlap_entry_hashes.length ? " · overlapping evidence, do not add" : ""}`,
+          ),
+          detail("Exact note, coverage, lineage and attribution", e),
+        );
+      }
+      const note = el("label", "Synthetic proof note (strict JSON)"),
+        text = el("textarea");
+      text.rows = 8;
+      text.value = d.note ?? "";
+      text.placeholder =
+        "Paste one bounded note using the API guide; unknown values must be null.";
+      text.oninput = () => (d.note = text.value);
+      note.append(text);
+      proof.append(note);
+      const save = button(
+        "Record synthetic proof note",
+        act(async () => {
+          await client.writeWork({
+            schema_version: "preparation-proof-note.v1",
+            operation: "proof_note",
+            purpose: "synthetic_measurement_readiness",
+            ...base(),
+            binding_hash: await intakeHash(latest.binding),
+            result_hash: latest.result_hash,
+            note: JSON.parse(d.note ?? ""),
+            reason:
+              "Explicit operator-supplied synthetic measurement note; no business outcome proof",
+          });
+        }),
+      );
+      save.disabled = blocked || latest.outcome === "started";
+      proof.append(save);
+      box.append(proof);
+    }
+    if (matches) {
+      const history = detail(
+        "Earlier invocations, exact bindings, timing & immutable history",
+        v.history,
+      );
+      box.append(history);
+      const download = el("a", "Download portable preparation history");
+      download.href = workPath(target) + "&representation=export";
+      box.append(download);
+    }
+    if (confirmed)
+      box.append(detail("Exact confirmed preparation-work receipt", confirmed));
+    box.append(
+      el(
+        "p",
+        "Synthetic preparation only. Customer impact is unverified; financial authority, external actions and Case closure remain blocked.",
+        "review-muted",
+      ),
+    );
+    return box;
+  }
   let discoveryDraft = null;
   function discoveryFocus() {
     const n =
@@ -562,8 +1065,9 @@ export function mountIntakeWorkbench() {
     box.dataset.state = status;
     const labels = {
       proposed: "Proposed — separate publication needed",
-      published_for_preparation:
-        "Published for preparation — worker not started",
+      published_for_preparation: s.work?.invocations.length
+        ? "Published for preparation — work history below"
+        : "Published for preparation — worker not started",
       stale: "Stale — previous publication cannot be used",
       withdrawn: "Withdrawn — no pack selected",
       unavailable: "Current selection unavailable",
@@ -717,7 +1221,9 @@ export function mountIntakeWorkbench() {
             "Review the exact candidate and choose its preparation expiry before publication or rollback.",
           );
         const command = {
-          schema_version: "pack-selection-command.v1",
+          schema_version: v.schema_version.endsWith(".v2")
+            ? "pack-selection-command.v2"
+            : "pack-selection-command.v1",
           operation,
           pack_id: v.pack_id,
           expected_selection_revision: v.selection_revision,
@@ -1078,7 +1584,25 @@ export function mountIntakeWorkbench() {
         ),
       );
     shell.append(summary, controls);
-    box.append(shell, packPanel(s));
+    const workerMode = s.pack?.schema_version === "pack-selection-read.v2";
+    if (workerMode && purposes.includes("discovery_description")) {
+      const completed = el("details", undefined, "review-card");
+      completed.append(
+        el("summary", "Description reviewed — inspect or correct"),
+        shell,
+      );
+      box.append(completed);
+    } else box.append(shell);
+    const packs = packPanel(s);
+    if (workerMode && s.pack.selected_artifact_hash) {
+      const published = el("details", undefined, "review-card");
+      published.append(
+        el("summary", "Publication & withdrawal — inspect or change"),
+        packs,
+      );
+      box.append(published);
+    } else box.append(packs);
+    if (workerMode && s.discoveryTarget?.case_id) box.prepend(workPanel(s));
     if (
       s.discoveryConfirmed?.entry.case_id === v.binding.case_id &&
       s.discoveryConfirmed.entry.command.bundle_id === v.binding.bundle_id &&
@@ -1282,7 +1806,7 @@ export function mountIntakeWorkbench() {
         el("h2", "Original submission needs recovery"),
         el(
           "p",
-          "One intake, Discovery or pack command is shared across tabs. Recover these exact saved bytes and key; completion in another tab does not authorize a different submission.",
+          "One intake, Discovery, pack or preparation-work command is shared across tabs. Recover these exact saved bytes and key; completion in another tab does not authorize a different submission.",
         ),
         button(
           "Recover original submission",
@@ -1327,6 +1851,21 @@ export function mountIntakeWorkbench() {
     );
     refresh.disabled = s.busy;
     stage.append(refresh);
+    if (
+      s.workConfirmed &&
+      (!s.discoveryTarget ||
+        s.workConfirmed.entry.case_id !== s.discoveryTarget.case_id ||
+        s.workConfirmed.entry.record_key !== s.discoveryTarget.record_key)
+    ) {
+      stage.append(
+        el(
+          "p",
+          "A preparation-work receipt is confirmed for the original record. Current applicability has not been refreshed.",
+          "review-notice",
+        ),
+        detail("Confirmed original work receipt", s.workConfirmed),
+      );
+    }
     if (s.discovery) stage.append(discoveryPanel(s));
     if (s.view) {
       const retained = el("details", undefined, "discovery-intake-details");

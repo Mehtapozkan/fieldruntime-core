@@ -3,7 +3,7 @@
   "info": {
     "title": "Synthetic intake API",
     "version": "1",
-    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input. Every successful request key, including no-ops, binds its normalized request fingerprint and original outcome/reference. First no-op key retention is metadata only; exact retries return the original status and cause no durable changes. Exports use intake-export.v2; the conformance reader also accepts strict historical v1 exports without no-op key history. Accepted D-035 adds versioned, Case-linked descriptive Discovery review with zero model calls. Confirmation grants no business authority, outcome acceptance or closure. Accepted D-036 adds one fixed preparation-only pack and separate synthetic publication profile. Candidate/selection/history/comparison/export GETs do not write. Publish and rollback require current basis; withdrawal checks the current reviewer and exact selected artifact/head even if its business basis or effectivity is stale. Publication never dispatches workers or grants business authority."
+    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input. Every successful request key, including no-ops, binds its normalized request fingerprint and original outcome/reference. First no-op key retention is metadata only; exact retries return the original status and cause no durable changes. Exports use intake-export.v2; the conformance reader also accepts strict historical v1 exports without no-op key history. Accepted D-035 adds versioned, Case-linked descriptive Discovery review with zero model calls. Confirmation grants no business authority, outcome acceptance or closure. Accepted D-036 adds one fixed preparation-only pack and separate synthetic publication profile. Candidate/selection/history/comparison/export GETs do not write. Publish and rollback require current basis; withdrawal checks the current reviewer and exact selected artifact/head even if its business basis or effectivity is stale. Publication never dispatches workers or grants business authority. Accepted D-037 adds explicitly worker-capable pack v2 and one deterministic synthetic preparation work journal. Fresh publication does not dispatch automatically. A start POST runs bounded preparation; exact retry returns its original start receipt without recomputation. Read current terminal history separately. Task review/correction/evaluation/proof notes grant no business authority or closure."
   },
   "servers": [
     {
@@ -402,10 +402,24 @@
                 "schema": {
                   "oneOf": [
                     {
-                      "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/read"
+                      "oneOf": [
+                        {
+                          "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/read"
+                        },
+                        {
+                          "$ref": "../schemas/preparation-pack.v2.schema.json#/$defs/read"
+                        }
+                      ]
                     },
                     {
-                      "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/export"
+                      "oneOf": [
+                        {
+                          "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/export"
+                        },
+                        {
+                          "$ref": "../schemas/preparation-pack.v2.schema.json#/$defs/export"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -443,7 +457,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/command"
+                "oneOf": [
+                  {
+                    "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/command"
+                  },
+                  {
+                    "$ref": "../schemas/preparation-pack.v2.schema.json#/$defs/command"
+                  }
+                ]
               }
             }
           }
@@ -454,7 +475,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/result"
+                  "oneOf": [
+                    {
+                      "$ref": "../schemas/preparation-pack.v1.schema.json#/$defs/result"
+                    },
+                    {
+                      "$ref": "../schemas/preparation-pack.v2.schema.json#/$defs/result"
+                    }
+                  ]
                 }
               }
             }
@@ -467,6 +495,102 @@
           },
           "500": {
             "description": "Integrity or persistence unavailable; preserve exact pending command"
+          }
+        }
+      }
+    },
+    "/v1/intake/preparation-work": {
+      "get": {
+        "description": "Consistent read-only snapshot; no writer lock, IDs, clock or durable changes. Historical result is separate from current permission.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "record_key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "representation",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["export"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated synthetic evidence only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/read"
+                    },
+                    {
+                      "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/export"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input or purpose rejected"
+          },
+          "409": {
+            "description": "Binding, work head, lifecycle, scope or clock conflict"
+          },
+          "500": {
+            "description": "Uncertain result or integrity failure; recover original command"
+          }
+        }
+      }
+    },
+    "/v1/intake/preparation-work/commands": {
+      "post": {
+        "description": "Explicit start, interruption, purpose-limited task review/correction, independent evaluation review or bounded synthetic proof note. Server-selected actors only. Original successful key and exact body return original receipt.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/command"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validated synthetic evidence only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/receipt"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Strict input or purpose rejected"
+          },
+          "409": {
+            "description": "Binding, work head, lifecycle, scope or clock conflict"
+          },
+          "500": {
+            "description": "Uncertain result or integrity failure; recover original command"
           }
         }
       }

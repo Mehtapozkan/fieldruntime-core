@@ -1,0 +1,54 @@
+{
+  "schema_version": "synthetic-preparation-worker.v1",
+  "tenant_id": "tenant_intake_demo",
+  "profile_id": "synthetic_preparation_worker.v1",
+  "implementation_id": "disposition-code.v1",
+  "identities": [
+    {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_disposition_worker_demo",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "service",
+      "status": "active"
+    },
+    {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_intake_operator",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "human",
+      "status": "active"
+    },
+    {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_pack_reviewer_demo",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "human",
+      "status": "active"
+    }
+  ],
+  "read_scope_ids": ["scope_entity_north", "scope_entity_south"],
+  "work_scope_ids": ["scope_entity_north"],
+  "grants": [
+    {
+      "identity_id": "identity_disposition_worker_demo",
+      "purpose": "prepare_disposition_packet",
+      "status": "active",
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_until": "2027-01-01T00:00:00.000Z"
+    },
+    {
+      "identity_id": "identity_intake_operator",
+      "purpose": "review_preparation_task",
+      "status": "active",
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_until": "2027-01-01T00:00:00.000Z"
+    },
+    {
+      "identity_id": "identity_pack_reviewer_demo",
+      "purpose": "review_synthetic_evaluation_candidate",
+      "status": "active",
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_until": "2027-01-01T00:00:00.000Z"
+    }
+  ]
+}

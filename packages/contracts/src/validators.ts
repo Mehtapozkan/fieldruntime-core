@@ -1,3 +1,5 @@
+import preparationWorkSchema from "../schemas/preparation-work.v1.schema.json" with { type: "json" };
+import preparationPackV2Schema from "../schemas/preparation-pack.v2.schema.json" with { type: "json" };
 import preparationPackSchema from "../schemas/preparation-pack.v1.schema.json" with { type: "json" };
 import discoverySchema from "../schemas/discovery.v1.schema.json" with { type: "json" };
 import intakeSchema from "../schemas/intake.v1.schema.json" with { type: "json" };
@@ -159,6 +161,57 @@ const packValidators = Object.fromEntries(
   "profile" | "artifact" | "command" | "journal" | "read" | "result" | "export",
   ValidateFunction
 >;
+ajv.addSchema(preparationWorkSchema);
+ajv.addSchema(preparationPackV2Schema);
+const packV2Validators = Object.fromEntries(
+  ["profile", "artifact", "command", "journal", "read", "result", "export"].map(
+    (kind) => [
+      kind,
+      ajv.compile({ $ref: `${preparationPackV2Schema.$id}#/$defs/${kind}` }),
+    ],
+  ),
+) as Record<keyof typeof packValidators, ValidateFunction>;
+const workValidators = Object.fromEntries(
+  [
+    "profile",
+    "note",
+    "binding",
+    "command",
+    "input",
+    "result",
+    "journal",
+    "receipt",
+    "read",
+    "export",
+  ].map((kind) => [
+    kind,
+    ajv.compile({ $ref: `${preparationWorkSchema.$id}#/$defs/${kind}` }),
+  ]),
+) as Record<
+  | "profile"
+  | "note"
+  | "binding"
+  | "command"
+  | "input"
+  | "result"
+  | "journal"
+  | "receipt"
+  | "read"
+  | "export",
+  ValidateFunction
+>;
+export function assertValidPreparationPackV2Contract(
+  kind: keyof typeof packV2Validators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(packV2Validators[kind], value, `preparation-pack.v2/${kind}`);
+}
+export function assertValidPreparationWorkContract(
+  kind: keyof typeof workValidators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(workValidators[kind], value, `preparation-work.v1/${kind}`);
+}
 export function assertValidPreparationPackContract(
   kind: keyof typeof packValidators,
   value: unknown,
