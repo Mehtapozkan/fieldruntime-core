@@ -321,11 +321,25 @@ The second DEL-4 packet cites the source report, keeps proof unverified and requ
 new task acceptance. DEL-5, historical packets/retries and old-version replay remain
 intact. Additive migration 0010 preserves 0001–0009. No D14 work.
 
-**Next:** review this slice and the proposed process experiment. The two-bundle limit
-is deliberate; a third source bundle or aggregate overflow requires visible manual
-follow-through, not truncation/history deletion. Broader continuation needs its own
-justified decision. Imported-dispute disposition, independent business observation,
-customer acceptance and closure contracts remain missing and separately gated.
+**Handoff completion:** retain the returned second-task acceptance receipt, a matching
+post-acceptance export and the separate byte-identical awaiting-review snapshot.
+Restart/exact retries prove one review for the new result without additional writes.
+This evidence correction changes no D-038 runtime semantics.
+
+**Next bounded design:** [Proposed D-039](docs/architecture/d13-imported-dispute-result.md)
+chooses one synthetic `uphold_invoice_no_adjustment` path for the same imported
+record. It specifies original POD/allocation/terms, a named business owner and D6
+approval, reported off-runtime disposition, independently checked source result,
+separate business recipient, commitments and reversal/reopen. BR1–BR8 and the worked
+example are design acceptance criteria, not implemented outcomes. After explicit
+approval, the smallest slice is one API-only result journal/profile/fixture-reader
+PR; no financial effect, connector or closure engine. D-038's two-bundle ceiling
+and all previous interpreters remain unchanged. Current status-only evidence cannot
+satisfy this new boundary. Keep the implementation PR open for review; no D14 work.
+
+The two-bundle limit is deliberate; a third source bundle or aggregate overflow
+requires visible manual follow-through, not truncation/history deletion. Customer
+comparison and the proposed process experiment still require their own evidence.
 
 **Improvement decision:** a process owner considers the cited proposal to combine
 proof/access/owner/terms questions and parallelize independent human clarification.

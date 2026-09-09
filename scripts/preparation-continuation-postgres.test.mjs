@@ -230,11 +230,43 @@ test("D13 F1/F2/F5 useful DEL-4 continuation preserves old approval, upgrades 00
   );
   assert.deepEqual(await currentReport(archive, manifest(archive)), report);
   const accept = review(await h.ok(path), "continue-review-after");
-  await h.ok(POST, accept);
-  assert.equal(
-    (await h.ok(path)).invocations.at(-1).review.command.idempotency_key,
-    "continue-review-after",
+  const acceptanceReceipt = await h.ok(POST, accept);
+  assertValidPreparationWorkV2Contract("receipt", acceptanceReceipt);
+  assert.deepEqual(acceptanceReceipt.entry.command, accept);
+  assert.equal(acceptanceReceipt.entry.event, "task_review");
+  assert.equal(acceptanceReceipt.entry.invocation_id, run.invocation_id);
+  assert.equal(acceptanceReceipt.entry.command.result_hash, run.result_hash);
+  assert.equal(acceptanceReceipt.entry.previous_entry_hash, fresh.work_head);
+  assert.equal(acceptanceReceipt.entry.sequence, fresh.work_revision + 1);
+  const acceptedPacket = await h.ok(path);
+  const acceptedArchive = await h.ok(path + "&representation=export");
+  const acceptedReplay = validateWorkExport(acceptedArchive);
+  assert.deepEqual(acceptedArchive.pack, archive.pack);
+  assert.deepEqual(acceptedArchive.entries.slice(0, -1), archive.entries);
+  assert.deepEqual(acceptedArchive.entries.at(-1), acceptanceReceipt.entry);
+  assert.deepEqual(
+    acceptedPacket.invocations.at(-1).review,
+    acceptanceReceipt.entry,
   );
+  assert.deepEqual(acceptedPacket.invocations[0], fresh.invocations[0]);
+  assert.equal(
+    acceptedReplay.entries.filter(
+      (e) => e.event === "task_review" && e.invocation_id === run.invocation_id,
+    ).length,
+    1,
+  );
+  const afterAcceptance = await h.snapshot();
+  assert.deepEqual(unchangedBusiness(afterAcceptance), unchangedBusiness(snap));
+  await h.restart();
+  const acceptanceRetry = await h.ok(POST, accept);
+  assert.deepEqual(acceptanceRetry, acceptanceReceipt);
+  assert.deepEqual(await h.ok(POST, accept), acceptanceReceipt);
+  assert.deepEqual(await h.ok(path), acceptedPacket);
+  assert.deepEqual(
+    await h.ok(path + "&representation=export"),
+    acceptedArchive,
+  );
+  assert.deepEqual(await h.snapshot(), afterAcceptance);
   t.diagnostic(
     JSON.stringify({
       before: { version: "v1", delivery: "not_supplied", accepted: 1 },
@@ -244,6 +276,12 @@ test("D13 F1/F2/F5 useful DEL-4 continuation preserves old approval, upgrades 00
         independently_verified: false,
         review_before_new_acceptance: run.review,
         attempts: report.summary.invocation_attempts,
+        acceptance_receipt_hash: acceptanceReceipt.entry.hash,
+        accepted_invocation: acceptanceReceipt.entry.invocation_id,
+        accepted_result_hash: acceptanceReceipt.entry.command.result_hash,
+        accepted_export_hash: acceptedArchive.hash,
+        new_invocation_review_count: 1,
+        restart_exact_retry_unchanged: true,
       },
       source: cited,
     }),
@@ -256,6 +294,10 @@ test("D13 F1/F2/F5 useful DEL-4 continuation preserves old approval, upgrades 00
       manifest: manifest(archive),
       report,
       before: x.archive,
+      "post-acceptance-archive": acceptedArchive,
+      "post-acceptance-packet": acceptedPacket,
+      "acceptance-receipt": acceptanceReceipt,
+      "acceptance-retry": acceptanceRetry,
       walkthrough: {
         original: x.command,
         original_receipt: x.receipt,
@@ -265,7 +307,11 @@ test("D13 F1/F2/F5 useful DEL-4 continuation preserves old approval, upgrades 00
         command,
         receipt,
         packet: fresh,
-        acceptance: accept,
+        acceptance_command: accept,
+        acceptance_receipt: acceptanceReceipt,
+        acceptance_retry: acceptanceRetry,
+        awaiting_review_export_hash: archive.hash,
+        post_acceptance_export_hash: acceptedArchive.hash,
       },
     }))
       await writeFile(`${dir}/${name}.json`, reportJson(value));

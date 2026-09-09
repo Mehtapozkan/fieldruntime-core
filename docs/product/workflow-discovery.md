@@ -441,3 +441,23 @@ preparation/review/correction/verification/support costs, including failed/open 
 Five proof measures remain separate and unknown without their own evidence. Customer
 comparisons and improvement proof remain unperformed; real data still requires named
 participants, approved arrangements and a pre-intervention baseline.
+
+### Next bounded D13 business-result design (Proposed)
+
+[D-039](../architecture/d13-imported-dispute-result.md) makes one imported-dispute
+no-adjustment path concrete without implementing it. Original delivery/allocation,
+applicable terms and complete grounds must be independently checked before a named
+owner authorizes the exact no-action consequence. A reported off-runtime disposition
+is separate from observed source state and separately eligible business acceptance.
+Missing proof, wrong-record evidence, stale authority, unavailable reads and later
+reversal cannot yield or preserve an apparently current success.
+
+The worked example links the actual second preparation acceptance and then labels
+all proposed POD/terms, grants and business events hypothetical. A fixed synthetic
+source-reader/profile boundary and one supporting journal require approval. Reuse
+Case, evidence, D6 authority and Outcome concepts; do not widen the preparation
+bundle limit, D7 credit enrollment or the closure boundary. Historical task approval
+never accepts a business result. Current cash/credit, newly attended and effort
+measures remain unknown; only a future evidenced accepted-disposition measure may
+count the exact synthetic record, with reopen/reversal and incomplete coverage shown.
+The 19 requirements, customer activation/baseline gates and existing roadmap remain.

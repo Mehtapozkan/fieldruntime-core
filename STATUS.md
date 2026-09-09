@@ -1,7 +1,7 @@
 # Status
 
 Current milestone: **D13 report/follow-through preserved; Accepted D-038 bounded
-preparation continuation implemented on this review branch.** Real-customer processing
+preparation continuation implemented on this review branch; its acceptance handoff is completed, and D-039 business-result design is Proposed.** Real-customer processing
 remains unapproved; customer comparison and improvement proof are still pending.
 
 PR #39 preserves the completed read-only [Challenge report](docs/guides/challenge-report.md)
@@ -39,6 +39,22 @@ never establishes cash collected, disputes resolved, credits issued, newly atten
 work or attention released; all five measures retain their units, unknown values,
 negative/reversal/reopen/overlap evidence and costs. Customer baseline/quality/effort,
 real outcomes and acceptance remain missing. No financial bridge or closure permission.
+
+The handoff correction retains the actual returned second-task approval receipt
+(`sha256:3be69b17…`) and a matching post-acceptance export (`sha256:2aafd11a…`).
+The original awaiting-review archive/report remains byte-identical and separate.
+The PostgreSQL/API test now restarts after acceptance and retries that exact command:
+one review binds the new invocation/result, U stays 6, the export/database stay
+unchanged, and the original approval remains historical. No runtime behavior changes.
+
+[D-039 — imported-dispute result](docs/architecture/d13-imported-dispute-result.md)
+is **Proposed**, with a worked no-adjustment path and BR1–BR8 future gates. It requires
+original delivery/allocation and applicable terms proof, a separately authorized
+business decision, independent synthetic source observation and separate eligible
+business acceptance. The present status note supplies none of those prerequisites.
+The new source/profile and one supporting result journal need human approval;
+no business result, original-delivery verification, customer acceptance or new
+persistence is implemented by the design. The two-bundle ceiling is unchanged.
 
 [Executable continuation, API steps and F1–F7](docs/guides/challenge-follow-through.md).
 Local and final-head CI evidence is recorded in the validation section below and PR.
@@ -82,8 +98,9 @@ Task acceptance and evaluation approval are separate, confer no business proof a
 never automatically promote worker code, policy or a pack. Full customer comparison,
 source/variant rules, active effort/cost baselines and customer acceptance remain gaps.
 
-**Next:** review the bounded continuation and choose whether to test the proposed
-proof/access/owner/terms improvement on a comparable synthetic batch. Do not start D14.
+**Next:** review the completed continuation evidence and Proposed D-039 before any
+imported-dispute business-result implementation. The proof/access/owner/terms experiment
+and comparable customer batch remain unrun. Do not start D14.
 Name the customer/cohort/custodian and approve the data arrangements plus baseline
 before any real comparison. Business outcomes, customer acceptance and complete costs
 remain missing. No release or deployment.
@@ -1622,3 +1639,30 @@ report correctly marked startability false but inherited the old interpreter's
 view reasons, explicitly requiring compatible v3 publication. The PostgreSQL/API
 regression retains the old report's original startability and verifies the corrected
 current guidance; no runtime permission or historical calculator changed.
+
+## D-038 acceptance-evidence completion and D-039 design
+
+Before this correction, the exported walkthrough's `acceptance` value was the submitted
+`preparation-task-review.v2` command, not the returned receipt; the restart check also
+preceded this new review. The updated test captures/validates `acceptance_receipt`,
+its command and exact-retry response, plus separate post-acceptance packet/export.
+It checks the new invocation/result/hash/sequence and one added task-review entry,
+preserved prior entries/supporting state and no further writes after restart/retries.
+Original awaiting-review files compare byte-for-byte. The focused real PostgreSQL
+18.4/API regression passes; final repository and retained CI evidence is recorded
+in PR #40. No new browser layout or visual check is claimed by this evidence correction.
+
+D-039 is a proposed design/example only. Business BR1–BR8 are not executed capability
+claims. The plan/specification and existing 19-entry matrix retain the distinction
+between task usefulness, authorized no-action, independent business-source checks,
+business acceptance and still-denied Case closure. Real-customer prerequisites,
+unknown proof/cost values and the original release boundary remain unchanged.
+
+Local evidence for this follow-up: `pnpm validate` passes 318 tests; the complete
+D-038 PostgreSQL/API/Chromium suite passes 23/23. ECC remains 620/620; its negative
+control exits 1 at 152/620 from intended assertions. The proposed example's hashes,
+references and existing policy/identity shapes pass document checks; 147 local
+Markdown targets resolve and all 19 matrix IDs are unchanged. `git diff --check`
+passes. Docker remains unavailable locally (Compose exit 127); required final-head
+CI supplies the retained PostgreSQL/API/Workbench/Compose/appliance evidence on PR #40.
+No business BR1–BR8 runtime acceptance or new visual inspection is claimed.

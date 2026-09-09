@@ -91,7 +91,7 @@ was retrieved, inspected or independently verified. No worker searches or sends.
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Evidence arrival and Case attachment         | `intake-prepare.v1`, review/selection preview, `intake-selection.v1`, immutable bundle/commit, Case `WorkEvent`; [intake API](../../packages/contracts/openapi/intake.v1.openapi.json) | Association and source reports, not authenticity, independent observation or disposition; never guess a Case from invoice labels                                                                               |
 | Descriptive answer/correction                | `discovery-review-command.v1` annotate/confirm, exact input/Case/D bindings and export                                                                                                 | Historical practice is not executable policy; genuinely new facts require new material/review                                                                                                                  |
-| Preparation permission                       | Strict pack v2 and selection publish/withdraw/rollback under D-036/D-037                                                                                                               | New permission cannot reuse stale description; current one-bundle resource limit blocks this fresh run                                                                                                         |
+| Preparation permission                       | Strict pack v3/worker v2 and selection publish/withdraw/rollback under Accepted D-036–D-038                                                                                            | New permission cannot reuse stale description; current preparation requires complete two-bundle resources/scope; historical one-bundle behavior remains unchanged                                              |
 | Packet usefulness / correction               | Preparation start/result, task review, correction/evaluation review and export in the existing U journal                                                                               | Task approval is not business/customer acceptance; evaluation review never promotes code or policy                                                                                                             |
 | Reported progress and proof readiness        | `preparation-proof-note.v1`, exact run/result, source, time, coverage, unknown/value and correction/reversal/overlap references                                                        | Synthetic attributed notes are not independent outcome proof or a verified source-read contract                                                                                                                |
 | Financial proposal/approval                  | D6 exact Authority Request/Decision contracts exist for their server-controlled synthetic workflow                                                                                     | Imported disputes have no reviewed disposition policy/profile/proposal path. Do **not** enroll or map this Case into D7's separate Orchid-credit demo by customer name                                         |
@@ -127,15 +127,15 @@ receiving a status-only answer can leave another round of human access/ownership
 clarification. The fixed template's inability to establish terms is also a product
 limit; it is not proof of a customer's process defect.
 
-| Decision factor        | Proposed assessment, not a measured result                                                                                                                                                     |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Affected cohort        | Subsequent comparable North invoice-dispute records lacking original delivery proof and/or an accountable evidence/terms owner; disclose exclusions and missing source inputs                  |
-| Expected benefit       | Fewer avoidable clarification rounds and a more decision-ready evidence set; magnitude and business impact unknown                                                                             |
-| Cost                   | Preflight preparation, recipient reading, review/correction, permission checks and founder/support/training effort; tool/infrastructure/setup costs separately recorded, all currently unknown |
-| Feasibility            | A person can use the existing draft and local supported intake today. No connector or automated send is needed. Worker re-preparation on two cited bundles requires Proposed D-038             |
-| Alternatives           | Keep sequential requests (less initial burden); request only original proof first; use the existing combined agenda with manual follow-through; defer if ownership/access is unavailable       |
-| Unresolved assumptions | Same owner can answer or route questions; combined agenda is not too burdensome; parallel requests are independent and permitted; useful quality survives; no extra sensitive data collected   |
-| Human choice           | Process owner may accept a bounded experiment, revise or reject it. No process change, individual pack or business authority is approved by this document                                      |
+| Decision factor        | Proposed assessment, not a measured result                                                                                                                                                                |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Affected cohort        | Subsequent comparable North invoice-dispute records lacking original delivery proof and/or an accountable evidence/terms owner; disclose exclusions and missing source inputs                             |
+| Expected benefit       | Fewer avoidable clarification rounds and a more decision-ready evidence set; magnitude and business impact unknown                                                                                        |
+| Cost                   | Preflight preparation, recipient reading, review/correction, permission checks and founder/support/training effort; tool/infrastructure/setup costs separately recorded, all currently unknown            |
+| Feasibility            | A person can use the existing draft and local supported intake today. No connector or automated send is needed. Worker re-preparation on two cited bundles is implemented for review under Accepted D-038 |
+| Alternatives           | Keep sequential requests (less initial burden); request only original proof first; use the existing combined agenda with manual follow-through; defer if ownership/access is unavailable                  |
+| Unresolved assumptions | Same owner can answer or route questions; combined agenda is not too burdensome; parallel requests are independent and permitted; useful quality survives; no extra sensitive data collected              |
+| Human choice           | Process owner may accept a bounded experiment, revise or reject it. No process change, individual pack or business authority is approved by this document                                                 |
 
 Pre-register the **next comparable batch** before results: same eligibility, input
 cut-off, evidence sufficiency strata, task quality and time/tool/cost budget. Compare
@@ -199,9 +199,22 @@ node scripts/challenge-report.mjs /tmp/fieldruntime-continuation/archive.json \
 ```
 
 Install Chromium with `pnpm exec playwright install chromium` before browser checks.
-Inspect `walkthrough.json`, `before.json`, `archive.json` and the v2 report HTML/JSON;
-they bind the exact input, original/new receipts and cited source locators. Output
-files are synthetic test evidence, not customer results. The report CLI creates a
+Inspect `walkthrough.json`, `before.json`, `archive.json` and the v2 report HTML/JSON.
+`archive.json` deliberately remains the **awaiting-review** snapshot at U5.
+`acceptance-receipt.json` is the actual returned `preparation-work-receipt.v2`, not
+the submitted command. `post-acceptance-archive.json` and `post-acceptance-packet.json`
+contain its matching U6 state; `acceptance-retry.json` is the actual identical receipt
+returned after restart. The walkthrough names `acceptance_command`,
+`acceptance_receipt`, `acceptance_retry` and both export hashes separately.
+The new invocation/result has exactly one task review; prior entries/supporting
+state remain unchanged. Repeated exact retry changes no durable state.
+
+The original handoff at `b67cfaf0` mistakenly labeled the submitted command
+`acceptance`; it omitted the actual receipt and post-acceptance export. This is an
+evidence-capture correction, not a repaired runtime acceptance claim. The original
+awaiting-review archive/report and old downloadable handoff remain preserved;
+the completed handoff identifies the missing evidence and supplies it separately.
+Output files are synthetic test evidence, not customer results. The report CLI creates a
 new directory and refuses to overwrite files. [Report version/reproduction rules](challenge-report.md).
 
 ### Acceptance and remaining gaps
@@ -211,7 +224,7 @@ new directory and refuses to overwrite files. [Report version/reproduction rules
 | F1 supplied evidence | Exact DEL-4/record association and new citation; DEL-5 does not inherit it; source report stays independently unverified                                                                                                       |
 | F2 stale consent     | Retention invalidates prior current use; attachment advances C; stale-bound command denied without writes; old packet/review unchanged                                                                                         |
 | F3 fresh review      | New descriptive confirmation and separate publication required; legacy v2 retains `WORK_INPUT_LIMIT`; new v3 prepares two bundles only with current permission                                                                 |
-| F4 history/retry     | Old export reproduces unchanged; original commands return original receipts after restart without another write/attempt; rejected fresh start fabricates no result                                                             |
+| F4 history/retry     | Old/awaiting exports reproduce unchanged; actual second acceptance receipt binds the new result and matches a separate post-acceptance export; restart/exact retry adds no review/write; denied start fabricates no result     |
 | F5 boundaries        | One Case remains detected; no outcome, action receipt or proposal; task usefulness never grants business authority/closure; original Challenge retains failed/open work and negative proof notes                               |
 | F6 explicit v3       | Two-bundle positive control; third bundle and aggregate overflow denied before start; v1/v2 remain unchanged; stale/conflicting sources retained; current U/C/D/P, identity, interruption, exact retry and replay gates remain |
 | F7 improvement proof | Human chooses experiment; comparable batch includes negative/open work and complete effort/cost/quality coverage. No automated promotion, savings or customer outcome inferred from rehearsal                                  |
@@ -220,3 +233,12 @@ Real-customer work still needs named participants, approved files/processing/cus
 access/retention/deletion and a baseline. Synthetic seat selection is not authentication.
 Apache-2.0, the historical prerelease and existing merge/release/deployment instructions
 are unchanged. The continuation implementation PR remains open for review; no release or deployment.
+
+### Proposed next business-result boundary
+
+[Proposed D-039](../architecture/d13-imported-dispute-result.md) and its
+[worked example](../examples/d13-dispute-result.proposed.json) follow the same imported
+record through a hypothetical no-adjustment decision, source check and separate
+business acceptance. They explicitly identify the original proof, terms, grants and
+source adapter missing today. This design does not implement a business result,
+expand the two-bundle worker, enroll the D7 credit path or permit Case closure.
