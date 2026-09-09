@@ -24,6 +24,12 @@ experiments are **not run**. No new runtime/API contract, migration, trust bound
 authority rule or Workbench behavior is introduced. D-034's customer-scoped custody,
 access and complete-dataset deletion approval is still required before real data.
 
+The first D13 hosted run passed the retained PostgreSQL/API suites and Challenge
+rehearsal, then reached the existing 45-minute job limit during the remaining
+appliance checks. CI now allows 60 minutes for the complete unchanged gate set plus
+the new rehearsal; no runtime budget or acceptance assertion was relaxed.
+Final-head results are recorded on the implementation PR.
+
 The following D12 implementation account describes merged behavior.
 
 PR #37 merged normally at `7b3b3e125591212a6392504298d9b467f1e2f464`, after the
