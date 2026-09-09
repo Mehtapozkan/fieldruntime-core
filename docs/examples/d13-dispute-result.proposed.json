@@ -1,0 +1,944 @@
+{
+  "example_version": "d039-dispute-result-design.v1",
+  "status": "Proposed",
+  "runtime_contract": false,
+  "business_scenarios_executed": false,
+  "actual_preparation_evidence": {
+    "implementation_commit": "b67cfaf0ee635da1d5ad5f6edc7981d110c5f084",
+    "subject": {
+      "tenant_id": "tenant_intake_demo",
+      "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+      "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+      "entity_id": "entity_north",
+      "customer_ref": "Orchid",
+      "source_record_id": "dispute-17",
+      "invoice_id": "INV-101",
+      "order_id": "PO-9",
+      "delivery_id": "DEL-4",
+      "disputed_amount_minor": 1500000,
+      "currency": "USD"
+    },
+    "C": 3,
+    "D": 2,
+    "P": 2,
+    "U": 6,
+    "invocation_id": "preparation_3b6c26854afa0c8d3d4abb1a29a90145453f00b518da5ec21ac9425efc9eb98a",
+    "result_hash": "sha256:9a8aafeb755ce745866c7df846ceac0a241155e260d52b211cc4dc273edf1eca",
+    "task_acceptance_receipt_hash": "sha256:3be69b177d5f57aa5c9fdfd848951f21f0c633467143915462194aa7e5c94df4",
+    "post_acceptance_export_hash": "sha256:2aafd11ade316c4318fb5e43aa3b688a8d9c61acdbf0c2f36b608984b0cd90b5",
+    "awaiting_review_export_hash": "sha256:06a1694e95b9dd25cebe0425c77313a0c5ea77a5dea7ec8770b3d6f18764102d",
+    "task_actor": {
+      "identity_id": "identity_intake_operator",
+      "identity_kind": "human",
+      "schema_version": "identity-reference.v0",
+      "status": "active",
+      "tenant_id": "tenant_intake_demo"
+    },
+    "case_journal_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+    "intake_manifest": {
+      "business_bundle_hashes": [
+        "sha256:82fb429cd5b530e375aa766d7e0f360d4f49a779c2d66722a597de1e948859f8",
+        "sha256:b1c61d552f52f5ef845fc8354cd0ca95bacd8cc693d3e293b77ef034efc90158"
+      ],
+      "business_commit_hashes": [
+        "sha256:6c6dd46c89f2b4e1a8a87cb02e9b73ad0f33ed8677cee99a369a8d634ba61c8f",
+        "sha256:b8b79902f9b250fb988d111511dc9b818fc2f1df9e3e28b68ff6c14e527ac6e2",
+        "sha256:ebab968dedd68cba19897936b72b6723b066b78d497a13f5a7ed18f924e13219"
+      ],
+      "intake_receipt_hash": "sha256:ebab968dedd68cba19897936b72b6723b066b78d497a13f5a7ed18f924e13219"
+    },
+    "retained_bundles": [
+      {
+        "bundle_hash": "sha256:82fb429cd5b530e375aa766d7e0f360d4f49a779c2d66722a597de1e948859f8",
+        "bundle_id": "intake_bundle_e3fe7e6faabde34bd9dfcd6539bcea7e2370d7ee5954cd767b97709c8aa131ae"
+      },
+      {
+        "bundle_hash": "sha256:b1c61d552f52f5ef845fc8354cd0ca95bacd8cc693d3e293b77ef034efc90158",
+        "bundle_id": "intake_bundle_5f9bcda69594ed07236439b60acc0a63d94bb25689a774c8f39a4a3955b4e636"
+      }
+    ],
+    "original_pod_verified": false,
+    "governing_terms_established": false,
+    "business_authorization": false,
+    "business_acceptance": false
+  },
+  "hypothetical_only": {
+    "identities": [
+      {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_dispute_owner",
+        "tenant_id": "tenant_intake_demo",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_dispute_verifier",
+        "tenant_id": "tenant_intake_demo",
+        "identity_kind": "service",
+        "status": "active"
+      },
+      {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_dispute_recipient",
+        "tenant_id": "tenant_intake_demo",
+        "identity_kind": "human",
+        "status": "active"
+      }
+    ],
+    "policy": {
+      "schema_version": "authority-policy.v0",
+      "policy_id": "policy_dispute_no_adjustment",
+      "policy_version": "1.0.0",
+      "tenant_id": "tenant_intake_demo",
+      "authority_class": "invoice_dispute_no_adjustment",
+      "action_class": "record_no_adjustment_disposition",
+      "consequence_class": "invoice_dispute_disposition",
+      "status": "approved",
+      "authority_rank": 1,
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_from_source_timezone": "UTC",
+      "effective_until": "2026-12-31T23:59:59.999Z",
+      "effective_until_source_timezone": "UTC",
+      "source_ref": "synthetic://proposed-d039/policy/no-adjustment/1",
+      "rules": [
+        {
+          "rule_id": "rule_dispute_named_owner",
+          "priority": 1,
+          "condition": {
+            "always": true
+          },
+          "requirements": [
+            {
+              "requirement_id": "requirement_dispute_owner",
+              "authority_class": "invoice_dispute_no_adjustment",
+              "required_approval_count": 1,
+              "named_approver_identity_ids": ["identity_dispute_owner"],
+              "allow_delegation": false,
+              "allow_preparer_approval": false
+            }
+          ]
+        }
+      ]
+    },
+    "policy_hash": "sha256:0ebef9585a18ac433e162b847d3137aa5f7a0c8f6c43aeae7f7af9fd17220520",
+    "original_pod": {
+      "source_id": "POD-4",
+      "source_version": 1,
+      "subject": {
+        "tenant_id": "tenant_intake_demo",
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "entity_id": "entity_north",
+        "customer_ref": "Orchid",
+        "source_record_id": "dispute-17",
+        "invoice_id": "INV-101",
+        "order_id": "PO-9",
+        "delivery_id": "DEL-4",
+        "disputed_amount_minor": 1500000,
+        "currency": "USD"
+      },
+      "issuer": "synthetic_delivery_custodian",
+      "recipient": "synthetic_Orchid_goods_receiver",
+      "source_occurred_at": "2026-09-07T15:30:00.000Z",
+      "source_timezone": "UTC",
+      "validity": "valid",
+      "receipt_status": "accepted_in_full",
+      "allocation": {
+        "source_record_id": "dispute-17",
+        "invoice_id": "INV-101",
+        "order_id": "PO-9",
+        "delivery_id": "DEL-4",
+        "line_id": "PO-9-L1",
+        "ordered_quantity": 10,
+        "received_quantity": 10,
+        "disputed_amount_minor": 1500000
+      },
+      "complete_for_requested_scope": true,
+      "original_text": "SYNTHETIC ORIGINAL POD ONLY: DEL-4 / PO-9-L1, 10 of 10 received by synthetic_Orchid_goods_receiver. Linked by the explicit allocation to North dispute-17. No independent real-world authenticity is asserted."
+    },
+    "original_pod_hash": "sha256:9d1c03bd267e60c07e1a5ee1394c115bdc57f633a8b29001ce7b484065f67f61",
+    "terms": {
+      "source_id": "TERMS-N1",
+      "source_version": 1,
+      "scope": {
+        "entity_id": "entity_north",
+        "customer_ref": "Orchid",
+        "order_id": "PO-9"
+      },
+      "clause_id": "N1-4",
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_until": "2026-12-31T23:59:59.999Z",
+      "original_text": "SYNTHETIC PROPOSED TEST TERMS ONLY. For an allocated delivery accepted in full, the named North AR owner may uphold the disputed portion without adjustment only when the complete record has no other active dispute ground. This is not payment evidence."
+    },
+    "terms_hash": "sha256:42f05d173c73018ceb946d826de5c47f216dfee2c74ff52628dc9d09c1064b7b",
+    "disposition_payload": {
+      "operation": "uphold_invoice_no_adjustment",
+      "subject": {
+        "tenant_id": "tenant_intake_demo",
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "entity_id": "entity_north",
+        "customer_ref": "Orchid",
+        "source_record_id": "dispute-17",
+        "invoice_id": "INV-101",
+        "order_id": "PO-9",
+        "delivery_id": "DEL-4",
+        "disputed_amount_minor": 1500000,
+        "currency": "USD"
+      },
+      "adjustment_minor": 0,
+      "financial_effect_requested": false,
+      "terms_hash": "sha256:42f05d173c73018ceb946d826de5c47f216dfee2c74ff52628dc9d09c1064b7b",
+      "clause_id": "N1-4",
+      "original_pod_hash": "sha256:9d1c03bd267e60c07e1a5ee1394c115bdc57f633a8b29001ce7b484065f67f61",
+      "grounds": ["non_delivery"],
+      "grounds_coverage": "complete_for_dispute_17",
+      "remaining_commitments": [
+        {
+          "id": "commitment_payment_followup",
+          "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "description": "Obtain separately evidenced payment status; no payment is currently asserted",
+          "owner_identity_id": "identity_dispute_owner",
+          "due_at": "2026-09-09T16:15:00.000Z",
+          "status": "active",
+          "evidence_ids": ["evidence_dispute_result_1"]
+        }
+      ]
+    },
+    "no_action_record": {
+      "example_only": true,
+      "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+      "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+      "sequence": 3,
+      "previous_entry_hash": "sha256:8d6c851bb138ef088351538f2d3626c411e5b15bab6be487f266eb378151d8ed",
+      "event": "no_action_recorded",
+      "recorded_at": "2026-09-07T16:12:00.000Z",
+      "data": {
+        "example_only": true,
+        "id": "disposition_example_01",
+        "payload_hash": "sha256:c976c713a1763f0510013b8d35dc7e9e00ff4e9d113d4fba7b756af4afaca309",
+        "authority_request_id": "request_dispute_example_01",
+        "expected_case_version": 3,
+        "expected_review_revision": 1,
+        "expected_catalog_revision": 1,
+        "status": "no_financial_action_recorded",
+        "basis_hash": "sha256:ea855e5e02c42c07f3d97eb21092cca9149616d31481755a663623bc85b3084a",
+        "basis_observation_hash": "sha256:8d6c851bb138ef088351538f2d3626c411e5b15bab6be487f266eb378151d8ed",
+        "authority_review_hash": "sha256:8f6ad055a95282fd3e8f9c8787b0a2418e15ea64ed4b7ae7f8f6c63139b633b2"
+      },
+      "hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2"
+    },
+    "ar_result_source": {
+      "source_id": "AR-dispute-17",
+      "source_version": 1,
+      "subject": {
+        "tenant_id": "tenant_intake_demo",
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "entity_id": "entity_north",
+        "customer_ref": "Orchid",
+        "source_record_id": "dispute-17",
+        "invoice_id": "INV-101",
+        "order_id": "PO-9",
+        "delivery_id": "DEL-4",
+        "disputed_amount_minor": 1500000,
+        "currency": "USD"
+      },
+      "disposition_code": "upheld_no_adjustment",
+      "adjustment_minor": 0,
+      "credit_ids": [],
+      "complete_for_requested_disposition": true,
+      "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+      "source_occurred_at": "2026-09-07T16:13:00.000Z",
+      "source_timezone": "UTC",
+      "prior_source_hash": "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63",
+      "prior_source_version": 0,
+      "disposed_grounds": ["non_delivery"],
+      "other_active_grounds": [],
+      "complete_grounds_for_record": true
+    },
+    "result_observation": {
+      "example_only": true,
+      "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+      "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+      "sequence": 5,
+      "previous_entry_hash": "sha256:567b453b2eb3f8deb31fd455ea5dda4ba31f7a7bb444c9313cfd094edef5a5d0",
+      "event": "result_observed",
+      "recorded_at": "2026-09-07T16:14:00.000Z",
+      "data": {
+        "id": "observation_result_example_01",
+        "subject": {
+          "tenant_id": "tenant_intake_demo",
+          "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+          "entity_id": "entity_north",
+          "customer_ref": "Orchid",
+          "source_record_id": "dispute-17",
+          "invoice_id": "INV-101",
+          "order_id": "PO-9",
+          "delivery_id": "DEL-4",
+          "disputed_amount_minor": 1500000,
+          "currency": "USD"
+        },
+        "no_action_entry_hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+        "report_entry_hash": "sha256:567b453b2eb3f8deb31fd455ea5dda4ba31f7a7bb444c9313cfd094edef5a5d0",
+        "observed_at": "2026-09-07T16:14:00.000Z",
+        "source_heads": {
+          "pod": "sha256:9d1c03bd267e60c07e1a5ee1394c115bdc57f633a8b29001ce7b484065f67f61",
+          "terms": "sha256:42f05d173c73018ceb946d826de5c47f216dfee2c74ff52628dc9d09c1064b7b",
+          "ar": "sha256:1faf1b2c7f53de65f808357586295098742c5319e0bbae05fa9e635086bb48b9"
+        },
+        "expected": {
+          "subject": {
+            "tenant_id": "tenant_intake_demo",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "entity_id": "entity_north",
+            "customer_ref": "Orchid",
+            "source_record_id": "dispute-17",
+            "invoice_id": "INV-101",
+            "order_id": "PO-9",
+            "delivery_id": "DEL-4",
+            "disputed_amount_minor": 1500000,
+            "currency": "USD"
+          },
+          "disposition_code": "upheld_no_adjustment",
+          "adjustment_minor": 0,
+          "credit_ids": [],
+          "complete_for_requested_disposition": true,
+          "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+          "prior_source_hash": "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63",
+          "prior_source_version": 0,
+          "disposed_grounds": ["non_delivery"],
+          "other_active_grounds": [],
+          "complete_grounds_for_record": true
+        },
+        "observed": {
+          "source_id": "AR-dispute-17",
+          "source_version": 1,
+          "subject": {
+            "tenant_id": "tenant_intake_demo",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "entity_id": "entity_north",
+            "customer_ref": "Orchid",
+            "source_record_id": "dispute-17",
+            "invoice_id": "INV-101",
+            "order_id": "PO-9",
+            "delivery_id": "DEL-4",
+            "disputed_amount_minor": 1500000,
+            "currency": "USD"
+          },
+          "disposition_code": "upheld_no_adjustment",
+          "adjustment_minor": 0,
+          "credit_ids": [],
+          "complete_for_requested_disposition": true,
+          "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+          "source_occurred_at": "2026-09-07T16:13:00.000Z",
+          "source_timezone": "UTC",
+          "prior_source_hash": "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63",
+          "prior_source_version": 0,
+          "disposed_grounds": ["non_delivery"],
+          "other_active_grounds": [],
+          "complete_grounds_for_record": true
+        },
+        "comparison": "match",
+        "verified_by_identity": {
+          "schema_version": "identity-reference.v0",
+          "identity_id": "identity_dispute_verifier",
+          "tenant_id": "tenant_intake_demo",
+          "identity_kind": "service",
+          "status": "active"
+        }
+      },
+      "hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5"
+    },
+    "outcome_projection_before_acceptance": {
+      "id": "outcome_dispute_example_01",
+      "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+      "type": "invoice_dispute_no_adjustment",
+      "status": "achieved",
+      "accepted": false,
+      "metrics": {
+        "synthetic": true,
+        "disputed_amount_minor": 1500000,
+        "cash_collected_minor": null,
+        "credits_issued_minor": null,
+        "newly_attended_records": null,
+        "human_attention_released_minutes": null
+      },
+      "evidence_ids": [
+        "evidence_pod_4",
+        "evidence_terms_n1",
+        "evidence_dispute_result_1"
+      ],
+      "verified_by_identity_id": "identity_dispute_verifier",
+      "verified_at": "2026-09-07T16:14:00.000Z"
+    },
+    "business_acceptance": {
+      "example_only": true,
+      "id": "acceptance_business_example_01",
+      "purpose": "business_dispute_disposition",
+      "actor": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_dispute_recipient",
+        "tenant_id": "tenant_intake_demo",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "subject": {
+        "tenant_id": "tenant_intake_demo",
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "entity_id": "entity_north",
+        "customer_ref": "Orchid",
+        "source_record_id": "dispute-17",
+        "invoice_id": "INV-101",
+        "order_id": "PO-9",
+        "delivery_id": "DEL-4",
+        "disputed_amount_minor": 1500000,
+        "currency": "USD"
+      },
+      "outcome_hash": "sha256:4127cd2fb5bbc865fbc154c2b9f3b4ecd516330360a3d76962f22e0fd1228d64",
+      "observation_hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
+      "disposition_hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+      "expected_result_revision": 5,
+      "expected_result_head": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
+      "decision": "accept",
+      "remaining_commitments": [
+        {
+          "id": "commitment_payment_followup",
+          "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+          "description": "Obtain separately evidenced payment status; no payment is currently asserted",
+          "owner_identity_id": "identity_dispute_owner",
+          "due_at": "2026-09-09T16:15:00.000Z",
+          "status": "active",
+          "evidence_ids": ["evidence_dispute_result_1"]
+        }
+      ],
+      "recorded_at": "2026-09-07T16:15:00.000Z"
+    },
+    "later_reversal": {
+      "source_id": "AR-dispute-17",
+      "source_version": 2,
+      "subject": {
+        "tenant_id": "tenant_intake_demo",
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "entity_id": "entity_north",
+        "customer_ref": "Orchid",
+        "source_record_id": "dispute-17",
+        "invoice_id": "INV-101",
+        "order_id": "PO-9",
+        "delivery_id": "DEL-4",
+        "disputed_amount_minor": 1500000,
+        "currency": "USD"
+      },
+      "disposition_code": "reopened",
+      "reason": "Original POD-4 was rescinded by the synthetic custodian",
+      "prior_decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+      "source_occurred_at": "2026-09-08T09:00:00.000Z",
+      "source_timezone": "UTC",
+      "pod_state": {
+        "source_id": "POD-4",
+        "source_version": 2,
+        "validity": "rescinded"
+      },
+      "expected_next_comparison": "mismatch",
+      "current_accepted_dispute_count": 0,
+      "historical_accepted_dispute_count": 1,
+      "reopened_record_count": 1
+    },
+    "ar_basis_source": {
+      "source_id": "AR-dispute-17",
+      "source_version": 0,
+      "subject": {
+        "tenant_id": "tenant_intake_demo",
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "entity_id": "entity_north",
+        "customer_ref": "Orchid",
+        "source_record_id": "dispute-17",
+        "invoice_id": "INV-101",
+        "order_id": "PO-9",
+        "delivery_id": "DEL-4",
+        "disputed_amount_minor": 1500000,
+        "currency": "USD"
+      },
+      "active_grounds": ["non_delivery"],
+      "complete_grounds_for_record": true,
+      "status": "open",
+      "source_occurred_at": "2026-09-07T16:09:00.000Z",
+      "source_timezone": "UTC"
+    },
+    "authority_review_example": {
+      "example_only": true,
+      "authority_request_id": "request_dispute_example_01",
+      "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+      "case_version": 3,
+      "authority_state_revision": 1,
+      "review_revision": 1,
+      "policy_hash": "sha256:0ebef9585a18ac433e162b847d3137aa5f7a0c8f6c43aeae7f7af9fd17220520",
+      "proposed_consequence_hash": "sha256:c976c713a1763f0510013b8d35dc7e9e00ff4e9d113d4fba7b756af4afaca309",
+      "basis_observation_hash": "sha256:8d6c851bb138ef088351538f2d3626c411e5b15bab6be487f266eb378151d8ed",
+      "decision": "approve",
+      "actor": {
+        "schema_version": "identity-reference.v0",
+        "identity_id": "identity_dispute_owner",
+        "tenant_id": "tenant_intake_demo",
+        "identity_kind": "human",
+        "status": "active"
+      },
+      "recorded_at": "2026-09-07T16:11:00.000Z",
+      "hash": "sha256:8f6ad055a95282fd3e8f9c8787b0a2418e15ea64ed4b7ae7f8f6c63139b633b2"
+    },
+    "proposed_journal": [
+      {
+        "example_only": true,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "sequence": 1,
+        "previous_entry_hash": null,
+        "event": "candidate_bound",
+        "recorded_at": "2026-09-07T16:10:00.000Z",
+        "data": {
+          "case_version": 3,
+          "case_journal_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+          "intake_manifest": {
+            "business_bundle_hashes": [
+              "sha256:82fb429cd5b530e375aa766d7e0f360d4f49a779c2d66722a597de1e948859f8",
+              "sha256:b1c61d552f52f5ef845fc8354cd0ca95bacd8cc693d3e293b77ef034efc90158"
+            ],
+            "business_commit_hashes": [
+              "sha256:6c6dd46c89f2b4e1a8a87cb02e9b73ad0f33ed8677cee99a369a8d634ba61c8f",
+              "sha256:b8b79902f9b250fb988d111511dc9b818fc2f1df9e3e28b68ff6c14e527ac6e2",
+              "sha256:ebab968dedd68cba19897936b72b6723b066b78d497a13f5a7ed18f924e13219"
+            ],
+            "intake_receipt_hash": "sha256:ebab968dedd68cba19897936b72b6723b066b78d497a13f5a7ed18f924e13219"
+          },
+          "retained_bundles": [
+            {
+              "bundle_hash": "sha256:82fb429cd5b530e375aa766d7e0f360d4f49a779c2d66722a597de1e948859f8",
+              "bundle_id": "intake_bundle_e3fe7e6faabde34bd9dfcd6539bcea7e2370d7ee5954cd767b97709c8aa131ae"
+            },
+            {
+              "bundle_hash": "sha256:b1c61d552f52f5ef845fc8354cd0ca95bacd8cc693d3e293b77ef034efc90158",
+              "bundle_id": "intake_bundle_5f9bcda69594ed07236439b60acc0a63d94bb25689a774c8f39a4a3955b4e636"
+            }
+          ],
+          "policy_hash": "sha256:0ebef9585a18ac433e162b847d3137aa5f7a0c8f6c43aeae7f7af9fd17220520",
+          "payload": {
+            "operation": "uphold_invoice_no_adjustment",
+            "subject": {
+              "tenant_id": "tenant_intake_demo",
+              "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+              "entity_id": "entity_north",
+              "customer_ref": "Orchid",
+              "source_record_id": "dispute-17",
+              "invoice_id": "INV-101",
+              "order_id": "PO-9",
+              "delivery_id": "DEL-4",
+              "disputed_amount_minor": 1500000,
+              "currency": "USD"
+            },
+            "adjustment_minor": 0,
+            "financial_effect_requested": false,
+            "terms_hash": "sha256:42f05d173c73018ceb946d826de5c47f216dfee2c74ff52628dc9d09c1064b7b",
+            "clause_id": "N1-4",
+            "original_pod_hash": "sha256:9d1c03bd267e60c07e1a5ee1394c115bdc57f633a8b29001ce7b484065f67f61",
+            "grounds": ["non_delivery"],
+            "grounds_coverage": "complete_for_dispute_17",
+            "remaining_commitments": [
+              {
+                "id": "commitment_payment_followup",
+                "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+                "description": "Obtain separately evidenced payment status; no payment is currently asserted",
+                "owner_identity_id": "identity_dispute_owner",
+                "due_at": "2026-09-09T16:15:00.000Z",
+                "status": "active",
+                "evidence_ids": ["evidence_dispute_result_1"]
+              }
+            ]
+          },
+          "source_hashes": [
+            "sha256:9d1c03bd267e60c07e1a5ee1394c115bdc57f633a8b29001ce7b484065f67f61",
+            "sha256:42f05d173c73018ceb946d826de5c47f216dfee2c74ff52628dc9d09c1064b7b",
+            "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63"
+          ]
+        },
+        "hash": "sha256:ea855e5e02c42c07f3d97eb21092cca9149616d31481755a663623bc85b3084a"
+      },
+      {
+        "example_only": true,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "sequence": 2,
+        "previous_entry_hash": "sha256:ea855e5e02c42c07f3d97eb21092cca9149616d31481755a663623bc85b3084a",
+        "event": "basis_observed",
+        "recorded_at": "2026-09-07T16:10:30.000Z",
+        "data": {
+          "candidate_hash": "sha256:ea855e5e02c42c07f3d97eb21092cca9149616d31481755a663623bc85b3084a",
+          "comparison": "match",
+          "source_hashes": [
+            "sha256:9d1c03bd267e60c07e1a5ee1394c115bdc57f633a8b29001ce7b484065f67f61",
+            "sha256:42f05d173c73018ceb946d826de5c47f216dfee2c74ff52628dc9d09c1064b7b",
+            "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63"
+          ],
+          "verifier": {
+            "schema_version": "identity-reference.v0",
+            "identity_id": "identity_dispute_verifier",
+            "tenant_id": "tenant_intake_demo",
+            "identity_kind": "service",
+            "status": "active"
+          },
+          "observed_at": "2026-09-07T16:10:30.000Z"
+        },
+        "hash": "sha256:8d6c851bb138ef088351538f2d3626c411e5b15bab6be487f266eb378151d8ed"
+      },
+      {
+        "example_only": true,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "sequence": 3,
+        "previous_entry_hash": "sha256:8d6c851bb138ef088351538f2d3626c411e5b15bab6be487f266eb378151d8ed",
+        "event": "no_action_recorded",
+        "recorded_at": "2026-09-07T16:12:00.000Z",
+        "data": {
+          "example_only": true,
+          "id": "disposition_example_01",
+          "payload_hash": "sha256:c976c713a1763f0510013b8d35dc7e9e00ff4e9d113d4fba7b756af4afaca309",
+          "authority_request_id": "request_dispute_example_01",
+          "expected_case_version": 3,
+          "expected_review_revision": 1,
+          "expected_catalog_revision": 1,
+          "status": "no_financial_action_recorded",
+          "basis_hash": "sha256:ea855e5e02c42c07f3d97eb21092cca9149616d31481755a663623bc85b3084a",
+          "basis_observation_hash": "sha256:8d6c851bb138ef088351538f2d3626c411e5b15bab6be487f266eb378151d8ed",
+          "authority_review_hash": "sha256:8f6ad055a95282fd3e8f9c8787b0a2418e15ea64ed4b7ae7f8f6c63139b633b2"
+        },
+        "hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2"
+      },
+      {
+        "example_only": true,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "sequence": 4,
+        "previous_entry_hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+        "event": "disposition_reported",
+        "recorded_at": "2026-09-07T16:13:10.000Z",
+        "data": {
+          "no_action_entry_hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+          "reporter": {
+            "identity_id": "identity_intake_operator",
+            "identity_kind": "human",
+            "schema_version": "identity-reference.v0",
+            "status": "active",
+            "tenant_id": "tenant_intake_demo"
+          },
+          "reported_source_id": "AR-dispute-17",
+          "reported_source_version": 1,
+          "reported_occurrence": "2026-09-07T16:13:00.000Z",
+          "source_timezone": "UTC",
+          "status": "reported_not_verified"
+        },
+        "hash": "sha256:567b453b2eb3f8deb31fd455ea5dda4ba31f7a7bb444c9313cfd094edef5a5d0"
+      },
+      {
+        "example_only": true,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "sequence": 5,
+        "previous_entry_hash": "sha256:567b453b2eb3f8deb31fd455ea5dda4ba31f7a7bb444c9313cfd094edef5a5d0",
+        "event": "result_observed",
+        "recorded_at": "2026-09-07T16:14:00.000Z",
+        "data": {
+          "id": "observation_result_example_01",
+          "subject": {
+            "tenant_id": "tenant_intake_demo",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "entity_id": "entity_north",
+            "customer_ref": "Orchid",
+            "source_record_id": "dispute-17",
+            "invoice_id": "INV-101",
+            "order_id": "PO-9",
+            "delivery_id": "DEL-4",
+            "disputed_amount_minor": 1500000,
+            "currency": "USD"
+          },
+          "no_action_entry_hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+          "report_entry_hash": "sha256:567b453b2eb3f8deb31fd455ea5dda4ba31f7a7bb444c9313cfd094edef5a5d0",
+          "observed_at": "2026-09-07T16:14:00.000Z",
+          "source_heads": {
+            "pod": "sha256:9d1c03bd267e60c07e1a5ee1394c115bdc57f633a8b29001ce7b484065f67f61",
+            "terms": "sha256:42f05d173c73018ceb946d826de5c47f216dfee2c74ff52628dc9d09c1064b7b",
+            "ar": "sha256:1faf1b2c7f53de65f808357586295098742c5319e0bbae05fa9e635086bb48b9"
+          },
+          "expected": {
+            "subject": {
+              "tenant_id": "tenant_intake_demo",
+              "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+              "entity_id": "entity_north",
+              "customer_ref": "Orchid",
+              "source_record_id": "dispute-17",
+              "invoice_id": "INV-101",
+              "order_id": "PO-9",
+              "delivery_id": "DEL-4",
+              "disputed_amount_minor": 1500000,
+              "currency": "USD"
+            },
+            "disposition_code": "upheld_no_adjustment",
+            "adjustment_minor": 0,
+            "credit_ids": [],
+            "complete_for_requested_disposition": true,
+            "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+            "prior_source_hash": "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63",
+            "prior_source_version": 0,
+            "disposed_grounds": ["non_delivery"],
+            "other_active_grounds": [],
+            "complete_grounds_for_record": true
+          },
+          "observed": {
+            "source_id": "AR-dispute-17",
+            "source_version": 1,
+            "subject": {
+              "tenant_id": "tenant_intake_demo",
+              "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+              "entity_id": "entity_north",
+              "customer_ref": "Orchid",
+              "source_record_id": "dispute-17",
+              "invoice_id": "INV-101",
+              "order_id": "PO-9",
+              "delivery_id": "DEL-4",
+              "disputed_amount_minor": 1500000,
+              "currency": "USD"
+            },
+            "disposition_code": "upheld_no_adjustment",
+            "adjustment_minor": 0,
+            "credit_ids": [],
+            "complete_for_requested_disposition": true,
+            "decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+            "source_occurred_at": "2026-09-07T16:13:00.000Z",
+            "source_timezone": "UTC",
+            "prior_source_hash": "sha256:3d5b4aa42b8c67fcce2b07e688732639e6f6e7124846f02b35d0185b8c447c63",
+            "prior_source_version": 0,
+            "disposed_grounds": ["non_delivery"],
+            "other_active_grounds": [],
+            "complete_grounds_for_record": true
+          },
+          "comparison": "match",
+          "verified_by_identity": {
+            "schema_version": "identity-reference.v0",
+            "identity_id": "identity_dispute_verifier",
+            "tenant_id": "tenant_intake_demo",
+            "identity_kind": "service",
+            "status": "active"
+          }
+        },
+        "hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5"
+      },
+      {
+        "example_only": true,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "sequence": 6,
+        "previous_entry_hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
+        "event": "business_accepted",
+        "recorded_at": "2026-09-07T16:15:00.000Z",
+        "data": {
+          "example_only": true,
+          "id": "acceptance_business_example_01",
+          "purpose": "business_dispute_disposition",
+          "actor": {
+            "schema_version": "identity-reference.v0",
+            "identity_id": "identity_dispute_recipient",
+            "tenant_id": "tenant_intake_demo",
+            "identity_kind": "human",
+            "status": "active"
+          },
+          "subject": {
+            "tenant_id": "tenant_intake_demo",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "entity_id": "entity_north",
+            "customer_ref": "Orchid",
+            "source_record_id": "dispute-17",
+            "invoice_id": "INV-101",
+            "order_id": "PO-9",
+            "delivery_id": "DEL-4",
+            "disputed_amount_minor": 1500000,
+            "currency": "USD"
+          },
+          "outcome_hash": "sha256:4127cd2fb5bbc865fbc154c2b9f3b4ecd516330360a3d76962f22e0fd1228d64",
+          "observation_hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
+          "disposition_hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+          "expected_result_revision": 5,
+          "expected_result_head": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
+          "decision": "accept",
+          "remaining_commitments": [
+            {
+              "id": "commitment_payment_followup",
+              "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "description": "Obtain separately evidenced payment status; no payment is currently asserted",
+              "owner_identity_id": "identity_dispute_owner",
+              "due_at": "2026-09-09T16:15:00.000Z",
+              "status": "active",
+              "evidence_ids": ["evidence_dispute_result_1"]
+            }
+          ],
+          "recorded_at": "2026-09-07T16:15:00.000Z"
+        },
+        "hash": "sha256:4da0dcb694af57e97c46e24701344090076031180433baf58896ce1bb7d333f8"
+      },
+      {
+        "example_only": true,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "sequence": 7,
+        "previous_entry_hash": "sha256:4da0dcb694af57e97c46e24701344090076031180433baf58896ce1bb7d333f8",
+        "event": "result_observed",
+        "recorded_at": "2026-09-08T09:01:00.000Z",
+        "data": {
+          "no_action_entry_hash": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+          "prior_observation_hash": "sha256:ddc7d5df22afec16c1a5c2bec4777384f9bca813ebf6f2c7af391241a01763a5",
+          "observed": {
+            "source_id": "AR-dispute-17",
+            "source_version": 2,
+            "subject": {
+              "tenant_id": "tenant_intake_demo",
+              "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+              "entity_id": "entity_north",
+              "customer_ref": "Orchid",
+              "source_record_id": "dispute-17",
+              "invoice_id": "INV-101",
+              "order_id": "PO-9",
+              "delivery_id": "DEL-4",
+              "disputed_amount_minor": 1500000,
+              "currency": "USD"
+            },
+            "disposition_code": "reopened",
+            "reason": "Original POD-4 was rescinded by the synthetic custodian",
+            "prior_decision_reference": "sha256:56d5fcc2a06c9e417da7cdb1ee50c2f70e8b638e92a6298c7f6bfd27e587bdf2",
+            "source_occurred_at": "2026-09-08T09:00:00.000Z",
+            "source_timezone": "UTC",
+            "pod_state": {
+              "source_id": "POD-4",
+              "source_version": 2,
+              "validity": "rescinded"
+            },
+            "expected_next_comparison": "mismatch",
+            "current_accepted_dispute_count": 0,
+            "historical_accepted_dispute_count": 1,
+            "reopened_record_count": 1
+          },
+          "comparison": "mismatch",
+          "observed_at": "2026-09-08T09:01:00.000Z",
+          "verified_by_identity": {
+            "schema_version": "identity-reference.v0",
+            "identity_id": "identity_dispute_verifier",
+            "tenant_id": "tenant_intake_demo",
+            "identity_kind": "service",
+            "status": "active"
+          }
+        },
+        "hash": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc"
+      },
+      {
+        "example_only": true,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "sequence": 8,
+        "previous_entry_hash": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc",
+        "event": "reopened",
+        "recorded_at": "2026-09-08T09:02:00.000Z",
+        "data": {
+          "prior_acceptance_entry_hash": "sha256:4da0dcb694af57e97c46e24701344090076031180433baf58896ce1bb7d333f8",
+          "observation_hash": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc",
+          "actor": {
+            "schema_version": "identity-reference.v0",
+            "identity_id": "identity_dispute_recipient",
+            "tenant_id": "tenant_intake_demo",
+            "identity_kind": "human",
+            "status": "active"
+          },
+          "expected_result_revision": 7,
+          "expected_result_head": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc",
+          "reason": "Authoritative synthetic source rescinded the delivery proof and reopened the same dispute"
+        },
+        "hash": "sha256:89b5af057907b178208a63f1ee8d7b38b7444a5b611a8e14550e801e1dbf7fcf"
+      }
+    ]
+  },
+  "preserved_limits": {
+    "preparation_retained_bundles": 2,
+    "worker_external_reads": 0,
+    "financial_actions": 0,
+    "case_closure_permission": false,
+    "real_customer_processing": false
+  },
+  "expected_operator_summary": "Synthetic dispute disposition accepted; payment and real-world delivery unverified; shared Case unresolved.",
+  "hypothetical_proof_measures": {
+    "cash_collected": null,
+    "disputes_resolved": {
+      "unit": "distinct synthetic dispute records",
+      "accepted_as_of_first_cutoff": 1,
+      "current_after_reversal": 0,
+      "reopened": 1,
+      "cohort_records": 2,
+      "other_record_still_open": 1
+    },
+    "credits_issued": null,
+    "work_newly_attended_to": null,
+    "human_attention_released": null
+  },
+  "provenance_note": "Only actual_preparation_evidence refers to executed D-038 evidence. All POD, terms, grants, source observations, disposition and business acceptance values are invented proposed test material, not current facts.",
+  "proposed_controls": [
+    {
+      "id": "wrong_record",
+      "change": {
+        "source_record_id": "dispute-18",
+        "delivery_id": "DEL-5",
+        "disputed_amount_minor": 250000
+      },
+      "expected": "Inapplicable evidence cannot bind the DEL-4 basis. A wrong-record reader response is inconclusive for dispute-17; no authorization, no-action or business acceptance."
+    },
+    {
+      "id": "stale_authorization",
+      "reviewed": {
+        "C": 3,
+        "R": 1,
+        "S": 1
+      },
+      "current": {
+        "C": 4,
+        "R": 1,
+        "S": 1
+      },
+      "trigger": "A legitimate Case event, including D-014, after approval and before recording no-action",
+      "expected": "Reject the stale submission; no O3 entry or external effect. Fresh basis and explicit new approval are required."
+    },
+    {
+      "id": "missing_original_proof",
+      "available": "Delivery confirmation for DEL-4 is supplied.",
+      "original_pod": null,
+      "terms": null,
+      "expected": "The present D-038 status report cannot satisfy basis prerequisites. Do not infer physical non-delivery, absence or a business result; request proof/access/terms."
+    },
+    {
+      "id": "later_reversal",
+      "source": "hypothetical_only.later_reversal",
+      "expected": "Retain O5/O6 as historical. O7 mismatch removes current verified status; O8 links the reopening. One prior accepted record, zero currently accepted, one reopened; DEL-5 remains open."
+    },
+    {
+      "id": "unavailable_read",
+      "reader_result": "error",
+      "expected": "Inconclusive, not absence, no current verified label and no new business acceptance. Current coverage unknown; original match/acceptance remain historical."
+    }
+  ],
+  "example_hash": "sha256:f9dcba901735b583ddc17f17b2e681fc50ad4cc83571bc4d55a82138295dfa78"
+}

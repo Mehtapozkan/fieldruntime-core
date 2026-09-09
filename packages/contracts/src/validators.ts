@@ -1,3 +1,5 @@
+import preparationWorkV2Schema from "../schemas/preparation-work.v2.schema.json" with { type: "json" };
+import preparationPackV3Schema from "../schemas/preparation-pack.v3.schema.json" with { type: "json" };
 import preparationWorkSchema from "../schemas/preparation-work.v1.schema.json" with { type: "json" };
 import preparationPackV2Schema from "../schemas/preparation-pack.v2.schema.json" with { type: "json" };
 import preparationPackSchema from "../schemas/preparation-pack.v1.schema.json" with { type: "json" };
@@ -163,6 +165,8 @@ const packValidators = Object.fromEntries(
 >;
 ajv.addSchema(preparationWorkSchema);
 ajv.addSchema(preparationPackV2Schema);
+ajv.addSchema(preparationWorkV2Schema);
+ajv.addSchema(preparationPackV3Schema);
 const packV2Validators = Object.fromEntries(
   ["profile", "artifact", "command", "journal", "read", "result", "export"].map(
     (kind) => [
@@ -200,6 +204,30 @@ const workValidators = Object.fromEntries(
   | "export",
   ValidateFunction
 >;
+const packV3Validators = Object.fromEntries(
+  Object.keys(packValidators).map((kind) => [
+    kind,
+    ajv.compile({ $ref: `${preparationPackV3Schema.$id}#/$defs/${kind}` }),
+  ]),
+) as Record<keyof typeof packValidators, ValidateFunction>;
+const workV2Validators = Object.fromEntries(
+  [...Object.keys(workValidators), "preflight"].map((kind) => [
+    kind,
+    ajv.compile({ $ref: `${preparationWorkV2Schema.$id}#/$defs/${kind}` }),
+  ]),
+) as Record<keyof typeof workValidators | "preflight", ValidateFunction>;
+export function assertValidPreparationPackV3Contract(
+  kind: keyof typeof packValidators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(packV3Validators[kind], value, `preparation-pack.v3/${kind}`);
+}
+export function assertValidPreparationWorkV2Contract(
+  kind: keyof typeof workV2Validators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(workV2Validators[kind], value, `preparation-work.v2/${kind}`);
+}
 export function assertValidPreparationPackV2Contract(
   kind: keyof typeof packV2Validators,
   value: unknown,

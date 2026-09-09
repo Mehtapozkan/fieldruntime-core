@@ -30,6 +30,7 @@ export const migrationNames = [
   "0007_discovery_review",
   "0008_preparation_pack_selection",
   "0009_preparation_work",
+  "0010_preparation_continuation",
 ];
 export const migrations = await Promise.all(
   migrationNames.map(async (name) =>
@@ -51,6 +52,7 @@ export async function intakeHost(
     upgrade = false,
     beforePack = false,
     beforeWork = false,
+    beforeContinuation = false,
     work = false,
   } = {},
 ) {
@@ -206,7 +208,9 @@ export async function intakeHost(
         ? migrations.slice(0, 7)
         : beforeWork
           ? migrations.slice(0, 8)
-          : migrations,
+          : beforeContinuation
+            ? migrations.slice(0, 9)
+            : migrations,
   );
   if (!upgrade) await start();
 

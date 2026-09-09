@@ -20,9 +20,12 @@ Real customer activation remains unapproved.
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external writes.
 > Not production software. Selecting a synthetic reviewer seat is not authentication.
 
-The D13 review branch adds a reproducible offline [synthetic Challenge report](docs/guides/challenge-report.md)
+PR #39 delivers a reproducible offline [synthetic Challenge report](docs/guides/challenge-report.md)
 and a [proposed customer comparison protocol](docs/guides/challenge-customer-protocol.md).
-It does not change the historical prerelease or establish customer outcomes.
+This continuation review branch implements [bounded supplied-evidence preparation](docs/guides/challenge-follow-through.md):
+new DEL-4 material, fresh descriptive review/publication and a separately reviewed
+second packet, with visible resource limits. It does not change the historical
+prerelease or establish customer outcomes.
 
 ## What works today
 
@@ -50,6 +53,7 @@ The historical prerelease has the smaller boundary described under [Distribution
 | Cited workflow preparation and descriptive review | Open retained intake, inspect seven records/six outputs, answer/correct/confirm and reopen history              | Deterministic brief, exact Case/material/review bindings, one immutable journal and portable provenance                 | Main (D10-B); not in historical prerelease; complete Discovery remains pending        |
 | Reviewed preparation pack                         | Compact intake panel: inspect, publish, compare, withdraw, roll back and export                                 | Strict fixed template, scoped publication profile, exact current basis and immutable selection replay                   | Main (D11-B); not in historical prerelease; no worker execution                       |
 | Bounded evidence-request preparation              | Explicit publish v2 → prepare → inspect cited packet → human task review; correction/recovery remain accessible | Fixed zero-model worker, one supporting journal, interruption, independent evaluation and bounded synthetic proof notes | Merged; not historical prerelease                                                     |
+| Supplied-evidence continuation                    | Explicit fresh v3 publication → second packet → separate task review; visible input limits                      | Two exact bundles, full occurrence/scope preflight and immutable versioned replay                                       | D-038 continuation review branch; not historical prerelease                           |
 | Accepted outcome, economics and complete closure  | Unavailable                                                                                                     | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof                                          | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the

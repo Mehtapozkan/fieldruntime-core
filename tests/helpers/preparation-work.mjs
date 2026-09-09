@@ -23,7 +23,7 @@ export async function preparedWork(t, input) {
   return { h, d, b, path, packPath };
 }
 export const publication = (v, key = "publish-worker") => ({
-  schema_version: "pack-selection-command.v2",
+  schema_version: `pack-selection-command.${v.candidate.schema_version.split(".").at(-1)}`,
   operation: "publish",
   pack_id: v.pack_id,
   expected_selection_revision: v.selection_revision,
@@ -37,7 +37,10 @@ export const publication = (v, key = "publish-worker") => ({
   idempotency_key: key,
 });
 export const start = (v, key = "start-worker") => ({
-  schema_version: "preparation-work-command.v1",
+  schema_version:
+    v.candidate_binding?.worker_implementation_id === "disposition-code.v3"
+      ? "preparation-work-command.v2"
+      : "preparation-work-command.v1",
   operation: "start",
   binding: v.candidate_binding,
   expected_work_revision: v.work_revision,

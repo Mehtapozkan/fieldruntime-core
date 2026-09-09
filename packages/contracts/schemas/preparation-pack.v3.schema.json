@@ -1,0 +1,800 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.dev/schemas/preparation-pack.v3.schema.json",
+  "title": "Accepted D-038: bounded two-bundle preparation pack; prior contracts remain strict",
+  "$defs": {
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "simplification_before_allocation": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/template/properties/simplification_before_allocation"
+        },
+        "steps": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/template/properties/steps"
+        },
+        "rules": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/template/properties/rules"
+        },
+        "outcome_requirements": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/template/properties/outcome_requirements"
+        },
+        "intervention_requirements": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/template/properties/intervention_requirements"
+        },
+        "correction_requirements": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/template/properties/correction_requirements"
+        },
+        "resource_limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "model_calls": {
+              "const": 0
+            },
+            "adaptive_agent_loops": {
+              "const": 0
+            },
+            "worker_dispatch": {
+              "const": true
+            },
+            "external_tools": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "maximum_input": {
+              "const": "Existing intake profile limits; no pack override"
+            },
+            "automatic_messages": {
+              "const": false
+            },
+            "deadline": {
+              "const": "Business due time unknown; no synthetic SLA. Existing HTTP timeout/recovery applies."
+            },
+            "worker_execution": {
+              "const": "fixed_in_process_preparation_only"
+            },
+            "worker_limits": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "selected_records": {
+                  "const": 1
+                },
+                "retained_bundles": {
+                  "const": 2
+                },
+                "coverage_rows": {
+                  "const": 200
+                },
+                "associated_support_artifacts": {
+                  "const": 20
+                },
+                "parsed_utf8_bytes": {
+                  "const": 2097152
+                },
+                "questions": {
+                  "const": 64
+                },
+                "result_bytes": {
+                  "const": 262144
+                },
+                "steps": {
+                  "const": 4
+                },
+                "computation_ms": {
+                  "const": 5000
+                }
+              },
+              "required": [
+                "selected_records",
+                "retained_bundles",
+                "coverage_rows",
+                "associated_support_artifacts",
+                "parsed_utf8_bytes",
+                "questions",
+                "result_bytes",
+                "steps",
+                "computation_ms"
+              ]
+            }
+          },
+          "required": [
+            "model_calls",
+            "adaptive_agent_loops",
+            "worker_dispatch",
+            "external_tools",
+            "maximum_input",
+            "automatic_messages",
+            "deadline",
+            "worker_execution",
+            "worker_limits"
+          ]
+        },
+        "measurement": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/template/properties/measurement"
+        },
+        "template_id": {
+          "const": "invoice-dispute-preparation.v3"
+        },
+        "objective": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/template/properties/objective"
+        },
+        "ecc_reference": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/template/properties/ecc_reference"
+        }
+      },
+      "required": [
+        "simplification_before_allocation",
+        "steps",
+        "rules",
+        "outcome_requirements",
+        "intervention_requirements",
+        "correction_requirements",
+        "resource_limits",
+        "measurement",
+        "template_id",
+        "objective",
+        "ecc_reference"
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "projection": {
+          "const": "preparation-pack.v3"
+        },
+        "selection": {
+          "const": "pack-selection.v3"
+        }
+      },
+      "required": [
+        "projection",
+        "selection"
+      ]
+    },
+    "profile": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/profile"
+    },
+    "binding": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/binding"
+    },
+    "coverage": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/coverage"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-pack.v3"
+        },
+        "pack_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/artifact/properties/pack_id"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^pack-v3-[a-f0-9]{64}$"
+        },
+        "template": {
+          "$ref": "#/$defs/template"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "material": {
+          "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/material"
+        },
+        "coverage": {
+          "$ref": "#/$defs/coverage"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/source"
+          }
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/finding"
+          },
+          "minItems": 7,
+          "maxItems": 7
+        },
+        "loop_outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/loop_output"
+          },
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "authority_granted": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/artifact/properties/authority_granted"
+        },
+        "closure_permission": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/artifact/properties/closure_permission"
+        }
+      },
+      "required": [
+        "schema_version",
+        "pack_id",
+        "version",
+        "template",
+        "binding",
+        "material",
+        "coverage",
+        "sources",
+        "findings",
+        "loop_outputs",
+        "authority_granted",
+        "closure_permission"
+      ]
+    },
+    "command": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schema_version": {
+              "const": "pack-selection-command.v3"
+            },
+            "operation": {
+              "const": "publish"
+            },
+            "pack_id": {
+              "const": "pack_synthetic_invoice_dispute_north"
+            },
+            "expected_selection_revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "expected_selection_head": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "expected_publication_profile_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "artifact_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "expected_basis": {
+              "$ref": "#/$defs/binding"
+            },
+            "effective_until": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "effective_until_source_timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "schema_version",
+            "operation",
+            "pack_id",
+            "expected_selection_revision",
+            "expected_selection_head",
+            "expected_publication_profile_hash",
+            "reason",
+            "idempotency_key",
+            "artifact_hash",
+            "expected_basis",
+            "effective_until",
+            "effective_until_source_timezone"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schema_version": {
+              "const": "pack-selection-command.v3"
+            },
+            "operation": {
+              "const": "rollback"
+            },
+            "pack_id": {
+              "const": "pack_synthetic_invoice_dispute_north"
+            },
+            "expected_selection_revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "expected_selection_head": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "expected_publication_profile_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "artifact_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "expected_basis": {
+              "$ref": "#/$defs/binding"
+            },
+            "effective_until": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "effective_until_source_timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "schema_version",
+            "operation",
+            "pack_id",
+            "expected_selection_revision",
+            "expected_selection_head",
+            "expected_publication_profile_hash",
+            "reason",
+            "idempotency_key",
+            "artifact_hash",
+            "expected_basis",
+            "effective_until",
+            "effective_until_source_timezone"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schema_version": {
+              "const": "pack-selection-command.v3"
+            },
+            "operation": {
+              "const": "withdraw"
+            },
+            "pack_id": {
+              "const": "pack_synthetic_invoice_dispute_north"
+            },
+            "expected_selection_revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "expected_selection_head": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "expected_publication_profile_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "artifact_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "schema_version",
+            "operation",
+            "pack_id",
+            "expected_selection_revision",
+            "expected_selection_head",
+            "expected_publication_profile_hash",
+            "reason",
+            "idempotency_key",
+            "artifact_hash"
+          ]
+        }
+      ]
+    },
+    "input_manifest": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/input_manifest"
+    },
+    "outcome": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/outcome"
+    },
+    "journal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "pack-selection-entry.v3"
+        },
+        "tenant_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/tenant_id"
+        },
+        "pack_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/pack_id"
+        },
+        "case_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/case_id"
+        },
+        "id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/id"
+        },
+        "sequence": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/sequence"
+        },
+        "previous_entry_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/previous_entry_hash"
+        },
+        "operation": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/operation"
+        },
+        "idempotency_key": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/idempotency_key"
+        },
+        "command_fingerprint": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/command_fingerprint"
+        },
+        "recorded_at": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/recorded_at"
+        },
+        "command": {
+          "$ref": "#/$defs/command"
+        },
+        "artifact_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/artifact_hash"
+        },
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/artifact"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_manifest": {
+          "$ref": "#/$defs/input_manifest"
+        },
+        "profile": {
+          "$ref": "#/$defs/profile"
+        },
+        "actor": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "result": {
+          "$ref": "#/$defs/outcome"
+        },
+        "versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal/properties/hash"
+        },
+        "worker_profile": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v2.schema.json#/$defs/profile"
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "pack_id",
+        "case_id",
+        "id",
+        "sequence",
+        "previous_entry_hash",
+        "operation",
+        "idempotency_key",
+        "command_fingerprint",
+        "recorded_at",
+        "command",
+        "artifact_hash",
+        "artifact",
+        "input_manifest",
+        "profile",
+        "actor",
+        "result",
+        "versions",
+        "hash",
+        "worker_profile"
+      ]
+    },
+    "current": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/current"
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "pattern": "^pack-v[123]-[0-9a-f]{64}$"
+        },
+        "eligible": {
+          "type": "boolean"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      },
+      "required": [
+        "artifact_hash",
+        "version",
+        "eligible",
+        "reasons"
+      ]
+    },
+    "read": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "pack-selection-read.v3"
+        },
+        "pack_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/pack_id"
+        },
+        "evaluated_at": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/evaluated_at"
+        },
+        "target": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/target"
+        },
+        "candidate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/artifact_any"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidate_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/candidate_hash"
+        },
+        "selection_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/selection_revision"
+        },
+        "selection_head": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/selection_head"
+        },
+        "selected_artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/artifact_any"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selected_artifact_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/selected_artifact_hash"
+        },
+        "current": {
+          "$ref": "#/$defs/current"
+        },
+        "publication_profile_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/publication_profile_hash"
+        },
+        "publication_reviewer": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comparison": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/comparison"
+        },
+        "rollback_candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rollback"
+          }
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/journal_any"
+          }
+        },
+        "authority_granted": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/authority_granted"
+        },
+        "closure_permission": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/closure_permission"
+        },
+        "hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/read/properties/hash"
+        }
+      },
+      "required": [
+        "schema_version",
+        "pack_id",
+        "evaluated_at",
+        "target",
+        "candidate",
+        "candidate_hash",
+        "selection_revision",
+        "selection_head",
+        "selected_artifact",
+        "selected_artifact_hash",
+        "current",
+        "publication_profile_hash",
+        "publication_reviewer",
+        "comparison",
+        "rollback_candidates",
+        "history",
+        "authority_granted",
+        "closure_permission",
+        "hash"
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "pack-selection-result.v3"
+        },
+        "status": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/result/properties/status"
+        },
+        "entry": {
+          "$ref": "#/$defs/journal"
+        },
+        "historical_receipt": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/result/properties/historical_receipt"
+        },
+        "authority_granted": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/result/properties/authority_granted"
+        },
+        "closure_permission": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/result/properties/closure_permission"
+        }
+      },
+      "required": [
+        "schema_version",
+        "status",
+        "entry",
+        "historical_receipt",
+        "authority_granted",
+        "closure_permission"
+      ]
+    },
+    "export": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "pack-selection-export.v3"
+        },
+        "discovery": {
+          "$ref": "https://fieldruntime.dev/schemas/discovery.v1.schema.json#/$defs/export"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/journal_any"
+          }
+        },
+        "versions": {
+          "$ref": "#/$defs/versions"
+        },
+        "authority_granted": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/export/properties/authority_granted"
+        },
+        "closure_permission": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/export/properties/closure_permission"
+        },
+        "hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/export/properties/hash"
+        }
+      },
+      "required": [
+        "schema_version",
+        "discovery",
+        "entries",
+        "versions",
+        "authority_granted",
+        "closure_permission",
+        "hash"
+      ]
+    },
+    "artifact_any": {
+      "oneOf": [
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/artifact"
+        },
+        {
+          "$ref": "#/$defs/artifact"
+        },
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/artifact"
+        }
+      ]
+    },
+    "journal_any": {
+      "oneOf": [
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/journal"
+        },
+        {
+          "$ref": "#/$defs/journal"
+        },
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/journal"
+        }
+      ]
+    }
+  }
+}

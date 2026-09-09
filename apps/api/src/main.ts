@@ -1,5 +1,6 @@
+import { syntheticContinuationContext } from "../../../packages/runtime/src/preparation-work.js";
 import { PostgresPreparationWorkStore } from "../../../packages/runtime/src/postgres-preparation-work-store.js";
-import { syntheticWorkerPackContext } from "../../../packages/runtime/src/preparation-pack.js";
+import { syntheticContinuationPackContext } from "../../../packages/runtime/src/preparation-pack.js";
 import { PostgresPreparationPackStore } from "../../../packages/runtime/src/postgres-preparation-pack-store.js";
 import { PostgresDiscoveryStore } from "../../../packages/runtime/src/postgres-discovery-store.js";
 import { PostgresIntakeStore } from "../../../packages/runtime/src/postgres-intake-store.js";
@@ -156,6 +157,7 @@ async function start(): Promise<void> {
     discoveryMigrationSql,
     packMigrationSql,
     workMigrationSql,
+    continuationMigrationSql,
     fixtureDocument,
     walkthroughDocument,
   ] = await Promise.all([
@@ -224,6 +226,13 @@ async function start(): Promise<void> {
     ),
     readFile(
       new URL(
+        "../../../packages/runtime/migrations/0010_preparation_continuation.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
         "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
         import.meta.url,
       ),
@@ -255,6 +264,10 @@ async function start(): Promise<void> {
     createMigrationSource("0007_discovery_review", discoveryMigrationSql),
     createMigrationSource("0008_preparation_pack_selection", packMigrationSql),
     createMigrationSource("0009_preparation_work", workMigrationSql),
+    createMigrationSource(
+      "0010_preparation_continuation",
+      continuationMigrationSql,
+    ),
   );
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
   const walkthrough = createGuidedWalkthroughRecord(
@@ -287,9 +300,12 @@ async function start(): Promise<void> {
   const discoveryStore = new PostgresDiscoveryStore(pool);
   const packStore = new PostgresPreparationPackStore(
     pool,
-    syntheticWorkerPackContext,
+    syntheticContinuationPackContext,
   );
-  const workStore = new PostgresPreparationWorkStore(pool);
+  const workStore = new PostgresPreparationWorkStore(
+    pool,
+    syntheticContinuationContext,
+  );
   const intakeWorker = new TransactionalIntakeWorker(
     intakeStore,
     undefined,

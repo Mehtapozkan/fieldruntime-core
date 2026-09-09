@@ -1,7 +1,10 @@
 // Explicitly consumes the synthetic D11 smoke fixture; no automatic initialization or faults.
 import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
-import { assertValidPreparationWorkContract } from "../dist/packages/contracts/src/index.js";
+import {
+  assertValidPreparationWorkContract,
+  assertValidPreparationWorkV2Contract,
+} from "../dist/packages/contracts/src/index.js";
 import { validateWorkExport } from "../dist/packages/runtime/src/preparation-work.js";
 const [mode, packFile, evidenceFile] = process.argv.slice(2),
   base = process.env.FIELD_RUNTIME_URL ?? "http://127.0.0.1:3210",
@@ -40,10 +43,14 @@ if (mode === "applied") {
     b = pack.receipt.entry.artifact.binding.discovery,
     path = `/v1/intake/preparation-work?case_id=${b.case_id}&record_key=${b.record_key}`,
     v = await call(path);
-  assertValidPreparationWorkContract("read", v);
+  (v.schema_version.endsWith(".v2")
+    ? assertValidPreparationWorkV2Contract
+    : assertValidPreparationWorkContract)("read", v);
   assert.equal(v.current.can_start, true);
   const start = {
-      schema_version: "preparation-work-command.v1",
+      schema_version: v.schema_version.endsWith(".v2")
+        ? "preparation-work-command.v2"
+        : "preparation-work-command.v1",
       operation: "start",
       binding: v.candidate_binding,
       expected_work_revision: v.work_revision,
@@ -57,7 +64,9 @@ if (mode === "applied") {
   assert.equal(run.outcome, "prepared_gap_packet");
   assert.equal(run.result.disposition.recommended_credit_minor, null);
   const review = {
-      schema_version: "preparation-task-review.v1",
+      schema_version: done.schema_version.endsWith(".v2")
+        ? "preparation-task-review.v2"
+        : "preparation-task-review.v1",
       operation: "task_review",
       purpose: "preparation_usefulness",
       invocation_id: run.invocation_id,
@@ -77,7 +86,7 @@ if (mode === "applied") {
     { flag: "wx" },
   );
   console.log(
-    "PASS: explicit published v2 → bounded preparation → cited gap packet → human task acceptance; no financial action or closure",
+    "PASS: explicit compatible publication → bounded preparation → cited gap packet → human task acceptance; no financial action or closure",
   );
 } else {
   const e = JSON.parse(await readFile(evidenceFile, "utf8"));
