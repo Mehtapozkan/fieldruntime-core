@@ -1,7 +1,68 @@
 # Status
 
-Current milestone: **D12-A / Accepted D-037 merged; D12-B implemented on this
-review branch.** No real-customer processing, financial authority or closure.
+Current milestone: **D12-B merged; first bounded D13 synthetic Challenge report
+delivered in open PR #39; bounded follow-through rehearsal and improvement proposal
+added for review.** Real-customer processing remains unapproved.
+
+PR #38 merged normally at `7db84da759a6a66ed713e5a51bd8f06bfa87e951`, preserving
+reviewed head `5100ef8dfb9c989ac7e6f1197fce1ff261640f8d`. Required
+[CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34311755211),
+both findings were resolved, and the strict up-to-date `validate`, PR, deletion and
+force-push protections were retained. No bypass, release or deployment was used.
+
+D13 adds an offline read-only [Challenge report and Operating Capacity Map](docs/guides/challenge-report.md)
+from one replay-validated preparation export. It distinguishes unique Cases, records,
+source revisions and attempts; retains rejected/open/failed/interrupted work and
+links exact packets, citations and historical receipts. Snapshot applicability never
+grants live permission. Repeat preparation does not inflate record coverage or
+newly attended work. All five proof measures and costs retain unknown aggregates
+and original synthetic note lineage, including negative/reversal/reopen/overlap.
+
+The [customer comparison and activation protocol](docs/guides/challenge-customer-protocol.md)
+defines fair inputs/budgets, baseline and complete effort/quality coverage. Manual
+and generic-assistant comparisons, the ten-minute target and paid/returning customer
+experiments are **not run**. No new runtime/API contract, migration, trust boundary,
+authority rule or Workbench behavior is introduced. D-034's customer-scoped custody,
+access and complete-dataset deletion approval is still required before real data.
+
+The first D13 hosted run passed the retained PostgreSQL/API suites and Challenge
+rehearsal, then reached the existing 45-minute job limit during the remaining
+appliance checks. CI now allows 60 minutes for the complete unchanged gate set plus
+the new rehearsal; no runtime budget or acceptance assertion was relaxed.
+Final-head results are recorded on the implementation PR.
+
+The completed report head `859b0fe9` passed [required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34382457473):
+316 repository, 344 PostgreSQL/API/browser tests, eight additional Workbench scenarios
+and Compose/appliance/restart checks. That reporting implementation remains unchanged.
+
+The [follow-through rehearsal and contract map](docs/guides/challenge-follow-through.md)
+now use actual supported intake to supply a record-associated DEL-4 note, attach it
+to Orchid's existing Case, retain stale history, perform fresh descriptive review
+and separate publication, and reconstruct exact receipts after restart. DEL-5 does
+not inherit the claim. C advances 2 → 3; D/P advance 1 → 2; the old packet/approval
+remains historical. No source report becomes independent verification or a business outcome.
+
+A fresh worker command then correctly refuses **WORK_INPUT_LIMIT**: the new artifact
+cites two bundles, while Accepted D-037 permits one. Reads currently report basis
+eligibility before this resource preflight; a true `can_start` is not a successful
+POST. No new invocation or approval is fabricated. [D-038](docs/architecture/d13-bounded-follow-through.md)
+is **Accepted** by the owner at `639889f6` on 2026-09-09, not yet implemented:
+an explicit two-bundle version and preflight under
+unchanged aggregate resource/authority/closure safeguards. Manual inspection and
+follow-through using the fresh brief are available now without that amendment.
+
+One cited improvement proposal combines proof/access/owner/terms questions and
+allows independent human work in parallel, pending a process owner's choice and a
+comparable-batch test. Customer comparisons, baseline, effort/cost completeness and
+business-disposition/observation/customer-acceptance contracts remain missing.
+No runtime, schema, migration or report-calculation change is included in this continuation.
+
+The reviewed D-038 head `639889f6` passed [required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34391313702),
+including the retained PostgreSQL/API/browser, Compose and appliance/restart gates.
+The approval-recording head must pass its own required checks before normal merge.
+No runtime, schema or migration behavior is implemented by recording approval.
+
+The following D12 implementation account describes merged behavior.
 
 PR #37 merged normally at `7b3b3e125591212a6392504298d9b467f1e2f464`, after the
 owner's approval of `7ac9f9db` was recorded at `0812e004`. Required
@@ -40,9 +101,12 @@ Task acceptance and evaluation approval are separate, confer no business proof a
 never automatically promote worker code, policy or a pack. Full customer comparison,
 source/variant rules, active effort/cost baselines and customer acceptance remain gaps.
 
-**Next:** review this D12-B implementation and its operator usefulness. D13 remains
-the next planned customer comparison/Capacity Map, subject to separately approved
-real-data custody/access/retention. No new planning milestone, release or deployment.
+**Next:** implement Accepted D-038's narrow two-bundle continuation after the protected
+PR #39 merge. Preserve the completed report/rehearsal and proposed process experiment.
+Do not start D14.
+Name the customer/cohort/custodian and approve the data arrangements plus baseline
+before any real comparison. Business outcomes, customer acceptance and complete costs
+remain missing. No release or deployment.
 The current source is Apache-2.0; the published evaluation prerelease remains historical.
 
 **D9-B merged in PR #30 at `ca9543289894fffdaa40ecfe794d83addc2c19de`.** The reviewed
@@ -1364,7 +1428,7 @@ CI is reported on the PR; these remain design assertions, not D12 implementation
 
 ## Next
 
-Review the bounded D12-B implementation and retained W1–W10 evidence. D13 customer
+D12-B is merged with retained W1–W10 evidence. D13 customer
 comparison remains planned; governing source/variant rules, baseline/effort/cost
 coverage, operator usefulness/support and customer acceptance remain incomplete.
 Measured economics and complete Case closure are not implemented.
@@ -1498,3 +1562,48 @@ refresh was finishing. The browser regression now holds that refresh, requires t
 acceptance to remain disabled, and waits for verified eligibility before inspection
 and capture. No runtime or health-check deadline changed. Both earlier CI results and
 the final-head result are retained in the PR handoff.
+
+## D13 synthetic report validation
+
+Local Node 24.19.0 / tz 2026b and pnpm 11.24.0: repository validation passed
+316 tests, including four focused report calculation/escaping/invalid-input controls. ECC remains
+30/30 Cases and 620/620 checks; negative control exits 1 for intended assertions
+(0/30 Cases, 152/620 checks, hard gates FAIL), not setup/crash. The first sandbox-only
+validation attempt hit loopback `listen EPERM`; the permitted rerun passed.
+
+A final audit reproduced a null-identity report crash with valid retained intake.
+Unidentified rows now remain source material with exact locators, excluded from
+identified-record/eligible coverage; invalid identified rows remain inspectable.
+Focused pure replay and PostgreSQL/API regressions cover that missing-input path.
+Portable replay also normalizes HTML disclosure object keys, retaining journal/array
+order, so canonical file export reproduces both report JSON and HTML byte-for-byte.
+
+The disposable PostgreSQL 18.4/API rehearsal and Chromium report subtest pass:
+eight records / three Cases / seven attempts, three records prepared, four prepared
+attempts and two accepted packets on one record. Rejection, conflicting scoped
+reports, failure, interruption and unfinished work stay visible. Exact retry and
+restart preserve receipts, export and report; report/GET reads leave canonical tables
+unchanged. Tampered evidence, changed bindings, caller totals and backdated snapshots
+are rejected. Five-measure notes retain unknowns, negative attention, overlap and
+reopen/reversal; no business outcome or labor total is manufactured.
+
+Report desktop/390px checks cover the capacity map, useful packet, citations,
+keyboard skip/disclosure route and no horizontal overflow. This is an offline report,
+not a new Workbench flow or a screen-reader audit. Full retained PostgreSQL/API,
+Workbench, migration/restart, Compose and appliance gates remain in required CI,
+which adds the D13 rehearsal. Final-head CI evidence is reported on the PR; a local
+Docker pass is not claimed (`docker compose config --quiet`: exit 127, not installed).
+
+Customer protocol/activation gaps and the worked synthetic account are linked from
+the guide. No real comparison, customer outcome, complete economics, real data,
+release or deployment is claimed. PR #38 is merged; the D13 implementation PR remains
+open for review.
+
+## D13 follow-through validation (this continuation)
+
+The selected real PostgreSQL/API test passes on local PostgreSQL 18.4: supplied DEL-4
+claim with exact association, unaffected DEL-5, fresh description/publication, expected
+stale-binding and one-bundle denials, unchanged business state, read-only reports and
+restart/exact retries. Initial fixture development exposed the real resource limit;
+it was retained as an expected denial, not relaxed. The original Challenge test and
+all existing guards remain; final validation/CI evidence is recorded on PR #39.

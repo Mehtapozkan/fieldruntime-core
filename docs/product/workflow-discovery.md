@@ -282,7 +282,7 @@ human, tool, support or setup cost. Any cost per outcome must disclose its exact
 or verified denominator; with no qualifying outcomes the ratio is unavailable.
 
 Definitions belong here now. Minimum manual, synthetic evidence/attention/cost capture
-is implemented for synthetic D12-B review in one supporting history under Accepted D-037;
+is merged for synthetic D12-B in one supporting history under Accepted D-037;
 it is not a telemetry platform, payroll model or ROI dashboard. D13 owns customer
 comparison/reporting, including failed/open work and all attributable human effort,
 only after the custody/access/deletion boundary is approved.
@@ -383,7 +383,7 @@ novelty engine, general attention allocator, nested loops or autonomous policy.
 D11-B is merged in PR #34. D12-A / Accepted D-037 merged in PR #37 at `7b3b3e12`.
 D12-B implements one bounded zero-model preparation worker, exact start/result/task
 review, correction and independent evaluation review, plus manual synthetic notes for
-the five separate measures. This is a review-branch implementation, not completed
+the five separate measures. D12-B merged in PR #38; this does not complete
 customer proof. v1 packs retain dispatch prohibition; v2 needs fresh publication.
 [Implemented operator journey and limits](../guides/synthetic-preparation-worker.md).
 
@@ -391,3 +391,49 @@ Every implementation handoff must report requirement IDs, changed files/contract
 actual user behavior, validation evidence, gaps and next dependencies. Update the
 matrix instead of creating another backlog. Any product-intent, first-workflow,
 data, authority or closure change needs its explicit decision and human approval.
+
+### First bounded D13 delivery (implemented for review)
+
+D12-B merged in PR #38 at `7db84da7`. The first D13 implementation is an offline
+[Challenge report and Operating Capacity Map](../guides/challenge-report.md), derived
+read-only from one validated preparation export. Its executable synthetic rehearsal
+preserves unique Case/record coverage, distinct attempts, accepted/rejected/pending
+packets, source conflicts and failed/interrupted/open work. Exact archive, rules,
+interpreter and calculation bindings reproduce the result; historical evidence is
+never current permission. All five proof measures remain separate, with unreconciled
+aggregate values unknown and retained corrections/reversals/reopens/overlap. No new
+persistence, authority logic or business close event is introduced.
+
+The [customer protocol](../guides/challenge-customer-protocol.md) specifies the narrow
+assignment, acceptance criteria, fair manual/generic-assistant comparisons and all
+active-effort/cost categories. Comparisons have not run. Ten-minute usefulness and
+returning/paid-continuation targets remain experiments; an exception-selected sample
+cannot determine the population exception rate. Real-data activation still requires
+completed D-034 custody/access/retention approval and explicit identity/scope fit.
+This implements a synthetic reporting slice, not all D13 customer proof or economics.
+
+### Bounded D13 follow-through (rehearsal and proposal for review)
+
+Preserve PR #39's delivered synthetic report and all 19 requirement IDs. The next
+objective is supplied-evidence follow-through and one evidence-backed **proposed**
+improvement decision, not D14. [The executable scenario and contract map](../guides/challenge-follow-through.md)
+introduce an explicitly associated DEL-4 note through supported intake, show stale
+history, fresh description and separate publication, and keep DEL-5 unaffected.
+Retained evidence, unsupported/unattempted retrieval and human access/ownership/judgment
+must remain distinct. A draft was not sent; a source report is not independent proof.
+
+D-037's one-bundle worker limit blocks renewed execution when the artifact cites the
+old and new bundle. Current read eligibility lacks that resource preflight. Preserve
+this denial and history; [D-038](../architecture/d13-bounded-follow-through.md) is a
+Proposed explicit two-bundle version, not approved runtime functionality. A person
+can inspect the fresh brief and follow up manually today. Task usefulness never
+establishes financial authority, a business disposition, customer acceptance or closure.
+
+The proposed improvement combines initial proof/access/owner/terms questions and
+parallelizes only independently permitted human work. Cite actual scoped observations,
+coverage, costs/feasibility/alternatives and unresolved assumptions; leave selection
+to a process owner. Test a comparable subsequent batch with quality and complete
+preparation/review/correction/verification/support costs, including failed/open work.
+Five proof measures remain separate and unknown without their own evidence. Customer
+comparisons and improvement proof remain unperformed; real data still requires named
+participants, approved arrangements and a pre-intervention baseline.

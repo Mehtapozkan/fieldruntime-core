@@ -11,8 +11,9 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    # Full retained PostgreSQL/browser suites plus pack upgrade/restart acceptance.
-    timeout-minutes: 45
+    # Retained PostgreSQL/browser suites, Challenge replay and appliance restarts.
+    # The synthetic Challenge rehearsal adds ~12 minutes on the hosted runner.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -54,6 +55,7 @@ jobs:
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/discovery-postgres.test.mjs scripts/discovery-browser.test.mjs
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/preparation-pack-postgres.test.mjs scripts/preparation-pack-browser.test.mjs
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/preparation-work-postgres.test.mjs scripts/preparation-work-browser.test.mjs
+          D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/challenge-postgres.test.mjs
           node scripts/smoke-local-appliance.mjs applied
           node scripts/smoke-authority-api.mjs applied
           docker compose restart postgres

@@ -20,6 +20,10 @@ Real customer activation remains unapproved.
 > **Evaluation Preview** — Synthetic cases. Simulated authority. No external writes.
 > Not production software. Selecting a synthetic reviewer seat is not authentication.
 
+The D13 review branch adds a reproducible offline [synthetic Challenge report](docs/guides/challenge-report.md)
+and a [proposed customer comparison protocol](docs/guides/challenge-customer-protocol.md).
+It does not change the historical prerelease or establish customer outcomes.
+
 ## What works today
 
 Main includes D9-B and D10-B (PR #32, merged at `953d49ec`): a cited synthetic
@@ -27,7 +31,7 @@ workflow brief, consequential questions and persistent descriptive answers/corre
 confirmations. It uses zero model calls. See the [Discovery walkthrough](docs/guides/synthetic-discovery.md).
 **D11-A/B and corrected Accepted D-036 are merged (PRs #33/#34, main `6bfc94e2`):** one fixed preparation pack, separate synthetic publication, withdrawal,
 guarded rollback and portable history. [Try the pack walkthrough](docs/guides/synthetic-preparation-pack.md).
-D12-A / Accepted D-037 merged in PR #37 at `7b3b3e12`. This review branch implements
+D12-A/B / Accepted D-037 are merged (PR #38 at `7db84da7`). Current main includes
 [D12-B bounded preparation](docs/guides/synthetic-preparation-worker.md): a cited
 checklist/reconciliation and unsent follow-up, separate human task review, correction
 evaluation and manual synthetic proof notes. No financial recommendation or closure.
@@ -45,7 +49,7 @@ The historical prerelease has the smaller boundary described under [Distribution
 | Synthetic file intake                             | Explicit prepare, review target, commit and reopen; source citations and gaps                                   | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay                                 | Main (D9-B); real data unapproved                                                     |
 | Cited workflow preparation and descriptive review | Open retained intake, inspect seven records/six outputs, answer/correct/confirm and reopen history              | Deterministic brief, exact Case/material/review bindings, one immutable journal and portable provenance                 | Main (D10-B); not in historical prerelease; complete Discovery remains pending        |
 | Reviewed preparation pack                         | Compact intake panel: inspect, publish, compare, withdraw, roll back and export                                 | Strict fixed template, scoped publication profile, exact current basis and immutable selection replay                   | Main (D11-B); not in historical prerelease; no worker execution                       |
-| Bounded evidence-request preparation              | Explicit publish v2 → prepare → inspect cited packet → human task review; correction/recovery remain accessible | Fixed zero-model worker, one supporting journal, interruption, independent evaluation and bounded synthetic proof notes | D12-B review branch; not historical prerelease                                        |
+| Bounded evidence-request preparation              | Explicit publish v2 → prepare → inspect cited packet → human task review; correction/recovery remain accessible | Fixed zero-model worker, one supporting journal, interruption, independent evaluation and bounded synthetic proof notes | Merged; not historical prerelease                                                     |
 | Accepted outcome, economics and complete closure  | Unavailable                                                                                                     | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof                                          | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
@@ -162,10 +166,10 @@ history. They remain isolated from Orchid.
   [Try Discovery](docs/guides/synthetic-discovery.md). Full evidenced routes, governing
   rules and measurement coverage remain incomplete. D11-B publication is merged;
   [D12-A / Accepted D-037](docs/architecture/d12-bounded-preparation-worker.md) designs
-  a bounded worker and separate proof/correction capture, implemented for D12-B review.
+  a bounded worker and separate proof/correction capture, merged in D12-B.
   Task acceptance is not verified business effect, customer acceptance or closure.
   Real-data activation remains unapproved.
-- **D13 — Customer proof:** planned 25-Case Challenge and Operating Capacity Map.
+- **D13 — Customer proof:** first read-only synthetic [Challenge report and Operating Capacity Map](docs/guides/challenge-report.md) implemented on this review branch; customer comparisons and real-data activation remain pending.
   Assisted evaluations may begin during D9–D12 within an approved data boundary;
   measured quality, total effort and repeat use determine continuation. Connected
   shadow operation and production writes retain their later gates.
