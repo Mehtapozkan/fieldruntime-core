@@ -6,7 +6,7 @@ head `3c93f6f6` passed [required CI](https://github.com/Mehtapozkan/fieldruntime
 The reviewed local correction `100b6818` was published as identical-tree `3ba7f800`;
 both findings were resolved. Normal merge preserved repository protections.
 
-**D11-B is implemented on this review branch, not in the historical prerelease.**
+**D11-B merged in PR #34 at `6bfc94e24d2a2980b369fc0aea487e32313b5f78`; it is not in the historical prerelease.**
 It installs one fixed preparation template and one synthetic North publication stream.
 An operator can inspect, publish, compare, withdraw, roll back and export that configuration.
 It does not execute the four-step assignment. D12 still owns useful worker execution
@@ -14,8 +14,7 @@ and separately reviewed minimum proof/correction capture. Customer activation re
 
 ## Workbench walkthrough
 
-Use the [current-source setup](../../README.md#try-current-source), checking out
-`feat/d11b-preparation-pack` before building while this PR is open. At
+Use the [current-source setup](../../README.md#try-current-source) on main. At
 <http://127.0.0.1:3210/?view=intake>:
 
 1. Explicitly prepare the synthetic sample, inspect the North record's Case target,
