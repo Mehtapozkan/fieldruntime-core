@@ -98,3 +98,24 @@ test("D12 W7 documented unknown proof note validates without pretending absent e
   assert.equal(note.baseline_person_minutes, null);
   assert.equal(note.synthetic, true);
 });
+
+test("D12 W7 measured note contracts require canonical UTC source observation time", async () => {
+  const note = JSON.parse(
+    await readFile(
+      new URL("../docs/examples/d12-proof-note.v1.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  note.value = 1;
+  note.qualification = "measured";
+  for (const observedAt of [
+    null,
+    "2026-09-07T09:00:00-07:00",
+    "2026-09-07T16:00:00Z",
+  ]) {
+    note.source.observed_at = observedAt;
+    assert.throws(() => assertValidPreparationWorkContract("note", note));
+  }
+  note.source.observed_at = "2026-09-07T16:00:00.000Z";
+  assertValidPreparationWorkContract("note", note);
+});

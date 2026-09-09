@@ -1390,16 +1390,17 @@ real-customer activation and closure are not granted.
 
 Local Node 24.19.0 / tzdata 2026b and PostgreSQL 18.4:
 
-- `pnpm validate`: 311 repository tests passed, plus format/lint/typecheck/public
+- `pnpm validate`: 312 repository tests passed, plus format/lint/typecheck/public
   release checks. The initial restricted run could not bind its existing loopback
   HTTP tests; rerunning with loopback permission passed.
 - `pnpm eval:ecc`: 620/620, 30/30. Negative control exited 1 for its intended
   failed assertions (152/620, 0/30, hard gates FAIL), not a setup error.
 - The combined retained run passed 326 tests: 273 retained D6–D11 PostgreSQL/API/
   browser scenarios plus the then-current 53 D12 cases, no skips. Final D12 expansion
-  separately passed 54 PostgreSQL/API and six real browser scenarios. This includes
+  separately passed 57 PostgreSQL/API and seven real browser scenarios. This includes
   exact correction-to-new-version output, original-record recovery after cross-tab
-  navigation, all terminal input changes, oversized output and clock rollback.
+  navigation, all terminal input changes, oversized output and clock rollback, plus
+  cross-measure correction denial, canonical source time and duplicate-row bounds.
 - Actual appliance entry point on a new disposable PostgreSQL database passed the
   documented intake → Case → descriptive review → publication → preparation →
   task review → API restart → exact retries/export reconstruction sequence.
@@ -1418,3 +1419,17 @@ independent evaluation. Native screen-reader and other-browser checks were not r
 Screenshots and the walkthrough are returned as downloadable handoff files; the guide
 includes reproduction commands. PR CI is reported against its exact head, separately
 from these local results. No release/deployment, real data or D13 work is included.
+
+The final presentation check reproduced an earlier invocation's manual proof note
+without a visible history label. Proof notes now stay record-scoped and explicitly
+say “This invocation” or “Historical invocation”; a fresh packet's unknown measures
+are not replaced by older reports. The real browser regression fails before the
+label correction and passes afterward. Canonical proof history is unchanged.
+
+PR review reproduced two proof-note defects through PostgreSQL/API: a correction
+could target another measure, and a measured value could omit its observation time.
+Corrections now require the same measure (cross-measure overlap remains explicit),
+and measured notes require canonical UTC source time. Both are enforced during
+historical replay. A separate input-bound regression reproduced 201 duplicate rows
+being counted as one record; the bound now counts all physical coverage rows.
+These repairs add no persistence or business authority.

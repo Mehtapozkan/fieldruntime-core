@@ -241,7 +241,8 @@ export function workInput(s: WorkState, start: Obj): Obj {
       bundle.id,
       ...l(o(artifact).sources).map((source) => source.bundle_id),
     ]).size <= WORK_LIMITS.retained_bundles &&
-      l(bundle.records).length <= WORK_LIMITS.coverage_rows &&
+      Number(o(bundle.coverage).physical_records) <=
+        WORK_LIMITS.coverage_rows &&
       supports.length <= WORK_LIMITS.associated_support_artifacts &&
       parsed <= WORK_LIMITS.parsed_utf8_bytes,
     "WORK_INPUT_LIMIT",
@@ -440,6 +441,14 @@ function validateNote(s: WorkState, start: Obj, command: Obj): void {
     "INVALID_INPUT",
     "Unknown values must stay null; other values require explicit qualification",
   );
+  ensure(
+    source.observed_at === null
+      ? n.qualification !== "measured"
+      : typeof source.observed_at === "string" &&
+          new Date(source.observed_at).toISOString() === source.observed_at,
+    "INVALID_TIME",
+    "Measured notes require a canonical UTC source observation time; supplied observation times must use UTC",
+  );
   const kind: Record<string, string> = {
     cash_collected: "cash_receipt",
     disputes_resolved: "accepted_disposition",
@@ -512,10 +521,16 @@ function validateNote(s: WorkState, start: Obj, command: Obj): void {
         (e) =>
           e.hash === hash &&
           e.event === "proof_note" &&
-          e.case_id === start.case_id,
+          e.case_id === start.case_id &&
+          (![
+            n.supersedes_entry_hash,
+            n.reversal_of_entry_hash,
+            n.reopens_entry_hash,
+          ].includes(hash) ||
+            o(o(e.command).note).measure === measure),
       ),
       "INVALID_INPUT",
-      "Proof lineage must refer to retained notes for this Case",
+      "Proof corrections must retain the same measure and Case; cross-measure relationships use overlap only",
     );
 }
 export function appendWorkCommand(

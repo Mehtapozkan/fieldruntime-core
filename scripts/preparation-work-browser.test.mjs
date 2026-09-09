@@ -1,6 +1,7 @@
+import { intakeHash } from "../apps/admin/public/intake-client.js";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { chromium, expect } from "@playwright/test";
 import { preparedWork } from "../tests/helpers/preparation-work.mjs";
 import { discoveryCommand, variation } from "../tests/helpers/discovery.mjs";
@@ -357,5 +358,53 @@ test("D12 W5 task-review recovery returns to the original record after another t
   assert.equal(
     (await h.ok(path)).invocations[0].review.command.decision,
     "reject",
+  );
+});
+test("D12 W7 browser keeps earlier proof notes historical when a fresh packet has unknown measurements", async (t) => {
+  const { page, h, path } = await host(t);
+  await publish(page);
+  await prepare(page);
+  const view = await h.ok(path),
+    run = view.invocations[0],
+    note = JSON.parse(
+      await readFile(
+        new URL("../docs/examples/d12-proof-note.v1.json", import.meta.url),
+        "utf8",
+      ),
+    );
+  await h.ok("/v1/intake/preparation-work/commands", {
+    schema_version: "preparation-proof-note.v1",
+    operation: "proof_note",
+    purpose: "synthetic_measurement_readiness",
+    invocation_id: run.invocation_id,
+    expected_work_revision: view.work_revision,
+    expected_work_head: view.work_head,
+    idempotency_key: "browser-note",
+    binding_hash: await intakeHash(run.binding),
+    result_hash: run.result_hash,
+    note,
+    reason: "Synthetic unknown active effort for the original invocation",
+  });
+  const next = await h.ok(path);
+  await h.ok("/v1/intake/preparation-work/commands", {
+    schema_version: "preparation-work-command.v1",
+    operation: "start",
+    binding: next.candidate_binding,
+    expected_work_revision: next.work_revision,
+    expected_work_head: next.work_head,
+    replaces_invocation: run.invocation_id,
+    idempotency_key: "new-measurement-unknown",
+  });
+  await page.reload();
+  await page
+    .getByText("Proof readiness & separate costs", { exact: true })
+    .click();
+  await expect(page.locator(".work-proof")).toContainText(
+    "Historical invocation · human attention released: unknown",
+  );
+  assert.ok(
+    (await h.ok(path)).invocations
+      .at(-1)
+      .result.proof_readiness.every((m) => m.value === null),
   );
 });

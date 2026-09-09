@@ -121,13 +121,18 @@ The retained v1 interpreter and a separately bound v2 wording variant exercise r
 and replacement; the appliance selects v1. Clients cannot choose worker code.
 
 **Proof readiness & separate costs** contains the five unknown readiness measures,
-manual notes and full coverage/lineage. [Example note](../examples/d12-proof-note.v1.json)
+record-scoped manual notes and full coverage/lineage. Notes from earlier invocations
+are explicitly labelled historical; a fresh result never inherits their measurements. [Example note](../examples/d12-proof-note.v1.json)
 is an explicit _unknown_ synthetic observation, suitable for the strict JSON input;
 edit only facts actually supported by the supplied synthetic evidence. API `proof_note`
 binds that note to exact invocation/input/result and U/head. It also accepts notes on
 failed terminal runs. No telemetry or measurement calculation is inferred from elapsed
 runtime timestamps. Source references are attributed reports, not independently verified
 business proof; portable exports retain the note, not otherwise-unretained source files.
+A measured note requires its source observation time in canonical UTC
+(`YYYY-MM-DDTHH:mm:ss.sssZ`). Unknown may retain a null time. Superseding,
+reversing or reopening a note must stay within the same measure and Case;
+cross-measure relationships use the explicit overlap field only.
 
 Cash, resolved disputes, credits, newly attended work and signed active attention remain
 separate. Import alone is not newly attended work; credit is not cash. Missing is null,
@@ -137,6 +142,9 @@ inflate a displayed total. Model/tool, infrastructure, human, support and setup 
 are separate, with recurring/one-time treatment and unknowns. Broader customer proof is D13.
 
 ## Persistence, bounds and compatibility
+
+The 200-row limit counts physical source rows, including duplicates, so repeated
+rows cannot bypass the worker input bound. Overflow is refused without truncation.
 
 Migration **0009_preparation_work** extends only the allowed v1/v2 discriminator in
 the existing selection table and adds **one append-only preparation_work_journal**,

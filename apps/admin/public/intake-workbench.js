@@ -573,7 +573,7 @@ export function mountIntakeWorkbench() {
     const receiptNotice = confirmed
       ? el(
           "p",
-          `Confirmed ${human(confirmed.event)} receipt · ${new Date(confirmed.recorded_at).toLocaleString()}. ${current ? "Current status is shown below." : "Current permission is unconfirmed; the original receipt is retained."}`,
+          `Confirmed ${human(confirmed.event)} receipt · ${new Date(confirmed.recorded_at).toLocaleString()}. ${current ? "Current eligibility is shown separately." : "Current permission is unconfirmed; the original receipt is retained."}`,
           "work-confirmed review-notice",
         )
       : null;
@@ -953,7 +953,10 @@ export function mountIntakeWorkbench() {
           }),
         );
       const notes = matches
-        ? v.history.filter((e) => e.event === "proof_note")
+        ? v.history.filter(
+            (e) =>
+              e.event === "proof_note" && e.record_key === target.record_key,
+          )
         : [];
       for (const e of notes) {
         const n = e.command.note,
@@ -966,7 +969,7 @@ export function mountIntakeWorkbench() {
         proof.append(
           el(
             "p",
-            `${human(n.measure)}: ${n.value === null ? "unknown" : `${n.value} ${n.unit}`} · synthetic ${n.qualification}${replaced ? " · superseded / reversed / reopened history" : ""}${n.overlap_entry_hashes.length ? " · overlapping evidence, do not add" : ""}`,
+            `${e.invocation_id === (newer ? confirmed.invocation_id : latest?.invocation_id) ? "This invocation" : "Historical invocation"} · ${human(n.measure)}: ${n.value === null ? "unknown" : `${n.value} ${n.unit}`} · synthetic ${n.qualification}${replaced ? " · superseded / reversed / reopened history" : ""}${n.overlap_entry_hashes.length ? " · overlapping evidence, do not add" : ""}`,
           ),
           detail("Exact note, coverage, lineage and attribution", e),
         );

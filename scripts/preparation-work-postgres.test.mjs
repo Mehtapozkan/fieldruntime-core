@@ -777,6 +777,7 @@ test("D12 W7 five separate measures and costs retain unknown, negative attention
   c = noteCommand(await h.ok(path), "human_attention_released", -5);
   c.idempotency_key = "negative-attention";
   c.note.source.kind = "active_effort_comparison";
+  c.note.source.observed_at = "2026-09-07T16:05:00.000Z";
   c.note.baseline_person_minutes = 10;
   c.note.actual_person_minutes = 15;
   c.note.supersedes_entry_hash = receipts[4].entry.hash;
@@ -1044,5 +1045,80 @@ test("D12 W5 clock rollback denies new commands but original successful key is r
       .error,
     "CLOCK_REGRESSION",
   );
+  assert.deepEqual(await h.snapshot(), before);
+});
+
+test("D12 W7 proof correction lineage cannot cross measures but overlap may", async (t) => {
+  const { h, path } = await completed(t);
+  const original = await h.ok(
+    POST,
+    noteCommand(await h.ok(path), "cash_collected"),
+  );
+  const before = await h.snapshot();
+  for (const field of [
+    "supersedes_entry_hash",
+    "reversal_of_entry_hash",
+    "reopens_entry_hash",
+  ]) {
+    const command = noteCommand(await h.ok(path), "credits_issued");
+    command.idempotency_key = `cross-measure-${field}`;
+    command.note[field] = original.entry.hash;
+    const denied = await h.call(POST, command);
+    assert.equal(
+      denied.status,
+      400,
+      `${field}: ${JSON.stringify(denied.data)}`,
+    );
+    assert.equal(denied.data.error, "INVALID_INPUT");
+  }
+  assert.deepEqual(await h.snapshot(), before);
+  const overlap = noteCommand(await h.ok(path), "credits_issued");
+  overlap.note.overlap_entry_hashes = [original.entry.hash];
+  const recorded = await h.ok(POST, overlap);
+  const archive = await h.ok(path + "&representation=export");
+  await h.restart();
+  assert.deepEqual(await h.ok(POST, overlap), recorded);
+  assert.deepEqual(await h.ok(path + "&representation=export"), archive);
+  assert.equal(validateWorkExport(archive).entries.length, 4);
+});
+
+test("D12 W7 measured proof requires a canonical UTC source observation time", async (t) => {
+  const { h, path } = await completed(t),
+    before = await h.snapshot();
+  for (const observedAt of [
+    null,
+    "2026-09-07T09:00:00-07:00",
+    "2026-09-07T16:00:00Z",
+  ]) {
+    const command = noteCommand(await h.ok(path), "cash_collected", 100);
+    command.note.source.kind = "cash_receipt";
+    command.note.source.observed_at = observedAt;
+    const denied = await h.call(POST, command);
+    assert.equal(denied.status, 400, JSON.stringify(denied.data));
+  }
+  assert.deepEqual(await h.snapshot(), before);
+  const command = noteCommand(await h.ok(path), "cash_collected", 100);
+  command.note.source.kind = "cash_receipt";
+  command.note.source.observed_at = "2026-09-07T16:00:00.000Z";
+  const receipt = await h.ok(POST, command),
+    archive = await h.ok(path + "&representation=export");
+  await h.restart();
+  assert.deepEqual(await h.ok(POST, command), receipt);
+  assert.deepEqual(await h.ok(path + "&representation=export"), archive);
+  assert.equal(validateWorkExport(archive).entries.length, 3);
+});
+
+test("D12 W9 bounded coverage includes duplicate physical source rows", async (t) => {
+  const input = editQueue(
+    await intakeInput("duplicate-coverage-worker"),
+    (rows, headers) => ({
+      rows: Array.from({ length: 201 }, () => ({ ...rows[0] })),
+      headers,
+    }),
+  );
+  const { h, path } = await published(t, input),
+    before = await h.snapshot();
+  const r = await h.call(POST, start(await h.ok(path)));
+  assert.equal(r.data.error, "WORK_INPUT_LIMIT", JSON.stringify(r.data));
   assert.deepEqual(await h.snapshot(), before);
 });
