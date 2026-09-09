@@ -803,3 +803,35 @@ test("D13 F5/F7 v2 correction, independent evaluation and five unknown measures 
   assert.deepEqual(await h.ok(path + "&representation=export"), archive);
   assert.deepEqual(await h.snapshot(), snapshot);
 });
+
+test("D13 current report never borrows a start action from a historical interpreter", async (t) => {
+  const x = await continuation(t, { prepared: false });
+  const old = await legacyReport(
+    x.archive,
+    manifest(x.archive, "v1", "2026-09-07T16:05:00.000Z"),
+  );
+  assert.equal(
+    old.records.find((r) => r.record_key === x.first.record_key)
+      .snapshot_can_start,
+    true,
+  );
+  x.h.setWorkContext(syntheticContinuationContext());
+  const view = await x.h.ok(x.path);
+  assert.equal(view.current.can_start, false);
+  const report = await currentReport(x.archive, manifest(x.archive));
+  const record = report.records.find(
+    (r) => r.record_key === x.first.record_key,
+  );
+  assert.equal(record.snapshot_can_start, false);
+  t.diagnostic(
+    JSON.stringify({
+      current_reasons: view.current.reasons,
+      report_next_action: record.next_action,
+    }),
+  );
+  assert.match(record.next_action, /v3 publication/);
+  assert.doesNotMatch(
+    record.next_action,
+    /explicitly prepare a fresh packet if useful/,
+  );
+});

@@ -9,7 +9,9 @@ comparisons and real-data activation remain unapproved/not run.
 
 The continuation branch accepts `challenge-input.v2` with the same four fields below
 and a replay-validated v1/v2 export. It uses the current fixed synthetic profile and
-shared read-only preflight. A known resource-blocked record is not startable. All
+shared read-only preflight. A known resource-blocked record is not startable. Next actions use the current
+view too: an old pack-v2 publication requires separate v3 publication, even when its
+historical report said preparation was startable. All
 bundle/row/support/parsed-byte/question occurrences are checked, while business
 coverage still deduplicates record identities. The report creates local output files,
 never appliance records. Snapshot eligibility is not live permission.

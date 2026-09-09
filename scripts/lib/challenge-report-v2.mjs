@@ -65,7 +65,9 @@ export async function buildReport(archive, manifest) {
           ? "Inspect this packet and record a separate task-usefulness decision."
           : startable
             ? "Inspect current live inputs and explicitly prepare a fresh packet if useful."
-            : record.next_action,
+            : views.length
+              ? `Open the live Workbench and review current prerequisites before acting. ${[...new Set(views.flatMap((v) => v.current.reasons))].join(" ")}`
+              : "Inspect retained material and explicitly attach the selected record to a Case.",
     };
   });
   const body = { ...prior };

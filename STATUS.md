@@ -1615,3 +1615,10 @@ all existing guards remain; final validation/CI evidence is recorded on PR #39.
 No complete customer comparison, verified delivery/outcome, measured savings, real-data
 activation, release or deployment. The two-bundle ceiling remains an explicit limit;
 manual inspection/follow-through is the fallback beyond it, without deleting history.
+
+D-038 report review correction: reproduced a legacy-only pack-v2 archive whose new
+report correctly marked startability false but inherited the old interpreter's
+“prepare” next action. The current report now derives its fallback from current
+view reasons, explicitly requiring compatible v3 publication. The PostgreSQL/API
+regression retains the old report's original startability and verifies the corrected
+current guidance; no runtime permission or historical calculator changed.
