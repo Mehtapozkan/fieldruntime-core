@@ -1,6 +1,8 @@
+import profileV2 from "../../contracts/src/preparation-worker-profile.v2.json" with { type: "json" };
 import profile from "../../contracts/src/preparation-worker-profile.v1.json" with { type: "json" };
 import {
   assertValidPreparationWorkContract,
+  assertValidPreparationWorkV2Contract,
   assertValidIdentityReference,
   canonicalJson,
   immutableJson,
@@ -24,6 +26,13 @@ export const WORK_LIMITS = Object.freeze({
   steps: 4,
   computation_ms: 5000,
 });
+export const CONTINUATION_LIMITS = Object.freeze({
+  ...WORK_LIMITS,
+  retained_bundles: 2,
+});
+export function syntheticContinuationProfile(): Obj {
+  return immutableJson(profileV2);
+}
 export const WORK_MEASURES = [
   "cash_collected",
   "disputes_resolved",
@@ -35,7 +44,9 @@ export function syntheticWorkerProfile(): Obj {
   return immutableJson(profile);
 }
 export function workIdentity(p: Obj, id: string, kind: string): Obj {
-  assertValidPreparationWorkContract("profile", p);
+  if (p.schema_version === "synthetic-preparation-worker.v2")
+    assertValidPreparationWorkV2Contract("profile", p);
+  else assertValidPreparationWorkContract("profile", p);
   const found = new Map<string, Obj>();
   for (const value of l(p.identities)) {
     assertValidIdentityReference(value);

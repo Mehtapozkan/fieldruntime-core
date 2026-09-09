@@ -5,6 +5,11 @@ PR #37 merged at `7b3b3e125591212a6392504298d9b467f1e2f464` after required check
 This page describes implemented synthetic behavior, not the historical evaluation prerelease.
 No real-customer activation, model calls, external tools/messages or business authority.
 
+The continuation review branch implements [Accepted D-038](../architecture/d13-bounded-follow-through.md):
+explicit pack v3, worker v2 / implementation v3, at most two exact retained bundles
+and read-only resource preflight. Current examples below use that version. Historical
+D12 v1 worker/v2 pack receipts and W1–W10 controls keep their original meaning.
+
 ## Try the useful result
 
 Use Node 24.19.0 / tzdata 2026b, pnpm 11.24.0 and the existing
@@ -15,7 +20,7 @@ Use Node 24.19.0 / tzdata 2026b, pnpm 11.24.0 and the existing
    North's record and explicitly create/attach its Case. Open its workflow brief.
 2. Inspect the source reports and unknowns. Confirm the current description for
    **Workflow description**; an already-applicable confirmation is reused.
-3. Inspect the fixed v2 candidate, give a selection reason/expiry and separately
+3. Inspect the fixed v3 candidate, give a selection reason/expiry and separately
    **Publish for preparation**. An old v1 publication never gains dispatch permission.
 4. Select **Prepare evidence-request packet**. This explicit command runs the fixed
    worker once; reads never start work. The actual **unsent follow-up excerpt** and
@@ -61,7 +66,7 @@ reconstruction and exact retries. They contain no fault controls. Do not run fix
 initialization against an evaluator's existing dataset as a cleanup or replacement.
 
 The strict [OpenAPI](../../packages/contracts/openapi/intake.v1.openapi.json) and
-[work contracts](../../packages/contracts/schemas/preparation-work.v1.schema.json)
+[current work contracts](../../packages/contracts/schemas/preparation-work.v2.schema.json)
 are authoritative shapes. With an explicitly published pack, GET
 `/v1/intake/preparation-work?case_id=CASE&record_key=RECORD` returns exact current
 `candidate_binding`, Case-local `work_revision` U and `work_head`. Validate the read,
@@ -73,7 +78,7 @@ record-scoped. Submit:
 
 ```js
 const command = {
-  schema_version: "preparation-work-command.v1",
+  schema_version: "preparation-work-command.v2",
   operation: "start",
   binding: view.candidate_binding,
   expected_work_revision: view.work_revision,
@@ -103,7 +108,7 @@ A task review binds the exact invocation/result hash and latest U/head:
 ```js
 const run = view.invocations.at(-1);
 const review = {
-  schema_version: "preparation-task-review.v1",
+  schema_version: "preparation-task-review.v2",
   operation: "task_review",
   purpose: "preparation_usefulness",
   invocation_id: run.invocation_id,
@@ -189,7 +194,7 @@ are separate, with recurring/one-time treatment and unknowns. Broader customer p
 The 200-row limit counts physical source rows, including duplicates, so repeated
 rows cannot bypass the worker input bound. Overflow is refused without truncation.
 
-Migration **0009_preparation_work** extends only the allowed v1/v2 discriminator in
+Historical migration **0009_preparation_work** extends only the allowed v1/v2 discriminator in
 the existing selection table and adds **one append-only preparation_work_journal**,
 including indexed bindings and clock guards. Migrations 0001–0008 are byte-for-byte
 unchanged. Normal appliance startup applies and checksum-checks 0009 atomically;
@@ -202,10 +207,10 @@ v0/v1 contracts and frozen ECC are unchanged. v2 is validated explicitly, requir
 fresh publication, and binds the server worker profile. Work changes U and internal
 writer coordination only, never C/D/P/R/S. The full conservative manifest still detects
 business-input changes; the one-bundle bound counts material actually supplied to the
-worker, not unrelated canonical invalidation hashes. Multi-bundle source material is
-refused rather than truncated.
+worker, not unrelated canonical invalidation hashes. Legacy multi-bundle source material is
+refused rather than truncated. Current v3 publication permits at most two bundles.
 
-Limits: one record/bundle, 200 coverage rows, 20 associated support artifacts, 2 MiB
+Current limits: one selected record, at most two exact bundles, 200 physical coverage rows, 20 associated support artifacts, 2 MiB
 parsed UTF-8, 64 questions, 256 KiB result, four fixed steps, five seconds computation.
 A disposable fixed Node worker thread has bounded heap and receives only canonical
 inputs. Its trusted code imports no network/filesystem clients and makes no external
@@ -219,6 +224,20 @@ inputs, actor profiles and versions. Coherently altered output, timing, index or
 input prefixes fail readiness/read/export. A legitimate result before later Case changes
 survives as history. Equal timestamps alone never order independent journals.
 Dataset disposal ends replay; retained content is necessary for historical reconstruction.
+
+Migration **0010_preparation_continuation** is additive version admission in those same
+tables. Startup checksum-checks/applies it; 0001–0009 checksums and old entries stay
+unchanged. Back up the dataset first, do not reset its volume. Old binaries cannot
+read new-version records; no downgrade tool is provided. Old exact keys still return
+the original receipt. New preparation requires fresh v3 publication and its own review.
+
+GET adds `resource_preflight`: full bundle IDs, counts, limits and explicit reasons.
+Physical rows, associated support and parsed UTF-8 count every occurrence across
+bundles, including identical bytes. Whole-bundle read scope is required. These checks
+also run at execution. Result-size/computation limits apply to the actual result; a
+preflight cannot promise successful computation or authorize a task. No background work.
+
+[Execute the supplied DEL-4 continuation and blocked controls](challenge-follow-through.md).
 
 ## Acceptance and evidence
 

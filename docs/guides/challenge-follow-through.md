@@ -1,10 +1,10 @@
 # D13 follow-through: supplied evidence, fresh review, proposed improvement
 
-PR #39's completed Challenge report at `859b0fe9` remains intact and unmerged.
-This continuation adds one executable synthetic rehearsal and a proposed next slice.
+PR #39's completed Challenge report at `859b0fe9` and its original follow-through
+rehearsal remain intact. Accepted D-038 adds the bounded continuation on this review branch.
 It does not restart D13, complete customer comparison or advance to D14.
 
-## What the operator can do now
+## Historical one-bundle control (preserved)
 
 Start with Orchid / dispute-17 / DEL-4 and its actual unsent request. A person
 supplies a new local TXT note, explicitly associated with `entity_north`, record
@@ -34,14 +34,14 @@ receipt and Case/description/selection bindings carry the change. Row revision a
 must never authorize a refreshed packet. The literal TXT form is recognized by the
 pinned parser; arbitrary text remains ambiguous rather than being model-interpreted.
 
-The read currently reports `can_start` before this input-bound check. It is not a
-promise that POST will succeed. The proposed slice below must expose this resource
-blocker before inviting preparation. No runtime eligibility or limit is changed here.
+The historical v1 read reports `can_start` before this input-bound check. It is not a
+promise that POST will succeed. The new version below adds resource preflight before inviting preparation. This
+legacy test intentionally retains the old read and execution meanings.
 The denied fresh submission is a test/API diagnostic, **not a committed invocation
 receipt**. Counts remain two records, one Case, one started invocation and one
 historically task-accepted packet. Newly attended work and business outcomes are unknown.
 
-## Execute and inspect
+## Reproduce the historical refusal
 
 Use the same Node 24.19.0 / tz 2026b, pnpm 11.24.0 and explicitly disposable local
 PostgreSQL setup as the [existing Challenge rehearsal](challenge-report.md).
@@ -156,30 +156,67 @@ verified business outcome; this rehearsal has no verified-outcome denominator.
 Imported evidence or another preparation is not newly attended work; credit amount
 is not cash/savings. The ten-minute useful-packet target remains an experiment.
 
-## Smallest next implementation and acceptance
+## Implemented two-bundle continuation (review branch)
 
-Within today's accepted boundary, this PR implements only the executable rehearsal,
-read-only before/after exports and contract/improvement handoff. It preserves the
-completed report, five-measure calculation rules and original failure coverage.
+The owner approved [D-038](../architecture/d13-bounded-follow-through.md) at
+`639889f6`. Current appliance reads use pack v3 / worker v2 and expose input limits.
+Existing v1/v2 artifacts and receipts retain their interpreters and original budgets;
+no old publication gains capacity. There is no new endpoint, supporting table or
+business-outcome contract.
 
-[Proposed D-038](../architecture/d13-bounded-follow-through.md) is the precise approval
-needed for worker re-preparation across the two retained bundles. After approval,
-one small implementation PR should add the explicit compatible version and resource
-preflight, reuse existing review/publication/start/recovery and expose the existing
-fresh brief/packet in the Workbench. No new dashboard, outcome journal, connector,
-manual-message tracking or D14 work is required.
+1. Retain the original packet and task approval. Supply the literal DEL-4 TXT above
+   through ordinary intake, with its explicit North/dispute-17 association.
+2. Inspect the new source and stale history. Explicitly attach it to the same Case,
+   confirm the fresh description and separately publish the **v3** artifact.
+3. Check **Preparation input limits**. The two exact bundles fit only if their whole
+   scopes and aggregate occurrence counts fit. Preflight is read-only and is not
+   authority. A third bundle, excess rows/support/parsed bytes/questions or missing
+   read scope blocks start; no sources are removed to fit.
+4. Explicitly **Prepare evidence-request packet**. It now says a source reports DEL-4
+   confirmation and asks for the original evidence, its owner, permitted inspection
+   route and governing terms. The proof is still independently unverified; no credit
+   recommendation, external lookup or sent message is produced. DEL-5 keeps its gap.
+5. Inspect the new cited packet and record a **separate task-usefulness review**.
+   The first approval does not approve this result. Reload/restart and exact retry
+   recover the original commands/receipts without another attempt or renewed permission.
+
+The test starts with the legacy accepted packet at C2/D1/P1/U3, upgrades 0009→0010,
+then attaches the new source at C3/D2/P2. The second start/result advance U to 5;
+its own acceptance advances U to 6. Case state remains detected. Two records, one
+Case and two attempts are not three kinds of new business coverage.
+
+```sh
+pnpm build
+# Each test creates and drops only its random disposable synthetic schema.
+D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime \
+  D13_CONTINUATION_DIR=/tmp/fieldruntime-continuation \
+  node --test scripts/preparation-continuation-postgres.test.mjs
+D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime \
+  D13_CONTINUATION_SCREENSHOTS=/tmp/fieldruntime-continuation/screenshots \
+  node --test scripts/preparation-continuation-browser.test.mjs
+node scripts/challenge-report.mjs /tmp/fieldruntime-continuation/archive.json \
+  /tmp/fieldruntime-continuation/manifest.json /tmp/fieldruntime-continuation/reproduced
+```
+
+Install Chromium with `pnpm exec playwright install chromium` before browser checks.
+Inspect `walkthrough.json`, `before.json`, `archive.json` and the v2 report HTML/JSON;
+they bind the exact input, original/new receipts and cited source locators. Output
+files are synthetic test evidence, not customer results. The report CLI creates a
+new directory and refuses to overwrite files. [Report version/reproduction rules](challenge-report.md).
+
+### Acceptance and remaining gaps
 
 | Scenario             | Current executable assertion / next implementation gate                                                                                                                                                                        |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | F1 supplied evidence | Exact DEL-4/record association and new citation; DEL-5 does not inherit it; source report stays independently unverified                                                                                                       |
 | F2 stale consent     | Retention invalidates prior current use; attachment advances C; stale-bound command denied without writes; old packet/review unchanged                                                                                         |
-| F3 fresh review      | New descriptive confirmation and separate publication required; now assert `WORK_INPUT_LIMIT` on two bundles. Proposed v3 must prepare only after explicit current permission                                                  |
+| F3 fresh review      | New descriptive confirmation and separate publication required; legacy v2 retains `WORK_INPUT_LIMIT`; new v3 prepares two bundles only with current permission                                                                 |
 | F4 history/retry     | Old export reproduces unchanged; original commands return original receipts after restart without another write/attempt; rejected fresh start fabricates no result                                                             |
 | F5 boundaries        | One Case remains detected; no outcome, action receipt or proposal; task usefulness never grants business authority/closure; original Challenge retains failed/open work and negative proof notes                               |
-| F6 proposed v3 only  | Two-bundle positive control; third bundle and aggregate overflow denied before start; v1/v2 remain unchanged; stale/conflicting sources retained; current U/C/D/P, identity, interruption, exact retry and replay gates remain |
+| F6 explicit v3       | Two-bundle positive control; third bundle and aggregate overflow denied before start; v1/v2 remain unchanged; stale/conflicting sources retained; current U/C/D/P, identity, interruption, exact retry and replay gates remain |
 | F7 improvement proof | Human chooses experiment; comparable batch includes negative/open work and complete effort/cost/quality coverage. No automated promotion, savings or customer outcome inferred from rehearsal                                  |
 
 Real-customer work still needs named participants, approved files/processing/custody/
 access/retention/deletion and a baseline. Synthetic seat selection is not authentication.
 Apache-2.0, the historical prerelease and existing merge/release/deployment instructions
-are unchanged. PR #39 remains open; this is not a merge or deployment request.
+are unchanged. The continuation implementation PR remains open for review; no release or deployment.

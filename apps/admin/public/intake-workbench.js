@@ -703,7 +703,10 @@ export function mountIntakeWorkbench() {
             if (decision === "modify" && !d.proposal?.trim())
               throw new Error("Give a proposed modification.");
             return {
-              schema_version: "preparation-task-review.v1",
+              schema_version:
+                v?.schema_version === "preparation-work-read.v2"
+                  ? "preparation-task-review.v2"
+                  : "preparation-task-review.v1",
               operation: "task_review",
               purpose: "preparation_usefulness",
               ...base(),
@@ -799,10 +802,41 @@ export function mountIntakeWorkbench() {
           ),
         );
     }
+    if (v?.resource_preflight && current) {
+      const p = v.resource_preflight;
+      if (!p.eligible)
+        controls.append(
+          el(
+            "p",
+            `Preparation blocked before submission. ${p.reasons.join(" ")}`,
+            "review-notice",
+          ),
+        );
+      const details = el("details");
+      details.append(
+        el("summary", "Preparation input limits"),
+        el(
+          "p",
+          "Read-only preflight. Submission rechecks current evidence, permission and limits.",
+        ),
+        el(
+          "pre",
+          JSON.stringify(
+            { counts: p.counts, limits: p.limits, bundle_ids: p.bundle_ids },
+            null,
+            2,
+          ),
+        ),
+      );
+      controls.append(details);
+    }
     const fresh = button(
       latest ? "Prepare a fresh packet" : "Prepare evidence-request packet",
       send(() => ({
-        schema_version: "preparation-work-command.v1",
+        schema_version:
+          v?.schema_version === "preparation-work-read.v2"
+            ? "preparation-work-command.v2"
+            : "preparation-work-command.v1",
         operation: "start",
         binding: v.candidate_binding,
         expected_work_revision: v.work_revision,
@@ -832,7 +866,10 @@ export function mountIntakeWorkbench() {
       const b = button(
         "Interrupt pending preparation",
         send(() => ({
-          schema_version: "preparation-interruption.v1",
+          schema_version:
+            v?.schema_version === "preparation-work-read.v2"
+              ? "preparation-interruption.v2"
+              : "preparation-interruption.v1",
           operation: "interrupt",
           ...base(),
           reason: d.interrupt ?? "",
@@ -926,7 +963,10 @@ export function mountIntakeWorkbench() {
         "Record wording correction",
         act(async () => {
           await client.writeWork({
-            schema_version: "purpose_limited_preparation_correction.v1",
+            schema_version:
+              v?.schema_version === "preparation-work-read.v2"
+                ? "purpose_limited_preparation_correction.v2"
+                : "purpose_limited_preparation_correction.v1",
             operation: "correction",
             purpose: "preparation_usefulness",
             ...base(),
@@ -988,7 +1028,10 @@ export function mountIntakeWorkbench() {
                 ? "Accept evaluation candidate"
                 : "Reject evaluation candidate",
               send(() => ({
-                schema_version: "preparation-evaluation-review.v1",
+                schema_version:
+                  v?.schema_version === "preparation-work-read.v2"
+                    ? "preparation-evaluation-review.v2"
+                    : "preparation-evaluation-review.v1",
                 operation: "evaluation_review",
                 purpose: "synthetic_evaluation_candidate",
                 ...base(),
@@ -1060,7 +1103,10 @@ export function mountIntakeWorkbench() {
         "Record synthetic proof note",
         act(async () => {
           await client.writeWork({
-            schema_version: "preparation-proof-note.v1",
+            schema_version:
+              v?.schema_version === "preparation-work-read.v2"
+                ? "preparation-proof-note.v2"
+                : "preparation-proof-note.v1",
             operation: "proof_note",
             purpose: "synthetic_measurement_readiness",
             ...base(),
@@ -1297,9 +1343,7 @@ export function mountIntakeWorkbench() {
             "Review the exact candidate and choose its preparation expiry before publication or rollback.",
           );
         const command = {
-          schema_version: v.schema_version.endsWith(".v2")
-            ? "pack-selection-command.v2"
-            : "pack-selection-command.v1",
+          schema_version: `pack-selection-command.${v.schema_version.split(".").at(-1)}`,
           operation,
           pack_id: v.pack_id,
           expected_selection_revision: v.selection_revision,
@@ -1660,7 +1704,10 @@ export function mountIntakeWorkbench() {
         ),
       );
     shell.append(summary, controls);
-    const workerMode = s.pack?.schema_version === "pack-selection-read.v2";
+    const workerMode = [
+      "pack-selection-read.v2",
+      "pack-selection-read.v3",
+    ].includes(s.pack?.schema_version);
     if (workerMode && purposes.includes("discovery_description")) {
       const completed = el("details", undefined, "review-card");
       completed.append(

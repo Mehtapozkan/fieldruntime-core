@@ -6,12 +6,15 @@ import { discoveryCommand } from "../tests/helpers/discovery.mjs";
 import {
   assertValidPreparationPackContract,
   assertValidPreparationPackV2Contract,
+  assertValidPreparationPackV3Contract,
 } from "../dist/packages/contracts/src/index.js";
 import { validatePackExport } from "../dist/packages/runtime/src/preparation-pack.js";
 const validatePack = (kind, v) =>
-  (v.schema_version.endsWith(".v2")
-    ? assertValidPreparationPackV2Contract
-    : assertValidPreparationPackContract)(kind, v);
+  (v.schema_version.endsWith(".v3")
+    ? assertValidPreparationPackV3Contract
+    : v.schema_version.endsWith(".v2")
+      ? assertValidPreparationPackV2Contract
+      : assertValidPreparationPackContract)(kind, v);
 const [mode, evidenceFile] = process.argv.slice(2),
   base = process.env.FIELD_RUNTIME_URL ?? "http://127.0.0.1:3210",
   url = new URL(base);
@@ -79,9 +82,7 @@ if (mode === "applied") {
     candidate = await call(path);
   validatePack("read", candidate);
   const command = {
-    schema_version: candidate.schema_version.endsWith(".v2")
-      ? "pack-selection-command.v2"
-      : "pack-selection-command.v1",
+    schema_version: `pack-selection-command.${candidate.schema_version.split(".").at(-1)}`,
     operation: "publish",
     pack_id: candidate.pack_id,
     expected_selection_revision: candidate.selection_revision,

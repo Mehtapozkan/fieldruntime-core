@@ -56,6 +56,7 @@ jobs:
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/preparation-pack-postgres.test.mjs scripts/preparation-pack-browser.test.mjs
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/preparation-work-postgres.test.mjs scripts/preparation-work-browser.test.mjs
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/challenge-postgres.test.mjs
+          D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/preparation-continuation-postgres.test.mjs scripts/preparation-continuation-browser.test.mjs
           node scripts/smoke-local-appliance.mjs applied
           node scripts/smoke-authority-api.mjs applied
           docker compose restart postgres

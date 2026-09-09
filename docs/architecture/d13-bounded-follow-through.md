@@ -1,6 +1,6 @@
 # D-038 — Bounded preparation after newly supplied evidence
 
-Status: **Accepted — implementation authorized, not yet implemented.**
+Status: **Accepted — bounded implementation on the continuation review branch.**
 
 ## Human approval
 
@@ -42,7 +42,7 @@ current pack retain citations from A and B. The current worker counts these as t
 bundles even when CSV bytes are shared, and refuses under its one-bundle contract.
 Changing a constant under old versions would silently change their execution meaning.
 
-Propose fixed `invoice-dispute-preparation.v3` / `preparation-pack.v3`, with strict
+Use fixed `invoice-dispute-preparation.v3` / `preparation-pack.v3`, with strict
 `pack-selection-command.v3` and `pack-selection-entry.v3` branches. Use
 `preparation-worker-input.v2`, `preparation-work-command.v2`, `preparation-work.v2`,
 `preparation-work-entry.v2`, and matching receipt/read/export v2 branches for the new
@@ -74,21 +74,20 @@ transaction. Capture computation before writer waiting. No model/external tool c
 scheduler, background resume or automatic financial retry.
 
 Reuse the existing supporting U journal and retained bytes. Migration 0009 constrains
-selection entries to v1/v2 and work entries to v1. Propose additive checksum migration
+selection entries to v1/v2 and work entries to v1. Use additive checksum migration
 0010 to admit the new strict versions in those existing tables; no new table, change
 to applied checksums or rewritten entry. New versions replay with their original budget
 and interpreter. Old commands and failed/pending/history stay reconstructable.
 Exact keys return original receipts without renewed permission; cross-tab claims,
 interruption and late-result fencing remain unchanged. Reads/exports are side-effect free.
 
-## Smaller valid alternative and unresolved choice
+## Smaller alternative and retained approval context
 
 **Available now:** retain/attach the evidence, inspect fresh Discovery, and let a
 person prepare the follow-up using the existing unsent agenda. Keep the worker's
-one-bundle refusal visible. This needs no new runtime boundary and is the recommended
-path until this proposal is approved. It does not establish a business outcome.
+one-bundle refusal visible. This needs no new runtime boundary and remains the fallback when current inputs exceed the approved bound. It does not establish a business outcome.
 
-Approve the two-bundle version only if one additional evidenced worker preparation
+The approval rationale was to add the two-bundle version only if one additional evidenced worker preparation
 is useful enough to justify the compatibility/migration work. It does not solve an
 unbounded sequence of customer replies. Do not create compacted authoritative snapshots
 or remove old citations as a shortcut; that would be another interpretation boundary.
@@ -99,3 +98,13 @@ wrong association, same-subject conflicts, stale input, concurrent commands, exa
 restart and unchanged financial/verification/closure guards. Existing D6–D12 and ECC
 remain required. New proof/acceptance or imported-dispute business-disposition contracts
 are explicitly outside this amendment and need their own concrete decision first.
+
+## Implementation mapping
+
+Migration `0010_preparation_continuation.sql` admits strict selection v3/work v2 in
+existing tables; it does not rewrite history. `preparation-work.v2` is the aggregate
+contract family; the concrete output discriminator is `disposition-preparation-result.v2`.
+The v2 profile selects `disposition-code.v3`; the old v1 profile/worker and pack v1/v2
+remain available for deterministic replay. Current Workbench/API preflight and
+`challenge-report.v2` share resource accounting; historical report v1 stays pinned.
+See the executable F1–F7 [continuation](../guides/challenge-follow-through.md).

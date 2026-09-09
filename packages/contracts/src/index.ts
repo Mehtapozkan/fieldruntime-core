@@ -23,6 +23,8 @@ export type { InvariantViolation } from "./invariants.js";
 export {
   assertValidPreparationPackContract,
   assertValidPreparationPackV2Contract,
+  assertValidPreparationPackV3Contract,
+  assertValidPreparationWorkV2Contract,
   assertValidPreparationWorkContract,
   assertValidDiscoveryContract,
   assertValidIntakeContract,

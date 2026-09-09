@@ -141,7 +141,9 @@ export function prepareDisposition(input: Obj): Obj {
             ? `Please identify the original ${delivery} confirmation, its evidence owner and the permitted inspection route.`
             : `Please provide ${delivery} confirmation or identify the evidence owner.`;
       if (
-        b.worker_implementation_id === "disposition-code.v2" &&
+        ["disposition-code.v2", "disposition-code.v3"].includes(
+          String(b.worker_implementation_id),
+        ) &&
         !["conflicting", "reported_confirmation"].includes(String(c.status))
       )
         text = `Please identify who can supply ${delivery} confirmation and the permitted retrieval route; this request assigns no owner.`;
@@ -195,7 +197,10 @@ export function prepareDisposition(input: Obj): Obj {
     ),
   );
   return immutableJson({
-    schema_version: "disposition-preparation-result.v1",
+    schema_version:
+      input.schema_version === "preparation-worker-input.v2"
+        ? "disposition-preparation-result.v2"
+        : "disposition-preparation-result.v1",
     invocation_id: input.invocation_id,
     started_entry_hash: input.started_entry_hash,
     binding_hash: sha256Json(b),

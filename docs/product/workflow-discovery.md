@@ -412,7 +412,7 @@ cannot determine the population exception rate. Real-data activation still requi
 completed D-034 custody/access/retention approval and explicit identity/scope fit.
 This implements a synthetic reporting slice, not all D13 customer proof or economics.
 
-### Bounded D13 follow-through (rehearsal and proposal for review)
+### Bounded D13 follow-through (continuation implemented for review)
 
 Preserve PR #39's delivered synthetic report and all 19 requirement IDs. The next
 objective is supplied-evidence follow-through and one evidence-backed **proposed**
@@ -422,12 +422,16 @@ history, fresh description and separate publication, and keep DEL-5 unaffected.
 Retained evidence, unsupported/unattempted retrieval and human access/ownership/judgment
 must remain distinct. A draft was not sent; a source report is not independent proof.
 
-D-037's one-bundle worker limit blocks renewed execution when the artifact cites the
-old and new bundle. Current read eligibility lacks that resource preflight. Preserve
-this denial and history; [D-038](../architecture/d13-bounded-follow-through.md) is a
-Proposed explicit two-bundle version, not approved runtime functionality. A person
-can inspect the fresh brief and follow up manually today. Task usefulness never
-establishes financial authority, a business disposition, customer acceptance or closure.
+D-037's one-bundle worker/history remains unchanged. [Accepted D-038](../architecture/d13-bounded-follow-through.md)
+adds explicit pack v3 / worker v2 and at most two exact retained bundles after fresh
+review and separate publication. Read-only preflight, Workbench and current Challenge
+reports count complete occurrence limits/read scope. Execution rechecks; a third bundle
+is blocked without truncation. The new useful DEL-4 packet retains unverified proof,
+owner/access/terms uncertainty and requires separate task acceptance. Historical
+citations, reviews, reports and exact retries retain their versions. A person can
+inspect the fresh brief and follow up manually when the bound is exceeded. Task
+usefulness never establishes financial authority, business disposition, customer
+acceptance or closure. No real-data activation or external retrieval/message.
 
 The proposed improvement combines initial proof/access/owner/terms questions and
 parallelizes only independently permitted human work. Cite actual scoped observations,

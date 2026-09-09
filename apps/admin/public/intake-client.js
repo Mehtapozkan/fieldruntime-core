@@ -250,7 +250,9 @@ export function createIntakeClient({
     );
     await refreshPack(brief, target);
     if (
-      state.pack?.schema_version === "pack-selection-read.v2" &&
+      ["pack-selection-read.v2", "pack-selection-read.v3"].includes(
+        state.pack?.schema_version,
+      ) &&
       target.case_id
     )
       await refreshWork(target);
@@ -738,16 +740,16 @@ const packVersions = {
 };
 async function validatePackArtifact(a, hash) {
   requireData(
-    ["preparation-pack.v1", "preparation-pack.v2"].includes(
-      a?.schema_version,
-    ) &&
+    [
+      "preparation-pack.v1",
+      "preparation-pack.v2",
+      "preparation-pack.v3",
+    ].includes(a?.schema_version) &&
       a.pack_id === "pack_synthetic_invoice_dispute_north" &&
       a.authority_granted === false &&
       a.closure_permission === false &&
       a.template?.template_id ===
-        (a.schema_version.endsWith(".v2")
-          ? "invoice-dispute-preparation.v2"
-          : "invoice-dispute-preparation.v1") &&
+        `invoice-dispute-preparation.${a.schema_version.split(".").at(-1)}` &&
       a.material?.model_calls === 0 &&
       a.findings?.length === 7 &&
       a.loop_outputs?.length === 6 &&
@@ -756,7 +758,7 @@ async function validatePackArtifact(a, hash) {
   const { version, ...content } = a;
   requireData(
     version ===
-      `pack-${a.schema_version.endsWith(".v2") ? "v2" : "v1"}-${(await intakeHash(content)).slice(7)}` &&
+      `pack-${a.schema_version.split(".").at(-1)}-${(await intakeHash(content)).slice(7)}` &&
       hash === (await intakeHash(a)),
   );
   requireData(
@@ -773,9 +775,11 @@ async function validatePackArtifact(a, hash) {
 }
 export async function validatePackEntry(e) {
   requireData(
-    ["pack-selection-entry.v1", "pack-selection-entry.v2"].includes(
-      e?.schema_version,
-    ) &&
+    [
+      "pack-selection-entry.v1",
+      "pack-selection-entry.v2",
+      "pack-selection-entry.v3",
+    ].includes(e?.schema_version) &&
       e.tenant_id === "tenant_intake_demo" &&
       e.pack_id === "pack_synthetic_invoice_dispute_north" &&
       e.actor?.identity_id === "identity_pack_reviewer_demo" &&
@@ -783,12 +787,12 @@ export async function validatePackEntry(e) {
       e.actor.identity_kind === "human" &&
       equal(
         e.versions,
-        e.schema_version.endsWith(".v2")
-          ? {
-              projection: "preparation-pack.v2",
-              selection: "pack-selection.v2",
-            }
-          : packVersions,
+        e.schema_version.endsWith(".v1")
+          ? packVersions
+          : {
+              projection: `preparation-pack.${e.schema_version.split(".").at(-1)}`,
+              selection: `pack-selection.${e.schema_version.split(".").at(-1)}`,
+            },
       ) &&
       e.operation === e.command?.operation &&
       e.idempotency_key === e.command.idempotency_key &&
@@ -820,9 +824,11 @@ export async function validatePackEntry(e) {
 }
 export async function validatePackResult(v, command) {
   requireData(
-    ["pack-selection-result.v1", "pack-selection-result.v2"].includes(
-      v?.schema_version,
-    ) &&
+    [
+      "pack-selection-result.v1",
+      "pack-selection-result.v2",
+      "pack-selection-result.v3",
+    ].includes(v?.schema_version) &&
       v.status === "recorded" &&
       v.historical_receipt === true &&
       v.authority_granted === false &&
@@ -834,9 +840,11 @@ export async function validatePackResult(v, command) {
 }
 export async function validatePackView(v, target) {
   requireData(
-    ["pack-selection-read.v1", "pack-selection-read.v2"].includes(
-      v?.schema_version,
-    ) &&
+    [
+      "pack-selection-read.v1",
+      "pack-selection-read.v2",
+      "pack-selection-read.v3",
+    ].includes(v?.schema_version) &&
       v.pack_id === "pack_synthetic_invoice_dispute_north" &&
       v.authority_granted === false &&
       v.closure_permission === false &&
@@ -898,7 +906,9 @@ export function workPath(target) {
 }
 export async function validateWorkEntry(e) {
   requireData(
-    e?.schema_version === "preparation-work-entry.v1" &&
+    ["preparation-work-entry.v1", "preparation-work-entry.v2"].includes(
+      e?.schema_version,
+    ) &&
       e.tenant_id === "tenant_intake_demo" &&
       e.authority_granted === false &&
       e.closure_permission === false,
@@ -942,7 +952,9 @@ export async function validateWorkEntry(e) {
 }
 export async function validateWorkReceipt(v, command) {
   requireData(
-    v?.schema_version === "preparation-work-receipt.v1" &&
+    ["preparation-work-receipt.v1", "preparation-work-receipt.v2"].includes(
+      v?.schema_version,
+    ) &&
       v.historical_receipt === true &&
       v.authority_granted === false &&
       v.closure_permission === false,
@@ -953,7 +965,9 @@ export async function validateWorkReceipt(v, command) {
 }
 export async function validateWorkView(v, target) {
   requireData(
-    v?.schema_version === "preparation-work-read.v1" &&
+    ["preparation-work-read.v1", "preparation-work-read.v2"].includes(
+      v?.schema_version,
+    ) &&
       v.case_id === target.case_id &&
       v.record_key === target.record_key &&
       v.authority_granted === false &&
@@ -1010,6 +1024,41 @@ export async function validateWorkView(v, target) {
     v.work_revision === (last?.sequence ?? 0) &&
       v.work_head === (last?.hash ?? null),
   );
+  if (v.schema_version === "preparation-work-read.v2") {
+    const p = v.resource_preflight;
+    requireData(
+      p === null ||
+        (p &&
+          typeof p.eligible === "boolean" &&
+          p.permission_granted === false &&
+          Array.isArray(p.reasons) &&
+          Array.isArray(p.bundle_ids) &&
+          equal(Object.keys(p.counts).sort(), [
+            "associated_support_artifacts",
+            "coverage_rows",
+            "parsed_utf8_bytes",
+            "questions",
+            "retained_bundles",
+          ]) &&
+          equal(Object.keys(p.limits).sort(), Object.keys(p.counts).sort()) &&
+          p.counts.retained_bundles === p.bundle_ids.length &&
+          Object.keys(p.counts).every(
+            (k) =>
+              Number.isSafeInteger(p.counts[k]) &&
+              p.counts[k] >= 0 &&
+              Number.isSafeInteger(p.limits[k]),
+          ) &&
+          (!p.eligible ||
+            (p.reasons.length === 0 &&
+              Object.keys(p.counts).every((k) => p.counts[k] <= p.limits[k])))),
+    );
+    requireData(
+      !v.current.can_start ||
+        (p?.eligible === true &&
+          v.candidate_binding !== null &&
+          v.current.reasons.length === 0),
+    );
+  }
   const pending = [...starts.values()].filter(
     (e) => !terminals.has(e.invocation_id),
   );

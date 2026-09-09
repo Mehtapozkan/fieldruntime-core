@@ -264,7 +264,7 @@ D-013 and D-033 remain unchanged; measured economics stays unimplemented.
    manual synthetic proof notes. Existing v1 and Discovery interpreters are retained.
    Completed description/publication disclosures keep correction and withdrawal
    available. The operator accepted the focused repair and presentation at `5100ef8d`.
-   The first D13 report/rehearsal is implemented for review; customer comparisons remain planned; real-data activation
+   The first D13 report/rehearsal is preserved; bounded continuation is implemented for review; customer comparisons remain planned; real-data activation
    still requires its own approved custody/access/retention boundary. No extra
    framework, scheduler or planning milestone is introduced.
 
@@ -305,29 +305,27 @@ The [read-only report/rehearsal](docs/guides/challenge-report.md) uses existing
 validated preparation exports and proof notes; no new ledger or live permission.
 The synthetic sample separates Cases/records/attempts, task usefulness and business
 outcomes, unknown population/effort and all five proof measures. Failure/retry and
-restart assertions accompany exact-input report reconstruction. This is implemented
-for review; it is not a completed customer Challenge or measured economics.
+restart assertions accompany exact-input report reconstruction. This report is merged; it is not a completed customer Challenge or measured economics.
 
-The completed synthetic report was delivered in open PR #39 at `859b0fe9`; preserve
+The completed report/rehearsal and Accepted D-038 merged in PR #39 at `6b59801d`; preserve
 its calculation and failure-case coverage. This is reporting delivery, not customer
 follow-through or improvement proof.
 
-**Current bounded continuation:** [executable follow-through and proposed improvement](docs/guides/challenge-follow-through.md).
-Supply Orchid's DEL-4 evidence through existing intake, inspect scoped changes,
-retain historical packets/decisions and require fresh descriptive review/publication.
-The existing one-bundle worker correctly refuses the new two-bundle artifact;
-manual follow-through remains possible. [Accepted D-038](docs/architecture/d13-bounded-follow-through.md)
-defines the smallest versioned two-bundle extension and preflight, approved by the
-owner at `639889f6` on 2026-09-09. Implementation is authorized, not yet delivered.
-No runtime boundary change or D14 work is authorized by the rehearsal.
+**Current bounded continuation, implemented for review:**
+[executable follow-through and proposed improvement](docs/guides/challenge-follow-through.md)
+under [Accepted D-038](docs/architecture/d13-bounded-follow-through.md), approved at
+`639889f6`. Explicit pack v3/worker v2 admits at most two exact bundles after fresh
+Discovery review and separate publication. Resource preflight, Workbench and new report
+v2 count complete physical occurrences and permitted read scope; execution rechecks.
+The second DEL-4 packet cites the source report, keeps proof unverified and requires
+new task acceptance. DEL-5, historical packets/retries and old-version replay remain
+intact. Additive migration 0010 preserves 0001–0009. No D14 work.
 
-**Next, after the protected PR #39 merge:** one bounded implementation slice:
-compatible artifact/input versions, aggregate limits, resource-aware read preflight,
-current start/terminal gates, original-key recovery and existing Workbench packet
-inspection. Execute F1–F7; preserve v1/v2 interpretation and all historical receipts.
-No imported-dispute business disposition, financial bridge, customer acceptance or
-closure permission is included. Those missing contracts must be separately specified
-and approved before implementation.
+**Next:** review this slice and the proposed process experiment. The two-bundle limit
+is deliberate; a third source bundle or aggregate overflow requires visible manual
+follow-through, not truncation/history deletion. Broader continuation needs its own
+justified decision. Imported-dispute disposition, independent business observation,
+customer acceptance and closure contracts remain missing and separately gated.
 
 **Improvement decision:** a process owner considers the cited proposal to combine
 proof/access/owner/terms questions and parallelize independent human clarification.

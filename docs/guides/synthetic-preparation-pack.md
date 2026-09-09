@@ -12,6 +12,15 @@ An operator can inspect, publish, compare, withdraw, roll back and export that c
 It does not execute the four-step assignment. D12 still owns useful worker execution
 and separately reviewed minimum proof/correction capture. Customer activation remains unapproved.
 
+Current continuation branch: [Accepted D-038](../architecture/d13-bounded-follow-through.md)
+adds explicit pack v3 and selection v3 with a two-bundle worker profile. The appliance
+selects this template; publishing it is a separate human action. Old v1/v2 publications,
+withdrawals, guarded rollback and exact receipts keep their historical semantics.
+The [continuation walkthrough](challenge-follow-through.md) covers new material,
+fresh descriptive review, separate publication and separate task acceptance. Current
+API command versions must match the validated candidate/read; do not relabel an old
+artifact to gain capacity.
+
 ## Workbench walkthrough
 
 Use the [current-source setup](../../README.md#try-current-source) on main. At

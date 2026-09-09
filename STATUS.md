@@ -1,66 +1,47 @@
 # Status
 
-Current milestone: **D12-B merged; first bounded D13 synthetic Challenge report
-delivered in open PR #39; bounded follow-through rehearsal and improvement proposal
-added for review.** Real-customer processing remains unapproved.
+Current milestone: **D13 report/follow-through preserved; Accepted D-038 bounded
+preparation continuation implemented on this review branch.** Real-customer processing
+remains unapproved; customer comparison and improvement proof are still pending.
 
-PR #38 merged normally at `7db84da759a6a66ed713e5a51bd8f06bfa87e951`, preserving
-reviewed head `5100ef8dfb9c989ac7e6f1197fce1ff261640f8d`. Required
-[CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34311755211),
-both findings were resolved, and the strict up-to-date `validate`, PR, deletion and
-force-push protections were retained. No bypass, release or deployment was used.
+PR #39 preserves the completed read-only [Challenge report](docs/guides/challenge-report.md)
+and [original follow-through rehearsal](docs/guides/challenge-follow-through.md).
+The owner approved D-038 at `639889f677a83a522996dd241d5082ddbadfc1bf` on 2026-09-09;
+that approval was recorded in PR #39 at `f2d2068b`. PR #39 merged normally at
+`6b59801d98cf7ba239701bccc1ca69016f384696` after [required CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34398187483).
+The review finding was resolved; required PR, strict up-to-date validate, deletion and
+force-push protections remain. This implementation starts from that main and stays unmerged.
 
-D13 adds an offline read-only [Challenge report and Operating Capacity Map](docs/guides/challenge-report.md)
-from one replay-validated preparation export. It distinguishes unique Cases, records,
-source revisions and attempts; retains rejected/open/failed/interrupted work and
-links exact packets, citations and historical receipts. Snapshot applicability never
-grants live permission. Repeat preparation does not inflate record coverage or
-newly attended work. All five proof measures and costs retain unknown aggregates
-and original synthetic note lineage, including negative/reversal/reopen/overlap.
+The current API/Workbench explicitly publishes pack v3 and runs worker v2
+(`disposition-code.v3`) across at most two exact retained bundles. After Orchid's new
+record-associated DEL-4 TXT, fresh descriptive review and separate publication, a
+second packet cites the supplied report and asks for original proof, permitted access,
+owner and governing terms. Delivery remains independently unverified; DEL-5 does not
+inherit it. The new packet starts unapproved. Original results, citations, reviews and
+exact retry receipts remain immutable and reconstruct after restart.
 
-The [customer comparison and activation protocol](docs/guides/challenge-customer-protocol.md)
-defines fair inputs/budgets, baseline and complete effort/quality coverage. Manual
-and generic-assistant comparisons, the ten-minute target and paid/returning customer
-experiments are **not run**. No new runtime/API contract, migration, trust boundary,
-authority rule or Workbench behavior is introduced. D-034's customer-scoped custody,
-access and complete-dataset deletion approval is still required before real data.
+Read-only preflight, controls and new Challenge report v2 share occurrence accounting:
+two bundles, 200 physical rows, 20 associated supports, 2 MiB parsed UTF-8 and 64 questions.
+Duplicate occurrences count. Whole-bundle read scope is required. A known blocked record
+is not startable; execution rechecks current C/D/P/U, publication, identity/scope/time and
+exact bundle hashes. Result size/computation remain separately bounded at execution.
+No omitted sources, preview writes, automatic retries or permission from a read.
 
-The first D13 hosted run passed the retained PostgreSQL/API suites and Challenge
-rehearsal, then reached the existing 45-minute job limit during the remaining
-appliance checks. CI now allows 60 minutes for the complete unchanged gate set plus
-the new rehearsal; no runtime budget or acceptance assertion was relaxed.
-Final-head results are recorded on the implementation PR.
+Migration **0010_preparation_continuation** admits new strict versions in the existing
+selection/work tables only. All applied 0001–0009 checksums, Discovery v1/v2 semantics,
+old pack/worker behavior and histories remain unchanged. Old publication never gains
+new capacity. Challenge v1 calculator and rehearsal remain preserved; exact historical
+report reproduction requires the original pinned build/input, not a new digest.
 
-The completed report head `859b0fe9` passed [required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34382457473):
-316 repository, 344 PostgreSQL/API/browser tests, eight additional Workbench scenarios
-and Compose/appliance/restart checks. That reporting implementation remains unchanged.
+One cited process-improvement option still awaits a person's choice and comparable-batch
+test. The worker retrieves nothing externally and sends no messages. Task usefulness
+never establishes cash collected, disputes resolved, credits issued, newly attended
+work or attention released; all five measures retain their units, unknown values,
+negative/reversal/reopen/overlap evidence and costs. Customer baseline/quality/effort,
+real outcomes and acceptance remain missing. No financial bridge or closure permission.
 
-The [follow-through rehearsal and contract map](docs/guides/challenge-follow-through.md)
-now use actual supported intake to supply a record-associated DEL-4 note, attach it
-to Orchid's existing Case, retain stale history, perform fresh descriptive review
-and separate publication, and reconstruct exact receipts after restart. DEL-5 does
-not inherit the claim. C advances 2 → 3; D/P advance 1 → 2; the old packet/approval
-remains historical. No source report becomes independent verification or a business outcome.
-
-A fresh worker command then correctly refuses **WORK_INPUT_LIMIT**: the new artifact
-cites two bundles, while Accepted D-037 permits one. Reads currently report basis
-eligibility before this resource preflight; a true `can_start` is not a successful
-POST. No new invocation or approval is fabricated. [D-038](docs/architecture/d13-bounded-follow-through.md)
-is **Accepted** by the owner at `639889f6` on 2026-09-09, not yet implemented:
-an explicit two-bundle version and preflight under
-unchanged aggregate resource/authority/closure safeguards. Manual inspection and
-follow-through using the fresh brief are available now without that amendment.
-
-One cited improvement proposal combines proof/access/owner/terms questions and
-allows independent human work in parallel, pending a process owner's choice and a
-comparable-batch test. Customer comparisons, baseline, effort/cost completeness and
-business-disposition/observation/customer-acceptance contracts remain missing.
-No runtime, schema, migration or report-calculation change is included in this continuation.
-
-The reviewed D-038 head `639889f6` passed [required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34391313702),
-including the retained PostgreSQL/API/browser, Compose and appliance/restart gates.
-The approval-recording head must pass its own required checks before normal merge.
-No runtime, schema or migration behavior is implemented by recording approval.
+[Executable continuation, API steps and F1–F7](docs/guides/challenge-follow-through.md).
+Local and final-head CI evidence is recorded in the validation section below and PR.
 
 The following D12 implementation account describes merged behavior.
 
@@ -101,9 +82,8 @@ Task acceptance and evaluation approval are separate, confer no business proof a
 never automatically promote worker code, policy or a pack. Full customer comparison,
 source/variant rules, active effort/cost baselines and customer acceptance remain gaps.
 
-**Next:** implement Accepted D-038's narrow two-bundle continuation after the protected
-PR #39 merge. Preserve the completed report/rehearsal and proposed process experiment.
-Do not start D14.
+**Next:** review the bounded continuation and choose whether to test the proposed
+proof/access/owner/terms improvement on a comparable synthetic batch. Do not start D14.
 Name the customer/cohort/custodian and approve the data arrangements plus baseline
 before any real comparison. Business outcomes, customer acceptance and complete costs
 remain missing. No release or deployment.
@@ -1607,3 +1587,31 @@ stale-binding and one-bundle denials, unchanged business state, read-only report
 restart/exact retries. Initial fixture development exposed the real resource limit;
 it was retained as an expected denial, not relaxed. The original Challenge test and
 all existing guards remain; final validation/CI evidence is recorded on PR #39.
+
+## D-038 continuation validation (implementation review branch)
+
+- `pnpm validate`: 318 tests pass, including strict old/new command barriers and
+  unchanged synthetic profile purpose checks; lint/type/format/release checks pass.
+- `pnpm eval:ecc`: 620/620, unchanged frozen corpus/gold. Negative control exits 1
+  for its intended hard-gate assertions (152/620), not a setup error.
+- Local PostgreSQL 18.4/API tests demonstrate two-bundle useful continuation and
+  0009→0010 upgrade, original retry receipts, separate acceptance, occurrence overflow,
+  third-bundle/scope denial, same-delivery conflicts/explicit associations, stale and
+  interrupted/concurrent work, injected persistence failures and coherent proof tampering.
+  Full retained suite results and final-head CI are reported on the implementation PR.
+- Actual appliance entry point: fresh temporary database, current v3 publication/v2
+  preparation, task acceptance, process restart, exports and original-key retries pass.
+- Chromium tests cover lost response, two-tab exact recovery after restart, new review,
+  visible third-bundle blocking, read-only refresh and disclosures. Desktop 1440px and
+  390px captures inspected; useful unsent requests, unverified evidence/owner/terms and
+  controls are readable. Keyboard Enter/focus and citation disclosure checked; no
+  screen-reader or other-browser audit claimed.
+- `git diff --check`: passes. All 19 matrix IDs retained. Applied 0001–0009, strict
+  legacy contracts, frozen ECC, old report calculator and rehearsal remain unchanged.
+- Docker is absent locally: `docker compose config --quiet` exits 127. Local process/
+  PostgreSQL evidence is not Compose evidence. Required final-head hosted `validate`
+  must supply PostgreSQL 17.11, Compose/appliance/restart and retained Workbench gates.
+
+No complete customer comparison, verified delivery/outcome, measured savings, real-data
+activation, release or deployment. The two-bundle ceiling remains an explicit limit;
+manual inspection/follow-through is the fallback beyond it, without deleting history.

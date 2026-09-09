@@ -3,7 +3,7 @@
   "info": {
     "title": "Synthetic intake API",
     "version": "1",
-    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input. Every successful request key, including no-ops, binds its normalized request fingerprint and original outcome/reference. First no-op key retention is metadata only; exact retries return the original status and cause no durable changes. Exports use intake-export.v2; the conformance reader also accepts strict historical v1 exports without no-op key history. Accepted D-035 adds versioned, Case-linked descriptive Discovery review with zero model calls. Confirmation grants no business authority, outcome acceptance or closure. Accepted D-036 adds one fixed preparation-only pack and separate synthetic publication profile. Candidate/selection/history/comparison/export GETs do not write. Publish and rollback require current basis; withdrawal checks the current reviewer and exact selected artifact/head even if its business basis or effectivity is stale. Publication never dispatches workers or grants business authority. Accepted D-037 adds explicitly worker-capable pack v2 and one deterministic synthetic preparation work journal. Fresh publication does not dispatch automatically. A start POST runs bounded preparation; exact retry returns its original start receipt without recomputation. Read current terminal history separately. Task review/correction/evaluation/proof notes grant no business authority or closure."
+    "description": "Accepted D-034. No real customer activation. Preparation and per-row commit are explicit writes; selection preview and GET use consistent read-only snapshots. No caller identity, normalized material or authorization input. Every successful request key, including no-ops, binds its normalized request fingerprint and original outcome/reference. First no-op key retention is metadata only; exact retries return the original status and cause no durable changes. Exports use intake-export.v2; the conformance reader also accepts strict historical v1 exports without no-op key history. Accepted D-035 adds versioned, Case-linked descriptive Discovery review with zero model calls. Confirmation grants no business authority, outcome acceptance or closure. Accepted D-036 adds one fixed preparation-only pack and separate synthetic publication profile. Candidate/selection/history/comparison/export GETs do not write. Publish and rollback require current basis; withdrawal checks the current reviewer and exact selected artifact/head even if its business basis or effectivity is stale. Publication never dispatches workers or grants business authority. Accepted D-037 adds explicitly worker-capable pack v2 and one deterministic synthetic preparation work journal. Fresh publication does not dispatch automatically. A start POST runs bounded preparation; exact retry returns its original start receipt without recomputation. Read current terminal history separately. Task review/correction/evaluation/proof notes grant no business authority or closure. Accepted D-038 adds explicit pack v3 / work v2 for at most two complete retained bundles, resource-aware read-only preflight and unchanged aggregate occurrence limits. New publication and new task acceptance remain separate; old versions and exact receipts keep their original interpretation."
   },
   "servers": [
     {
@@ -408,6 +408,9 @@
                         },
                         {
                           "$ref": "../schemas/preparation-pack.v2.schema.json#/$defs/read"
+                        },
+                        {
+                          "$ref": "../schemas/preparation-pack.v3.schema.json#/$defs/read"
                         }
                       ]
                     },
@@ -418,6 +421,9 @@
                         },
                         {
                           "$ref": "../schemas/preparation-pack.v2.schema.json#/$defs/export"
+                        },
+                        {
+                          "$ref": "../schemas/preparation-pack.v3.schema.json#/$defs/export"
                         }
                       ]
                     }
@@ -463,6 +469,9 @@
                   },
                   {
                     "$ref": "../schemas/preparation-pack.v2.schema.json#/$defs/command"
+                  },
+                  {
+                    "$ref": "../schemas/preparation-pack.v3.schema.json#/$defs/command"
                   }
                 ]
               }
@@ -481,6 +490,9 @@
                     },
                     {
                       "$ref": "../schemas/preparation-pack.v2.schema.json#/$defs/result"
+                    },
+                    {
+                      "$ref": "../schemas/preparation-pack.v3.schema.json#/$defs/result"
                     }
                   ]
                 }
@@ -537,10 +549,24 @@
                 "schema": {
                   "oneOf": [
                     {
-                      "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/read"
+                      "oneOf": [
+                        {
+                          "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/read"
+                        },
+                        {
+                          "$ref": "../schemas/preparation-work.v2.schema.json#/$defs/read"
+                        }
+                      ]
                     },
                     {
-                      "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/export"
+                      "oneOf": [
+                        {
+                          "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/export"
+                        },
+                        {
+                          "$ref": "../schemas/preparation-work.v2.schema.json#/$defs/export"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -567,7 +593,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/command"
+                "oneOf": [
+                  {
+                    "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/command"
+                  },
+                  {
+                    "$ref": "../schemas/preparation-work.v2.schema.json#/$defs/command"
+                  }
+                ]
               }
             }
           }
@@ -578,7 +611,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/receipt"
+                  "oneOf": [
+                    {
+                      "$ref": "../schemas/preparation-work.v1.schema.json#/$defs/receipt"
+                    },
+                    {
+                      "$ref": "../schemas/preparation-work.v2.schema.json#/$defs/receipt"
+                    }
+                  ]
                 }
               }
             }

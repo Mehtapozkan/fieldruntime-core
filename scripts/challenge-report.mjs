@@ -1,7 +1,8 @@
+import { buildReport as buildCurrentReport } from "./lib/challenge-report-v2.mjs";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
-  buildReport,
+  buildReport as buildLegacyReport,
   renderReport,
   reportJson,
 } from "./lib/challenge-report.mjs";
@@ -12,7 +13,18 @@ if (!archiveFile || !manifestFile || !directory || process.argv.length !== 5)
   );
 const archive = JSON.parse(await readFile(archiveFile, "utf8"));
 const manifest = JSON.parse(await readFile(manifestFile, "utf8"));
-const report = await buildReport(archive, manifest);
+if (
+  manifest.schema_version === "challenge-input.v1" &&
+  archive.schema_version !== "preparation-work-export.v1"
+)
+  throw new Error(
+    "Historical report v1 requires a v1 archive and its pinned implementation; use challenge-input.v2 for new history",
+  );
+const report = await (
+  manifest.schema_version === "challenge-input.v2"
+    ? buildCurrentReport
+    : buildLegacyReport
+)(archive, manifest);
 await mkdir(directory, { recursive: true });
 // Never overwrite original inputs or an earlier report. New report = explicit new directory.
 for (const [name, content] of Object.entries({

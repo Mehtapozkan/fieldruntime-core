@@ -1,11 +1,29 @@
 # Synthetic Challenge report and Operating Capacity Map
 
 D13's first bounded delivery is an offline, read-only report over one validated
-`preparation-work-export.v1`. It does not ingest customer data, mutate the appliance,
+preparation export (historical v1; current v1/v2). It does not ingest customer data, mutate the appliance,
 create a second ledger, or grant permission. D12 preparation is merged; customer
 comparisons and real-data activation remain unapproved/not run.
 
-## Calculation contract — challenge-report.v1
+## Current resource-aware reports — challenge-report.v2
+
+The continuation branch accepts `challenge-input.v2` with the same four fields below
+and a replay-validated v1/v2 export. It uses the current fixed synthetic profile and
+shared read-only preflight. A known resource-blocked record is not startable. All
+bundle/row/support/parsed-byte/question occurrences are checked, while business
+coverage still deduplicates record identities. The report creates local output files,
+never appliance records. Snapshot eligibility is not live permission.
+
+Use the [continuation command](challenge-follow-through.md#implemented-two-bundle-continuation-review-branch)
+to obtain a v2 manifest/archive. Existing report v1 calculation code and rehearsal are
+unchanged; their exact historic reports must be reproduced with the pinned source
+commit, Node/tz, implementation digest, original manifest and archive. For example,
+use source `639889f677a83a522996dd241d5082ddbadfc1bf` for its follow-through handoff.
+A new build has a different implementation digest and must not claim the same old
+report hash. The CLI refuses a v1 manifest for new-version history. Creating a new v2
+report is explicit and never rewrites an old report or reinterprets its conclusions.
+
+## Historical calculation contract — challenge-report.v1
 
 Input: one complete preparation export and a strict manifest with only
 `schema_version: challenge-input.v1`, `archive_hash`, `evaluated_at` (canonical UTC,

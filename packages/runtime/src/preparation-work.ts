@@ -1,5 +1,11 @@
 import {
+  preparationResources,
+  requirePreparationResources,
+  exactBundleBindings,
+} from "./preparation-resources.js";
+import {
   assertValidPreparationWorkContract,
+  assertValidPreparationWorkV2Contract,
   canonicalJson,
   immutableJson,
   sha256Json,
@@ -20,6 +26,7 @@ import {
   packSupportManifest,
   historicalPackSupport,
   syntheticWorkerPackContext,
+  syntheticContinuationPackContext,
   type PackState,
   type PackContext,
   type PackTarget,
@@ -29,6 +36,7 @@ import {
   assertWorkReader,
   workActor,
   syntheticWorkerProfile,
+  syntheticContinuationProfile,
 } from "./preparation-worker-profile.js";
 import { prepareDisposition } from "./disposition-preparation.js";
 export interface WorkState {
@@ -45,6 +53,25 @@ export function syntheticWorkContext(): WorkContext {
     profile: syntheticWorkerProfile(),
   };
 }
+export function syntheticContinuationContext(): WorkContext {
+  return {
+    pack: syntheticContinuationPackContext(),
+    profile: syntheticContinuationProfile(),
+  };
+}
+const generation = (v: Obj): number =>
+  v.worker_implementation_id === "disposition-code.v3" ||
+  String(v.schema_version).endsWith(".v2")
+    ? 2
+    : 1;
+function validateWork(
+  kind: Parameters<typeof assertValidPreparationWorkContract>[0],
+  v: unknown,
+): asserts v is Obj {
+  if (v && typeof v === "object" && generation(v as Obj) === 2)
+    assertValidPreparationWorkV2Contract(kind, v);
+  else assertValidPreparationWorkContract(kind, v);
+}
 const same = (a: unknown, b: unknown): boolean =>
   canonicalJson(a) === canonicalJson(b);
 const checked = (
@@ -52,7 +79,7 @@ const checked = (
     "binding" | "input" | "result" | "journal" | "receipt" | "read" | "export",
   v: Obj,
 ): Obj => {
-  assertValidPreparationWorkContract(kind, v);
+  validateWork(kind, v);
   return immutableJson(v);
 };
 const listStrings = (v: unknown): string[] => v as string[];
@@ -60,8 +87,8 @@ const head = (s: WorkState, id: unknown): Obj | undefined =>
   s.entries.filter((e) => e.case_id === id).at(-1);
 const versions = (p: Obj): Obj => ({
   worker: p.implementation_id,
-  validator: "preparation-result-validator.v1",
-  journal: "preparation-work.v1",
+  validator: `preparation-result-validator.v${String(generation(p))}`,
+  journal: `preparation-work.v${String(generation(p))}`,
 });
 const floor = (s: WorkState): string =>
   [
@@ -75,7 +102,7 @@ const floor = (s: WorkState): string =>
 const withoutHash = (e: Obj): Obj =>
   Object.fromEntries(Object.entries(e).filter(([k]) => k !== "hash"));
 export function normalizeWorkCommand(v: unknown): Obj {
-  assertValidPreparationWorkContract("command", v);
+  validateWork("command", v);
   ensure(
     String(v.idempotency_key).trim() &&
       Buffer.byteLength(canonicalJson(v)) <= 131072,
@@ -152,9 +179,15 @@ function currentBinding(
   const v = readPack(s.pack, t, at, c.pack),
     a = v.selected_artifact;
   ensure(
-    a && o(a).schema_version === "preparation-pack.v2",
+    a &&
+      o(a).schema_version ===
+        (generation(c.profile) === 2
+          ? "preparation-pack.v3"
+          : "preparation-pack.v2"),
     "WORK_COMPATIBILITY_REQUIRED",
-    "Explicit worker-capable v2 publication is required; v1 prohibits dispatch",
+    generation(c.profile) === 2
+      ? "Explicit compatible v3 publication is required; historical publications do not gain new capacity"
+      : "Explicit worker-capable v2 publication is required; v1 prohibits dispatch",
   );
   ensure(
     o(v.current).eligible,
@@ -164,6 +197,11 @@ function currentBinding(
   const artifact = o(a),
     basis = o(artifact.binding),
     manifest = o(basis.manifest);
+  const resources =
+    generation(c.profile) === 2
+      ? preparationResources(s.pack, artifact, c.profile)
+      : null;
+  if (resources) requirePreparationResources(resources.preflight);
   return checked("binding", {
     tenant_id: INTAKE_TENANT,
     case_id: t.case_id,
@@ -178,6 +216,9 @@ function currentBinding(
     basis,
     worker_implementation_id: c.profile.implementation_id,
     worker_profile_hash: sha256Json(c.profile),
+    ...(resources
+      ? { retained_bundles: exactBundleBindings(resources.bundles) }
+      : {}),
   });
 }
 function startOf(s: WorkState, id: unknown): Obj {
@@ -221,6 +262,18 @@ export function workInput(s: WorkState, start: Obj): Obj {
     "WORK_INTEGRITY",
     "Original worker subject is missing",
   );
+  const modern = generation(b) === 2;
+  const resources = modern
+    ? preparationResources(s.pack, o(artifact), o(start.worker_profile))
+    : null;
+  if (resources) {
+    requirePreparationResources(resources.preflight);
+    ensure(
+      same(b.retained_bundles, exactBundleBindings(resources.bundles)),
+      "WORK_INTEGRITY",
+      "The exact participating bundle binding changed",
+    );
+  }
   const supports = l(bundle.artifacts).filter(
     (a) =>
       a.role === "support" &&
@@ -236,28 +289,36 @@ export function workInput(s: WorkState, start: Obj): Obj {
   const parsed = l(bundle.artifacts)
     .filter((a) => a.interpretation !== "retained_only")
     .reduce((n, a) => n + Number(a.byte_length), 0);
-  ensure(
-    new Set([
-      bundle.id,
-      ...l(o(artifact).sources).map((source) => source.bundle_id),
-    ]).size <= WORK_LIMITS.retained_bundles &&
-      Number(o(bundle.coverage).physical_records) <=
-        WORK_LIMITS.coverage_rows &&
-      supports.length <= WORK_LIMITS.associated_support_artifacts &&
-      parsed <= WORK_LIMITS.parsed_utf8_bytes,
-    "WORK_INPUT_LIMIT",
-    "The fixed worker input limit was exceeded; no evidence was truncated",
-  );
+  if (!modern)
+    ensure(
+      new Set([
+        bundle.id,
+        ...l(o(artifact).sources).map((source) => source.bundle_id),
+      ]).size <= WORK_LIMITS.retained_bundles &&
+        Number(o(bundle.coverage).physical_records) <=
+          WORK_LIMITS.coverage_rows &&
+        supports.length <= WORK_LIMITS.associated_support_artifacts &&
+        parsed <= WORK_LIMITS.parsed_utf8_bytes,
+      "WORK_INPUT_LIMIT",
+      "The fixed worker input limit was exceeded; no evidence was truncated",
+    );
   return checked("input", {
-    schema_version: "preparation-worker-input.v1",
+    schema_version: modern
+      ? "preparation-worker-input.v2"
+      : "preparation-worker-input.v1",
     invocation_id: start.invocation_id,
     started_entry_hash: start.hash,
     binding: b,
     artifact,
     selected_record: record,
     covered_records: bundle.records,
-    associated_support_count: supports.length,
-    parsed_utf8_bytes: parsed,
+    associated_support_count: resources
+      ? o(resources.preflight.counts).associated_support_artifacts
+      : supports.length,
+    parsed_utf8_bytes: resources
+      ? o(resources.preflight.counts).parsed_utf8_bytes
+      : parsed,
+    ...(resources ? { retained_bundles: resources.bundles } : {}),
   });
 }
 function assertAt(s: WorkState, at: string): void {
@@ -290,7 +351,7 @@ function baseEntry(
     fp = command ? sha256Json(command) : null,
     invocation = start?.invocation_id ?? `preparation_${String(fp).slice(7)}`;
   return {
-    schema_version: "preparation-work-entry.v1",
+    schema_version: `preparation-work-entry.v${String(Math.max(generation(c.profile), start ? generation(start) : 1, command ? generation(command) : 1))}`,
     tenant_id: INTAKE_TENANT,
     case_id: caseId,
     record_key: b.record_key,
@@ -544,6 +605,12 @@ export function appendWorkCommand(
   assertWorkReader(c.profile);
   if (command.operation === "start") {
     const b = o(command.binding);
+    ensure(
+      generation(command) === generation(c.profile) &&
+        generation(b) === generation(c.profile),
+      "WORK_COMPATIBILITY_REQUIRED",
+      "The command version must match the explicitly published worker capacity",
+    );
     assertHead(s, b.case_id, command);
     noPending(s, b.case_id);
     const current = currentBinding(
@@ -705,7 +772,7 @@ export function appendWorkCommand(
   );
 }
 export function validateWorkerResult(input: Obj, value: unknown): Obj {
-  assertValidPreparationWorkContract("result", value);
+  validateWork("result", value);
   ensure(
     Buffer.byteLength(canonicalJson(value)) <= WORK_LIMITS.result_bytes &&
       l(o(value.follow_up).requests).length <= WORK_LIMITS.questions,
@@ -794,7 +861,7 @@ export function appendWorkTerminal(
 }
 export function workReceipt(e: Obj): Obj {
   return checked("receipt", {
-    schema_version: "preparation-work-receipt.v1",
+    schema_version: `preparation-work-receipt.v${String(generation(e))}`,
     status: "recorded",
     entry: e,
     historical_receipt: true,
@@ -812,7 +879,7 @@ export function assertWorkState(s: WorkState): void {
       String(a.case_id).localeCompare(String(b.case_id)) ||
       Number(a.sequence) - Number(b.sequence),
   )) {
-    assertValidPreparationWorkContract("journal", entry);
+    validateWork("journal", entry);
     ensure(
       entry.hash === sha256Json(withoutHash(entry)),
       "WORK_INTEGRITY",
@@ -894,16 +961,45 @@ export function readWork(
   recordKey: string,
   at: string,
   c: WorkContext = syntheticWorkContext(),
+  resourceAware = generation(c.profile) === 2,
 ): Obj {
   assertWorkReader(c.profile);
   const t = target(s, caseId, recordKey),
     last = head(s, caseId),
     entries = s.entries.filter((e) => e.case_id === caseId);
   let binding: Obj | null = null;
-  const reasons = why(() => {
-    assertAt(s, at);
-    binding = currentBinding(s, t, at, c);
-  });
+  let preflight: Obj | null = null;
+  const resourceReasons = resourceAware
+    ? why(() => {
+        const v = readPack(s.pack, t, at, c.pack);
+        if (v.candidate)
+          preflight = preparationResources(
+            s.pack,
+            o(v.candidate),
+            c.profile,
+          ).preflight;
+        if (preflight) requirePreparationResources(preflight);
+      })
+    : [];
+  const reasons = [
+    ...resourceReasons,
+    ...why(() => {
+      assertAt(s, at);
+      const current = currentBinding(s, t, at, c);
+      binding = current;
+      if (resourceAware && generation(c.profile) === 1) {
+        const a = s.pack.entries.find(
+          (e) =>
+            e.artifact_hash === current.artifact_hash &&
+            e.operation === "publish",
+        )?.artifact;
+        if (a)
+          requirePreparationResources(
+            preparationResources(s.pack, o(a), c.profile).preflight,
+          );
+      }
+    }),
+  ];
   const pending = entries.find(
     (e) => e.event === "started" && !terminalOf(s, e.invocation_id),
   );
@@ -970,7 +1066,13 @@ export function readWork(
   return checked(
     "read",
     withHash({
-      schema_version: "preparation-work-read.v1",
+      schema_version:
+        resourceAware || s.entries.some((e) => generation(e) === 2)
+          ? "preparation-work-read.v2"
+          : "preparation-work-read.v1",
+      ...(resourceAware || s.entries.some((e) => generation(e) === 2)
+        ? { resource_preflight: preflight }
+        : {}),
       case_id: caseId,
       record_key: recordKey,
       evaluated_at: at,
@@ -997,7 +1099,13 @@ export function exportWorkState(s: WorkState): Obj {
   return checked(
     "export",
     withHash({
-      schema_version: "preparation-work-export.v1",
+      schema_version:
+        s.entries.some((e) => generation(e) === 2) ||
+        s.pack.entries.some(
+          (e) => e.schema_version === "pack-selection-entry.v3",
+        )
+          ? "preparation-work-export.v2"
+          : "preparation-work-export.v1",
       pack: exportPackState(s.pack),
       entries: s.entries,
       authority_granted: false,
@@ -1006,7 +1114,7 @@ export function exportWorkState(s: WorkState): Obj {
   );
 }
 export function validateWorkExport(v: unknown): WorkState {
-  assertValidPreparationWorkContract("export", v);
+  validateWork("export", v);
   ensure(
     v.hash === sha256Json(withoutHash(v)),
     "WORK_INTEGRITY",
