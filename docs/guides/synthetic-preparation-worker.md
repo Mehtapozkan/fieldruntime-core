@@ -18,11 +18,14 @@ Use Node 24.19.0 / tzdata 2026b, pnpm 11.24.0 and the existing
 3. Inspect the fixed v2 candidate, give a selection reason/expiry and separately
    **Publish for preparation**. An old v1 publication never gains dispatch permission.
 4. Select **Prepare evidence-request packet**. This explicit command runs the fixed
-   worker once; reads never start work. Inspect the checklist, scoped reconciliation
-   and **unsent follow-up**. Orchid's DEL-4 note reports missing confirmation; that
+   worker once; reads never start work. The actual **unsent follow-up excerpt** and
+   key evidence requests appear beside/before task acceptance. Expand the complete
+   draft, checklist and scoped citations as needed. Orchid's DEL-4 note reports missing confirmation; that
    neither proves non-delivery nor justifies its reported $15,000 disputed amount.
 5. Give a task-review reason and **Accept preparation packet**, reject, request
-   modification or escalate. Task acceptance means usefulness for preparation only.
+   modification or escalate. **Request modification** reveals and focuses the proposed
+   change; **Submit modification request** records it with the required reason.
+   Task acceptance means usefulness for preparation only.
    Accountable business owner, governing terms, original impact and closure remain unknown.
 6. Reload: starts, results, task reviews, corrections and proof notes reconstruct from
    PostgreSQL. Completed description/publication sections remain expandable, including
@@ -61,7 +64,12 @@ The strict [OpenAPI](../../packages/contracts/openapi/intake.v1.openapi.json) an
 [work contracts](../../packages/contracts/schemas/preparation-work.v1.schema.json)
 are authoritative shapes. With an explicitly published pack, GET
 `/v1/intake/preparation-work?case_id=CASE&record_key=RECORD` returns exact current
-`candidate_binding`, Case-local `work_revision` U and `work_head`. Submit:
+`candidate_binding`, Case-local `work_revision` U and `work_head`. Validate the read,
+including its hash/Case history chain and exact target, before preparing a command.
+`history` covers the **whole Case**, while `invocations` contains only the selected
+record's results. A fresh run names the latest Case-wide **started** entry, even
+when that invocation belongs to another record. Keep result/review/proof inspection
+record-scoped. Submit:
 
 ```js
 const command = {
@@ -70,7 +78,9 @@ const command = {
   binding: view.candidate_binding,
   expected_work_revision: view.work_revision,
   expected_work_head: view.work_head,
-  replaces_invocation: view.invocations.at(-1)?.invocation_id ?? null,
+  replaces_invocation:
+    view.history.filter((entry) => entry.event === "started").at(-1)
+      ?.invocation_id ?? null,
   idempotency_key: "operator-chosen-original-key",
 };
 // POST /v1/intake/preparation-work/commands with JSON.stringify(command)
@@ -81,6 +91,10 @@ Save the exact bytes/key **before sending**. The response is the original immuta
 a start receipt alone is not successful preparation. Exact retry returns that same
 receipt without recomputing, writing or renewing permission. A lost response keeps
 its original key; a deliberate fresh run uses a new key and exact replacement lineage.
+When another record on this Case has a pending start, **Open pending preparation’s
+record** uses that start's validated binding. It only navigates/reads. Recover the
+original saved command first where needed, then explicitly interrupt the pending run;
+no new invocation or result is invented by navigation.
 One atomic IndexedDB slot protects intake, Discovery, publication and work commands
 across tabs. A conflicting claim cannot send or overwrite; clear compares command identity.
 
@@ -107,6 +121,35 @@ Reject/modify/escalate close that task review; modify also requires
 stale execution does not grant acceptance. An interrupted run cannot accept a late result.
 A pending run after crash does **not** resume: recover the original receipt, explicitly
 interrupt with reason/U/head, then inspect fresh permission before a new invocation.
+
+## Shared-Case replacement regression
+
+The disposable test fixture commits North dispute-17 and dispute-18, both Orchid,
+to one explicitly chosen Case before descriptive review. It separately confirms both
+descriptions, then explicitly publishes the current v2 candidate for A → B → A.
+Same customer/entity does not transfer source evidence, a publication or task acceptance.
+Returning to A requires deliberate republication; no silent rebasing occurs.
+
+At `ba43c7e`, both API/helper and actual Chromium commands returned **200, 409, 409**:
+B sent null replacement, and returning to A cited A's old run. Each 409 was
+`WORK_REPLACEMENT_REQUIRED`. To observe the second failure, the reproduction first
+completed B using the server-required Case-wide reference. First/repeat single-record
+controls passed. The repair changes command preparation, not server ordering/history.
+The regression now requires three successful starts with A → B → A replacement
+lineage, record-specific results, original-key retries and no transferred reviews.
+
+```bash
+# After pnpm build; requires disposable local PostgreSQL and installed Chromium.
+D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime \
+  node --test --test-name-pattern='shared-Case|single-record first' \
+  scripts/preparation-work-postgres.test.mjs scripts/preparation-work-browser.test.mjs
+```
+
+These assertions include restart, lost-response recovery, Case-wide pending exclusion,
+read-only navigation back to the original record, explicit interruption, stale/wrong
+replacement denials and unchanged histories on exact retries. Fault injection stays
+inside the disposable test host, never the ordinary appliance API. No contract,
+interpreter, migration or historical receipt changes are needed for this repair.
 
 ## Correction and lightweight proof
 

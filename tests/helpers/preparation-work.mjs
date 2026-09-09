@@ -1,5 +1,11 @@
 import { intakeHost } from "./intake-postgres.mjs";
-import { preparedDiscovery, discoveryCommand } from "./discovery.mjs";
+import {
+  preparedDiscovery,
+  discoveryCommand,
+  discoveryPath,
+  reviewPath,
+  scopedDeliveries,
+} from "./discovery.mjs";
 export const WORK = "/v1/intake/preparation-work";
 export const PACK =
   "/v1/intake/preparation-packs/pack_synthetic_invoice_dispute_north";
@@ -36,6 +42,58 @@ export const start = (v, key = "start-worker") => ({
   binding: v.candidate_binding,
   expected_work_revision: v.work_revision,
   expected_work_head: v.work_head,
-  replaces_invocation: v.invocations.at(-1)?.invocation_id ?? null,
+  replaces_invocation:
+    v.history.filter((entry) => entry.event === "started").at(-1)
+      ?.invocation_id ?? null,
   idempotency_key: key,
 });
+
+// Two separately identified North records explicitly committed to one Case.
+// Complete both attachments before review: attachment changes C, never consent.
+export async function sharedCaseWork(t) {
+  const h = await intakeHost(t, { work: true });
+  let v = await h.prepare(
+    await scopedDeliveries("shared-case-work", "distinct-records"),
+  );
+  const first = (
+    await h.ok(
+      "/v1/intake/commits",
+      await h.selection(v, 0, {
+        target: { mode: "create", expected_case_version: 0 },
+        key: "attach-a",
+      }),
+    )
+  ).receipt;
+  v = await h.ok(`/v1/intake/bundles/${v.bundle.id}`);
+  await h.ok(
+    "/v1/intake/commits",
+    await h.selection(v, 1, {
+      target: {
+        mode: "attach",
+        case_id: first.case_id,
+        expected_case_version: first.case_version,
+      },
+      key: "attach-b",
+    }),
+  );
+  const records = [];
+  for (const index of [0, 1]) {
+    const d = {
+      path: discoveryPath(v, first.case_id, index),
+      post: reviewPath(v),
+    };
+    d.get = () => h.ok(d.path);
+    await h.ok(
+      d.post,
+      discoveryCommand(await d.get(), `describe-${index}`, "confirm"),
+    );
+    const b = (await d.get()).binding;
+    records.push({
+      d,
+      b,
+      path: `${WORK}?case_id=${b.case_id}&record_key=${b.record_key}`,
+      packPath: `${PACK}?bundle_id=${b.bundle_id}&record_key=${b.record_key}&case_id=${b.case_id}`,
+    });
+  }
+  return { h, ...records[0], records };
+}

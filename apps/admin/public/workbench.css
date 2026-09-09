@@ -2514,6 +2514,19 @@ button {
   flex-wrap: wrap;
   gap: 8px;
 }
+.work-controls [hidden] {
+  display: none;
+}
+.work-preview {
+  border-top: 1px solid var(--line);
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+}
+.work-preview blockquote {
+  margin: 0.5rem 0;
+  padding-left: 0.8rem;
+  border-left: 3px solid var(--line);
+}
 .preparation-work {
   overflow-wrap: anywhere;
 }

@@ -538,6 +538,17 @@ export function mountIntakeWorkbench() {
         ? s.workConfirmed.entry
         : null;
     const latest = matches ? v.invocations.at(-1) : null;
+    // Concurrency and replacement are Case-wide; results stay record-scoped.
+    const prior = matches
+      ? v.history.filter((e) => e.event === "started").at(-1)
+      : null;
+    const pending = matches
+      ? v.history.find(
+          (e) =>
+            e.event === "started" &&
+            e.invocation_id === v.current.pending_invocation,
+        )
+      : null;
     const newer =
       confirmed?.event === "started" &&
       !v?.history.some((e) => e.hash === confirmed.hash);
@@ -570,6 +581,19 @@ export function mountIntakeWorkbench() {
         focus?.focus();
       });
     const blocked = !current || s.busy || !!s.pending;
+    const cite = (ids) => {
+      const node = el("details", undefined, "intake-source");
+      node.append(el("summary", "Supporting citations"));
+      for (const id of [...new Set(ids)]) {
+        const source = v.sources.find((x) => x.id === id);
+        if (source) {
+          node.append(el("p", `${source.name} · ${source.interpretation}`));
+          if (source.excerpt) node.append(el("blockquote", source.excerpt));
+          node.append(detail("Source locator and binding", source));
+        }
+      }
+      return node;
+    };
     const receiptNotice = confirmed
       ? el(
           "p",
@@ -621,6 +645,33 @@ export function mountIntakeWorkbench() {
             "review-notice",
           ),
         );
+      const preview = el("section", undefined, "work-preview");
+      const first = r.follow_up.requests[0];
+      const end = r.follow_up.draft.indexOf(first.text) + first.text.length;
+      preview.append(
+        el("h3", "Unsent follow-up — excerpt"),
+        el("blockquote", r.follow_up.draft.slice(0, end)),
+        cite(first.citation_ids),
+      );
+      const otherRequests = r.follow_up.requests.slice(1);
+      // Keep the terms/owner request visible, even for a multi-delivery packet.
+      if (otherRequests.length)
+        preview.append(el("p", `Also asks: ${otherRequests.at(-1).text}`));
+      if (otherRequests.length > 1)
+        preview.append(
+          el(
+            "p",
+            `${otherRequests.length - 1} more scoped evidence request(s) in the complete draft.`,
+          ),
+        );
+      const full = el("details", undefined, "work-draft");
+      full.append(
+        el("summary", "Inspect the complete unsent follow-up"),
+        el("pre", r.follow_up.draft),
+        cite(r.follow_up.draft_citation_ids),
+      );
+      preview.append(full);
+      summary.append(preview);
       controls.append(
         el(
           "p",
@@ -636,6 +687,8 @@ export function mountIntakeWorkbench() {
           );
         reason.node.oninput = () => (d.reason = reason.node.value);
         proposal.node.oninput = () => (d.proposal = proposal.node.value);
+        proposal.wrap.hidden = !d.modifying;
+        proposal.node.id = "work-modification";
         controls.append(reason.wrap);
         const actions = el("div", undefined, "work-actions");
         for (const [decision, label] of [
@@ -644,26 +697,44 @@ export function mountIntakeWorkbench() {
           ["modify", "Request modification"],
           ["escalate", "Escalate for human attention"],
         ]) {
+          const submit = send(() => {
+            if (!d.reason?.trim())
+              throw new Error("Give a task review reason.");
+            if (decision === "modify" && !d.proposal?.trim())
+              throw new Error("Give a proposed modification.");
+            return {
+              schema_version: "preparation-task-review.v1",
+              operation: "task_review",
+              purpose: "preparation_usefulness",
+              ...base(),
+              result_hash: latest.result_hash,
+              decision,
+              reason: d.reason,
+              ...(decision === "modify"
+                ? { replacement_proposal: d.proposal ?? "" }
+                : {}),
+            };
+          });
           const b = button(
-            label,
-            send(() => {
-              if (!d.reason?.trim())
-                throw new Error("Give a task review reason.");
-              return {
-                schema_version: "preparation-task-review.v1",
-                operation: "task_review",
-                purpose: "preparation_usefulness",
-                ...base(),
-                result_hash: latest.result_hash,
-                decision,
-                reason: d.reason,
-                ...(decision === "modify"
-                  ? { replacement_proposal: d.proposal ?? "" }
-                  : {}),
-              };
-            }),
+            decision === "modify" && d.modifying
+              ? "Submit modification request"
+              : label,
+            decision === "modify"
+              ? () => {
+                  if (d.modifying) return submit();
+                  d.modifying = true;
+                  proposal.wrap.hidden = false;
+                  b.textContent = "Submit modification request";
+                  b.setAttribute("aria-expanded", "true");
+                  proposal.node.focus();
+                }
+              : submit,
             decision === "approve",
           );
+          if (decision === "modify") {
+            b.setAttribute("aria-expanded", String(!!d.modifying));
+            b.setAttribute("aria-controls", proposal.node.id);
+          }
           b.disabled =
             blocked ||
             (decision === "approve"
@@ -736,7 +807,7 @@ export function mountIntakeWorkbench() {
         binding: v.candidate_binding,
         expected_work_revision: v.work_revision,
         expected_work_head: v.work_head,
-        replaces_invocation: v.invocations.at(-1)?.invocation_id ?? null,
+        replaces_invocation: prior?.invocation_id ?? null,
         idempotency_key: uid(),
       })),
       !r,
@@ -770,30 +841,32 @@ export function mountIntakeWorkbench() {
       b.disabled = blocked;
       controls.append(reason.wrap, b);
     }
+    if (pending && pending.record_key !== target.record_key) {
+      const b = pending.command.binding;
+      const route = button(
+        "Open pending preparation’s record",
+        act(async () => {
+          await client.openDiscovery({
+            bundle_id: b.basis.discovery.bundle_id,
+            case_id: b.case_id,
+            record_key: b.record_key,
+          });
+          discoveryFocus();
+        }),
+      );
+      route.disabled = s.busy;
+      controls.prepend(
+        el(
+          "p",
+          `${current ? "Another record on this Case has pending preparation." : "The last validated read showed pending preparation for another record; current status is unconfirmed."} Open its record to inspect or explicitly interrupt it; recovery keeps the original command.`,
+        ),
+        route,
+      );
+    }
     columns.append(summary, controls);
     box.append(columns);
     if (receiptNotice) box.append(receiptNotice);
-    const cite = (ids) => {
-      const node = el("details", undefined, "intake-source");
-      node.append(el("summary", "Supporting citations"));
-      for (const id of [...new Set(ids)]) {
-        const source = v.sources.find((x) => x.id === id);
-        if (source) {
-          node.append(el("p", `${source.name} · ${source.interpretation}`));
-          if (source.excerpt) node.append(el("blockquote", source.excerpt));
-          node.append(detail("Source locator and binding", source));
-        }
-      }
-      return node;
-    };
     if (r) {
-      const draft = el("details", undefined, "review-card work-draft");
-      draft.append(
-        el("summary", "Inspect the unsent follow-up"),
-        el("pre", r.follow_up.draft),
-        cite(r.follow_up.draft_citation_ids),
-      );
-      box.append(draft);
       const evidence = el("details", undefined, "review-card work-evidence");
       evidence.append(
         el("summary", "Checklist, scoped reconciliation & step evidence"),

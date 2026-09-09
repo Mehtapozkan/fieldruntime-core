@@ -976,7 +976,12 @@ export async function validateWorkView(v, target) {
     );
     last = e;
     if (e.event === "started") {
-      requireData(e.binding_hash === (await intakeHash(e.command.binding)));
+      requireData(
+        e.binding_hash === (await intakeHash(e.command.binding)) &&
+          e.case_id === e.command.binding.case_id &&
+          e.record_key === e.command.binding.record_key &&
+          !starts.has(e.invocation_id),
+      );
       starts.set(e.invocation_id, e);
     } else {
       const start = starts.get(e.invocation_id);
@@ -1004,6 +1009,14 @@ export async function validateWorkView(v, target) {
   requireData(
     v.work_revision === (last?.sequence ?? 0) &&
       v.work_head === (last?.hash ?? null),
+  );
+  const pending = [...starts.values()].filter(
+    (e) => !terminals.has(e.invocation_id),
+  );
+  requireData(
+    pending.length <= 1 &&
+      v.current.pending_invocation === (pending[0]?.invocation_id ?? null) &&
+      (!pending.length || !v.current.can_start),
   );
   const selected = [...starts.values()].filter(
     (e) => e.record_key === v.record_key,

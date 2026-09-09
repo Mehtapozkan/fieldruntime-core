@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import {
+  validateWorkView,
+  intakeHash,
+} from "../apps/admin/public/intake-client.js";
 import test from "node:test";
 import {
   discoveryCommand,
@@ -11,6 +15,7 @@ import {
   preparedWork,
   publication,
   start,
+  sharedCaseWork,
 } from "../tests/helpers/preparation-work.mjs";
 test("D12 W1/W3 API: explicit v2 publication, preparation and exact task target; read-only inspection", async (t) => {
   const { h, d, path, packPath } = await preparedWork(t);
@@ -58,6 +63,100 @@ import { workColumns } from "../dist/packages/runtime/src/postgres-preparation-w
 import { setTimeout as delay } from "node:timers/promises";
 import { intakeInput, editQueue } from "../tests/helpers/intake.mjs";
 const POST = `${WORK}/commands`;
+test("D12 W5 shared-Case A to B to A uses Case replacement ordering", async (t) => {
+  const {
+    h,
+    records: [a, b],
+  } = await sharedCaseWork(t);
+  const receipts = [],
+    commands = [];
+  for (const [i, record] of [a, b, a].entries()) {
+    await h.ok(
+      `${PACK}/selections/publication`,
+      publication(await h.ok(record.packPath), `publish-${i}`),
+    );
+    const view = await h.ok(record.path),
+      command = start(view, `start-${i}`);
+    assert.equal(view.current.can_start, true);
+    assert.equal(
+      command.replaces_invocation,
+      receipts.at(-1)?.entry.invocation_id ?? null,
+    );
+    const before = await h.snapshot();
+    if (i) {
+      const wrong = await h.call(POST, {
+        ...command,
+        replaces_invocation: view.invocations.at(-1)?.invocation_id ?? null,
+      });
+      assert.equal(wrong.status, 409);
+      assert.equal(wrong.data.error, "WORK_REPLACEMENT_REQUIRED");
+      assert.deepEqual(await h.snapshot(), before);
+    }
+    const response = await h.call(POST, command);
+    t.diagnostic(
+      JSON.stringify({
+        step: ["A first", "B first", "A repeat"][i],
+        status: response.status,
+        result: response.data.error ?? response.data.entry?.event,
+      }),
+    );
+    assert.equal(response.status, 200, JSON.stringify(response.data));
+    commands.push(command);
+    receipts.push(response.data);
+    const after = await h.snapshot();
+    assert.deepEqual(business(after), business(before));
+    await h.restart();
+    assert.deepEqual(await h.ok(POST, command), response.data);
+    assert.deepEqual(await h.snapshot(), after);
+    const run = (await h.ok(record.path)).invocations.at(-1);
+    assert.equal(
+      run.result.subject.record_id,
+      i === 1 ? "dispute-18" : "dispute-17",
+    );
+    assert.equal(run.can_accept, true);
+    assert.equal(run.review, null);
+  }
+  const av = await h.ok(a.path),
+    bv = await h.ok(b.path);
+  assert.equal(av.invocations.length, 2);
+  assert.equal(bv.invocations.length, 1);
+  assert.deepEqual(av.history, bv.history);
+  assert.equal(av.work_revision, 6);
+  assert.equal(bv.invocations[0].current_usable, false);
+  const before = await h.snapshot();
+  for (const [i, command] of commands.entries())
+    assert.deepEqual(await h.ok(POST, command), receipts[i]);
+  assert.equal(
+    (await h.call(POST, { ...commands[0], idempotency_key: "stale-U" })).status,
+    409,
+  );
+  assert.equal(
+    (await h.call(POST, { ...commands[1], replaces_invocation: null })).data
+      .error,
+    "IDEMPOTENCY_CONFLICT",
+  );
+  validateWorkExport(await h.ok(`${a.path}&representation=export`));
+  await validateWorkView(av, a.b);
+  for (const pending of [receipts[0].entry.invocation_id, "invented-pending"]) {
+    const bad = structuredClone(av);
+    bad.current.pending_invocation = pending;
+    delete bad.hash;
+    bad.hash = await intakeHash(bad);
+    await assert.rejects(() => validateWorkView(bad, a.b));
+  }
+  assert.deepEqual(await h.snapshot(), before);
+});
+test("D12 W5 single-record first and repeat control", async (t) => {
+  const { h, path } = await published(t);
+  for (const key of ["first", "repeat"]) {
+    const command = start(await h.ok(path), key);
+    const receipt = await h.ok(POST, command),
+      snapshot = await h.snapshot();
+    assert.deepEqual(await h.ok(POST, command), receipt);
+    assert.deepEqual(await h.snapshot(), snapshot);
+  }
+  assert.equal((await h.ok(path)).invocations.length, 2);
+});
 const review = (v, decision = "approve") => ({
   schema_version: "preparation-task-review.v1",
   operation: "task_review",

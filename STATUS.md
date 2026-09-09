@@ -1441,3 +1441,51 @@ the primary journey deliberately delays the response by 5.5 seconds and still
 requires the validated completed packet. The worker's five-second computation
 limit and its timeout/lock-wait regressions are unchanged. Final-head CI is linked
 in the PR; a failed earlier run is not reported as passing appliance evidence.
+
+## PR #38 Case/record replacement and review-layout repair
+
+Starting at `ba43c7e1bc1b148fb9dfcc83480ecf3c2ba90061`, two same-scope North records
+explicitly attached to one Case reproduced **200 → 409 → 409** through both the
+PostgreSQL/API helper and actual Chromium Workbench. Both records had valid
+D10 descriptions and explicit current v2 publications. B's first start sent null;
+returning to A sent A's old invocation after a correctly bound B run. The server
+correctly rejected both as `WORK_REPLACEMENT_REQUIRED`. Single-record first/repeat
+controls passed. This was a command-preparation mismatch, not a server ordering repair.
+
+The Workbench, helper and executable example now select the latest **Case-wide
+started entry from validated history**, retaining record-filtered results/reviews/proof.
+The client reconciles pending identity against that history. Another record's pending
+invocation has an explicit read-only route back to its original record; saved command
+bytes/key remain unchanged across navigation, tabs, restart and exact recovery.
+The original server U/head, current input/publication checks, one-pending-run rule and
+interruption fences are preserved. No runtime contract, interpreter, migration or
+historical receipt changes. Earlier five-measure/proof and authority/closure limits remain.
+
+The actual unsent draft excerpt and key evidence requests are visible before/beside
+acceptance. Complete draft and citations remain expandable; terms, accountable owners
+and impact remain unconfirmed. Request modification reveals/focuses its required input;
+accept/reject/escalate, visible intervention errors and the skip link remain. Task
+acceptance still records preparation usefulness only.
+
+Focused before/after, final validation and downloadable desktop/390px captures are
+reported against the repaired commit in PR #38. No release/deployment or next-milestone
+work is included; review D12-B usefulness before the planned D13 comparison.
+
+Local repair validation passes: **312 repository tests**, ECC **620/620** and its
+intended negative control (**152/620**, exit **1**, failed assertions). The complete
+retained PostgreSQL 18.4/API/browser run passes **341/341**, no skips: 273 retained
+D6–D11 plus 59 D12 API and nine D12 Chromium scenarios. This includes A → B → A,
+wrong replacement/stale U denials, original-key retries after restart, lost responses,
+cross-tab pending-record navigation and explicit interruption. The actual native
+appliance entry-point preparation/review/API-restart/export smoke also passes.
+
+Desktop 1440px and 390px prepared views were visually inspected with the actual draft
+excerpt visible; the final captures match those inspected bytes. The final shared-Case
+return-to-A desktop capture was also inspected. Material uncertainty, scoped requests,
+progress and controls are readable, with no tested horizontal overflow; mobile still
+requires vertical scrolling. Keyboard preparation, reason-to-accept traversal,
+modification focus and pending-record navigation pass. Screen-reader and other-browser
+checks were not run. All 19 original matrix IDs, 76 local Markdown targets, unchanged
+runtime/contracts/migrations/frozen corpus and `git diff --check` pass. Docker remains
+absent locally (Compose exit 127); final-commit CI evidence for Compose, PostgreSQL/
+container restart and the additional appliance browser gates is linked in PR #38.
