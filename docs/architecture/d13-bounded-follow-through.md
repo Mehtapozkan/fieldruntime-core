@@ -1,13 +1,28 @@
 # D-038 — Bounded preparation after newly supplied evidence
 
-Status: **Proposed — not approved or implemented.**
+Status: **Accepted — implementation authorized, not yet implemented.**
+
+## Human approval
+
+On 2026-09-09 the owner approved this decision as documented at
+`639889f677a83a522996dd241d5082ddbadfc1bf`:
+
+> I approve D-038 as documented at `639889f677a83a522996dd241d5082ddbadfc1bf`, limited to explicitly versioned synthetic preparation across at most two exact retained bundles, resource preflight and the proposed additive compatibility migration.
+
+The approval requires useful DEL-4 continuation after fresh descriptive review and
+separate publication, independent new task acceptance, resource-aware preflight/
+Workbench/Challenge reporting, complete occurrence limits and read scope, and retained
+version/retry/restart compatibility. DEL-5 and all five separate proof measures remain
+unaffected. It excludes real-customer processing, external retrieval or messages,
+financial actions, business-outcome/closure contracts, release and deployment.
+This approval does not itself publish a pack or accept a preparation result.
 
 The existing [D13 follow-through rehearsal](../guides/challenge-follow-through.md)
 uses Accepted D-034–D-037 as written. It retains new DEL-4 evidence, fresh description
 and separate publication, then asserts the present `WORK_INPUT_LIMIT` refusal.
 D-037's accepted one-bundle limit and historical interpreters remain unchanged.
 
-## Decision requiring human approval
+## Accepted decision
 
 Permit an **explicitly versioned synthetic preparation artifact/worker input** to
 read at most **two exact retained bundles**, including the selected bundle, solely

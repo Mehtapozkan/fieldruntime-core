@@ -316,11 +316,12 @@ follow-through or improvement proof.
 Supply Orchid's DEL-4 evidence through existing intake, inspect scoped changes,
 retain historical packets/decisions and require fresh descriptive review/publication.
 The existing one-bundle worker correctly refuses the new two-bundle artifact;
-manual follow-through remains possible. [Proposed D-038](docs/architecture/d13-bounded-follow-through.md)
-defines the smallest versioned two-bundle extension and preflight, pending approval.
+manual follow-through remains possible. [Accepted D-038](docs/architecture/d13-bounded-follow-through.md)
+defines the smallest versioned two-bundle extension and preflight, approved by the
+owner at `639889f6` on 2026-09-09. Implementation is authorized, not yet delivered.
 No runtime boundary change or D14 work is authorized by the rehearsal.
 
-**After that approval:** one bounded implementation slice, not another framework:
+**Next, after the protected PR #39 merge:** one bounded implementation slice:
 compatible artifact/input versions, aggregate limits, resource-aware read preflight,
 current start/terminal gates, original-key recovery and existing Workbench packet
 inspection. Execute F1–F7; preserve v1/v2 interpretation and all historical receipts.

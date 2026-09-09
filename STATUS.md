@@ -46,7 +46,8 @@ A fresh worker command then correctly refuses **WORK_INPUT_LIMIT**: the new arti
 cites two bundles, while Accepted D-037 permits one. Reads currently report basis
 eligibility before this resource preflight; a true `can_start` is not a successful
 POST. No new invocation or approval is fabricated. [D-038](docs/architecture/d13-bounded-follow-through.md)
-is **Proposed**, not implemented: an explicit two-bundle version and preflight under
+is **Accepted** by the owner at `639889f6` on 2026-09-09, not yet implemented:
+an explicit two-bundle version and preflight under
 unchanged aggregate resource/authority/closure safeguards. Manual inspection and
 follow-through using the fresh brief are available now without that amendment.
 
@@ -55,6 +56,11 @@ allows independent human work in parallel, pending a process owner's choice and 
 comparable-batch test. Customer comparisons, baseline, effort/cost completeness and
 business-disposition/observation/customer-acceptance contracts remain missing.
 No runtime, schema, migration or report-calculation change is included in this continuation.
+
+The reviewed D-038 head `639889f6` passed [required CI](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34391313702),
+including the retained PostgreSQL/API/browser, Compose and appliance/restart gates.
+The approval-recording head must pass its own required checks before normal merge.
+No runtime, schema or migration behavior is implemented by recording approval.
 
 The following D12 implementation account describes merged behavior.
 
@@ -95,8 +101,9 @@ Task acceptance and evaluation approval are separate, confer no business proof a
 never automatically promote worker code, policy or a pack. Full customer comparison,
 source/variant rules, active effort/cost baselines and customer acceptance remain gaps.
 
-**Next:** review the executable D13 follow-through, the proposed process experiment
-and D-038's narrow two-bundle amendment before worker continuation. Do not start D14.
+**Next:** implement Accepted D-038's narrow two-bundle continuation after the protected
+PR #39 merge. Preserve the completed report/rehearsal and proposed process experiment.
+Do not start D14.
 Name the customer/cohort/custodian and approve the data arrangements plus baseline
 before any real comparison. Business outcomes, customer acceptance and complete costs
 remain missing. No release or deployment.
