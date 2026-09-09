@@ -1525,10 +1525,15 @@ the final-head result are retained in the PR handoff.
 ## D13 synthetic report validation
 
 Local Node 24.19.0 / tz 2026b and pnpm 11.24.0: repository validation passed
-315 tests, including three focused report calculation/escaping controls. ECC remains
+316 tests, including four focused report calculation/escaping/invalid-input controls. ECC remains
 30/30 Cases and 620/620 checks; negative control exits 1 for intended assertions
 (0/30 Cases, 152/620 checks, hard gates FAIL), not setup/crash. The first sandbox-only
 validation attempt hit loopback `listen EPERM`; the permitted rerun passed.
+
+A final audit reproduced a null-identity report crash with valid retained intake.
+Unidentified rows now remain source material with exact locators, excluded from
+identified-record/eligible coverage; invalid identified rows remain inspectable.
+Focused pure replay and PostgreSQL/API regressions cover that missing-input path.
 
 The disposable PostgreSQL 18.4/API rehearsal and Chromium report subtest pass:
 eight records / three Cases / seven attempts, three records prepared, four prepared

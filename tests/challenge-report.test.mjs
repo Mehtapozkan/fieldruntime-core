@@ -51,6 +51,7 @@ test("D13 unique records, Cases and attempts; an old accepted packet cannot labe
   ];
   assert.deepEqual(summarize(rows), {
     retained_records: 3,
+    unidentified_source_rows: 0,
     attached_cases: 1,
     worker_scope_records: 2,
     attached_worker_scope_records: 2,
@@ -139,4 +140,65 @@ test("D13 presentation escapes source content and never installs scripts or exte
   );
   assert.ok(!html.includes("<script>"));
   assert.ok(html.includes("&lt;script&gt;"));
+});
+
+import { prepareIntake } from "../dist/packages/runtime/src/intake.js";
+import { exportWorkState } from "../dist/packages/runtime/src/preparation-work.js";
+import { buildReport } from "../scripts/lib/challenge-report.mjs";
+import { intakeInput, editQueue, INTAKE_START } from "./helpers/intake.mjs";
+test("D13 invalid rows without identities remain distinct source material, never invented records or eligible coverage", async () => {
+  const input = editQueue(
+    await intakeInput("missing-identities"),
+    (rows, headers) => ({
+      headers,
+      rows: [
+        rows[0],
+        { ...rows[0], source_record_id: "" },
+        { ...rows[0], source_record_id: "" },
+        { ...rows[0], source_record_id: "invalid-amount", amount_minor: "-1" },
+      ],
+    }),
+  );
+  const { bundle, bytes } = prepareIntake(input, INTAKE_START, INTAKE_START);
+  const state = {
+    pack: {
+      discovery: {
+        intake: {
+          cases: {
+            cases: [],
+            idempotency_records: [],
+            source_event_records: [],
+          },
+          artifacts: bytes,
+          bundles: [bundle],
+          commits: [],
+          clockFloor: INTAKE_START,
+        },
+        entries: [],
+      },
+      entries: [],
+    },
+    entries: [],
+  };
+  const archive = exportWorkState(state);
+  const r = await buildReport(archive, {
+    schema_version: "challenge-input.v1",
+    archive_hash: archive.hash,
+    evaluated_at: INTAKE_START,
+    cohort: "all_retained_records",
+  });
+  assert.equal(r.summary.retained_records, 2);
+  assert.equal(r.summary.unidentified_source_rows, 2);
+  assert.equal(r.summary.worker_scope_records, 1);
+  assert.equal(r.summary.invocation_attempts, 0);
+  assert.equal(r.unidentified_material.length, 2);
+  assert.ok(
+    r.unidentified_material.every(
+      (v) => v.record.record_key === null && v.pointer,
+    ),
+  );
+  assert.equal(
+    r.records.filter((v) => v.status === "invalid_retained_input").length,
+    1,
+  );
 });

@@ -283,6 +283,7 @@ test("D13 Challenge: real API rehearsal, exact retries, failed/open work, reprod
   );
   assert.deepEqual(report.summary, {
     retained_records: 8,
+    unidentified_source_rows: 0,
     attached_cases: 3,
     worker_scope_records: 7,
     attached_worker_scope_records: 6,
@@ -439,4 +440,44 @@ test("D13 Challenge: real API rehearsal, exact retries, failed/open work, reprod
       unexpected_acceptance: false,
     }),
   );
+});
+
+test("D13 API export retains unidentified rows without fabricating record coverage", async (t) => {
+  const h = await intakeHost(t, { work: true });
+  const input = editQueue(
+    await intakeInput("unidentified-api"),
+    (rows, headers) => ({
+      headers,
+      rows: [
+        rows[0],
+        { ...rows[0], source_record_id: "" },
+        { ...rows[0], source_record_id: "" },
+      ],
+    }),
+  );
+  const v = await h.prepare(input);
+  const receipt = (
+    await h.ok(
+      "/v1/intake/commits",
+      await h.selection(v, 0, { key: "commit-valid-row" }),
+    )
+  ).receipt;
+  const path = `${WORK}?case_id=${receipt.case_id}&record_key=${receipt.record_key}&representation=export`;
+  const before = await h.snapshot(),
+    archive = await h.ok(path);
+  const manifest = {
+    schema_version: "challenge-input.v1",
+    archive_hash: archive.hash,
+    evaluated_at: AT,
+    cohort: "all_retained_records",
+  };
+  const r = await buildReport(archive, manifest);
+  assert.equal(r.summary.retained_records, 1);
+  assert.equal(r.summary.unidentified_source_rows, 2);
+  assert.equal(r.summary.invocation_attempts, 0);
+  assert.equal(r.summary.snapshot_startable_records, 0);
+  assert.equal(r.unidentified_material.length, 2);
+  assert.deepEqual(await h.snapshot(), before);
+  await h.restart();
+  assert.deepEqual(await h.ok(path), archive);
 });

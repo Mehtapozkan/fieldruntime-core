@@ -23,6 +23,11 @@ and work applicability are reconstructed using the bundled synthetic profile at
 `evaluated_at`, labelled snapshot-only, never live permission. A source revision
 retained but not committed remains visible beside the committed material.
 
+Rows without a record identity stay separate unidentified source material, deduplicated
+only by their exact retained artifact/locator. They cannot become invented business
+records, eligible coverage or a population denominator. Identifiable invalid rows
+also remain inspectable without Discovery projection or preparation permission.
+
 Counts use sets of canonical record keys and Case IDs. Attempts are `started`
 entries, not command submissions; exact retry returns the same entry. A completed
 preparation requires an exact terminal result with a prepared outcome. Acceptance
@@ -115,6 +120,8 @@ retention arrangement as their source archive; they contain the retained materia
   label matches. Governing terms and accountable ownership remain unconfirmed.
 - Exact retry after later work and restart returns its original receipt with no
   added attempt or write. The unfinished invocation remains unfinished after restart.
+- Invalid retained rows without identities remain distinct source material and do
+  not crash the report or inflate identified-record coverage.
 - Export/report generation leave all canonical tables unchanged and use no writer
   lock. Changed archive bindings, tampered entries, caller totals and backdated
   evaluation fail instead of producing a plausible report.

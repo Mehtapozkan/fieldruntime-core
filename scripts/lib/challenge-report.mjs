@@ -20,10 +20,11 @@ const unique = (xs) => [...new Set(xs)].sort();
 const sum = (xs, f) => xs.filter(f).length;
 const hash = (v) => ({ ...v, hash: sha256Json(v) });
 
-export function summarize(rows) {
+export function summarize(rows, unidentifiedSourceRows = 0) {
   const attempts = rows.flatMap((r) => r.attempts);
   return {
     retained_records: rows.length,
+    unidentified_source_rows: unidentifiedSourceRows,
     attached_cases: unique(rows.flatMap((r) => r.case_ids)).length,
     worker_scope_records: sum(rows, (r) => r.valid && r.worker_scope),
     attached_worker_scope_records: sum(
@@ -142,15 +143,21 @@ export async function buildReport(archive, manifest) {
     times.every((t) => typeof t === "string" && t <= manifest.evaluated_at),
     "Evaluation predates retained evidence",
   );
-  const variants = new Map();
+  const variants = new Map(),
+    unidentified = [];
   for (const [bi, bundle] of intake.bundles.entries())
     for (const [ri, record] of bundle.records.entries()) {
-      const all = variants.get(record.record_key) ?? [];
-      all.push({
+      const material = {
         record,
         bundle_id: bundle.id,
         pointer: `/pack/discovery/intake/bundles/${bi}/records/${ri}`,
-      });
+      };
+      if (record.record_key === null) {
+        unidentified.push(material);
+        continue;
+      }
+      const all = variants.get(record.record_key) ?? [];
+      all.push(material);
       variants.set(record.record_key, all);
     }
   const records = [];
@@ -295,7 +302,15 @@ export async function buildReport(archive, manifest) {
     implementation: await reportImplementation(),
     evidence_scope:
       "Complete retained upload in this one export; exception-selected synthetic rehearsal, not a customer population or live authorization snapshot.",
-    summary: summarize(records),
+    summary: summarize(
+      records,
+      unique(
+        unidentified.flatMap((v) =>
+          v.record.locators.map((at) => sha256Json(at)),
+        ),
+      ).length,
+    ),
+    unidentified_material: unidentified,
     records,
     case_states: intake.cases.cases.reduce(
       (counts, c) => ({
@@ -351,11 +366,12 @@ body{max-width:1100px;margin:auto;padding:24px;background:#faf8f1;color:#242b28;
 <p><a href="archive.json">Exact evidence archive</a> · <a href="manifest.json">Input manifest</a> · <a href="report.json">Calculated report</a></p>
 ${disclosure("Reproduction bindings and calculation rules", { hash: report.hash, manifest: report.manifest, implementation: report.implementation, evidence_scope: report.evidence_scope })}
 <h2>Retained work and coverage</h2>${disclosure("Counts — Cases, records and attempts remain separate", report.summary)}
-<p>${esc(report.summary.retained_records)} retained records; ${esc(report.summary.attached_cases)} attached Cases; ${esc(report.summary.records_ever_prepared)} records prepared across ${esc(report.summary.invocation_attempts)} attempts. ${esc(report.summary.accepted_packets)} packets task-accepted. Population coverage and newly attended work are unknown. Failed and open work remain included.</p><p>Recorded Case states: ${esc(
+<p>${esc(report.summary.retained_records)} identified retained records; ${esc(report.summary.attached_cases)} attached Cases; ${esc(report.summary.records_ever_prepared)} records prepared across ${esc(report.summary.invocation_attempts)} attempts. ${esc(report.summary.accepted_packets)} packets task-accepted. Population coverage and newly attended work are unknown. Failed and open work remain included.</p><p>Recorded Case states: ${esc(
     Object.entries(report.case_states ?? {})
       .map(([state, count]) => `${count} ${state.replaceAll("_", " ")}`)
       .join(", "),
   )}. Task acceptance never establishes a resolved dispute or Case closure.</p>
+${report.summary.unidentified_source_rows ? `<p><strong>${esc(report.summary.unidentified_source_rows)} unidentified source rows need correction.</strong> They remain evidence, not invented records or eligible coverage.</p>${disclosure("Unidentified retained material and source locators", report.unidentified_material)}` : ""}
 <table id="capacity"><caption>Operating Capacity Map — demonstrated state / proposed next action</caption><thead><tr><th>Record</th><th>Recorded work</th><th>Next human action</th></tr></thead><tbody>${report.records.map((r, i) => `<tr><td><a href="#record-${i}">${esc(r.subject?.customer)} / ${esc(r.subject?.record)}</a></td><td>${esc(r.status.replaceAll("_", " "))}<br><small>${r.attempts.length} attempts · ${r.case_ids.length} Cases</small></td><td>${esc(r.next_action)}</td></tr>`).join("")}</tbody></table>
 ${report.records
   .map(
