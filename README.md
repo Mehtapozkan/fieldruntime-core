@@ -27,7 +27,7 @@ workflow brief, consequential questions and persistent descriptive answers/corre
 confirmations. It uses zero model calls. See the [Discovery walkthrough](docs/guides/synthetic-discovery.md).
 **D11-A/B and corrected Accepted D-036 are merged (PRs #33/#34, main `6bfc94e2`):** one fixed preparation pack, separate synthetic publication, withdrawal,
 guarded rollback and portable history. [Try the pack walkthrough](docs/guides/synthetic-preparation-pack.md).
-[D12-A](docs/guides/d12-preparation-worker-design.md) is a docs-only proposal on this review branch; worker execution and proof/correction capture remain pending approval and implementation.
+[D12-A](docs/guides/d12-preparation-worker-design.md) is an Accepted design on this review branch; worker execution and proof/correction capture await D12-B implementation.
 The historical prerelease has the smaller boundary described under [Distribution](#distribution).
 
 | Functionality                                     | Workbench                                                                                                | API / runtime                                                                                           | Availability                                                                          |
@@ -157,7 +157,7 @@ history. They remain isolated from Orchid.
   The broader Operational Legibility requirements remain incomplete.
   [Try Discovery](docs/guides/synthetic-discovery.md). Full evidenced routes, governing
   rules and measurement coverage remain incomplete. D11-B publication is merged;
-  [D12-A / Proposed D-037](docs/architecture/d12-bounded-preparation-worker.md) designs
+  [D12-A / Accepted D-037](docs/architecture/d12-bounded-preparation-worker.md) designs
   a bounded worker and separate proof/correction capture. No D12 implementation exists.
   Real-data activation remains unapproved.
 - **D13 — Customer proof:** planned 25-Case Challenge and Operating Capacity Map.

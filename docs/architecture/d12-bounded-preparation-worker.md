@@ -1,6 +1,6 @@
 # D-037 — One bounded synthetic preparation worker and its proof
 
-Status: **Proposed — no D12 runtime, contract registration or migration implemented.**
+Status: **Accepted — no D12 runtime, contract registration or migration implemented.**
 Based on main `6bfc94e24d2a2980b369fc0aea487e32313b5f78`, the normal merge of PR #34
 at reviewed head `b284279c`. [D-036](d11-reviewed-runtime-pack.md) remains Accepted.
 The [worked packet and operator path](../guides/d12-preparation-worker-design.md)
@@ -8,7 +8,21 @@ and [populated contract example](../examples/d12-preparation-worker.proposed.jso
 are design evidence, not worker receipts. The [canonical specification](../product/workflow-discovery.md)
 and its existing 19-entry matrix remain the product plan.
 
-## Decision requested
+## Human approval — 2026-09-08
+
+The repository owner explicitly approved the corrected design in PR #37 at
+`7ac9f9db69ea0b609ae084a046f0d4f42021f201`:
+
+> I approve the narrow D-037 design in PR #37 at `7ac9f9db69ea0b609ae084a046f0d4f42021f201`.
+>
+> This approval covers the fixed synthetic worker and purpose-specific reviewer profiles, explicitly worker-capable pack v2, bounded deterministic execution, and one supporting journal for the specified task/proof/correction history. It does not approve an individual publication, task acceptance, financial action, real-customer processing or Case closure.
+
+The same instruction authorizes one D12-B implementation PR after this design merges
+through normal repository protections. This acceptance records that human instruction;
+it does not establish implemented functionality. The worked example and W1–W10 remain
+design/acceptance requirements until exercised by implementation.
+
+## Accepted decision
 
 Approve only a synchronous, server-selected deterministic worker that reads an exact
 synthetic invoice-dispute basis and produces one cited preparation packet. Approve
@@ -16,7 +30,7 @@ its separate execution/recipient profile, a new fixed preparation-template versi
 and **one append-only PostgreSQL supporting journal** for starts, terminal results,
 interruptions, purpose-limited task reviews, corrections, evaluation-candidate reviews
 and manual synthetic proof notes. None is a Case transition or business authority.
-All these additions require human approval of this Proposed decision before code.
+The approval above covers these additions; individual publication and task review remain separate commands.
 
 No model access is proposed: zero model calls, adaptive loops, external tools,
 network retrieval, messages, financial actions or worker-selected code. A model has
@@ -297,7 +311,7 @@ Proposed minimal routes within the existing appliance:
   or worker results. The internal worker port is replaceable without exposing execution
   code or result acceptance to browser input.
 
-Smallest **D12-B implementation PR, only after acceptance**:
+Smallest **D12-B implementation PR, after this accepted design merges**:
 
 1. Add the strict envelopes, fixed zero-model worker/recipient profile and pack v2
    template/compatibility while preserving v1. Require fresh publication; no silent upgrade.
@@ -347,9 +361,9 @@ quality and all attributable effort; synthetic test success is not customer bene
 
 ## Remaining decisions and limits
 
-Human approval is needed for the fixed preparation execution/recipient profile,
+Human approval above covers the fixed preparation execution/recipient profile,
 explicit template/pack v2 permission change and one journal's task/proof/correction
-purposes and retention. This proposal approves no individual publication or task.
+purposes and retention. It approves no individual publication or task.
 Real sources, governing disposition/precedence/variant rules, customer acceptance
 owner, baseline/effort coverage and retention/custody remain unknown. Unknown business
 facts block the affected conclusion, not a correctly labeled synthetic gap packet.

@@ -1,6 +1,6 @@
 # Status
 
-Current milestone: **D11-B merged; D12-A design proposed on this branch. No D12
+Current milestone: **D11-B merged; D12-A design Accepted on this branch. No D12
 worker, task review or proof/correction capture is implemented.**
 
 PR #34 merged normally at `6bfc94e24d2a2980b369fc0aea487e32313b5f78`, preserving
@@ -26,7 +26,7 @@ observations carry into D12: completed descriptive review competes with the next
 and a published pack retains an inactive publication form. Proposed consolidation
 keeps completed details expandable and correction/withdrawal/recovery accessible.
 
-[Proposed D-037](docs/architecture/d12-bounded-preparation-worker.md) defines one
+[Accepted D-037](docs/architecture/d12-bounded-preparation-worker.md) defines one
 zero-model worker assembling a cited evidence checklist, reconciliation, gap agenda and
 unsent follow-up. The [worked example](docs/guides/d12-preparation-worker-design.md)
 separates reproduced D11 material from hypothetical worker records. Existing pack v1
@@ -34,8 +34,7 @@ explicitly forbids dispatch; proposed v2 needs fresh publication. One proposed s
 journal retains start/result, task review, correction/evaluation review and synthetic
 proof notes, without changing Case/review/selection history or granting business authority.
 The [five separate proof measures](docs/product/workflow-discovery.md#five-separate-proof-measures)
-are now defined in the canonical specification and existing matrix. Capture awaits
-D-037 approval/implementation; customer comparisons remain D13 and real data unapproved.
+are now defined in the canonical specification and existing matrix. Capture is approved for bounded synthetic D12-B implementation; customer comparisons remain D13 and real data unapproved.
 
 D10-B merged in PR #32 at `953d49ece70f7828935bb0f4636299d7601f16d5`.
 Historical Discovery v1/v2 retains its original loop-helper semantics; the new pack
@@ -44,8 +43,8 @@ The old helper remains a documented upstream gap, not silently repaired. Node 24
 tzdata 2026b is still required. All 19 canonical matrix entries remain; complete Discovery,
 source/variant rules, customer evidence and measurements remain incomplete.
 
-**Next: human review of Proposed D-037, then one bounded D12-B implementation PR
-using its W1–W10 gates.** D11-B does not execute the four-step assignment, invoke models,
+**Next: validate and normally merge the D-037 approval record, then implement one
+bounded D12-B PR using W1–W10.** D11-B does not execute the four-step assignment, invoke models,
 activate consequential rules, authorize a credit or allow Case closure. Real customer
 activation remains unapproved. No release or deployment is included.
 
@@ -1336,7 +1335,7 @@ The expanded full-suite job has a 45-minute budget; all assertions remain requir
 Final corrected-head CI is reported on the PR. Historical archives from other interpreter
 versions must retain their original image/volume; no silent timezone conversion is added.
 
-## D12-A design validation
+## D12-A design validation (historical checkpoint)
 
 This branch changes documentation and one proposed JSON example only. No runtime,
 registered schema, migration, fixture or UI behavior changes. D-037 remains Proposed.
@@ -1368,7 +1367,7 @@ CI is reported on the PR; these remain design assertions, not D12 implementation
 
 ## Next
 
-D11-B is merged. Review Proposed D-037 before implementing its bounded D12-B worker,
+D11-B is merged. D-037 is now Accepted; merge its approval record before implementing the bounded D12-B worker,
 task/proof/correction history and explicit pack v2 publication. The W1–W10 design gates
 are not passing worker tests yet. Business source/variant/authority rules remain
 disabled; descriptive confirmation is not permission for worker execution or closure.
@@ -1383,3 +1382,12 @@ business occurrence, population coverage, effort, comparable baseline, customer
 acceptance, real impact and full costs remain missing. Source status is not a
 lifecycle transition; reported disputed value is not savings or recovered revenue.
 No customer samples, release or deployment are included.
+
+## D-037 approval record
+
+On 2026-09-08 the owner explicitly approved PR #37 at
+`7ac9f9db69ea0b609ae084a046f0d4f42021f201`; the full approval and exclusions are retained
+in D-037. D12-B is authorized after the design merges with required checks. No worker,
+new registered contract, migration, task/proof/correction capture or UI behavior is
+implemented by this approval record. Individual publication/review, financial authority,
+real-customer activation and closure are not granted.
