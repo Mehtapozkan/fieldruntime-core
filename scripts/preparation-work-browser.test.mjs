@@ -2,7 +2,11 @@ import { intakeHash } from "../apps/admin/public/intake-client.js";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { mkdir, readFile } from "node:fs/promises";
-import { chromium, expect } from "@playwright/test";
+import { chromium, expect as browserExpect } from "@playwright/test";
+import { setTimeout as delay } from "node:timers/promises";
+// UI completion includes persistence and read-only replay; it is not the worker's
+// five-second computation budget, which the PostgreSQL tests enforce separately.
+const expect = browserExpect.configure({ timeout: 15000 });
 import { preparedWork } from "../tests/helpers/preparation-work.mjs";
 import { discoveryCommand, variation } from "../tests/helpers/discovery.mjs";
 async function host(t, input) {
@@ -94,10 +98,22 @@ test("D12 W1/W6/W9 browser: publish, prepare useful cited packet, task review, r
   await expect(
     page.getByRole("button", { name: /^Prepare evidence-request packet/ }),
   ).toBeFocused();
+  // Retain a confirmed server response in transit for longer than the worker
+  // computation budget. No progress can appear before the response and refresh.
+  await page.route("**/v1/intake/preparation-work/commands", async (route) => {
+    const response = await route.fetch();
+    await expect(page.locator(".work-progress")).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /^Prepare evidence-request packet/ }),
+    ).toBeDisabled();
+    await delay(5500);
+    await route.fulfill({ response });
+  });
   await page.keyboard.press("Enter");
   await expect(page.locator(".work-progress")).toContainText(
     "human task review needed",
   );
+  await page.unroute("**/v1/intake/preparation-work/commands");
   await shot(page, "prepared");
   await expect(page.locator(".preparation-work")).toContainText(
     "DEL-4: An associated source reports confirmation is not supplied",

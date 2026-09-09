@@ -1395,9 +1395,9 @@ Local Node 24.19.0 / tzdata 2026b and PostgreSQL 18.4:
   HTTP tests; rerunning with loopback permission passed.
 - `pnpm eval:ecc`: 620/620, 30/30. Negative control exited 1 for its intended
   failed assertions (152/620, 0/30, hard gates FAIL), not a setup error.
-- The combined retained run passed 326 tests: 273 retained D6–D11 PostgreSQL/API/
-  browser scenarios plus the then-current 53 D12 cases, no skips. Final D12 expansion
-  separately passed 57 PostgreSQL/API and seven real browser scenarios. This includes
+- The combined retained run passed 337 tests: 273 retained D6–D11 PostgreSQL/API/
+  browser scenarios plus 57 D12 PostgreSQL/API and seven real browser scenarios,
+  no skips. This includes
   exact correction-to-new-version output, original-record recovery after cross-tab
   navigation, all terminal input changes, oversized output and clock rollback, plus
   cross-measure correction denial, canonical source time and duplicate-row bounds.
@@ -1433,3 +1433,11 @@ and measured notes require canonical UTC source time. Both are enforced during
 historical replay. A separate input-bound regression reproduced 201 duplicate rows
 being counted as one record; the bound now counts all physical coverage rows.
 These repairs add no persistence or business authority.
+
+Initial PR #38 container CI passed the runtime cases but exposed a browser assertion
+that used Playwright's five-second default while a preparation response was still
+pending. D12 browser assertions now allow persistence and read-only refresh time;
+the primary journey deliberately delays the response by 5.5 seconds and still
+requires the validated completed packet. The worker's five-second computation
+limit and its timeout/lock-wait regressions are unchanged. Final-head CI is linked
+in the PR; a failed earlier run is not reported as passing appliance evidence.
