@@ -27,6 +27,7 @@ import {
 } from "./postgres-store.js";
 import {
   applyDisputeCommand,
+  disputeNeedsSource,
   withDisputeAuthority,
   assertDisputeState,
   disputeBinding,
@@ -94,14 +95,7 @@ export class PostgresDisputeResultStore {
       caseId = String(binding.case_id),
       key = String(binding.record_key),
       op = String(command.operation);
-    const needsRead = [
-      "basis_check",
-      "result_check",
-      "request_authority",
-      "review_authority",
-      "no_action",
-      "accept",
-    ].includes(op);
+    const needsRead = disputeNeedsSource(command);
     const pre = await authorityTransaction(this.pool, true, async (c) => {
       const s = await loadDisputeStore(c),
         duplicate = disputeDuplicate(s, command);
@@ -118,7 +112,7 @@ export class PostgresDisputeResultStore {
         "CLOCK_REGRESSION",
         "Preflight clock regressed",
       );
-      if (op.includes("check"))
+      if (needsRead)
         disputeActor(
           catalogData(s),
           "verifier",
@@ -146,7 +140,7 @@ export class PostgresDisputeResultStore {
         "CLOCK_REGRESSION",
         "Writer time regressed",
       );
-      if (op.includes("check"))
+      if (needsRead)
         disputeActor(
           catalogData(s),
           "verifier",

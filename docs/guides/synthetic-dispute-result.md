@@ -101,6 +101,12 @@ following GET fails; it does not prove current eligibility.
 | `reject view.json pending.json 'reason'`              | Robin terminates an unaccepted candidate. An accepted result needs a linked reopen instead.                                                                                                                                   |
 | `reopen view.json pending.json 'reason'`              | Robin links the original acceptance and a subsequent negative/inconclusive check, even when the old business basis is stale. Current intervention eligibility still applies.                                                  |
 
+Every operation that reads the source rechecks the current scoped verifier grant
+before its independent read and under the writer lock; replay checks that retained
+grant at the original observation and recording times. Rejecting or escalating an
+authority request needs Morgan's current review permission and exact bindings, but
+no source read or verifier grant. These interventions do not grant authority.
+
 The normal fixture ships with original synthetic POD/terms and an **open** AR
 record. The appliance can check that basis and record a report; its result check
 will correctly say **mismatch** while AR remains open. No HTTP command edits that

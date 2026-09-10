@@ -423,6 +423,19 @@ function authorityMaterial(
     implementation_versions: DISPUTE_REVIEW_VERSIONS,
   };
 }
+export function disputeNeedsSource(c: Obj): boolean {
+  return (
+    [
+      "basis_check",
+      "result_check",
+      "request_authority",
+      "no_action",
+      "accept",
+    ].includes(String(c.operation)) ||
+    (c.operation === "review_authority" &&
+      ["approve", "modify"].includes(String(c.decision)))
+  );
+}
 export function applyDisputeCommand(
   s: DisputeState,
   c: Obj,
@@ -488,6 +501,25 @@ export function applyDisputeCommand(
             ? "recipient"
             : "operator";
     actor = disputeActor(catalogData(s), role, subject, at);
+    ensure(
+      !!observation === disputeNeedsSource(c),
+      "RESULT_INTEGRITY",
+      "Source evidence must match the operation's read requirement",
+    );
+    if (observation) {
+      ensure(
+        observation.recorded_at === at,
+        "RESULT_INTEGRITY",
+        "Observation recording time changed",
+      );
+      disputeActor(
+        catalogData(s),
+        "verifier",
+        subject,
+        String(observation.started_at),
+      );
+      disputeActor(catalogData(s), "verifier", subject, at);
+    }
     if (op === "candidate") {
       data = { kind: op, subject };
     } else {
@@ -559,34 +591,36 @@ export function applyDisputeCommand(
             : null;
         data = { kind: op, observation, comparison, outcome };
       } else if (op === "request_authority" || op === "review_authority") {
-        const b = currentBasis(s, e, at);
-        ensure(
-          op !== "request_authority" ||
-            c.basis_observation_hash === b.basis_observation_hash,
-          "BINDING_CONFLICT",
-          "Basis observation changed",
-        );
-        ensure(
-          observation &&
-            sha256Json(o(observation.recheck).source) === b.source_hash &&
-            o(observation.recheck).status === "read",
-          "STALE_SOURCE",
-          "Original source changed; check a fresh basis",
-        );
-        ensure(
-          compareDisputeSource(
-            subject,
-            o(observation.recheck),
-            o(observation.recheck),
-            at,
-            "basis",
-            null,
-            null,
-          ).status === "match",
-          "STALE_SOURCE",
-          "Original prerequisites expired or no longer match",
-        );
-        const create = op === "request_authority",
+        const create = op === "request_authority";
+        let material: Obj | undefined;
+        if (disputeNeedsSource(c)) {
+          const b = currentBasis(s, e, at);
+          ensure(
+            op !== "request_authority" ||
+              c.basis_observation_hash === b.basis_observation_hash,
+            "BINDING_CONFLICT",
+            "Basis observation changed",
+          );
+          ensure(
+            observation &&
+              sha256Json(o(observation.recheck).source) === b.source_hash &&
+              o(observation.recheck).status === "read",
+            "STALE_SOURCE",
+            "Original source changed; check a fresh basis",
+          );
+          ensure(
+            compareDisputeSource(
+              subject,
+              o(observation.recheck),
+              o(observation.recheck),
+              at,
+              "basis",
+              null,
+              null,
+            ).status === "match",
+            "STALE_SOURCE",
+            "Original prerequisites expired or no longer match",
+          );
           material = authorityMaterial(
             s,
             e,
@@ -596,6 +630,7 @@ export function applyDisputeCommand(
                 "Review original proof and uphold only this disputed portion without adjustment; payment remains outstanding.",
             ),
           );
+        }
         if (create)
           ensure(
             !last(s, e, "request_authority"),

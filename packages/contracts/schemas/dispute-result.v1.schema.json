@@ -2053,7 +2053,14 @@
           "$ref": "#/$defs/context"
         },
         "observation": {
-          "$ref": "#/$defs/observation"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/observation"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "actor": {
           "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"

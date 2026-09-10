@@ -985,3 +985,101 @@ test("D13 BR3 a writer wait cannot legitimize a source event that was future at 
   await r.h.restart();
   assert.deepEqual((await r.get()).history.at(-1), checked.entry);
 });
+test("D13 BR3 authority preparation cannot read proof through an expired verifier grant", async (t) => {
+  const r = await resultHost(t);
+  await r.enroll();
+  await changeCatalog(r, (d) => {
+    d.authority_records.find(
+      (g) => g.authority_class === "dispute_verifier",
+    ).effective_until = "2026-09-07T16:06:01.000Z";
+  });
+  await r.candidate();
+  await r.basis();
+  let reads = 0;
+  r.h.setResultReader(async () => {
+    reads++;
+    return Buffer.from(canonicalJson(r.source));
+  });
+  r.h.setTime("2026-09-07T16:06:02.000Z");
+  const v = await r.get(),
+    command = await r.command("request_authority", {
+      candidate_hash: v.candidate_hash,
+      basis_observation_hash: v.basis.basis_observation_hash,
+    });
+  await denied(r, command, "REVIEWER_INELIGIBLE");
+  assert.equal(reads, 0);
+});
+
+for (const decision of ["reject", "escalate"])
+  test(`D13 BR3 ${decision} remains available without an expired source-reader grant`, async (t) => {
+    const r = await resultHost(t);
+    await r.enroll();
+    await changeCatalog(r, (d) => {
+      d.authority_records.find(
+        (g) => g.authority_class === "dispute_verifier",
+      ).effective_until = "2026-09-07T16:06:01.000Z";
+    });
+    await r.candidate();
+    await r.basis();
+    await r.request();
+    await r.decide();
+    const before = await r.get();
+    let reads = 0;
+    r.h.setResultReader(async () => {
+      reads++;
+      throw new Error("Source access is no longer granted");
+    });
+    r.h.setTime("2026-09-07T16:06:02.000Z");
+    const receipt = await r.decide(decision),
+      command = r.commands.at(-1);
+    assert.equal(reads, 0);
+    assert.equal(receipt.entry.source_precondition, null);
+    const after = await r.get();
+    assert.equal(after.binding.result_revision, before.binding.result_revision);
+    assert.equal(
+      after.authority.review_revision,
+      before.authority.review_revision + 1,
+    );
+    assert.equal(after.authority.current.authorized, false);
+    await r.h.restart();
+    const durable = await r.h.snapshot();
+    assert.deepEqual((await r.h.call(COMMAND, command)).data, receipt);
+    assert.deepEqual(await r.h.snapshot(), durable);
+    validateDisputeExport(await r.h.ok(`${r.path}&representation=export`));
+  });
+
+test("D13 BR3 no-action source preflight rechecks verifier effectivity under the writer lock", async (t) => {
+  const r = await resultHost(t);
+  await r.enroll();
+  await changeCatalog(r, (d) => {
+    d.authority_records.find(
+      (g) => g.authority_class === "dispute_verifier",
+    ).effective_until = "2026-09-07T16:06:01.000Z";
+  });
+  await r.candidate();
+  await r.basis();
+  await r.request();
+  await r.decide();
+  const v = await r.get(),
+    command = await r.command("no_action", {
+      candidate_hash: v.candidate_hash,
+      basis_hash: sha256Json(v.authority.material.basis),
+      review: {
+        authority_request_id: v.authority.authority_request_id,
+        request_binding_hash: v.authority.request_binding_hash,
+        expected_review_revision: v.authority.review_revision,
+      },
+    });
+  let reads = 0;
+  r.h.setResultReader(async () => {
+    reads++;
+    r.h.setTime("2026-09-07T16:06:02.000Z");
+    return Buffer.from(canonicalJson(r.source));
+  });
+  await denied(r, command, "REVIEWER_INELIGIBLE");
+  assert.equal(reads, 1);
+  assert.equal(
+    (await r.get()).history.some((e) => e.operation === "no_action"),
+    false,
+  );
+});

@@ -5,7 +5,7 @@ branch; local validation and captured handoff completed; required CI is tracked 
 acceptance evidence remain preserved at PR #40's reviewed `1f387d470a90dfe41df69335732b3c48c831750a`.
 This separate API branch is stacked on that open PR; neither is merged by this task.
 Real-customer processing remains unapproved. Workbench result controls and the
-separately approved model investigation are the immediate following builds, not
+model investigation (subject to separate approval) are the immediate following builds, not
 implemented here; no D14 work.
 
 The owner approved D-039 at that exact head on 2026-09-10 UTC, including the corrected
@@ -35,11 +35,12 @@ tenant and frozen ECC are untouched. No new Workbench or model/provider code.
 
 - `pnpm validate`: **323/323 repository tests**, format/lint/typecheck and public-release
   checks passed locally (Node 24.19.0/tzdata 2026b).
-- New real PostgreSQL 18.4/API BR suite: **47/47** consolidated checks, with final
-  timing controls added as described below: both pass, and the complete success/
-  acceptance/reversal control still returns the identical captured hashes. The captured path retains both preparation packets, accepts the
-  exact independently observed result, restarts/retries without another review,
-  then records negative observation and reopen. [Actual receipts and export hashes](docs/examples/d039-runtime-receipts.json).
+- New real PostgreSQL 18.4/API BR suite: **53/53** checks pass, including source
+  timing/reader-grant controls and source-free rejection/escalation. The captured
+  path retains both preparation packets, accepts the exact independently observed
+  result, restarts/retries without another review, then records negative observation
+  and reopen. [Actual receipts and export hashes](docs/examples/d039-runtime-receipts.json)
+  reproduce exactly after the repairs.
 - Preserved D6–D8 PostgreSQL/API/Chromium authority, action, verification and receipt
   suites: **178/178** locally. The complete D-038 PostgreSQL/API/browser suite passes
   **23/23**, including the corrected additive-upgrade content snapshot and the exact
@@ -49,7 +50,7 @@ tenant and frozen ECC are untouched. No new Workbench or model/provider code.
   its exact receipts/export. No local PostgreSQL server restart/container pass is claimed.
 - ECC **620/620**; intended negative control **152/620**, hard gates fail and exit 1,
   with a complete assertion receipt. No crash/setup failure.
-- `git diff --check`, example hashes/references, 198 local Markdown targets and all
+- `git diff --check`, example hashes/references, 200 local Markdown targets and all
   **19 unchanged requirement IDs** pass. Actual prior D-038 evidence is unchanged.
 - Docker is unavailable locally (`docker compose config --quiet`: exit 127). The
   existing final-head CI gate retains all PostgreSQL/API/browser suites, Compose,
@@ -62,6 +63,13 @@ ordering and compares non-future source times to the independent observation tim
 writer waiting cannot legitimize a previously future event. Negative observations
 remain retained evidence, never current success. These are existing D-039 time
 checks, not a new source or authority boundary.
+
+A further expiry control reproduced authority preparation returning HTTP 200 after
+the source-reader grant expired. All source-reading operations now recheck that
+grant before reading and under the writer lock, with the same evidence enforced in
+replay. The before-write reproduction now returns `REVIEWER_INELIGIBLE` (HTTP 409)
+without reading or writing. Eligible rejection/escalation use no source read and
+retain their separate review permission, exact revision checks and retry receipts.
 
 The preserved D-038 upgrade assertion now compares the new journal's empty content
 before/after additive installation; no old rows/checksums are altered. Its focused
