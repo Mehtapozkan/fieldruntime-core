@@ -1,12 +1,22 @@
 # D-040 — One bounded synthetic investigation task
 
-Status: **Proposed. No provider integration, credentials or inference calls implemented.**
+Status: **Accepted for bounded implementation only. Live activation, inference spending and customer-data processing remain unapproved.**
 
-This separate proposal accompanies the D-039 Workbench delivery. It does not gate
-that UI, amend Accepted D-039 or move broad model routing out of D15. It needs human
-approval before changing the credential-free, zero-model execution boundary.
+The owner approved implementation on 2026-09-10 from PR #42 at
+`1954f929daf60887053635a31a83179f74ee6d8e`. This approval does not amend D-039 or
+move broad model routing out of D15. The existing deterministic default remains.
 
-## Decision to approve
+> “implementation is authorized; live provider activation, inference spending and customer-data processing are not yet authorized.”
+
+The approved scope is the optional adapter, explicitly versioned preparation
+artifact/result/profile, additive compatibility migration and hermetic fake-provider
+tests. No individual publication, task acceptance, business authority, message,
+financial write or Case closure is approved. Live activation remains unavailable
+until separately authorized with a named custodian, exact model snapshot, confirmed
+data controls, pricing and evaluation budget. Approval is not an evaluation result.
+Implementation status and evidence are recorded separately in STATUS.md.
+
+## Approved implementation and separately gated activation
 
 Permit one explicitly published, operator-started **synthetic text investigation**
 using an isolated OpenAI Responses adapter, with the inputs, one-call budget and
@@ -16,7 +26,7 @@ old pack v1/v2/v3 and worker v1/v2 interpretation, current exact bindings, publi
 interruption and task-review rules. Old artifacts never acquire model permission.
 No new ledger, scheduler, general tool loop, external retrieval or message sending.
 
-Approval would cover a synthetic provider boundary and this proposed envelope, not
+The implementation approval covers this envelope and fake-provider boundary, not
 an individual publication, task acceptance, business authority, customer data or a
 successful usefulness claim. Activation also needs a named project custodian, exact
 available model snapshot, approved pricing sheet and confirmation of that project's
@@ -120,7 +130,7 @@ permitted tools, time/token caps and quality rubric; include failed/open attempt
 | Runtime boundary     | Strict schema, wrong scope, both bundle limits, stale publication/input, expired grant, concurrent key, interrupted/late result, unavailable/invalid response, persistence rollback, restart and exact retry tests remain hermetic with a fake adapter. A separate approved live evaluation records actual usage and failures.                                                               |
 | Product meaning      | Keep five distinct proof measures; preparation acceptance is not resolved dispute, cash, credit or released attention. D-039 and closure negatives still pass. Better coverage may be useful even without labor savings, but requires evidence.                                                                                                                                              |
 
-Smallest implementation after approval: one optional isolated adapter, explicit
+Approved smallest implementation: one optional isolated adapter, explicit
 versioned artifact/result/profile, additive admission in the existing U journal,
 strict validation and hermetic tests. Then one separately authorized live synthetic
 evaluation; retain deterministic default if gates fail. No new Workbench framework.
