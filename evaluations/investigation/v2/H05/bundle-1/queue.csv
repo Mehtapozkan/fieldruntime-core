@@ -1,0 +1,2 @@
+source_record_id,source_version,legal_entity_id,customer_ref,invoice_id,amount_minor,currency,source_status,activity,reported_actor,reported_role,upstream_case_id,upstream_owner,order_ids,delivery_ids,source_occurred_at,source_timezone
+dispute-105,r1,entity_north,Willow,INV-305,73185,USD,open,queue_snapshot,Synthetic source reporter,AR analyst,AR-E5,,,DEL-5,,
