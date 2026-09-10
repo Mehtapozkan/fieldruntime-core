@@ -1,0 +1,297 @@
+{
+  "simplification_before_allocation": [
+    {
+      "change": "Remove copying queue fields into a second worksheet.",
+      "retained_control": "Use original bytes, exact record identity, locators and source revision."
+    },
+    {
+      "change": "Combine support requests into one subject-scoped gap agenda.",
+      "retained_control": "Each claim keeps explicit applicability; no invoice-label joins."
+    },
+    {
+      "change": "Collect delivery proof and governing terms in parallel when owners confirm independence.",
+      "retained_control": "No messages are sent; overlapping waits cannot be added as independent savings."
+    },
+    {
+      "change": "Keep unknown source precedence visible instead of repeated informal adjudication.",
+      "retained_control": "A person obtains an approved governing rule; no inferred winner."
+    }
+  ],
+  "steps": [
+    {
+      "id": "S1",
+      "label": "Bind and inspect retained inputs",
+      "mechanism": "code",
+      "depends_on": [],
+      "subject_binding": "selected record_key; claims preserve their own entity/kind/id and explicit source associations",
+      "inputs": [
+        "Validated intake and Discovery export at exact basis hashes",
+        "Full artifact read scopes, parsed bytes and supported interpreter versions"
+      ],
+      "output": "Cited subject index; unknown and retained-only inputs explicit",
+      "acceptance": [
+        "Recompute hashes and locators",
+        "Do not parse retained-only documents or broaden scope"
+      ],
+      "accountable_owner": "identity_intake_operator (synthetic preparation seat)",
+      "exception_owner": "identity_pack_reviewer_demo (synthetic publication support seat)",
+      "allowed_actions": ["Read retained bytes", "Derive scoped index"],
+      "authority_mode": "scoped_read_propose_only",
+      "intervention_and_stop": [
+        "SYSTEM_FAILURE: stop if bytes, scope or interpreter cannot be validated; preserve read error",
+        "Missing opaque content blocks only claims needing that content"
+      ],
+      "verification_and_evaluations": [
+        "Existing intake A1/A3/A8/A12; Discovery T1/T12",
+        "D11 T1/T3/T8"
+      ]
+    },
+    {
+      "id": "S2",
+      "label": "Interpret unfamiliar scoped reports and propose a consequential gap agenda",
+      "mechanism": "bounded_model",
+      "depends_on": ["S1"],
+      "subject_binding": "selected record_key; claims preserve their own entity/kind/id and explicit source associations",
+      "inputs": [
+        "Scoped record facts and delivery claims with explicit associations",
+        "R1-R7 and six loop outputs; separately identified proposed process",
+        "Optional hermetic investigation response; runtime identifiers, arithmetic and scope remain deterministic"
+      ],
+      "output": "Unreviewed cited interpretations, proposed contradictions and consolidated questions; citation validity does not establish correctness",
+      "acceptance": [
+        "Same subject and comparable field only for contradiction",
+        "Reported confirmation never becomes independent verification",
+        "Keep ambiguous and related material visible without transferring proof"
+      ],
+      "accountable_owner": "identity_intake_operator (synthetic preparation seat)",
+      "exception_owner": "identity_pack_reviewer_demo (synthetic publication support seat)",
+      "allowed_actions": ["Derive comparison", "Propose evidence requests"],
+      "authority_mode": "scoped_read_propose_only",
+      "intervention_and_stop": [
+        "MISSING_EVIDENCE: ask for scoped delivery proof without concluding non-delivery",
+        "MISSING_KNOWLEDGE: no governing rule means no decisive source winner"
+      ],
+      "verification_and_evaluations": [
+        "Discovery A/B, same-delivery, shared-object and ordering regressions",
+        "D11 T3/T4"
+      ]
+    },
+    {
+      "id": "S3",
+      "label": "Reuse applicable descriptive review; intervene only when the description changes",
+      "mechanism": "person",
+      "depends_on": ["S2"],
+      "subject_binding": "selected record_key; claims preserve their own entity/kind/id and explicit source associations",
+      "inputs": [
+        "Exact bound material and currently applicable selected-record D10 descriptive confirmation",
+        "Canonical synthetic operator identity; proposed recipients remain unconfirmed"
+      ],
+      "output": "Reference the existing applicable review and proposed follow-up agenda; a genuine correction branches to fresh review and pack publication",
+      "acceptance": [
+        "Normal path reuses the completed D10 review; opening or acknowledging it performs no identical confirmation write",
+        "A genuine correction advances the Case-wide Discovery revision and makes the old pack ineligible for current use",
+        "Refresh, append the necessary descriptive annotation and separate confirmation, derive a new artifact/version and obtain separate publication approval before S4 uses the changed basis",
+        "No task/message dispatch, approval carry-forward or automatic owner assignment"
+      ],
+      "accountable_owner": "identity_intake_operator (synthetic descriptive-review seat)",
+      "exception_owner": "identity_pack_reviewer_demo (synthetic publication support seat)",
+      "allowed_actions": [
+        "Read the already applicable D10 review",
+        "Use existing annotate/confirm commands only for genuine descriptive changes under D-035, independently of old pack permission",
+        "Draft a follow-up agenda for a person"
+      ],
+      "authority_mode": "scoped_read_propose_only",
+      "intervention_and_stop": [
+        "JUDGMENT only for evidenced trade-offs; do not infer it from missing approval",
+        "No response/deadline evidence means follow-up remains unconfirmed; operator may pause",
+        "Existing exact retry and cross-tab recovery; never auto-resubmit",
+        "Changed basis stops progression under the old pack; D11-B displays fresh-review/publication prerequisites, while D12 owns worker execution"
+      ],
+      "verification_and_evaluations": ["Discovery T5-T9/T11/T12", "D11 T2/T5"]
+    },
+    {
+      "id": "S4",
+      "label": "Prepare a disposition packet for task review",
+      "mechanism": "code",
+      "depends_on": ["S2", "S3"],
+      "subject_binding": "selected record_key; claims preserve their own entity/kind/id and explicit source associations",
+      "inputs": [
+        "Exact material, applicable descriptive review and currently eligible published pack sharing the same basis",
+        "Unresolved items and separate authority/close requirements"
+      ],
+      "output": "Read/propose disposition packet: supported options or explicit abstention",
+      "acceptance": [
+        "Require one coherent exact basis across S2, S3 and current pack selection; never combine new material with historical permission",
+        "Every factual claim has applicable citations; hypotheses labeled",
+        "No unsupported amount recommendation",
+        "Human task acceptance, when captured later, binds exact packet/step/pack and does not authorize an action"
+      ],
+      "accountable_owner": "identity_intake_operator (synthetic packet recipient)",
+      "exception_owner": "identity_pack_reviewer_demo (synthetic publication support seat)",
+      "allowed_actions": [
+        "Derive a draft packet",
+        "Present permitted next human action"
+      ],
+      "authority_mode": "scoped_read_propose_only",
+      "intervention_and_stop": [
+        "AUTHORITY blocks consequential action, not a valid cited gap packet",
+        "Missing terms, proof or business owner prevents a disposition conclusion",
+        "Stop at proposed packet; no effect or closure claim"
+      ],
+      "verification_and_evaluations": [
+        "Existing authority/closure/ECC safeguards",
+        "D11 T4/T9; D12 reviewed packet-quality and abstention cases"
+      ]
+    }
+  ],
+  "rules": {
+    "preparation_safety": {
+      "basis": ["D-034", "D-035 v2"],
+      "requires_pack_publication_approval": true,
+      "scope_match": "Exact tenant and entity-qualified record; full original artifact scopes for reads. Explicit delivery association for reusable support.",
+      "source_precedence": "No business winner; preserve comparable scoped conflicts.",
+      "variant_behavior": "Only selected North record is applicable; related South context is not a North variant rule."
+    },
+    "business_field_precedence": {
+      "approved_rule": null,
+      "enabled": false
+    },
+    "business_variant_rules": {
+      "approved_rule": null,
+      "enabled": false
+    },
+    "consequential_authority": {
+      "approved_policy": null,
+      "enrollment": null,
+      "allowed_actions": [],
+      "enabled": false
+    }
+  },
+  "outcome_requirements": {
+    "packet_acceptance": {
+      "implemented_capture": true,
+      "expected": "Named task recipient reviews exact cited packet for preparation usefulness",
+      "required_bindings": [
+        "case_id",
+        "case_version",
+        "record_key",
+        "pack_hash",
+        "step_id",
+        "packet_hash",
+        "acceptor_identity",
+        "decision",
+        "recorded_at",
+        "evidence_refs"
+      ],
+      "current_status": "requires_exact_task_review"
+    },
+    "effect_verification": {
+      "applicable_operation": null,
+      "current_status": "not_applicable; intake Cases are not enrolled in D-033",
+      "requirement": "Independent observation, exact attempt/target/payload and verifier eligibility; adapter acknowledgment never suffices."
+    },
+    "business_close": {
+      "name": "Agreed invoice-dispute disposition evidenced in its governing source (candidate only)",
+      "authoritative_source": null,
+      "observation_method": null,
+      "acceptance_owner": null,
+      "freshness_window": null,
+      "reopen_rule": "Changed or contradicted governing evidence invalidates current proof; append history.",
+      "current_status": "unconfirmed; no close claim permitted"
+    },
+    "case_resolution": {
+      "allowed": false,
+      "reason": "D-013 closure denial and all existing guards remain."
+    }
+  },
+  "intervention_requirements": {
+    "primary_reasons": [
+      "AUTHORITY",
+      "JUDGMENT",
+      "MISSING_EVIDENCE",
+      "MISSING_KNOWLEDGE",
+      "NOVEL_CASE",
+      "SYSTEM_FAILURE"
+    ],
+    "unconfirmed_reason_label": "Reason unconfirmed",
+    "bindings": [
+      "case_id",
+      "record_key",
+      "pack_hash",
+      "step_id",
+      "primary_reason",
+      "other_blockers",
+      "evidence_refs",
+      "accountable_identity",
+      "exception_identity",
+      "recorded_at"
+    ],
+    "durable_capture": "preparation_work_journal under Accepted D-037"
+  },
+  "correction_requirements": {
+    "reuse": [
+      "Correction",
+      "LearningCandidate",
+      "Discovery annotation lineage"
+    ],
+    "additional_bindings": [
+      "record_key",
+      "pack_hash",
+      "step_id",
+      "basis_hash",
+      "authority_only_or_knowledge_bearing",
+      "original_reference",
+      "evaluation_candidate_status"
+    ],
+    "promotion": "Append correction, manually review a synthetic evaluation candidate, propose a new pack version, pass held-out and retained regressions, obtain fresh publication approval. Never automatic.",
+    "implemented_general_capture": false,
+    "minimum_capture": "purpose_limited_preparation_correction.v1"
+  },
+  "resource_limits": {
+    "model_calls": 1,
+    "adaptive_agent_loops": 0,
+    "worker_dispatch": true,
+    "external_tools": [],
+    "maximum_input": "Existing intake profile limits; no pack override",
+    "automatic_messages": false,
+    "deadline": "Business due time unknown; no synthetic SLA. Existing HTTP timeout/recovery applies.",
+    "worker_execution": "fixed_optional_hermetic_investigation",
+    "worker_limits": {
+      "selected_records": 1,
+      "retained_bundles": 2,
+      "coverage_rows": 200,
+      "associated_support_artifacts": 20,
+      "parsed_utf8_bytes": 2097152,
+      "questions": 64,
+      "result_bytes": 262144,
+      "steps": 4,
+      "computation_ms": 60000
+    }
+  },
+  "measurement": {
+    "baseline": "Required before intervention, with agreed cohort, period, normal/exception variants and open/failed work",
+    "missing": [
+      "active human effort",
+      "waiting/handoff chronology",
+      "comparable baseline",
+      "model/tool/human/support costs",
+      "customer acceptance",
+      "business impact"
+    ],
+    "rules": [
+      "Overlapping waits need interval union, not a sum",
+      "Timestamp differences are not labor time or time saved",
+      "Missing measurements are not zero",
+      "Dispute or credit amount is not recovered revenue or savings"
+    ]
+  },
+  "template_id": "invoice-dispute-preparation.v4",
+  "objective": "Prepare a scoped investigation proposal and unsent follow-up for human interpretation review; no business authority or independent proof.",
+  "ecc_reference": {
+    "path": "packages/ecc-pack/workflows/contract.v0.yaml",
+    "bytes_hash": "sha256:b655e728036a340becdc97c209900e47388602184f1f2c7cd29b24ae12fa4676",
+    "workflow_id": "customer_escalation_commitment_control",
+    "version": "0.1.0",
+    "activation": "unchanged; shadow/evaluation only"
+  }
+}

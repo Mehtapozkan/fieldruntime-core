@@ -1,6 +1,32 @@
 # Status
 
-Current milestone: **Minimum same-dispute Workbench implemented for review**, stacked
+Current milestone: **D-040 optional investigation implemented for review**, stacked
+on PR #42 at `1954f929daf60887053635a31a83179f74ee6d8e`. No dependency is merged.
+Strict pack v4/work v3, additive migration 0012 and fake-only transport retain
+scoped complete inputs, durable invocation/budget reservations, unreviewed output,
+exact retries and deterministic replay. Default preparation stays deterministic.
+[Walkthrough, limitations and activation handoff](docs/guides/bounded-investigation.md).
+The 24-record evaluation/rubric is frozen; usefulness comparisons have not run.
+Local validation: `pnpm validate` passes 328 tests, formatting, lint, type checks
+and the public-release boundary. The investigation PostgreSQL/API suite now has 41 focused scenarios, including
+seven red-before-repair review regressions. The retained worker, continuation and
+D-039 API/browser suites passed 157/157 locally before this output-only correction. This is local
+PostgreSQL 18.4/Node 24.19.0 evidence; final-head CI must also exercise the pinned
+PostgreSQL 17.11 appliance and retained browser/restart suites. Docker is unavailable
+locally (`docker compose config --quiet`: exit 127), so Compose/appliance results
+come from CI, not an unperformed local check. The PR carries final-head evidence. Final scope audit reproduced a DEL-4 note being
+admitted for a DEL-5 proposal on the same record; the new interpreter now binds
+delivery citations to explicit associations or exact identifiers. Record context
+remains available, and citation validity still does not establish interpretation.
+Historical Discovery and deterministic preparation semantics are unchanged.
+PR review also reproduced unrelated draft citations, duplicate provider JSON keys
+and dispatch instructions being admitted. The corrected optional interpreter keeps
+the deterministic cited draft intact and retains the model draft separately as
+unreviewed material; it rejects duplicate keys and text outside a conservative
+descriptive/evidence-request grammar. This grammar is not semantic correctness proof.
+Final-head run results, including all retained coverage, are reported in the PR.
+
+Prior milestone: **Minimum same-dispute Workbench implemented for review**, stacked
 on open PR #41 at `4a1f536fb7b6b441a968f518499235443930c723`, then open PR #40
 at `1f387d470a90dfe41df69335732b3c48c831750a`. Neither dependency nor this Workbench
 is merged by this assignment. D-038's second-task acceptance, awaiting-review snapshot,
@@ -16,13 +42,15 @@ Current eligibility never comes from a retained receipt or synthetic role select
 The shared atomic recovery slot retains result bytes/key across tabs, reload and
 restart. Confirmed receipts survive a failed read; mismatches/inconclusive observations
 and historical acceptance remain distinct. Reads stay free of durable side effects.
-No runtime contract, migration, provider integration or source-editor endpoint is added.
+PR #42 added no runtime contract, migration, provider integration or source-editor
+endpoint; those preserved controls remain separate from D-040’s new compatibility
+contracts/migration.
 [Executable Workbench guide](docs/guides/dispute-result-workbench.md).
 
-[Proposed D-040](docs/architecture/d13-bounded-investigation-task.md) describes one
-bounded synthetic model task and evaluation. No credentials or inference calls were
-used; provider/model access and its supporting journal admission await separate
-approval. Named customer participants, data arrangements and baseline remain missing.
+[Accepted D-040](docs/architecture/d13-bounded-investigation-task.md) authorizes
+bounded implementation only. Its optional hermetic adapter and journal admission
+are implemented on this separate review branch; live activation, inference spending
+and customer processing remain unapproved. No provider inference calls were used. Named customer participants, data arrangements and baseline remain missing.
 Real-customer processing, release/deployment and D14 remain outside this task.
 
 ### Workbench validation

@@ -1,0 +1,18 @@
+{
+  "synthetic": true,
+  "not_holdout": true,
+  "records": [
+    {
+      "record": "DEV-A",
+      "reports": [
+        "A status report states confirmation is available, but the original is not supplied."
+      ]
+    },
+    {
+      "record": "DEV-B",
+      "reports": [
+        "One explicitly associated report says confirmation supplied; another denies supplied confirmation for the same delivery."
+      ]
+    }
+  ]
+}

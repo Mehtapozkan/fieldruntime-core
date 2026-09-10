@@ -1,8 +1,10 @@
+import templateV4 from "../../contracts/src/preparation-template.v4.json" with { type: "json" };
 import templateV3 from "../../contracts/src/preparation-template.v3.json" with { type: "json" };
 import templateV2 from "../../contracts/src/preparation-template.v2.json" with { type: "json" };
 import {
   syntheticWorkerProfile,
   syntheticContinuationProfile,
+  syntheticInvestigationProfile,
   workActor,
 } from "./preparation-worker-profile.js";
 // Accepted D-036: one synthetic preparation configuration, never worker or business authority.
@@ -11,6 +13,7 @@ import {
   assertValidPreparationPackContract,
   assertValidPreparationPackV2Contract,
   assertValidPreparationPackV3Contract,
+  assertValidPreparationPackV4Contract,
   assertValidIdentityReference,
   canonicalJson,
   immutableJson,
@@ -56,10 +59,27 @@ export const PACK_V3_VERSIONS = immutableJson({
   projection: "preparation-pack.v3",
   selection: "pack-selection.v3",
 });
+export const PREPARATION_TEMPLATE_V4 = immutableJson(templateV4);
+export const PACK_V4_VERSIONS = immutableJson({
+  projection: "preparation-pack.v4",
+  selection: "pack-selection.v4",
+});
 const packGeneration = (v: unknown): number =>
-  String(v).endsWith(".v3") ? 3 : String(v).endsWith(".v2") ? 2 : 1;
+  String(v).endsWith(".v4")
+    ? 4
+    : String(v).endsWith(".v3")
+      ? 3
+      : String(v).endsWith(".v2")
+        ? 2
+        : 1;
 const packVersions = (n: number): Obj =>
-  n === 3 ? PACK_V3_VERSIONS : n === 2 ? PACK_V2_VERSIONS : PACK_VERSIONS;
+  n === 4
+    ? PACK_V4_VERSIONS
+    : n === 3
+      ? PACK_V3_VERSIONS
+      : n === 2
+        ? PACK_V2_VERSIONS
+        : PACK_VERSIONS;
 export interface PackState {
   readonly discovery: DiscoveryState;
   readonly entries: readonly Obj[];
@@ -98,7 +118,9 @@ function validatePack(
     | "export",
   value: unknown,
 ): asserts value is Obj {
-  if (packGeneration(o(value).schema_version) === 3)
+  if (packGeneration(o(value).schema_version) === 4)
+    assertValidPreparationPackV4Contract(kind, value);
+  else if (packGeneration(o(value).schema_version) === 3)
     assertValidPreparationPackV3Contract(kind, value);
   else if (
     o(value).schema_version === `preparation-pack.v2` ||
@@ -113,6 +135,13 @@ export function syntheticWorkerPackContext(): PackContext {
     ...syntheticPackContext(),
     template_id: "invoice-dispute-preparation.v2",
     worker_profile: syntheticWorkerProfile(),
+  };
+}
+export function syntheticInvestigationPackContext(): PackContext {
+  return {
+    ...syntheticPackContext(),
+    template_id: "invoice-dispute-preparation.v4",
+    worker_profile: syntheticInvestigationProfile(),
   };
 }
 export function syntheticContinuationPackContext(): PackContext {
@@ -304,11 +333,13 @@ export function projectPreparationPack(
 ): Obj {
   reader(context.profile);
   const selectedTemplate =
-    context.template_id === PREPARATION_TEMPLATE_V3.template_id
-      ? PREPARATION_TEMPLATE_V3
-      : context.template_id === PREPARATION_TEMPLATE_V2.template_id
-        ? PREPARATION_TEMPLATE_V2
-        : PREPARATION_TEMPLATE;
+    context.template_id === PREPARATION_TEMPLATE_V4.template_id
+      ? PREPARATION_TEMPLATE_V4
+      : context.template_id === PREPARATION_TEMPLATE_V3.template_id
+        ? PREPARATION_TEMPLATE_V3
+        : context.template_id === PREPARATION_TEMPLATE_V2.template_id
+          ? PREPARATION_TEMPLATE_V2
+          : PREPARATION_TEMPLATE;
   const generation = packGeneration(selectedTemplate.template_id),
     v2 = generation >= 2;
   ensure(

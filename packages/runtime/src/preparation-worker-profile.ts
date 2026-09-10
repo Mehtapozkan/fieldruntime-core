@@ -1,8 +1,10 @@
+import profileV3 from "../../contracts/src/preparation-worker-profile.v3.json" with { type: "json" };
 import profileV2 from "../../contracts/src/preparation-worker-profile.v2.json" with { type: "json" };
 import profile from "../../contracts/src/preparation-worker-profile.v1.json" with { type: "json" };
 import {
   assertValidPreparationWorkContract,
   assertValidPreparationWorkV2Contract,
+  assertValidPreparationWorkV3Contract,
   assertValidIdentityReference,
   canonicalJson,
   immutableJson,
@@ -30,6 +32,9 @@ export const CONTINUATION_LIMITS = Object.freeze({
   ...WORK_LIMITS,
   retained_bundles: 2,
 });
+export function syntheticInvestigationProfile(): Obj {
+  return immutableJson(profileV3);
+}
 export function syntheticContinuationProfile(): Obj {
   return immutableJson(profileV2);
 }
@@ -44,7 +49,9 @@ export function syntheticWorkerProfile(): Obj {
   return immutableJson(profile);
 }
 export function workIdentity(p: Obj, id: string, kind: string): Obj {
-  if (p.schema_version === "synthetic-preparation-worker.v2")
+  if (p.schema_version === "synthetic-preparation-worker.v3")
+    assertValidPreparationWorkV3Contract("profile", p);
+  else if (p.schema_version === "synthetic-preparation-worker.v2")
     assertValidPreparationWorkV2Contract("profile", p);
   else assertValidPreparationWorkContract("profile", p);
   const found = new Map<string, Obj>();

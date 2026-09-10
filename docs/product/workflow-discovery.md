@@ -487,7 +487,11 @@ implement it alongside those controls after the API and its own approved boundar
 This is a narrow D13 task. D15 still owns broader worker/model routing. The precise
 sequence and dependencies live in [PLAN](../../PLAN.md#remaining-d13-mvp-sequence).
 
-**Proposed bounded investigation task, not currently implemented or approved:**
+**Accepted D-040 bounded implementation, on a separate review branch:**
+
+[The optional adapter](../guides/bounded-investigation.md) implements versioned
+synthetic preparation with fake responses. Live activation/spending/customer data
+remain unapproved. The deterministic default and all business boundaries remain.
 
 - Interpret unfamiliar wording in a supported, explicitly permitted retained invoice,
   delivery, remittance or correspondence subset. Start with one bounded model call
@@ -560,6 +564,6 @@ The immediate [same-dispute Workbench](../guides/dispute-result-workbench.md) is
 implemented on a separate review branch stacked on PR #41. It exposes the existing
 D-039 operations and retained preparation without changing runtime or closure rules.
 Normal-source mismatch and separate test-fixture acceptance are explicitly distinct.
-[Proposed D-040](../architecture/d13-bounded-investigation-task.md) is the bounded
-investigation/provider decision, not implemented model capability. Customer activation
+[Accepted D-040](../architecture/d13-bounded-investigation-task.md) is implemented
+as a bounded hermetic adapter; it establishes no live model capability or usefulness result. Customer activation
 and comparisons remain separately gated; all 19 requirements retain their existing scope.
