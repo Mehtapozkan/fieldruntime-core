@@ -1,0 +1,2091 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.ai/schemas/dispute-result.v1.schema.json",
+  "$defs": {
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "case_id",
+        "record_key",
+        "entity",
+        "customer",
+        "dispute_id",
+        "invoice_id",
+        "order_id",
+        "delivery_id",
+        "amount_minor",
+        "currency"
+      ],
+      "properties": {
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "record_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "entity": {
+          "const": "entity_north"
+        },
+        "customer": {
+          "const": "Orchid"
+        },
+        "dispute_id": {
+          "const": "dispute-17"
+        },
+        "invoice_id": {
+          "const": "INV-101"
+        },
+        "order_id": {
+          "const": "PO-9"
+        },
+        "delivery_id": {
+          "const": "DEL-4"
+        },
+        "amount_minor": {
+          "const": 1500000
+        },
+        "currency": {
+          "const": "USD"
+        }
+      }
+    },
+    "source_subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity",
+        "customer",
+        "dispute_id",
+        "invoice_id",
+        "order_id",
+        "delivery_id",
+        "amount_minor",
+        "currency"
+      ],
+      "properties": {
+        "entity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "customer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "dispute_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "invoice_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "order_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "delivery_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "amount_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "pod": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "object_id",
+        "version",
+        "subject",
+        "issuer",
+        "custodian",
+        "event_at",
+        "source_timezone",
+        "valid",
+        "rescinded",
+        "original_bytes_base64",
+        "original_hash",
+        "recipient",
+        "line_id",
+        "quantity",
+        "allocation_complete"
+      ],
+      "properties": {
+        "object_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "subject": {
+          "$ref": "#/$defs/source_subject"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "custodian": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "event_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "source_timezone": {
+          "const": "UTC"
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "rescinded": {
+          "type": "boolean"
+        },
+        "original_bytes_base64": {
+          "type": "string",
+          "maxLength": 65536
+        },
+        "original_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "recipient": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "line_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "allocation_complete": {
+          "type": "boolean"
+        }
+      }
+    },
+    "terms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "object_id",
+        "version",
+        "subject",
+        "clause_id",
+        "clause",
+        "effective_from",
+        "effective_until",
+        "valid"
+      ],
+      "properties": {
+        "object_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "subject": {
+          "$ref": "#/$defs/source_subject"
+        },
+        "clause_id": {
+          "const": "N1-matched-delivery-only"
+        },
+        "clause": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "effective_until": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "valid": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "object_id",
+        "version",
+        "subject",
+        "status",
+        "grounds_complete",
+        "active_grounds",
+        "disposed_grounds",
+        "adjustment_minor",
+        "credit_ids",
+        "decision_reference",
+        "prior_version",
+        "prior_hash",
+        "payment_status",
+        "event_at",
+        "source_timezone"
+      ],
+      "properties": {
+        "object_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "subject": {
+          "$ref": "#/$defs/source_subject"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "upheld_no_adjustment",
+            "reopened"
+          ]
+        },
+        "grounds_complete": {
+          "type": "boolean"
+        },
+        "active_grounds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "disposed_grounds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "adjustment_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "credit_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "decision_reference": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prior_version": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prior_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payment_status": {
+          "enum": [
+            "unknown",
+            "unpaid"
+          ]
+        },
+        "event_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "source_timezone": {
+          "const": "UTC"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "revision",
+        "pod",
+        "terms",
+        "ar"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "synthetic-dispute-source.v1"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "pod": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/pod"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "terms": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/terms"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ar": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ar"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "raw": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "bytes_base64",
+        "byte_hash",
+        "source"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "read",
+            "unavailable",
+            "malformed"
+          ]
+        },
+        "bytes_base64": {
+          "type": "string",
+          "maxLength": 262144
+        },
+        "byte_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "started_at",
+        "observed_at",
+        "recorded_at",
+        "read",
+        "recheck"
+      ],
+      "properties": {
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "read": {
+          "$ref": "#/$defs/raw"
+        },
+        "recheck": {
+          "$ref": "#/$defs/raw"
+        }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reasons",
+        "expected",
+        "observed",
+        "phase"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "match",
+            "mismatch",
+            "inconclusive"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "expected": {
+          "$ref": "#/$defs/source_subject"
+        },
+        "observed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "phase": {
+          "enum": [
+            "basis",
+            "result"
+          ]
+        }
+      }
+    },
+    "basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "subject",
+        "case_version",
+        "case_head_hash",
+        "business_bundle_hashes",
+        "business_commit_hashes",
+        "preparation_entry_hashes",
+        "catalog_hash",
+        "authority_state_revision",
+        "basis_observation_hash",
+        "source",
+        "source_hash",
+        "policy_id",
+        "policy_version",
+        "policy_content_hash",
+        "observed_at",
+        "expires_at"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "dispute-result-basis.v1"
+        },
+        "subject": {
+          "$ref": "#/$defs/subject"
+        },
+        "case_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "case_head_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "business_bundle_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "business_commit_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "preparation_entry_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "catalog_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "authority_state_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "basis_observation_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "source_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "policy_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "policy_content_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "record_key",
+        "case_version",
+        "case_head_hash",
+        "authority_state_revision",
+        "catalog_hash",
+        "business_input_hash",
+        "result_revision",
+        "result_head"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "record_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "case_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "case_head_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "authority_state_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "catalog_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "business_input_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "result_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "result_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "review_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_request_id",
+        "request_binding_hash",
+        "expected_review_revision"
+      ],
+      "properties": {
+        "authority_request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "request_binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "expected_review_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "commitment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "description",
+        "owner_identity_id",
+        "due_at",
+        "status",
+        "evidence_ref"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "owner_identity_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "due_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "status": {
+          "enum": [
+            "owned",
+            "complete",
+            "transferred"
+          ]
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      }
+    },
+    "command": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "enroll"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "candidate"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation",
+            "candidate_hash"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "basis_check"
+            },
+            "candidate_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation",
+            "candidate_hash",
+            "basis_observation_hash"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "request_authority"
+            },
+            "candidate_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "basis_observation_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation",
+            "candidate_hash",
+            "review",
+            "decision",
+            "reason"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "review_authority"
+            },
+            "candidate_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "review": {
+              "$ref": "#/$defs/review_binding"
+            },
+            "decision": {
+              "enum": [
+                "approve",
+                "reject",
+                "modify",
+                "escalate"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation",
+            "candidate_hash",
+            "review",
+            "basis_hash"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "no_action"
+            },
+            "candidate_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "review": {
+              "$ref": "#/$defs/review_binding"
+            },
+            "basis_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation",
+            "candidate_hash",
+            "decision_hash",
+            "reason",
+            "claim"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "report"
+            },
+            "candidate_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "decision_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "claim": {
+              "$ref": "#/$defs/report_claim"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation",
+            "candidate_hash",
+            "decision_hash"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "result_check"
+            },
+            "candidate_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "decision_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation",
+            "candidate_hash",
+            "decision_hash",
+            "observation_hash",
+            "outcome_hash",
+            "commitments",
+            "reason"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "accept"
+            },
+            "candidate_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "decision_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "observation_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "outcome_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "commitments": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/commitment"
+              }
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation",
+            "candidate_hash",
+            "reason"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "reject"
+            },
+            "candidate_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "binding",
+            "idempotency_key",
+            "operation",
+            "candidate_hash",
+            "acceptance_hash",
+            "observation_hash",
+            "reason"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "dispute-result-command.v1"
+            },
+            "binding": {
+              "$ref": "#/$defs/binding"
+            },
+            "idempotency_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "operation": {
+              "const": "reopen"
+            },
+            "candidate_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "acceptance_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "observation_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        }
+      ]
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_version",
+        "case_head_hash",
+        "bundle_hashes",
+        "commit_hashes",
+        "work_hashes",
+        "catalog_hash",
+        "authority_state_revision",
+        "authority_position",
+        "clock_floor"
+      ],
+      "properties": {
+        "case_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "case_head_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "bundle_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "commit_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "work_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "catalog_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "authority_state_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "authority_position": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "clock_floor": {
+          "type": "string"
+        }
+      }
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "subject",
+            "catalog_hash"
+          ],
+          "properties": {
+            "kind": {
+              "const": "enroll"
+            },
+            "subject": {
+              "$ref": "#/$defs/subject"
+            },
+            "catalog_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "subject"
+          ],
+          "properties": {
+            "kind": {
+              "const": "candidate"
+            },
+            "subject": {
+              "$ref": "#/$defs/subject"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "observation",
+            "comparison",
+            "outcome"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "basis_check",
+                "result_check"
+              ]
+            },
+            "observation": {
+              "$ref": "#/$defs/observation"
+            },
+            "comparison": {
+              "$ref": "#/$defs/comparison"
+            },
+            "outcome": {
+              "anyOf": [
+                {
+                  "$ref": "https://fieldruntime.ai/schemas/ecc-canonical-data-model-v0.schema.json#/$defs/Outcome"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "authority_entry_hashes"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "request_authority",
+                "review_authority"
+              ]
+            },
+            "authority_entry_hashes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "basis",
+            "request_hash",
+            "review_head",
+            "consequence_hash",
+            "authorization"
+          ],
+          "properties": {
+            "kind": {
+              "const": "no_action"
+            },
+            "basis": {
+              "$ref": "#/$defs/basis"
+            },
+            "request_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "review_head": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "consequence_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "authorization": {
+              "$ref": "https://fieldruntime.ai/schemas/authority-resolution-result.v0.schema.json"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "reported_by",
+            "reported_at",
+            "reason",
+            "claim"
+          ],
+          "properties": {
+            "kind": {
+              "const": "report"
+            },
+            "reported_by": {
+              "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+            },
+            "reported_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "claim": {
+              "$ref": "#/$defs/report_claim"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "outcome_hash",
+            "observation_hash",
+            "commitments",
+            "remaining_obligations"
+          ],
+          "properties": {
+            "kind": {
+              "const": "accept"
+            },
+            "outcome_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "observation_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "commitments": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/commitment"
+              }
+            },
+            "remaining_obligations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "reason"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "reject",
+                "reopen"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        }
+      ]
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "id",
+        "tenant_id",
+        "case_id",
+        "record_key",
+        "sequence",
+        "previous_entry_hash",
+        "hash",
+        "operation",
+        "idempotency_key",
+        "command_fingerprint",
+        "command",
+        "context",
+        "actor",
+        "authority_position",
+        "authority_state_revision",
+        "recorded_at",
+        "versions",
+        "data",
+        "source_precondition"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "dispute-result-entry.v1"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "tenant_id": {
+          "const": "tenant_intake_demo"
+        },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "record_key": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "previous_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "operation": {
+          "enum": [
+            "enroll",
+            "candidate",
+            "basis_check",
+            "request_authority",
+            "review_authority",
+            "no_action",
+            "report",
+            "result_check",
+            "accept",
+            "reject",
+            "reopen"
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "command_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "command": {
+          "$ref": "#/$defs/command"
+        },
+        "context": {
+          "$ref": "#/$defs/context"
+        },
+        "actor": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "authority_position": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "authority_state_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "versions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "engine",
+            "reader",
+            "material"
+          ],
+          "properties": {
+            "engine": {
+              "const": "dispute-result.v1"
+            },
+            "reader": {
+              "const": "synthetic-dispute-source.v1"
+            },
+            "material": {
+              "const": "dispute-authority-material.v1"
+            }
+          }
+        },
+        "data": {
+          "$ref": "#/$defs/data"
+        },
+        "source_precondition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/observation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "historical_only",
+        "entry"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "dispute-result-receipt.v1"
+        },
+        "historical_only": {
+          "const": true
+        },
+        "entry": {
+          "$ref": "#/$defs/entry"
+        }
+      }
+    },
+    "current": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "verified",
+        "accepted",
+        "blockers",
+        "responsible_role",
+        "next_action",
+        "remaining_obligations",
+        "closure_permitted",
+        "financial_write_permitted"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "accepted": {
+          "type": "boolean"
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "responsible_role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "next_action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "remaining_obligations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "closure_permitted": {
+          "const": false
+        },
+        "financial_write_permitted": {
+          "const": false
+        }
+      }
+    },
+    "read": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "simulation",
+        "binding",
+        "evaluated_at",
+        "subject",
+        "history",
+        "candidate_hash",
+        "basis",
+        "authority",
+        "current",
+        "outcome",
+        "proof_measures"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "dispute-result-read.v1"
+        },
+        "simulation": {
+          "const": true
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "subject": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/subject"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entry"
+          }
+        },
+        "candidate_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/basis"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "authority": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.ai/schemas/authority-request-read-response.dispute.v1.schema.json"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "current": {
+          "$ref": "#/$defs/current"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.ai/schemas/ecc-canonical-data-model-v0.schema.json#/$defs/Outcome"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "proof_measures": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cash_collected",
+            "disputes_resolved",
+            "credits_issued",
+            "work_newly_attended_to",
+            "human_attention_released"
+          ],
+          "properties": {
+            "cash_collected": {
+              "const": null
+            },
+            "disputes_resolved": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "credits_issued": {
+              "const": null
+            },
+            "work_newly_attended_to": {
+              "const": null
+            },
+            "human_attention_released": {
+              "const": null
+            }
+          }
+        }
+      }
+    },
+    "export": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "work",
+        "authority",
+        "catalog_heads",
+        "entries",
+        "hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "dispute-result-export.v1"
+        },
+        "work": {
+          "oneOf": [
+            {
+              "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/export"
+            },
+            {
+              "$ref": "https://fieldruntime.dev/schemas/preparation-work.v2.schema.json#/$defs/export"
+            }
+          ]
+        },
+        "authority": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "entries",
+            "snapshots"
+          ],
+          "properties": {
+            "entries": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "https://fieldruntime.ai/schemas/authority-request-journal-entry.v1.schema.json"
+                  },
+                  {
+                    "$ref": "https://fieldruntime.ai/schemas/authority-request-journal-entry.dispute.v1.schema.json"
+                  }
+                ]
+              }
+            },
+            "snapshots": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "tenant_id",
+                  "hash",
+                  "kind",
+                  "content"
+                ],
+                "properties": {
+                  "tenant_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  },
+                  "kind": {
+                    "enum": [
+                      "catalog",
+                      "material",
+                      "evaluation"
+                    ]
+                  },
+                  "content": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "catalog_heads": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tenant_id",
+              "revision",
+              "snapshot_hash",
+              "last_recorded_at"
+            ],
+            "properties": {
+              "tenant_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "snapshot_hash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "last_recorded_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+              }
+            }
+          }
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entry"
+          }
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "report_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "source_version",
+        "occurred_at",
+        "source_timezone",
+        "evidence_ref"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "source_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "source_timezone": {
+          "const": "UTC"
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      }
+    },
+    "authority_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "context",
+        "observation",
+        "actor",
+        "versions"
+      ],
+      "properties": {
+        "command": {
+          "$ref": "#/$defs/command"
+        },
+        "context": {
+          "$ref": "#/$defs/context"
+        },
+        "observation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/observation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actor": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "versions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "engine",
+            "reader",
+            "material"
+          ],
+          "properties": {
+            "engine": {
+              "const": "dispute-result.v1"
+            },
+            "reader": {
+              "const": "synthetic-dispute-source.v1"
+            },
+            "material": {
+              "const": "dispute-authority-material.v1"
+            }
+          }
+        }
+      }
+    }
+  }
+}

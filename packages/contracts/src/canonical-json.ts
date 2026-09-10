@@ -289,3 +289,35 @@ export function sha256Json(value: unknown): `sha256:${string}` {
 export function immutableJson<T>(value: T): T {
   return deepFreeze(canonicalizeJson(value)) as T;
 }
+
+// D-036 commands reject duplicate JSON keys before boundary validation, including
+// escaped spellings of the same key. JSON.parse first establishes valid JSON syntax.
+export function assertUniqueJsonKeys(body: string): void {
+  const tokens =
+    body.match(/"(?:\\[\s\S]|[^"\\])*"|[{}[\]:,]|[^\s{}[\]:,]+/g) ?? [];
+  let i = 0;
+  const value = (): void => {
+    const token = tokens[i++];
+    if (token === "{") {
+      const keys = new Set<string>();
+      while (tokens[i] !== "}") {
+        const key = JSON.parse(tokens[i++] ?? "") as string;
+        if (keys.has(key)) throw new Error("Duplicate JSON key");
+        keys.add(key);
+        i++;
+        value();
+        if (tokens[i] !== ",") break;
+        i++;
+      }
+      i++;
+    } else if (token === "[") {
+      while (tokens[i] !== "]") {
+        value();
+        if (tokens[i] !== ",") break;
+        i++;
+      }
+      i++;
+    }
+  };
+  value();
+}

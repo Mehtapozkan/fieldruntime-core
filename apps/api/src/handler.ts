@@ -1,4 +1,10 @@
 import {
+  ContractValidationError,
+  CanonicalJsonError,
+  assertUniqueJsonKeys,
+} from "../../../packages/contracts/src/index.js";
+import { IntakeError } from "../../../packages/runtime/src/intake.js";
+import {
   IntakeInputError,
   type TransactionalIntakeWorker,
 } from "../../worker/src/intake-service.js";
@@ -51,6 +57,11 @@ export interface GuidedWalkthroughRecord {
 }
 
 export interface ApiDependencies {
+  readonly dispute?: {
+    submit: (value: unknown) => Promise<JsonObject>;
+    read: (caseId: string, key: string) => Promise<JsonObject>;
+    export: (caseId: string, key: string) => Promise<JsonObject>;
+  };
   readonly intake?: TransactionalIntakeWorker;
   readonly credit?: {
     readonly verify?: (command: unknown) => Promise<JsonObject>;
@@ -157,38 +168,6 @@ function safeCommandResult(result: CaseCommandResult): JsonObject {
   };
 }
 
-// D-036 commands reject duplicate JSON keys before boundary validation, including
-// escaped spellings of the same key. JSON.parse first establishes valid JSON syntax.
-function assertUniqueJsonKeys(body: string): void {
-  const tokens =
-    body.match(/"(?:\\[\s\S]|[^"\\])*"|[{}[\]:,]|[^\s{}[\]:,]+/g) ?? [];
-  let i = 0;
-  const value = (): void => {
-    const token = tokens[i++];
-    if (token === "{") {
-      const keys = new Set<string>();
-      while (tokens[i] !== "}") {
-        const key = JSON.parse(tokens[i++] ?? "") as string;
-        if (keys.has(key)) throw new Error("Duplicate JSON key");
-        keys.add(key);
-        i++;
-        value();
-        if (tokens[i] !== ",") break;
-        i++;
-      }
-      i++;
-    } else if (token === "[") {
-      while (tokens[i] !== "]") {
-        value();
-        if (tokens[i] !== ",") break;
-        i++;
-      }
-      i++;
-    }
-  };
-  value();
-}
-
 function parseCommand(
   request: ApiRequest,
   limit = MAX_BODY_BYTES,
@@ -223,6 +202,68 @@ export async function handleApiRequest(
   const segments = decodePath(request.path);
   if (segments === undefined) return response(400, { error: "invalid_path" });
 
+  if (
+    segments[0] === "v1" &&
+    segments[1] === "intake" &&
+    segments[2] === "dispute-results" &&
+    dependencies.dispute
+  ) {
+    const params = new URL(request.path, "http://localhost").searchParams;
+    try {
+      if (
+        method === "POST" &&
+        segments.length === 4 &&
+        segments[3] === "commands" &&
+        params.size === 0
+      ) {
+        const parsed = parseCommand(request, 131072, true);
+        if ("error" in parsed) return parsed.error;
+        return response(200, await dependencies.dispute.submit(parsed.command));
+      }
+      if (
+        method === "GET" &&
+        segments.length === 3 &&
+        params.size >= 2 &&
+        [...params.keys()].every((k) =>
+          ["case_id", "record_key", "representation"].includes(k),
+        ) &&
+        [...params.keys()].every((k) => params.getAll(k).length === 1)
+      ) {
+        const caseId = params.get("case_id"),
+          key = params.get("record_key"),
+          representation = params.get("representation");
+        if (
+          !caseId ||
+          !key ||
+          (representation !== null && representation !== "export")
+        )
+          return response(400, { error: "invalid_query" });
+        return response(
+          200,
+          await (representation === "export"
+            ? dependencies.dispute.export(caseId, key)
+            : dependencies.dispute.read(caseId, key)),
+        );
+      }
+      return response(400, { error: "invalid_dispute_result_route" });
+    } catch (error) {
+      if (
+        error instanceof ContractValidationError ||
+        error instanceof CanonicalJsonError
+      )
+        return response(400, { error: "invalid_dispute_command" });
+      if (error instanceof IntakeError)
+        return response(
+          error.code === "NOT_FOUND"
+            ? 404
+            : error.code === "INVALID_INPUT"
+              ? 400
+              : 409,
+          { error: error.code, message: error.message },
+        );
+      throw error;
+    }
+  }
   if (segments[0] === "v1" && segments[1] === "intake" && dependencies.intake) {
     const intake = dependencies.intake;
     try {

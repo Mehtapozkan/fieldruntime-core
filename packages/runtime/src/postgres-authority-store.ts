@@ -1,3 +1,4 @@
+import { loadDisputeEvidence } from "./postgres-dispute-evidence.js";
 import { loadCreditEvidence } from "./postgres-credit-evidence.js";
 import {
   assertCreditIntegrity,
@@ -54,7 +55,7 @@ function storedInteger(value: unknown): number {
 function assertStored(condition: boolean, message: string): asserts condition {
   if (!condition) throw new PostgresStoreError("STORE_INTEGRITY", message);
 }
-function journalColumns(entry: ObjectValue, state: AuthorityState): Row {
+export function journalColumns(entry: ObjectValue, state: AuthorityState): Row {
   const creation = state.entries.find(
     (item) =>
       item.tenant_id === entry.tenant_id &&
@@ -137,7 +138,11 @@ export async function loadAuthorityStore(
     historyOnlyForVerification,
   );
   try {
-    assertAuthorityStateIntegrity(authority, cases, heads, credit.entries);
+    const resultClocks = (await loadDisputeEvidence(client)).map(json);
+    assertAuthorityStateIntegrity(authority, cases, heads, [
+      ...credit.entries,
+      ...resultClocks,
+    ]);
     assertCreditIntegrity({ cases, authority, heads, credit });
     for (const row of journal.rows) {
       const columns = journalColumns(json(row.entry), authority);
@@ -172,7 +177,7 @@ export async function writeAuthorityRow(
       "authority write affected unexpected rows",
     );
 }
-async function persistSnapshot(
+export async function persistSnapshot(
   client: SqlClient,
   snapshot: ReviewSnapshot,
 ): Promise<void> {
@@ -244,6 +249,11 @@ export class PostgresAuthorityStore {
     dependencies: ReviewDependencies,
   ): Promise<AuthorityCommandResult> {
     assertValidAuthorityReviewContract("command", command);
+    if (command.tenant_id === "tenant_intake_demo")
+      throw new AuthorityReviewError(
+        "REVIEW_INPUT_INVALID",
+        "Imported-dispute authority requires the bound result API",
+      );
     return authorityTransaction(this.pool, false, async (client) => {
       const before = await loadAuthorityStore(client);
       const head = before.heads.find(

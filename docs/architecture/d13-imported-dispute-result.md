@@ -1,31 +1,65 @@
 # D-039 — One synthetic imported-dispute result and separate business acceptance
 
-Status: **Proposed — no implementation or approval of this boundary.**
+Status: **Accepted — implementation authorized; delivery evidence is tracked in STATUS.md.**
 
 D-038 preparation at `b67cfaf0` is preserved. Its accepted second packet is useful
 preparation, not an authorized disposition, verified delivery or business acceptance.
-This decision proposes one next bounded D13 API slice; it does not start D14.
+This decision authorizes one bounded D13 API slice; it does not start D14.
+The [implemented API guide](../guides/synthetic-dispute-result.md) records the executable
+path, migration and actual validation separately from the retained design example.
 The [worked example](../examples/d13-dispute-result.proposed.json) distinguishes
 actual preparation bindings from hypothetical source records and future commands.
 
-## Decision requested
+## Accepted decision and human approval
 
-Approve only a **synthetic no-adjustment disposition** for one explicitly selected,
+The owner explicitly approved D-039 at `1f387d470a90dfe41df69335732b3c48c831750a`
+on 2026-09-10, including the corrected handoff product clarifications, and assigned
+the bounded synthetic result API. Approval covers the fixed synthetic reader, exact
+record enrollment, separate decision/verifier/business-recipient profiles, strict
+versioned contracts and one supporting journal for `uphold_invoice_no_adjustment`.
+It does not approve an individual decision, model/provider access, real customer
+data, financial writes, messages, release, deployment or Case closure. The earlier
+Proposed text and worked example remain in Git history at the reviewed commit.
+
+## Decision
+
+Implement only a **synthetic no-adjustment disposition** for one explicitly selected,
 already imported North invoice-dispute record, with a fixed source reader, separate
 decision/verifier/business-recipient profiles, and one append-only PostgreSQL
 supporting result journal. Reuse the existing Case, D6 request/review/resolver and
 persistence/retry patterns. New result contracts must be strict and versioned.
 
-This would let a person authorize “uphold this disputed portion without adjustment,”
+This lets a person authorize “uphold this disputed portion without adjustment,”
 record a reported off-runtime disposition, independently check the synthetic source,
 and separately accept that exact result. It does not authorize any individual
 decision, change customer terms, issue credit, collect cash, send a message or close
 a Case. D-013/D-017, D-033's separate credit tenant, D-034 activation gate and D-038's
-two-bundle ceiling remain unchanged. Do not implement this boundary before approval.
+two-bundle ceiling remain unchanged. The human approval above authorizes this bounded implementation.
+
+### Product completion clarification
+
+This is the next bounded result API in [the remaining D13 MVP](../../PLAN.md#remaining-d13-mvp-sequence),
+followed immediately by minimum controls in the existing Workbench. It completes one
+no-adjustment branch for the same imported record; it is not generalized dispute
+resolution, cash application or a financial action. Preserve the record's preparation,
+decision, source observation, acceptance and reversal as distinct, linked facts.
+
+The read view must identify the supported disposition, the evidenced blocker, the
+next supported action and applicable responsible role. Unknown owners remain unknown;
+unsupported dispositions remain open for human follow-through. It must show why this
+recipient may accept this exact disputed portion and which payment/other commitments
+remain after acceptance. A synthetic recipient's recorded acceptance is not evidence
+that an actual customer agreed or paid.
+
+D-039 must remain independent of the proposed model-assisted investigation task.
+Model/worker output can prepare cited questions or proposals but cannot supply the
+independent proof, business grant, source observation or acceptance required here.
+The model/provider/data boundary is a separate design and approval; it cannot delay
+or enlarge this API slice. The product clarifications do not extend the approval to model/provider integration.
 
 ## One disposition, with evidence prerequisites
 
-**Proposed path:** `uphold_invoice_no_adjustment`, confined to the selected disputed
+**Accepted path:** `uphold_invoice_no_adjustment`, confined to the selected disputed
 portion. For the worked example this is North / Orchid / dispute-17 / INV-101 /
 PO-9 / DEL-4 / USD 1,500,000 minor units. That is the reported **disputed amount**,
 not the total invoice balance, cash recovered or an amount to credit.
@@ -38,7 +72,7 @@ Required before a no-action decision can be authorized and recorded:
 | Delivery         | Original POD object and bytes, issuer/custodian, source revision, recipient/receipt event, delivered line/quantity and explicit dispute–invoice–order–delivery allocation. The authoritative delivery source must mark the original valid and not rescinded. A TXT saying proof exists, filename, queue status or task confirmation is insufficient.                                  |
 | Governing terms  | Exact applicable terms object/version/hash, clause, entity/account/order scope and effectivity at the relevant delivery/disposition times. The proposed synthetic clause permits no adjustment only for matched delivery and no other active dispute ground. This clause is an invented test rule, **not a fact established by current inputs** or a contract interpretation service. |
 | Complete grounds | A complete authoritative record-specific grounds view confirms that non-delivery is the only ground being disposed. Unknown quantity/quality/price claims or conflicting allocation/terms block this path. Do not infer absence from omitted fields.                                                                                                                                  |
-| Decision owner   | Proposed server-controlled **Morgan, synthetic North AR decision owner**, with a current canonical human identity and named scoped `invoice_dispute_no_adjustment` authority. Queue-reported Taylor and the preparation operator do not inherit this grant.                                                                                                                           |
+| Decision owner   | Server-controlled **Morgan, synthetic North AR decision owner**, with a current canonical human identity and named scoped `invoice_dispute_no_adjustment` authority. Queue-reported Taylor and the preparation operator do not inherit this grant.                                                                                                                                    |
 | Authorization    | New fixed policy/content reference and exact consequence hash, existing D6 C/R/S checks and repaired resolver. One named Morgan approval, no delegation or preparer self-approval. The profile admits only this no-adjustment operation; amounts remain context and cannot select a credit or write-off.                                                                              |
 
 The present two-bundle handoff has **none of the original-POD, governing-terms or
@@ -47,7 +81,7 @@ owner clarification. A missing prerequisite is a blocker, not a successful dispo
 
 ## Sources and the new trust boundary
 
-The smallest implementation would use one fixed **local synthetic fixture reader**,
+The bounded implementation uses one fixed **local synthetic fixture reader**,
 not a connector. It independently reads allowlisted POD/allocation, terms and AR
 dispute objects from versioned fixture files. Normal command payloads cannot contain
 source observations, fixture paths, verifier identities or success flags. No normal
@@ -65,7 +99,7 @@ These proof-source objects are **not extra preparation bundles** and cannot beco
 worker inputs by citation or an alternative upload route. D-038 keeps every existing
 bundle, limit, occurrence count and read-scope check. Any later material entering
 preparation must use existing intake and will be refused if its complete input
-exceeds two bundles. This proposed reader has only the named business-proof purpose;
+exceeds two bundles. This reader has only the named business-proof purpose;
 it grants no external access, arbitrary file read, general retrieval or worker capacity.
 Do not widen the frozen ECC fixture catalog to store these objects.
 
@@ -118,7 +152,7 @@ approval flags never grant permission. Any changed Case event, including D-014, 
 changed S/business-intake/source/terms invalidates new use of the old basis. D/P/U are retained
 provenance, not a substitute for business authority.
 
-Propose a fixed 15-minute freshness window for basis/result observations and new
+Use a fixed 15-minute freshness window for basis/result observations and new
 business consent in this synthetic slice; also enforce source-specific validity and
 non-future times. This is a test policy, not a customer SLA. Expiry leaves historical
 evidence intact but requires an explicit fresh check before new permission or
@@ -146,7 +180,7 @@ Use one Case-wide supporting result revision/head **O**, with record-specific
 applicability. O never replaces C, R, S or another record's identity. Each strict
 operation binds the expected O/head and its applicable exact immutable references:
 
-| Proposed operation             | Checks and durable result                                                                                                                                                                                                                                                                                                             |
+| Operation                      | Checks and durable result                                                                                                                                                                                                                                                                                                             |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Bind candidate / check basis   | Select an already committed record; fixed sources and full read scope. Append candidate or independent observation; no authority or business acceptance.                                                                                                                                                                              |
 | Request authority              | Current C/S/source/basis and successful basis proof. A bounded new material adapter creates an existing Authority Request v1 with immutable consent and separate R. It does not reinterpret the current credit-only create payload.                                                                                                   |
@@ -173,15 +207,15 @@ responses retain original bytes/key through the existing atomic browser claim;
 a fresh check is explicit and uses a new key. No background retry or financial effect.
 
 Immutable snapshots live with their supporting journal entries or reused hash-addressed
-authority snapshots; no mutable outcome aggregate or second Case ledger. Proposed
+authority snapshots; no mutable outcome aggregate or second Case ledger. The additive
 migration adds **one `dispute_result_journal` table** for this bounded evidence and
 its relational identity/head/key indexes. Do not overload the purpose-limited U
 journal, credit journal or existing CHECK constraints. Applied migrations stay intact.
-This migration and the new catalog/source purposes are part of the approval request.
+This migration and the new catalog/source purposes are part of the accepted boundary.
 
 ## Separate business acceptance and reversal
 
-Proposed **Robin, synthetic Orchid dispute recipient**, is a separate named canonical
+**Robin, synthetic Orchid dispute recipient**, is a separate named canonical
 human with current `accept_invoice_dispute_disposition` scope for this record.
 Selecting the seat is not authentication. Morgan authorizes the decision; Robin
 accepts its business result. The service verifies; none inherits another purpose.
@@ -215,7 +249,7 @@ Even an accepted, source-checked no-adjustment result leaves **Case closure deni
 DEL-5, other commitments, customer impact, correction/audit completeness and all
 D-013 closure obligations are separate. No closure-engine amendment is requested.
 
-## Worked path and controls — proposed, not executed
+## Historical design example — distinct from executed receipts
 
 The JSON example binds the actual second preparation at C3/D2/P2/U6 and its returned
 acceptance receipt. All business fixtures, identities, times and events below are
@@ -234,12 +268,12 @@ acceptance receipt. All business fixtures, identities, times and events below ar
 Wrong-record DEL-5 proof cannot satisfy DEL-4. Changing C/S/terms or revoking Morgan
 before O3 denies no-action recording without a partial result. The present status-only
 TXT fails original-proof prerequisites. Unavailable reads are inconclusive, never a
-no-credit/absence finding. A stale or ineligible Robin cannot accept. No proposed
-source/action event is claimed to have occurred by the current implementation.
+no-credit/absence finding. A stale or ineligible Robin cannot accept. These example source/action events are not runtime receipts. The API guide supplies
+separately executed fixtures and their actual accepted/reopened exports.
 
-## Existing versus missing implementation
+## Accepted implementation mapping
 
-| Reuse inspected in repository                                                                                                                                                                           | Missing addition requiring this decision                                                                                                                                                                |
+| Reuse inspected in repository                                                                                                                                                                           | Addition authorized by this decision                                                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Case/WorkEvent/EvidenceRef/Commitment/Outcome v0](../../packages/contracts/schemas/case.v0.schema.json), [Case engine](../../packages/runtime/src/case-engine.ts), immutable intake bytes/associations | Exact scoped business basis/expected result, admitted original-proof/terms semantics and supported result commands. v0 shapes alone supply neither verification nor acceptance operations.              |
 | [Authority request/review](../../packages/runtime/src/authority-review.ts), [resolver](../../packages/domain/src/authority-resolution.ts), catalog/S, terminal rules                                    | A new fixed intake-tenant no-adjustment material/profile adapter and purpose grants. Current `synthetic-authority.ts` is credit-only for tenant_orchid; it cannot authorize this imported Case by name. |
@@ -253,11 +287,14 @@ One API-only PR: strict basis/command/observation/comparison/receipt/read/export
 contracts; the fixed synthetic enrollment/material adapter; one supporting journal
 and additive migration; one allowlisted fixture reader; no-action/report/check and
 separate business review/intervention. Reuse the existing runtime boundary and
-recovery primitives. A derived read view supplies the compact operator story;
-Workbench controls may follow, without another dashboard. No general OutcomeEvent,
-scheduler, connector, financial write or arbitrary-source framework.
+recovery primitives. A derived read view supplies the compact operator story and
+its exact record/state/role/action bindings. Minimum Workbench controls are the
+immediate following product slice, using these contracts and current eligibility,
+without another dashboard. Model integration may proceed alongside that follow-up
+only under its separate approval. No general OutcomeEvent, scheduler, connector,
+financial write or arbitrary-source framework.
 
-| ID                             | Required actual PostgreSQL/API assertion for that future PR                                                                                                                                                                                                                                                        |
+| ID                             | Required actual PostgreSQL/API assertion                                                                                                                                                                                                                                                                           |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | BR1 success                    | Import same Case/record, retain both packets, independent original-proof/terms check, exact D6 approval, no-action receipt, reported action, independent result with exact AR 0→1 lineage, separate acceptance without renewing old execution permission. Zero financial effects; DEL-5 unchanged; closure denied. |
 | BR2 wrong subject              | Same invoice/customer with another record/delivery, wrong entity, partial allocation and explicitly shared delivery controls. Only applicable complete evidence can count.                                                                                                                                         |
@@ -267,6 +304,21 @@ scheduler, connector, financial write or arbitrary-source framework.
 | BR6 reversal                   | Later authoritative retraction/reopen, later inconclusive check and rejected/reversed result preserve original history while removing current success. Deduplicate record/period coverage.                                                                                                                         |
 | BR7 persistence/recovery       | Fresh/upgrade migration, failures at insert/commit/read-back, concurrent shared-Case commands, exact lost-response retries after restart, stale-head denial, source races and coherently altered proof. GET/export does not write; replay is deterministic.                                                        |
 | BR8 product safeguards         | All five measures, commitments/unknowns, old interpreters/migrations/ECC, D6–D13 coverage, two-bundle preflight and authority/closure guards unchanged. No assumed D7 enrollment.                                                                                                                                  |
+
+BR1/BR5 must expose who accepted which record, disputed portion, decision and
+observation, at what time and under which current recipient grant. BR6/BR8 must
+retain payment status, DEL-5, owned/due obligations and unknowns after acceptance;
+show current reopened/inconclusive state separately from a prior accepted cutoff.
+The Workbench follow-up must demonstrate the same progression, wrong-record/stale
+denials, explicit next action and exact lost-response recovery against these APIs.
+
+Before turning the proposed JSON into executable fixtures, separate source facts
+from test expectations: comparison outcomes and aggregate accepted/reopened counts
+are derived by the verifier/report, never asserted by an authoritative source.
+Its operator summary must identify a specific cutoff (O6 accepted or O8 reopened),
+not present O6 success as the final state of an O8 journal. Recompute affected example
+hashes/references and retain before/after validation; neither example cleanup nor
+documentation checks establish BR1–BR8 implementation.
 
 Cash collected remains unknown; this operation issues no credit, which does not prove
 the complete credits-issued measure is zero. Only the synthetic accepted-disposition
@@ -280,7 +332,7 @@ Neither packet count nor disputed principal is savings.
 authenticity/custody, precise contract interpretation, delegated decision and recipient
 authority, completeness/freshness windows, commitment policy, cohort/baseline and
 approved data/access/retention/deletion arrangements. Synthetic design approval cannot
-answer these for a customer. BR1–BR8 are proposed tests, not implementation evidence.
+answer these for a customer. BR1–BR8 require actual test evidence; the API guide and STATUS identify the executed checks.
 
 ## Reproduce the document checks
 
@@ -296,7 +348,7 @@ import { sha256Json, assertValidAuthorityPolicy, assertValidIdentityReference } 
 const e = JSON.parse(await readFile('docs/examples/d13-dispute-result.proposed.json', 'utf8'));
 const { example_hash, ...body } = e;
 assert.equal(example_hash, sha256Json(body));
-assert.equal(e.status, 'Proposed');
+assert.equal(e.status, 'Accepted');
 assert.equal(e.business_scenarios_executed, false);
 const q = e.hypothetical_only;
 assertValidAuthorityPolicy(q.policy);
@@ -322,6 +374,10 @@ assert.equal(q.business_acceptance.outcome_hash, sha256Json(q.outcome_projection
 assert.equal(q.business_acceptance.expected_result_head, q.proposed_journal[4].hash);
 assert.equal(q.later_reversal.subject.record_key, e.actual_preparation_evidence.subject.record_key);
 assert.equal(e.preserved_limits.preparation_retained_bundles, 2);
-console.log('Proposed example hashes/references checked; business behavior is not implemented.');
+assert.equal(e.expected_cutoffs.O6.accepted_disputed_records, 1);
+assert.equal(e.expected_cutoffs.O8.accepted_disputed_records, 0);
+assert.equal(e.expected_cutoffs.O8.reopened_records, 1);
+assert.equal(Object.hasOwn(q.later_reversal, 'expected_next_comparison'), false);
+console.log('Accepted design example hashes/references checked; executed BR evidence is separate.');
 NODE
 ```

@@ -6,6 +6,7 @@ const directories = [
   "packages/contracts/openapi",
   "packages/ecc-pack/fixtures",
   "packages/runtime/migrations",
+  "packages/runtime/fixtures",
 ];
 
 for (const directory of directories) {

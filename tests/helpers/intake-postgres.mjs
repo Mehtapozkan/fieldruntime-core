@@ -1,3 +1,5 @@
+import { PostgresDisputeResultStore } from "../../dist/packages/runtime/src/postgres-dispute-result-store.js";
+import { fixedDisputeReader } from "../../dist/packages/runtime/src/dispute-source.js";
 import { PostgresPreparationWorkStore } from "../../dist/packages/runtime/src/postgres-preparation-work-store.js";
 import { syntheticWorkContext } from "../../dist/packages/runtime/src/preparation-work.js";
 import { fixedPreparationPort } from "../../dist/packages/runtime/src/preparation-worker-port.js";
@@ -31,6 +33,7 @@ export const migrationNames = [
   "0008_preparation_pack_selection",
   "0009_preparation_work",
   "0010_preparation_continuation",
+  "0011_dispute_result",
 ];
 export const migrations = await Promise.all(
   migrationNames.map(async (name) =>
@@ -53,6 +56,7 @@ export async function intakeHost(
     beforePack = false,
     beforeWork = false,
     beforeContinuation = false,
+    beforeResult = false,
     work = false,
   } = {},
 ) {
@@ -83,6 +87,13 @@ export async function intakeHost(
     hook,
     fault,
     workContext = syntheticWorkContext(),
+    resultReader = fixedDisputeReader,
+    resultEnabled =
+      !upgrade &&
+      !beforePack &&
+      !beforeWork &&
+      !beforeContinuation &&
+      !beforeResult,
     workPort = fixedPreparationPort,
     workMonotonic = () => globalThis.performance.now(),
     packContext = workEnabled ? workContext.pack : syntheticPackContext();
@@ -157,7 +168,29 @@ export async function intakeHost(
     server = createApiServer(
       {
         intake: iw,
+        ...(resultEnabled
+          ? {
+              dispute: {
+                submit: (command) =>
+                  new PostgresDisputeResultStore(pool, () =>
+                    resultReader(),
+                  ).submit(command, now),
+                read: (caseId, key) =>
+                  new PostgresDisputeResultStore(pool, () =>
+                    resultReader(),
+                  ).read(caseId, key, now),
+                export: (caseId, key) =>
+                  new PostgresDisputeResultStore(pool, () =>
+                    resultReader(),
+                  ).export(caseId, key, now),
+              },
+            }
+          : {}),
         isReady: async () => {
+          if (resultEnabled)
+            await new PostgresDisputeResultStore(pool, () =>
+              resultReader(),
+            ).assertReady();
           if (workEnabled)
             await new PostgresPreparationWorkStore(
               pool,
@@ -210,7 +243,9 @@ export async function intakeHost(
           ? migrations.slice(0, 8)
           : beforeContinuation
             ? migrations.slice(0, 9)
-            : migrations,
+            : beforeResult
+              ? migrations.slice(0, 10)
+              : migrations,
   );
   if (!upgrade) await start();
 
@@ -282,6 +317,7 @@ export async function intakeHost(
     try {
       const tables = [
         "runtime_writer_lock",
+        ...(resultEnabled ? ["dispute_result_journal"] : []),
         "case_journal",
         "case_projections",
         "source_event_identities",
@@ -297,7 +333,9 @@ export async function intakeHost(
         ...(packEnabled ? ["preparation_pack_selection"] : []),
         ...(workEnabled ? ["preparation_work_journal"] : []),
       ];
-      const out = {};
+      // A pre-0011 store has no result rows. Compare business content across the
+      // additive upgrade; once installed the real table is always read/checked.
+      const out = { dispute_result_journal: [] };
       for (const table of tables)
         out[table] = (
           await c.query(
@@ -332,6 +370,9 @@ export async function intakeHost(
       return clockReads;
     },
     dependencies,
+    setResultReader: (reader) => {
+      resultReader = reader;
+    },
     setWorkContext: (value) => {
       workContext = value;
       packContext = value.pack;
@@ -373,6 +414,7 @@ export async function intakeHost(
       }
       await migrate(migrations.slice(4));
       packEnabled = true;
+      resultEnabled = true;
       if (work || beforeWork) {
         workEnabled = true;
         packContext = workContext.pack;
