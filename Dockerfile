@@ -7,6 +7,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 COPY apps ./apps
 COPY packages ./packages
 COPY scripts ./scripts
+COPY evaluations/investigation/v2/manifest.json ./evaluations/investigation/v2/manifest.json
 RUN pnpm install --frozen-lockfile
 RUN pnpm build
 
