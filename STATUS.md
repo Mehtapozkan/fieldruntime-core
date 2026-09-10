@@ -31,7 +31,9 @@ Current eligibility never comes from a retained receipt or synthetic role select
 The shared atomic recovery slot retains result bytes/key across tabs, reload and
 restart. Confirmed receipts survive a failed read; mismatches/inconclusive observations
 and historical acceptance remain distinct. Reads stay free of durable side effects.
-No runtime contract, migration, provider integration or source-editor endpoint is added.
+PR #42 added no runtime contract, migration, provider integration or source-editor
+endpoint; those preserved controls remain separate from D-040’s new compatibility
+contracts/migration.
 [Executable Workbench guide](docs/guides/dispute-result-workbench.md).
 
 [Accepted D-040](docs/architecture/d13-bounded-investigation-task.md) authorizes

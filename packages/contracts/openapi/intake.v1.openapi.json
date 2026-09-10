@@ -411,6 +411,9 @@
                         },
                         {
                           "$ref": "../schemas/preparation-pack.v3.schema.json#/$defs/read"
+                        },
+                        {
+                          "$ref": "../schemas/preparation-pack.v4.schema.json#/$defs/read"
                         }
                       ]
                     },
@@ -424,6 +427,9 @@
                         },
                         {
                           "$ref": "../schemas/preparation-pack.v3.schema.json#/$defs/export"
+                        },
+                        {
+                          "$ref": "../schemas/preparation-pack.v4.schema.json#/$defs/export"
                         }
                       ]
                     }
@@ -472,6 +478,9 @@
                   },
                   {
                     "$ref": "../schemas/preparation-pack.v3.schema.json#/$defs/command"
+                  },
+                  {
+                    "$ref": "../schemas/preparation-pack.v4.schema.json#/$defs/command"
                   }
                 ]
               }
@@ -493,6 +502,9 @@
                     },
                     {
                       "$ref": "../schemas/preparation-pack.v3.schema.json#/$defs/result"
+                    },
+                    {
+                      "$ref": "../schemas/preparation-pack.v4.schema.json#/$defs/result"
                     }
                   ]
                 }
@@ -555,6 +567,9 @@
                         },
                         {
                           "$ref": "../schemas/preparation-work.v2.schema.json#/$defs/read"
+                        },
+                        {
+                          "$ref": "../schemas/preparation-work.v3.schema.json#/$defs/read"
                         }
                       ]
                     },
@@ -565,6 +580,9 @@
                         },
                         {
                           "$ref": "../schemas/preparation-work.v2.schema.json#/$defs/export"
+                        },
+                        {
+                          "$ref": "../schemas/preparation-work.v3.schema.json#/$defs/export"
                         }
                       ]
                     }
@@ -599,6 +617,9 @@
                   },
                   {
                     "$ref": "../schemas/preparation-work.v2.schema.json#/$defs/command"
+                  },
+                  {
+                    "$ref": "../schemas/preparation-work.v3.schema.json#/$defs/command"
                   }
                 ]
               }
@@ -617,6 +638,9 @@
                     },
                     {
                       "$ref": "../schemas/preparation-work.v2.schema.json#/$defs/receipt"
+                    },
+                    {
+                      "$ref": "../schemas/preparation-work.v3.schema.json#/$defs/receipt"
                     }
                   ]
                 }
