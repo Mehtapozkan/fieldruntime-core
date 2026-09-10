@@ -114,7 +114,7 @@ record. The appliance can check that basis and record a report; its result check
 will correctly say **mismatch** while AR remains open. No HTTP command edits that
 source. Use the isolated test above for the controlled matched transition and later
 reversal. Do not edit an evaluator's retained source/history to simulate success.
-Workbench result controls and model integration are following builds, absent here.
+The separate [Workbench review branch](dispute-result-workbench.md) connects these operations. This API checkpoint remains its unchanged dependency; model integration is absent.
 
 GET with `representation=export` returns portable canonical evidence. Ordinary
 GET/export uses one repeatable-read transaction: no writer lock, source preview,

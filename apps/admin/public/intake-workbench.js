@@ -1,3 +1,4 @@
+import { resultPanel } from "./dispute-result-workbench.js";
 import {
   createIntakeClient,
   packPath,
@@ -524,6 +525,7 @@ export function mountIntakeWorkbench() {
     return box;
   }
   let workDraft = {};
+  let resultDraft = {};
   function workPanel(s) {
     const box = el("section", undefined, "review-card preparation-work"),
       v = s.work,
@@ -1725,7 +1727,72 @@ export function mountIntakeWorkbench() {
       );
       box.append(published);
     } else box.append(packs);
-    if (workerMode && s.discoveryTarget?.case_id) box.prepend(workPanel(s));
+    if (workerMode && s.discoveryTarget?.case_id) {
+      const work = workPanel(s);
+      if (
+        s.disputeOpen ===
+          s.discoveryTarget.case_id + "|" + s.discoveryTarget.record_key &&
+        s.dispute &&
+        !s.workNeedsRefresh &&
+        s.work?.invocations.at(-1)?.review
+      ) {
+        const completed = el("details", undefined, "review-card");
+        completed.append(
+          el(
+            "summary",
+            "Preparation packet — review, correct or prepare again",
+          ),
+          work,
+        );
+        box.prepend(completed);
+      } else box.prepend(work);
+    }
+    if (
+      s.discoveryTarget?.case_id &&
+      s.disputeOpen ===
+        s.discoveryTarget.case_id + "|" + s.discoveryTarget.record_key
+    ) {
+      const key =
+        s.discoveryTarget.case_id + "|" + s.discoveryTarget.record_key;
+      if (resultDraft.target !== key) resultDraft = { target: key };
+      box.prepend(
+        resultPanel({
+          state: s,
+          client,
+          el,
+          button,
+          detail,
+          input,
+          act,
+          draft: resultDraft,
+          focus: () => {
+            const n =
+              stage.querySelector('[role="alert"]') ??
+              stage.querySelector(".dispute-result h2");
+            n?.setAttribute("tabindex", "-1");
+            n?.focus();
+          },
+        }),
+      );
+    }
+    if (
+      s.discoveryTarget?.case_id &&
+      s.disputeOpen !==
+        s.discoveryTarget.case_id + "|" + s.discoveryTarget.record_key
+    ) {
+      const open = button(
+        "Follow this dispute’s result",
+        act(async () => {
+          await client.openDispute();
+          const n = stage.querySelector(".dispute-result h2");
+          n?.setAttribute("tabindex", "-1");
+          n?.focus();
+        }),
+      );
+      open.setAttribute("aria-label", "Follow this dispute’s result");
+      open.disabled = s.busy;
+      box.prepend(open);
+    }
     if (
       s.discoveryConfirmed?.entry.case_id === v.binding.case_id &&
       s.discoveryConfirmed.entry.command.bundle_id === v.binding.bundle_id &&
@@ -1929,7 +1996,7 @@ export function mountIntakeWorkbench() {
         el("h2", "Original submission needs recovery"),
         el(
           "p",
-          "One intake, Discovery, pack or preparation-work command is shared across tabs. Recover these exact saved bytes and key; completion in another tab does not authorize a different submission.",
+          "One intake, Discovery, pack, preparation-work or business-result command is shared across tabs. Recover these exact saved bytes and key; completion in another tab does not authorize a different submission.",
         ),
         button(
           "Recover original submission",
@@ -1987,6 +2054,25 @@ export function mountIntakeWorkbench() {
           "review-notice",
         ),
         detail("Confirmed original work receipt", s.workConfirmed),
+      );
+    }
+    if (
+      s.disputeConfirmed &&
+      (!s.discovery ||
+        !s.discoveryTarget ||
+        s.disputeConfirmed.entry.case_id !== s.discoveryTarget.case_id ||
+        s.disputeConfirmed.entry.record_key !== s.discoveryTarget.record_key)
+    ) {
+      stage.append(
+        el(
+          "p",
+          "The original business-result submission is confirmed. Current result evidence could not be refreshed here; this receipt grants no current permission.",
+          "review-notice",
+        ),
+        detail(
+          "Confirmed original business-result receipt",
+          s.disputeConfirmed,
+        ),
       );
     }
     if (s.discovery) stage.append(discoveryPanel(s));

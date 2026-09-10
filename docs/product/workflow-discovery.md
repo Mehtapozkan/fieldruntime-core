@@ -555,3 +555,11 @@ Synthetic completion demonstrates behavior, not customer outcomes or PMF. Custom
 usefulness, observed business results, economics and repeated demand require their own
 evidence. D-039 is Accepted; its implementation remains in review. Model integration,
 real customer activation, production writes and Case closure retain separate boundaries.
+
+The immediate [same-dispute Workbench](../guides/dispute-result-workbench.md) is now
+implemented on a separate review branch stacked on PR #41. It exposes the existing
+D-039 operations and retained preparation without changing runtime or closure rules.
+Normal-source mismatch and separate test-fixture acceptance are explicitly distinct.
+[Proposed D-040](../architecture/d13-bounded-investigation-task.md) is the bounded
+investigation/provider decision, not implemented model capability. Customer activation
+and comparisons remain separately gated; all 19 requirements retain their existing scope.

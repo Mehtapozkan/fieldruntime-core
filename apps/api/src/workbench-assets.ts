@@ -14,6 +14,7 @@ export interface WorkbenchAssets {
   readonly creditClient?: WorkbenchAsset;
   readonly intakeClient?: WorkbenchAsset;
   readonly intakeWorkbench?: WorkbenchAsset;
+  readonly disputeResultWorkbench?: WorkbenchAsset;
   readonly intakeCsv?: WorkbenchAsset;
   readonly intakeNote?: WorkbenchAsset;
 }
@@ -36,6 +37,7 @@ export async function loadWorkbenchAssets(): Promise<WorkbenchAssets> {
     creditClient,
     intakeClient,
     intakeWorkbench,
+    disputeResultWorkbench,
     intakeCsv,
     intakeNote,
   ] = await Promise.all([
@@ -52,6 +54,12 @@ export async function loadWorkbenchAssets(): Promise<WorkbenchAssets> {
     readFile(new URL("../../admin/public/intake-client.js", import.meta.url)),
     readFile(
       new URL("../../admin/public/intake-workbench.js", import.meta.url),
+    ),
+    readFile(
+      new URL(
+        "../../admin/public/dispute-result-workbench.js",
+        import.meta.url,
+      ),
     ),
     readFile(
       new URL("../../admin/public/intake-sample/orchid.csv", import.meta.url),
@@ -73,6 +81,10 @@ export async function loadWorkbenchAssets(): Promise<WorkbenchAssets> {
     creditClient: asset(creditClient, "text/javascript; charset=utf-8"),
     intakeClient: asset(intakeClient, "text/javascript; charset=utf-8"),
     intakeWorkbench: asset(intakeWorkbench, "text/javascript; charset=utf-8"),
+    disputeResultWorkbench: asset(
+      disputeResultWorkbench,
+      "text/javascript; charset=utf-8",
+    ),
     intakeCsv: asset(intakeCsv, "text/csv; charset=utf-8"),
     intakeNote: asset(intakeNote, "text/plain; charset=utf-8"),
   });
@@ -108,6 +120,8 @@ export function getWorkbenchAsset(
       return assets.intakeClient;
     case "/intake-workbench.js":
       return assets.intakeWorkbench;
+    case "/dispute-result-workbench.js":
+      return assets.disputeResultWorkbench;
     case "/intake-sample/orchid.csv":
       return assets.intakeCsv;
     case "/intake-sample/note-17.txt":
