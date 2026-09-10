@@ -61,11 +61,23 @@ export function investigationMaterial(input: Obj): Obj {
             )),
       );
       if (!associations.length) continue;
-      const scoped = associations.some((a) => a.kind === "record")
-        ? subjects
-        : subjects.filter((s) =>
-            associations.some((a) => a.kind === s.kind && a.id === s.id),
-          );
+      // A record association admits the document, not every delivery on that
+      // record. Identifier mentions are scope tags only, never interpretations.
+      const words = new Set(
+        (typeof artifact.derived_text === "string"
+          ? artifact.derived_text
+          : ""
+        ).match(/[A-Za-z0-9_-]+/g) ?? [],
+      );
+      const scoped = subjects.filter(
+        (subject) =>
+          associations.some(
+            (a) => a.kind === subject.kind && a.id === subject.id,
+          ) ||
+          (subject.kind === "delivery" &&
+            associations.some((a) => a.kind === "record") &&
+            words.has(String(subject.id))),
+      );
       if (
         artifact.interpretation === "retained_only" ||
         typeof artifact.derived_text !== "string"

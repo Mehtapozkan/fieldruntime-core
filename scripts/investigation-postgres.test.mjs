@@ -765,3 +765,67 @@ test("D040 concurrent cross-Case starts cannot oversubscribe the last reserved s
   await x.h.restart();
   validateWorkExport(await x.h.ok(path + "&representation=export"));
 });
+
+import { scopedDeliveries } from "../tests/helpers/discovery.mjs";
+test("D040 DEL-4-only note cannot support a DEL-5 claim on the same multi-delivery record", async (t) => {
+  const x = await investigation(t, {
+    input: await scopedDeliveries("investigation-multi"),
+    transport: async (q) =>
+      fakeResponse(q, (v) => {
+        const material = JSON.parse(q.input),
+          source = material.sources.find(
+            (s) => s.kind === "retained_utf8_text" && s.text.includes("DEL-4"),
+          );
+        v.output.claims[0] = {
+          subject: material.subjects.find((s) => s.id === "DEL-5"),
+          interpretation:
+            "The delivery confirmation is reported in this note; underlying proof remains unverified.",
+          status: "unreviewed_interpretation",
+          spans: [
+            {
+              source_id: source.id,
+              start: 0,
+              end: Buffer.byteLength(source.text),
+              quote: source.text,
+            },
+          ],
+        };
+        return v;
+      }),
+  });
+  await x.run();
+  assert.equal((await x.view()).invocations[0].outcome, "failed");
+  assert.equal(
+    (await x.view()).history.at(-1).investigation.status,
+    "invalid_response",
+  );
+});
+
+test("D040 separate delivery notes and explicit shared-object evidence retain useful preparation", async (t) => {
+  for (const scenario of ["different-deliveries", "shared-delivery"]) {
+    const x = await investigation(t, {
+      input: await scopedDeliveries(`positive-${scenario}`, scenario),
+    });
+    await x.run();
+    const v = await x.view();
+    assert.equal(v.invocations[0].outcome, "prepared_gap_packet");
+    const ev = v.invocations[0].result.investigation;
+    assert.equal(ev.semantic_correctness, "not_established");
+    const material = JSON.parse(ev.request.input);
+    for (const source of material.sources.filter(
+      (s) => s.kind === "retained_utf8_text",
+    ))
+      assert.ok(
+        source.subjects
+          .filter((s) => s.kind === "delivery")
+          .every(
+            (s) =>
+              source.text.includes(s.id) ||
+              source.associations.some(
+                (a) => a.kind === "delivery" && a.id === s.id,
+              ),
+          ),
+      );
+    validateWorkExport(await x.h.ok(x.path + "&representation=export"));
+  }
+});

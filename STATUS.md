@@ -8,12 +8,16 @@ exact retries and deterministic replay. Default preparation stays deterministic.
 [Walkthrough, limitations and activation handoff](docs/guides/bounded-investigation.md).
 The 24-record evaluation/rubric is frozen; usefulness comparisons have not run.
 Local validation: `pnpm validate` passes 328 tests, formatting, lint, type checks
-and the public-release boundary. All 32 focused investigation PostgreSQL/API
+and the public-release boundary. All 34 focused investigation PostgreSQL/API
 scenarios have passed across the full run and final focused rerun. This is local
 PostgreSQL 18.4/Node 24.19.0 evidence; final-head CI must also exercise the pinned
 PostgreSQL 17.11 appliance and retained browser/restart suites. Docker is unavailable
 locally (`docker compose config --quiet`: exit 127), so Compose/appliance results
-come from CI, not an unperformed local check. The PR carries final-head evidence.
+come from CI, not an unperformed local check. The PR carries final-head evidence. Final scope audit reproduced a DEL-4 note being
+admitted for a DEL-5 proposal on the same record; the new interpreter now binds
+delivery citations to explicit associations or exact identifiers. Record context
+remains available, and citation validity still does not establish interpretation.
+Historical Discovery and deterministic preparation semantics are unchanged.
 
 Prior milestone: **Minimum same-dispute Workbench implemented for review**, stacked
 on open PR #41 at `4a1f536fb7b6b441a968f518499235443930c723`, then open PR #40

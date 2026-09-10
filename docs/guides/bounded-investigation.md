@@ -61,7 +61,10 @@ read/export v3 retain prompt version, exact full scoped text, canonical identiti
 request hash, raw bounded response or sanitized failure, model/request attribution,
 usage when supplied and parent timing. Deterministic code still owns identifiers,
 arithmetic, source applicability, policy and authority. No D-039 proof-source object
-is sent to the adapter. Related invoice labels cannot transfer evidence.
+is sent to the adapter. Related invoice labels cannot transfer evidence. Record association alone does not
+make a note evidence for every delivery on that record: a delivery citation requires
+its explicit source association or exact identifier in the text. Those identifiers
+are scope tags, not verified claims or a prose interpretation.
 
 At most two complete bundles are admitted. Every D-038 row, artifact, byte and full
 read-scope check remains, including duplicate occurrences. The request additionally
