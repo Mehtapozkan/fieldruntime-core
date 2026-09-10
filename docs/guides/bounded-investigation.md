@@ -136,3 +136,11 @@ named evaluation budget. The approved implementation does not itself activate th
 arrangements. Real-customer processing needs its own named participants, permitted
 files/access/storage/retention/deletion arrangements and comparable baseline.
 D-039 payment obligations, DEL-5 separation and Case closure denial remain intact.
+
+## Subsequent evaluation-readiness branch
+
+The [readiness handoff](investigation-evaluation-readiness.md) adds executable
+fixture v2, mock-tested HTTP comparison versions and a deterministic baseline.
+The fake v1 implementation described above remains historical and unchanged;
+its 30-call reservation profile is not silently reused for a 48-call comparison.
+Live activation and both model evaluations remain unavailable/not run.

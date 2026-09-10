@@ -1,5 +1,29 @@
 # Status
 
+## D13 evaluation readiness — implemented on the stacked review branch
+
+This branch preserves PR #43 at `4217000` and its open dependencies. The three
+review threads were addressed with that head's repair/regression and passing CI
+references; no PR was merged. Executable fixture v2 corrects H17/H23/H24 and
+materializes all 24 cases while frozen v1 is unchanged. Explicit pack v5/work v4
+and HTTP evidence v2 use one additive compatibility migration (0013) and the
+existing supporting journal. Both mocked model arms share 48 reservations; reads
+remain side-effect free and deterministic preparation stays the appliance default.
+
+The local deterministic baseline produced 24 packets, including restart and exact
+retry, all awaiting human review. Fixture execution is not model usefulness proof.
+Both model arms, blinded scoring and customer comparisons are **not run**. The
+[readiness guide and proposed activation request](docs/guides/investigation-evaluation-readiness.md)
+define exact inputs, source controls, both-arm pricing, unknown costs and account
+confirmations. Live activation/spending, customer data and automatic promotion are
+unapproved. Remaining work is separate activation approval and the bounded
+comparison; D13 result/authority/payment/DEL-5/closure boundaries and all five
+proof measures remain unchanged. No D14, release or deployment.
+
+Final-head validation evidence is reported in the PR handoff; local PostgreSQL is
+18.4. Pinned PostgreSQL 17.11, Compose and appliance gates require CI; Docker is
+not installed locally. Historical milestone entries below are retained.
+
 Current milestone: **D-040 optional investigation implemented for review**, stacked
 on PR #42 at `1954f929daf60887053635a31a83179f74ee6d8e`. No dependency is merged.
 Strict pack v4/work v3, additive migration 0012 and fake-only transport retain

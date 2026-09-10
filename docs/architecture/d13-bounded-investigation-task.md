@@ -147,3 +147,16 @@ activation remain unavailable; all calls in implementation tests use a fake. The
 synthetic accounting profile reserves the full per-call ceiling without refunds or
 automatic resets, including unknown outcomes. This conservative bookkeeping is not
 spending or an evaluation result. Existing deterministic preparation remains default.
+
+## Bounded evaluation-readiness authorization (2026-09-10)
+
+The owner authorized a separate implementation stacked on PR #43 at
+`42170005f960abbc3d56cd0c8932cdd0587c00fe`: executable corrected synthetic fixtures,
+a disabled provider transport tested only with mock HTTP, a three-arm runner and
+a concrete activation request. The owner explicitly stated: “No live provider
+requests, credential use, spending or customer processing are authorized.”
+This does not approve activation, an individual publication, task acceptance or a
+business action. The [readiness guide](../guides/investigation-evaluation-readiness.md)
+records new compatibility versions, both-arm reservations, baseline evidence and
+account-specific facts still requiring confirmation. Historical fake-provider v1
+contracts, receipts and frozen evaluation v1 remain unchanged.

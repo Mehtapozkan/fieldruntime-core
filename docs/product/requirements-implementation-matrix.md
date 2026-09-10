@@ -1,5 +1,13 @@
 # Requirements and implementation gaps
 
+D13 evaluation-readiness update: a 24-case executable synthetic v2 and deterministic
+baseline are delivered on the stacked branch; model arms and human usefulness
+scoring remain not run. The disabled mock HTTP comparison has explicit versions
+and shared durable reservations. This adds evaluation evidence for scoped inputs,
+prepared work and reproducibility, not completion of business outcome, customer
+comparison or measured-economics gaps. All 19 IDs and existing statuses below are
+preserved. See [readiness/activation handoff](../guides/investigation-evaluation-readiness.md).
+
 This is the single requirement/gaps matrix for the [canonical specification](workflow-discovery.md).
 Implementation baseline: main `6b59801d98cf7ba239701bccc1ca69016f384696` includes
 D10-A/B PRs #31/#32, D9-A/B PRs #29/#30 and merged D6–D8. [Accepted D-034][boundary] and its successful-key

@@ -1,5 +1,11 @@
 # Field Runtime Core
 
+The stacked D13 [evaluation-readiness branch](docs/guides/investigation-evaluation-readiness.md) adds exact synthetic fixtures,
+a disabled mock-tested transport and a three-arm comparison handoff. Its deterministic
+baseline ran; model comparisons and human usefulness scoring did not. Live access,
+spending and customer processing remain separately gated. This does not change the
+published historical evaluation prerelease or establish measured business value.
+
 Field Runtime Core is an Apache-2.0-licensed **Enterprise Case Runtime** for
 consequential operational work. It keeps a complete case—evidence, conflicts,
 people, decisions and their history—outside any model or worker session. Models

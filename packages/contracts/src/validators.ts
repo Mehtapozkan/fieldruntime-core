@@ -1,3 +1,7 @@
+import investigationV2Schema from "../schemas/investigation.v2.schema.json" with { type: "json" };
+import preparationWorkV4Schema from "../schemas/preparation-work.v4.schema.json" with { type: "json" };
+import preparationPackV5Schema from "../schemas/preparation-pack.v5.schema.json" with { type: "json" };
+import disputeExportV3Schema from "../schemas/dispute-result-export.v3.schema.json" with { type: "json" };
 import disputeExportV2Schema from "../schemas/dispute-result-export.v2.schema.json" with { type: "json" };
 import investigationSchema from "../schemas/investigation.v1.schema.json" with { type: "json" };
 import preparationWorkV3Schema from "../schemas/preparation-work.v3.schema.json" with { type: "json" };
@@ -177,6 +181,10 @@ const packValidators = Object.fromEntries(
   "profile" | "artifact" | "command" | "journal" | "read" | "result" | "export",
   ValidateFunction
 >;
+ajv.addSchema(investigationV2Schema);
+ajv.addSchema(preparationWorkV4Schema);
+ajv.addSchema(preparationPackV5Schema);
+ajv.addSchema(disputeExportV3Schema);
 ajv.addSchema(investigationSchema);
 ajv.addSchema(preparationWorkV3Schema);
 ajv.addSchema(preparationPackV4Schema);
@@ -604,4 +612,52 @@ export function assertValidDisputeExportV2(
   value: unknown,
 ): asserts value is Record<string, unknown> {
   assertContract(validateDisputeExportV2, value, "dispute-result-export.v2");
+}
+
+const investigationV2Validators = Object.fromEntries(
+  ["profile", "proposal", "reservation", "evidence"].map((kind) => [
+    kind,
+    ajv.compile({ $ref: `${investigationV2Schema.$id}#/$defs/${kind}` }),
+  ]),
+) as Record<
+  "profile" | "proposal" | "reservation" | "evidence",
+  ValidateFunction
+>;
+
+const packV5Validators = Object.fromEntries(
+  Object.keys(packValidators).map((kind) => [
+    kind,
+    ajv.compile({ $ref: `${preparationPackV5Schema.$id}#/$defs/${kind}` }),
+  ]),
+) as Record<keyof typeof packValidators, ValidateFunction>;
+
+const workV4Validators = Object.fromEntries(
+  [...Object.keys(workValidators), "preflight"].map((kind) => [
+    kind,
+    ajv.compile({ $ref: `${preparationWorkV4Schema.$id}#/$defs/${kind}` }),
+  ]),
+) as Record<keyof typeof workValidators | "preflight", ValidateFunction>;
+export function assertValidInvestigationV2Contract(
+  kind: keyof typeof investigationV2Validators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(investigationV2Validators[kind], value, "InvestigationV2");
+}
+export function assertValidPreparationPackV5Contract(
+  kind: keyof typeof packV5Validators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(packV5Validators[kind], value, "PreparationPackV5");
+}
+export function assertValidPreparationWorkV4Contract(
+  kind: keyof typeof workV4Validators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(workV4Validators[kind], value, "PreparationWorkV4");
+}
+const validateDisputeExportV3 = ajv.compile(disputeExportV3Schema);
+export function assertValidDisputeExportV3(
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(validateDisputeExportV3, value, "dispute-result-export.v3");
 }

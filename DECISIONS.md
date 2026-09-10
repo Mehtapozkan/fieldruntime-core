@@ -55,3 +55,9 @@ live activation, inference spending and customer-data processing. Fake responses
 are required for implementation/CI; live activation requires a separate named
 custodian, exact model snapshot, data controls, pricing and evaluation-budget approval.
 This does not publish a pack, accept a task or grant business/closure authority.
+
+D-040 implementation authorization was extended narrowly on 2026-09-10 from PR #43
+`42170005f960abbc3d56cd0c8932cdd0587c00fe` to evaluation readiness: corrected executable
+synthetic fixtures, disabled mock-tested HTTP transport, both-arm comparison plan
+and durable reservations. Live requests, credentials, spending and customer data
+remain unapproved. See the [recorded instruction and activation boundary](docs/architecture/d13-bounded-investigation-task.md#bounded-evaluation-readiness-authorization-2026-09-10).

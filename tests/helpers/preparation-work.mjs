@@ -39,11 +39,15 @@ export const publication = (v, key = "publish-worker") => ({
 export const start = (v, key = "start-worker") => ({
   schema_version:
     v.candidate_binding?.worker_implementation_id ===
-    "disposition-investigation.v1"
-      ? "preparation-work-command.v3"
-      : v.candidate_binding?.worker_implementation_id === "disposition-code.v3"
-        ? "preparation-work-command.v2"
-        : "preparation-work-command.v1",
+    "disposition-investigation.v2"
+      ? "preparation-work-command.v4"
+      : v.candidate_binding?.worker_implementation_id ===
+          "disposition-investigation.v1"
+        ? "preparation-work-command.v3"
+        : v.candidate_binding?.worker_implementation_id ===
+            "disposition-code.v3"
+          ? "preparation-work-command.v2"
+          : "preparation-work-command.v1",
   operation: "start",
   binding: v.candidate_binding,
   expected_work_revision: v.work_revision,
