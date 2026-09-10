@@ -126,7 +126,8 @@ reject caller identities, source paths, observations, privileges and success fla
   resolver checks the fixed one-named-Morgan/no-delegation policy. Enrollment changes
   only the intake tenant; the D6 Finance/Executive credit tenant is untouched.
 - **Result:** AR 0→1 must link the prior exact hash/version and the committed no-action
-  decision, move only `non_delivery` to disposed, retain POD/terms, and have zero
+  decision with a source event at or after its issuance and not in the future at
+  the independent read, move only `non_delivery` to disposed, retain POD/terms, and have zero
   adjustment/no associated credit. Added grounds, wrong attribution and unexpected
   transitions cannot establish success. This is not a complete cash/credit ledger audit.
 - **History:** C/D/P/U never advance for result/review commands. Enrollment advances S.

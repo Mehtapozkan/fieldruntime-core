@@ -64,6 +64,8 @@ export function compareDisputeSource(
   phase: "basis" | "result",
   basis: Obj | null,
   decisionHash: string | null,
+  decisionAt: string | null = null,
+  observedAt = at,
 ): Obj {
   const expected = sourceSubject(subject),
     observed = read.source,
@@ -141,7 +143,7 @@ export function compareDisputeSource(
         fail(
           "Original POD bytes do not establish the claimed receipt/allocation",
         );
-      if (String(pod.event_at) > at)
+      if (String(pod.event_at) > observedAt)
         fail("Delivery event is in the future", true);
     }
     if (
@@ -161,7 +163,8 @@ export function compareDisputeSource(
     if (ar) {
       if (!ar.grounds_complete)
         fail("Complete dispute grounds are not established", true);
-      if (String(ar.event_at) > at) fail("AR event is in the future", true);
+      if (String(ar.event_at) > observedAt)
+        fail("AR event is in the future at observation", true);
       if (ar.adjustment_minor !== 0 || canonicalJson(ar.credit_ids) !== "[]")
         fail("Disposition includes an adjustment or associated credit");
       if (phase === "basis") {
@@ -174,6 +177,10 @@ export function compareDisputeSource(
             "This path requires only the complete active non-delivery ground",
           );
       } else if (basis) {
+        if (decisionAt === null)
+          fail("Trusted decision issuance time is missing", true);
+        else if (String(ar.event_at) < decisionAt)
+          fail("AR disposition predates its claimed no-action decision");
         const prior = o(o(basis.source).ar);
         if (
           sha256Json(pod) !== sha256Json(o(basis.source).pod) ||

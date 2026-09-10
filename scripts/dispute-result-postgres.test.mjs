@@ -953,3 +953,35 @@ for (const identity of [
       "REVIEWER_INELIGIBLE",
     );
   });
+test("D13 BR3 an AR disposition cannot predate the no-action decision it claims to follow", async (t) => {
+  const r = await resultHost(t);
+  await r.authorized();
+  await r.reported();
+  await r.transition();
+  const source = clone(r.source);
+  source.ar.event_at = "2026-09-07T16:05:59.000Z";
+  r.setSource(source);
+  const checked = await r.check();
+  assert.equal(checked.entry.data.comparison.status, "mismatch");
+  assert.equal((await r.get()).current.verified, false);
+});
+
+test("D13 BR3 a writer wait cannot legitimize a source event that was future at observation", async (t) => {
+  const r = await resultHost(t);
+  await r.authorized();
+  await r.reported();
+  await r.transition();
+  const source = clone(r.source);
+  source.ar.event_at = "2026-09-07T16:06:02.000Z";
+  r.setSource(source);
+  r.h.hook((sql) => {
+    if (sql.includes("fr:authority-lock-writer"))
+      r.h.setTime("2026-09-07T16:06:03.000Z");
+  });
+  const checked = await r.check();
+  r.h.hook(null);
+  assert.equal(checked.entry.data.comparison.status, "inconclusive");
+  assert.equal((await r.get()).current.verified, false);
+  await r.h.restart();
+  assert.deepEqual((await r.get()).history.at(-1), checked.entry);
+});

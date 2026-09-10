@@ -93,6 +93,7 @@ test("D039 reported success cannot replace expected prior AR lineage or original
     decision_reference: decision,
     prior_version: 0,
     prior_hash: sha256Json(source.ar),
+    event_at: at,
   };
   assert.equal(
     compareDisputeSource(
@@ -103,6 +104,7 @@ test("D039 reported success cannot replace expected prior AR lineage or original
       "result",
       { source },
       decision,
+      at,
     ).status,
     "match",
   );
@@ -116,6 +118,7 @@ test("D039 reported success cannot replace expected prior AR lineage or original
       "result",
       { source },
       decision,
+      at,
     ).status,
     "mismatch",
   );
@@ -129,6 +132,7 @@ test("D039 reported success cannot replace expected prior AR lineage or original
       "result",
       { source },
       decision,
+      at,
     ).status,
     "inconclusive",
   );

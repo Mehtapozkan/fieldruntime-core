@@ -35,14 +35,15 @@ tenant and frozen ECC are untouched. No new Workbench or model/provider code.
 
 - `pnpm validate`: **323/323 repository tests**, format/lint/typecheck and public-release
   checks passed locally (Node 24.19.0/tzdata 2026b).
-- New real PostgreSQL 18.4/API BR suite: **44/44** plus **3/3** independent-profile
-  denial controls. The captured path retains both preparation packets, accepts the
+- New real PostgreSQL 18.4/API BR suite: **47/47** consolidated checks, with final
+  timing controls added as described below: both pass, and the complete success/
+  acceptance/reversal control still returns the identical captured hashes. The captured path retains both preparation packets, accepts the
   exact independently observed result, restarts/retries without another review,
   then records negative observation and reopen. [Actual receipts and export hashes](docs/examples/d039-runtime-receipts.json).
 - Preserved D6–D8 PostgreSQL/API/Chromium authority, action, verification and receipt
-  suites: **178/178** locally. D-038 browser/resource/replay controls passed; the one
-  additive-upgrade snapshot assertion was corrected and its full F1/F2/F5 test rerun
-  successfully, preserving the prior acceptance/export hashes.
+  suites: **178/178** locally. The complete D-038 PostgreSQL/API/browser suite passes
+  **23/23**, including the corrected additive-upgrade content snapshot and the exact
+  prior acceptance/export hashes.
 - The normal appliance entry point, shipped fixed reader and additive fresh migration
   passed locally against a disposable PostgreSQL database; API restart reconstructed
   its exact receipts/export. No local PostgreSQL server restart/container pass is claimed.
@@ -54,6 +55,13 @@ tenant and frozen ECC are untouched. No new Workbench or model/provider code.
   existing final-head CI gate retains all PostgreSQL/API/browser suites, Compose,
   fresh install and PostgreSQL/core restart smokes, with BR1–BR8 added. CI results
   are linked in the implementation PR; a pending/failed run is not a pass.
+
+The final timing control reproduced an incorrect `match` when the claimed AR event
+predated its exact no-action decision. The source comparison now requires that
+ordering and compares non-future source times to the independent observation time;
+writer waiting cannot legitimize a previously future event. Negative observations
+remain retained evidence, never current success. These are existing D-039 time
+checks, not a new source or authority boundary.
 
 The preserved D-038 upgrade assertion now compares the new journal's empty content
 before/after additive installation; no old rows/checksums are altered. Its focused

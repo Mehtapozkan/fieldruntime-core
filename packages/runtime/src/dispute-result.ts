@@ -536,6 +536,8 @@ export function applyDisputeCommand(
           op === "basis_check" ? "basis" : "result",
           decision ? o(o(decision.data).basis) : null,
           decision ? String(decision.hash) : null,
+          decision ? String(decision.recorded_at) : null,
+          String(observation.observed_at),
         );
         const outcome =
           op === "result_check" && comparison.status === "match"
@@ -812,6 +814,7 @@ export function applyDisputeCommand(
             "result",
             b,
             String(d.hash),
+            String(d.recorded_at),
           ).status === "match",
           "STALE_SOURCE",
           "Original prerequisites are no longer valid",
