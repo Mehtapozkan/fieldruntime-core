@@ -99,10 +99,12 @@ following GET fails; it does not prove current eligibility.
 | `result_check`                                        | Independently compare the current fixed source to the exact recorded decision, regardless of current execution eligibility. Ignore the report's success claim.                                                                |
 | `accept view.json pending.json 'scope of acceptance'` | Robin accepts only the latest fresh matching result, exact outcome/decision and owned, future-due payment follow-up. Current recipient and authority prerequisites are checked again.                                         |
 | `reject view.json pending.json 'reason'`              | Robin terminates an unaccepted candidate. An accepted result needs a linked reopen instead.                                                                                                                                   |
-| `reopen view.json pending.json 'reason'`              | Robin links the original acceptance and a subsequent negative/inconclusive check, even when the old business basis is stale. Current intervention eligibility still applies.                                                  |
+| `reopen view.json pending.json 'reason'`              | Robin links the original acceptance and the latest subsequent reliable mismatch, even when the old business basis is stale. Current intervention eligibility still applies.                                                   |
 
 Every operation that reads the source rechecks the current scoped verifier grant
-before its independent read and under the writer lock; replay checks that retained
+before its independent read and under the writer lock. Both reads must agree before
+new authority, no-action or acceptance; an unavailable first read cannot be replaced
+by a later matching read. Replay checks that retained
 grant at the original observation and recording times. Rejecting or escalating an
 authority request needs Morgan's current review permission and exact bindings, but
 no source read or verifier grant. These interventions do not grant authority.
@@ -155,7 +157,9 @@ checks remain inspectable after expiry. A fresh check never carries old acceptan
 onto a new observation; new exact business acceptance is explicit. Later mismatch
 or reopen removes current accepted-disposition coverage; inconclusive/expired
 coverage is unknown, not zero. Repeated acceptance/retries count one record, not
-another success. A candidate rejected or reopened cannot revive.
+another success. An inconclusive check cannot support a reopen/zero-count receipt:
+retain unknown coverage and obtain an explicit fresh check when source access is
+available. A candidate rejected or reopened cannot revive.
 
 Payment remains unknown and owned for follow-up; acceptance establishes no customer
 payment or real agreement. `cash_collected`, `credits_issued`, `work_newly_attended_to`

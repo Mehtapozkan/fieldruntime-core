@@ -35,8 +35,9 @@ tenant and frozen ECC are untouched. No new Workbench or model/provider code.
 
 - `pnpm validate`: **323/323 repository tests**, format/lint/typecheck and public-release
   checks passed locally (Node 24.19.0/tzdata 2026b).
-- New real PostgreSQL 18.4/API BR suite: **53/53** checks pass, including source
-  timing/reader-grant controls and source-free rejection/escalation. The captured
+- New real PostgreSQL 18.4/API BR suite: **64/64** checks pass, including source
+  timing/reader-grant controls, both-read consistency, reliable reversal proof and
+  source-free rejection/escalation. The captured
   path retains both preparation packets, accepts the exact independently observed
   result, restarts/retries without another review, then records negative observation
   and reopen. [Actual receipts and export hashes](docs/examples/d039-runtime-receipts.json)
@@ -70,6 +71,12 @@ grant before reading and under the writer lock, with the same evidence enforced 
 replay. The before-write reproduction now returns `REVIEWER_INELIGIBLE` (HTTP 409)
 without reading or writing. Eligible rejection/escalation use no source read and
 retain their separate review permission, exact revision checks and retry receipts.
+
+Two PR review controls reproduced discarded first reads authorizing request/review,
+no-action and acceptance, and inconclusive proof supporting a zero-count reopen.
+Both source reads now participate in every prerequisite comparison, including
+historical replay. Reopen requires reliable subsequent mismatch evidence; unavailable
+or malformed checks keep coverage unknown and cannot create a reversal receipt.
 
 The retained D12 upgrade test now expects eleven migrations after adding 0011; its
 prior migration-row equality and unchanged business-history assertions remain.

@@ -611,12 +611,14 @@ export function applyDisputeCommand(
           ensure(
             compareDisputeSource(
               subject,
-              o(observation.recheck),
+              o(observation.read),
               o(observation.recheck),
               at,
               "basis",
               null,
               null,
+              null,
+              String(observation.observed_at),
             ).status === "match",
             "STALE_SOURCE",
             "Original prerequisites expired or no longer match",
@@ -738,12 +740,14 @@ export function applyDisputeCommand(
         ensure(
           compareDisputeSource(
             subject,
-            o(observation.recheck),
+            o(observation.read),
             o(observation.recheck),
             at,
             "basis",
             null,
             null,
+            null,
+            String(observation.observed_at),
           ).status === "match",
           "STALE_SOURCE",
           "Original prerequisites expired or no longer match",
@@ -843,13 +847,14 @@ export function applyDisputeCommand(
         ensure(
           compareDisputeSource(
             subject,
-            o(observation.recheck),
+            o(observation.read),
             o(observation.recheck),
             at,
             "result",
             b,
             String(d.hash),
             String(d.recorded_at),
+            String(observation.observed_at),
           ).status === "match",
           "STALE_SOURCE",
           "Original prerequisites are no longer valid",
@@ -894,9 +899,9 @@ export function applyDisputeCommand(
             v &&
             v.hash === c.observation_hash &&
             Number(v.sequence) > Number(a.sequence) &&
-            o(o(v.data).comparison).status !== "match",
+            o(o(v.data).comparison).status === "mismatch",
           "REOPEN_PROOF_REQUIRED",
-          "Reopen must cite the original acceptance and latest subsequent negative/uncertain check",
+          "Reopen requires the original acceptance and latest subsequent reliable mismatch; inconclusive evidence leaves coverage unknown",
         );
         data = { kind: op, reason: c.reason };
       }

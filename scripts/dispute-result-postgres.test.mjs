@@ -1,4 +1,5 @@
 import { Buffer } from "node:buffer";
+import { unavailableDisputeRead } from "../dist/packages/runtime/src/dispute-source.js";
 import process from "node:process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -1082,4 +1083,133 @@ test("D13 BR3 no-action source preflight rechecks verifier effectivity under the
     (await r.get()).history.some((e) => e.operation === "no_action"),
     false,
   );
+});
+
+for (const operation of [
+  "request_authority",
+  "review_authority",
+  "no_action",
+  "accept",
+])
+  for (const first of ["unavailable", "changed"])
+    test(`D13 BR3/BR4 ${operation} cannot discard a ${first} first source read`, async (t) => {
+      const r = await checkedCandidate(t);
+      if (operation !== "request_authority") await r.request();
+      if (["no_action", "accept"].includes(operation)) await r.decide();
+      if (operation === "accept") {
+        await r.noAction();
+        await r.reported();
+        await r.transition();
+        await r.check();
+      }
+      const v = await r.get(),
+        review = v.authority && {
+          authority_request_id: v.authority.authority_request_id,
+          request_binding_hash: v.authority.request_binding_hash,
+          expected_review_revision: v.authority.review_revision,
+        },
+        d = v.history.findLast((e) => e.operation === "no_action"),
+        check = v.history.findLast((e) => e.operation === "result_check");
+      const extra =
+        operation === "request_authority"
+          ? { basis_observation_hash: v.basis.basis_observation_hash }
+          : operation === "review_authority"
+            ? {
+                review,
+                decision: "approve",
+                reason:
+                  "Morgan explicitly reviews the exact proposed disposition",
+              }
+            : operation === "no_action"
+              ? { review, basis_hash: sha256Json(v.authority.material.basis) }
+              : {
+                  decision_hash: d.hash,
+                  observation_hash: check.hash,
+                  outcome_hash: sha256Json(check.data.outcome),
+                  reason: "Robin reviews this exact synthetic result",
+                  commitments: [
+                    {
+                      id: "commitment_payment_follow_up",
+                      description: "Obtain payment status",
+                      owner_identity_id: "identity_dispute_morgan",
+                      due_at: "2026-09-08T16:06:00.000Z",
+                      status: "owned",
+                      evidence_ref: `dispute-result://${d.hash}/payment-follow-up`,
+                    },
+                  ],
+                };
+      const command = await r.command(operation, {
+        candidate_hash: v.candidate_hash,
+        ...extra,
+      });
+      let reads = 0;
+      r.h.setResultReader(async () => {
+        if (++reads === 1) {
+          if (first === "unavailable") throw Error("Original read unavailable");
+          const changed = clone(r.source);
+          changed.revision++;
+          changed.pod.valid = false;
+          return Buffer.from(canonicalJson(changed));
+        }
+        return Buffer.from(canonicalJson(r.source));
+      });
+      await denied(r, command, "STALE_SOURCE");
+      assert.equal(reads, 2);
+      await r.h.restart();
+      assert.deepEqual((await r.get()).history, v.history);
+    });
+
+for (const fault of ["unavailable", "malformed"])
+  test(`D13 BR6 ${fault} evidence cannot support an explicit reversal or turn unknown coverage into zero`, async (t) => {
+    const r = await resultHost(t);
+    await r.authorized();
+    await r.reported();
+    await r.transition();
+    await r.check();
+    const accepted = await r.accept();
+    r.h.setResultReader(async () => {
+      if (fault === "unavailable") throw Error("unavailable");
+      return Buffer.from("not-json");
+    });
+    const check = await r.check(),
+      v = await r.get();
+    assert.equal(check.entry.data.comparison.status, "inconclusive");
+    assert.equal(v.proof_measures.disputes_resolved, null);
+    await denied(
+      r,
+      await r.command("reopen", {
+        candidate_hash: v.candidate_hash,
+        acceptance_hash: accepted.entry.hash,
+        observation_hash: check.entry.hash,
+        reason: "An unknown observation cannot prove a reversal",
+      }),
+      "REOPEN_PROOF_REQUIRED",
+    );
+    await r.h.restart();
+    const after = await r.get();
+    assert.equal(after.proof_measures.disputes_resolved, null);
+    assert.equal(after.current.accepted, false);
+    assert.equal(after.current.verified, false);
+    assert.equal(after.current.closure_permitted, false);
+    assert.ok(after.history.some((e) => e.hash === accepted.entry.hash));
+    validateDisputeExport(await r.h.ok(r.path + "&representation=export"));
+  });
+
+test("D13 BR7 coherent first-read alteration cannot survive no-action replay, readiness or restart", async (t) => {
+  const r = await resultHost(t);
+  const original = await r.authorized();
+  const forged = clone(original.entry);
+  forged.source_precondition.read = unavailableDisputeRead();
+  const { hash, ...body } = forged;
+  forged.hash = sha256Json(body);
+  assert.notEqual(forged.hash, hash);
+  await replaceEntry(r.h, forged);
+  await assert.rejects(
+    new PostgresDisputeResultStore(r.h.pool).assertReady(),
+    /reconstruction/,
+  );
+  assert.ok((await r.h.call(r.path)).status >= 500);
+  assert.ok((await r.h.call(r.path + "&representation=export")).status >= 500);
+  await r.h.restart();
+  assert.ok((await r.h.call(r.path)).status >= 500);
 });
