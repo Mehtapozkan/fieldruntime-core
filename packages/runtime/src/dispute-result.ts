@@ -1,3 +1,4 @@
+import { assertValidDisputeExportV2 } from "../../contracts/src/index.js";
 import {
   assertValidDisputeResultContract,
   canonicalJson,
@@ -1392,10 +1393,20 @@ export function readDispute(
   assertValidDisputeResultContract("read", result);
   return result;
 }
+const checkDisputeExport = (value: unknown): Obj => {
+  if (o(value).schema_version === "dispute-result-export.v2")
+    assertValidDisputeExportV2(value);
+  else assertValidDisputeResultContract("export", value);
+  return value;
+};
 export function exportDispute(s: DisputeState): Obj {
+  const work = exportWorkState(s.work);
   const e = hashed({
-    schema_version: "dispute-result-export.v1",
-    work: exportWorkState(s.work),
+    schema_version:
+      work.schema_version === "preparation-work-export.v3"
+        ? "dispute-result-export.v2"
+        : "dispute-result-export.v1",
+    work,
     authority: {
       entries: s.authority.entries.filter((e) => e.tenant_id === INTAKE_TENANT),
       snapshots: s.authority.snapshots.filter(
@@ -1405,11 +1416,11 @@ export function exportDispute(s: DisputeState): Obj {
     catalog_heads: s.heads.filter((h) => h.tenant_id === INTAKE_TENANT),
     entries: s.entries.filter((e) => !isAuthority(e)),
   });
-  assertValidDisputeResultContract("export", e);
+  checkDisputeExport(e);
   return e;
 }
-export function validateDisputeExport(value: unknown): DisputeState {
-  assertValidDisputeResultContract("export", value);
+export function validateDisputeExport(raw: unknown): DisputeState {
+  const value = checkDisputeExport(raw);
   const { hash, ...body } = value;
   ensure(hash === sha256Json(body), "RESULT_INTEGRITY", "Export hash drift");
   ensure(

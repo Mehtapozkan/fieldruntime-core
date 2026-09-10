@@ -1,0 +1,1395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.dev/schemas/preparation-work.v3.schema.json",
+  "title": "Accepted D-038: bounded two-bundle preparation and mixed immutable history",
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "synthetic-preparation-worker.v3"
+        },
+        "tenant_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/profile/properties/tenant_id"
+        },
+        "profile_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/profile/properties/profile_id"
+        },
+        "implementation_id": {
+          "const": "disposition-investigation.v1"
+        },
+        "identities": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+          },
+          "maxItems": 10
+        },
+        "read_scope_ids": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/profile/properties/read_scope_ids"
+        },
+        "work_scope_ids": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/profile/properties/work_scope_ids"
+        },
+        "grants": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/profile/properties/grants"
+        },
+        "investigation": {
+          "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/profile"
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "profile_id",
+        "implementation_id",
+        "identities",
+        "read_scope_ids",
+        "work_scope_ids",
+        "grants",
+        "investigation"
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tenant_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/tenant_id"
+        },
+        "case_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/case_id"
+        },
+        "record_key": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/record_key"
+        },
+        "entity_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/entity_id"
+        },
+        "source_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/source_revision"
+        },
+        "pack_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/pack_id"
+        },
+        "pack_version": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/pack_version"
+        },
+        "artifact_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/artifact_hash"
+        },
+        "selection_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/selection_revision"
+        },
+        "selection_head": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/selection_head"
+        },
+        "basis": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v4.schema.json#/$defs/binding"
+        },
+        "worker_implementation_id": {
+          "const": "disposition-investigation.v1"
+        },
+        "worker_profile_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding/properties/worker_profile_hash"
+        },
+        "retained_bundles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "bundle_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "bundle_hash": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "bundle_id",
+              "bundle_hash"
+            ]
+          }
+        }
+      },
+      "required": [
+        "tenant_id",
+        "case_id",
+        "record_key",
+        "entity_id",
+        "source_revision",
+        "pack_id",
+        "pack_version",
+        "artifact_hash",
+        "selection_revision",
+        "selection_head",
+        "basis",
+        "worker_implementation_id",
+        "worker_profile_hash",
+        "retained_bundles"
+      ]
+    },
+    "start": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-work-command.v3"
+        },
+        "operation": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/start/properties/operation"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "expected_work_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/start/properties/expected_work_revision"
+        },
+        "expected_work_head": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/start/properties/expected_work_head"
+        },
+        "idempotency_key": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/start/properties/idempotency_key"
+        },
+        "replaces_invocation": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/start/properties/replaces_invocation"
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "binding",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "replaces_invocation"
+      ]
+    },
+    "interrupt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-interruption.v3"
+        },
+        "operation": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/interrupt/properties/operation"
+        },
+        "invocation_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/interrupt/properties/invocation_id"
+        },
+        "expected_work_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/interrupt/properties/expected_work_revision"
+        },
+        "expected_work_head": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/interrupt/properties/expected_work_head"
+        },
+        "idempotency_key": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/interrupt/properties/idempotency_key"
+        },
+        "reason": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/interrupt/properties/reason"
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "invocation_id",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "reason"
+      ]
+    },
+    "task_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-task-review.v3"
+        },
+        "operation": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/task_review/properties/operation"
+        },
+        "purpose": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/task_review/properties/purpose"
+        },
+        "invocation_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/task_review/properties/invocation_id"
+        },
+        "expected_work_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/task_review/properties/expected_work_revision"
+        },
+        "expected_work_head": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/task_review/properties/expected_work_head"
+        },
+        "idempotency_key": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/task_review/properties/idempotency_key"
+        },
+        "result_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/task_review/properties/result_hash"
+        },
+        "decision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/task_review/properties/decision"
+        },
+        "reason": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/task_review/properties/reason"
+        },
+        "replacement_proposal": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/task_review/properties/replacement_proposal"
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "purpose",
+        "invocation_id",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "result_hash",
+        "decision",
+        "reason"
+      ]
+    },
+    "correction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "purpose_limited_preparation_correction.v3"
+        },
+        "operation": {
+          "const": "correction"
+        },
+        "purpose": {
+          "const": "preparation_usefulness"
+        },
+        "invocation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+        },
+        "expected_work_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expected_work_head": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "original_result_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "before": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "after": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "classification": {
+          "enum": [
+            "knowledge_bearing",
+            "authority_only"
+          ]
+        },
+        "primary_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "AUTHORITY",
+                "JUDGMENT",
+                "MISSING_EVIDENCE",
+                "MISSING_KNOWLEDGE",
+                "NOVEL_CASE",
+                "SYSTEM_FAILURE"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "citation_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          },
+          "maxItems": 200
+        },
+        "evidence_limits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "purpose",
+        "invocation_id",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "binding_hash",
+        "original_result_hash",
+        "target",
+        "before",
+        "after",
+        "classification",
+        "primary_reason",
+        "reason",
+        "citation_ids",
+        "evidence_limits"
+      ]
+    },
+    "evaluation_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-evaluation-review.v3"
+        },
+        "operation": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/operation"
+        },
+        "purpose": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/purpose"
+        },
+        "invocation_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/invocation_id"
+        },
+        "expected_work_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/expected_work_revision"
+        },
+        "expected_work_head": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/expected_work_head"
+        },
+        "idempotency_key": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/idempotency_key"
+        },
+        "correction_entry_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/correction_entry_hash"
+        },
+        "candidate_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/candidate_id"
+        },
+        "expected_candidate_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/expected_candidate_revision"
+        },
+        "expected_test_case_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/expected_test_case_hash"
+        },
+        "decision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/decision"
+        },
+        "reason": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/reason"
+        },
+        "test_references": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/evaluation_review/properties/test_references"
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "purpose",
+        "invocation_id",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "correction_entry_hash",
+        "candidate_id",
+        "expected_candidate_revision",
+        "expected_test_case_hash",
+        "decision",
+        "reason",
+        "test_references"
+      ]
+    },
+    "note": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/note"
+    },
+    "proof_note": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-proof-note.v3"
+        },
+        "operation": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/proof_note/properties/operation"
+        },
+        "purpose": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/proof_note/properties/purpose"
+        },
+        "invocation_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/proof_note/properties/invocation_id"
+        },
+        "expected_work_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/proof_note/properties/expected_work_revision"
+        },
+        "expected_work_head": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/proof_note/properties/expected_work_head"
+        },
+        "idempotency_key": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/proof_note/properties/idempotency_key"
+        },
+        "binding_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/proof_note/properties/binding_hash"
+        },
+        "result_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/proof_note/properties/result_hash"
+        },
+        "note": {
+          "$ref": "#/$defs/note"
+        },
+        "reason": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/proof_note/properties/reason"
+        }
+      },
+      "required": [
+        "schema_version",
+        "operation",
+        "purpose",
+        "invocation_id",
+        "expected_work_revision",
+        "expected_work_head",
+        "idempotency_key",
+        "binding_hash",
+        "result_hash",
+        "note",
+        "reason"
+      ]
+    },
+    "command": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/start"
+        },
+        {
+          "$ref": "#/$defs/interrupt"
+        },
+        {
+          "$ref": "#/$defs/task_review"
+        },
+        {
+          "$ref": "#/$defs/correction"
+        },
+        {
+          "$ref": "#/$defs/evaluation_review"
+        },
+        {
+          "$ref": "#/$defs/proof_note"
+        }
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "disposition-preparation-result.v3"
+        },
+        "invocation_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/invocation_id"
+        },
+        "started_entry_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/started_entry_hash"
+        },
+        "binding_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/binding_hash"
+        },
+        "outcome": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/outcome"
+        },
+        "title": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/title"
+        },
+        "subject": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/subject"
+        },
+        "coverage": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/coverage"
+        },
+        "steps": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/steps"
+        },
+        "evidence_checklist": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/evidence_checklist"
+        },
+        "reconciliation": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/reconciliation"
+        },
+        "related_context": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/related_context"
+        },
+        "follow_up": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/follow_up"
+        },
+        "disposition": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/disposition"
+        },
+        "intervention": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/intervention"
+        },
+        "proof_readiness": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/proof_readiness"
+        },
+        "execution_facts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "model_calls": {
+              "const": 1
+            },
+            "external_tool_calls": {
+              "const": 0
+            },
+            "messages_sent": {
+              "const": 0
+            }
+          },
+          "required": [
+            "model_calls",
+            "external_tool_calls",
+            "messages_sent"
+          ]
+        },
+        "cost_evidence": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/cost_evidence"
+        },
+        "financial_authority": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/financial_authority"
+        },
+        "case_closure_permission": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result/properties/case_closure_permission"
+        },
+        "investigation": {
+          "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/evidence"
+        }
+      },
+      "required": [
+        "schema_version",
+        "invocation_id",
+        "started_entry_hash",
+        "binding_hash",
+        "outcome",
+        "title",
+        "subject",
+        "coverage",
+        "steps",
+        "evidence_checklist",
+        "reconciliation",
+        "related_context",
+        "follow_up",
+        "disposition",
+        "intervention",
+        "proof_readiness",
+        "execution_facts",
+        "cost_evidence",
+        "financial_authority",
+        "case_closure_permission",
+        "investigation"
+      ]
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-worker-input.v3"
+        },
+        "invocation_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/input/properties/invocation_id"
+        },
+        "started_entry_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/input/properties/started_entry_hash"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "artifact": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v4.schema.json#/$defs/artifact"
+        },
+        "selected_record": {
+          "$ref": "https://fieldruntime.dev/schemas/intake.v1.schema.json#/$defs/record"
+        },
+        "covered_records": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/intake.v1.schema.json#/$defs/record"
+          },
+          "maxItems": 200
+        },
+        "associated_support_count": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/input/properties/associated_support_count"
+        },
+        "parsed_utf8_bytes": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/input/properties/parsed_utf8_bytes"
+        },
+        "retained_bundles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/intake.v1.schema.json#/$defs/bundle"
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "invocation_id",
+        "started_entry_hash",
+        "binding",
+        "artifact",
+        "selected_record",
+        "covered_records",
+        "associated_support_count",
+        "parsed_utf8_bytes",
+        "retained_bundles"
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "worker": {
+          "const": "disposition-investigation.v1"
+        },
+        "validator": {
+          "const": "preparation-result-validator.v3"
+        },
+        "journal": {
+          "const": "preparation-work.v3"
+        }
+      },
+      "required": [
+        "worker",
+        "validator",
+        "journal"
+      ]
+    },
+    "support": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/support"
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "computation_started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "computation_completed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "computation_elapsed_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "computation_budget_ms": {
+          "enum": [
+            5000,
+            60000
+          ]
+        },
+        "completed_within_budget": {
+          "type": "boolean"
+        },
+        "measurement_source": {
+          "const": "runtime_parent_monotonic_clock"
+        },
+        "validation_elapsed_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "writer_lock_wait_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "terminal_evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_timezone": {
+          "const": "UTC"
+        }
+      },
+      "required": [
+        "computation_started_at",
+        "computation_completed_at",
+        "computation_elapsed_ms",
+        "computation_budget_ms",
+        "completed_within_budget",
+        "measurement_source",
+        "validation_elapsed_ms",
+        "writer_lock_wait_ms",
+        "terminal_evaluated_at",
+        "source_timezone"
+      ]
+    },
+    "candidate": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/candidate"
+    },
+    "journal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-work-entry.v3"
+        },
+        "tenant_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/tenant_id"
+        },
+        "case_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/case_id"
+        },
+        "record_key": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/record_key"
+        },
+        "id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/id"
+        },
+        "event": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/event"
+        },
+        "sequence": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/sequence"
+        },
+        "previous_entry_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/previous_entry_hash"
+        },
+        "invocation_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/invocation_id"
+        },
+        "command": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/command_any"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/idempotency_key"
+        },
+        "command_fingerprint": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/command_fingerprint"
+        },
+        "actor": {
+          "$ref": "https://fieldruntime.ai/schemas/identity-reference.v0.schema.json"
+        },
+        "worker_profile": {
+          "$ref": "#/$defs/profile_any"
+        },
+        "publication_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "profile": {
+              "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/profile"
+            },
+            "template_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "worker_profile": {
+              "$ref": "#/$defs/profile_any"
+            }
+          },
+          "required": [
+            "profile",
+            "template_id",
+            "worker_profile"
+          ]
+        },
+        "binding_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/binding_hash"
+        },
+        "started_entry_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/started_entry_hash"
+        },
+        "input_manifest": {
+          "$ref": "#/$defs/support"
+        },
+        "recorded_at": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/recorded_at"
+        },
+        "versions": {
+          "$ref": "#/$defs/versions_any"
+        },
+        "computation_budget_ms": {
+          "enum": [
+            5000,
+            60000
+          ]
+        },
+        "outcome": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/outcome"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/result_any"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/result_hash"
+        },
+        "conformance": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/conformance"
+        },
+        "diagnostics": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/diagnostics"
+        },
+        "parent_timing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/timing"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/candidate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "authority_granted": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/authority_granted"
+        },
+        "closure_permission": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/closure_permission"
+        },
+        "hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal/properties/hash"
+        },
+        "investigation": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/evidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reservation": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/reservation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "case_id",
+        "record_key",
+        "id",
+        "event",
+        "sequence",
+        "previous_entry_hash",
+        "invocation_id",
+        "command",
+        "idempotency_key",
+        "command_fingerprint",
+        "actor",
+        "worker_profile",
+        "publication_context",
+        "binding_hash",
+        "started_entry_hash",
+        "input_manifest",
+        "recorded_at",
+        "versions",
+        "computation_budget_ms",
+        "outcome",
+        "result",
+        "result_hash",
+        "conformance",
+        "diagnostics",
+        "parent_timing",
+        "candidate",
+        "authority_granted",
+        "closure_permission",
+        "hash",
+        "investigation",
+        "reservation"
+      ]
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-work-receipt.v3"
+        },
+        "status": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/receipt/properties/status"
+        },
+        "entry": {
+          "$ref": "#/$defs/journal"
+        },
+        "historical_receipt": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/receipt/properties/historical_receipt"
+        },
+        "authority_granted": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/receipt/properties/authority_granted"
+        },
+        "closure_permission": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/receipt/properties/closure_permission"
+        }
+      },
+      "required": [
+        "schema_version",
+        "status",
+        "entry",
+        "historical_receipt",
+        "authority_granted",
+        "closure_permission"
+      ]
+    },
+    "invocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "invocation_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/invocation/properties/invocation_id"
+        },
+        "started_entry_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/invocation/properties/started_entry_hash"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding_any"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/result_any"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/invocation/properties/result_hash"
+        },
+        "terminal_entry_hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/invocation/properties/terminal_entry_hash"
+        },
+        "outcome": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/invocation/properties/outcome"
+        },
+        "current_usable": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/invocation/properties/current_usable"
+        },
+        "reasons": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/invocation/properties/reasons"
+        },
+        "review": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/journal_any"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "can_accept": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/invocation/properties/can_accept"
+        },
+        "can_intervene": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/invocation/properties/can_intervene"
+        },
+        "can_interrupt": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/invocation/properties/can_interrupt"
+        }
+      },
+      "required": [
+        "invocation_id",
+        "started_entry_hash",
+        "binding",
+        "result",
+        "result_hash",
+        "terminal_entry_hash",
+        "outcome",
+        "current_usable",
+        "reasons",
+        "review",
+        "can_accept",
+        "can_intervene",
+        "can_interrupt"
+      ]
+    },
+    "read": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-work-read.v3"
+        },
+        "case_id": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/case_id"
+        },
+        "record_key": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/record_key"
+        },
+        "evaluated_at": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/evaluated_at"
+        },
+        "work_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/work_revision"
+        },
+        "work_head": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/work_head"
+        },
+        "candidate_binding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/binding_any"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selection_revision": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/selection_revision"
+        },
+        "selection_head": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/selection_head"
+        },
+        "current": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/current"
+        },
+        "invocations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/invocation"
+          },
+          "maxItems": 10000
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/journal_any"
+          },
+          "maxItems": 10000
+        },
+        "sources": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/artifact/properties/sources"
+        },
+        "authority_granted": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/authority_granted"
+        },
+        "closure_permission": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/closure_permission"
+        },
+        "hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/read/properties/hash"
+        },
+        "resource_preflight": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/preflight"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "case_id",
+        "record_key",
+        "evaluated_at",
+        "work_revision",
+        "work_head",
+        "candidate_binding",
+        "selection_revision",
+        "selection_head",
+        "current",
+        "invocations",
+        "history",
+        "sources",
+        "authority_granted",
+        "closure_permission",
+        "hash",
+        "resource_preflight"
+      ]
+    },
+    "export": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "preparation-work-export.v3"
+        },
+        "pack": {
+          "oneOf": [
+            {
+              "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v1.schema.json#/$defs/export"
+            },
+            {
+              "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v2.schema.json#/$defs/export"
+            },
+            {
+              "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v3.schema.json#/$defs/export"
+            },
+            {
+              "$ref": "https://fieldruntime.dev/schemas/preparation-pack.v4.schema.json#/$defs/export"
+            }
+          ]
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/journal_any"
+          },
+          "maxItems": 10000
+        },
+        "authority_granted": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/export/properties/authority_granted"
+        },
+        "closure_permission": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/export/properties/closure_permission"
+        },
+        "hash": {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/export/properties/hash"
+        }
+      },
+      "required": [
+        "schema_version",
+        "pack",
+        "entries",
+        "authority_granted",
+        "closure_permission",
+        "hash"
+      ]
+    },
+    "binding_any": {
+      "oneOf": [
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/binding"
+        },
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v2.schema.json#/$defs/binding"
+        },
+        {
+          "$ref": "#/$defs/binding"
+        }
+      ]
+    },
+    "journal_any": {
+      "oneOf": [
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/journal"
+        },
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v2.schema.json#/$defs/journal"
+        },
+        {
+          "$ref": "#/$defs/journal"
+        }
+      ]
+    },
+    "result_any": {
+      "oneOf": [
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/result"
+        },
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v2.schema.json#/$defs/result"
+        },
+        {
+          "$ref": "#/$defs/result"
+        }
+      ]
+    },
+    "command_any": {
+      "oneOf": [
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/command"
+        },
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v2.schema.json#/$defs/command"
+        },
+        {
+          "$ref": "#/$defs/command"
+        }
+      ]
+    },
+    "profile_any": {
+      "oneOf": [
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/profile"
+        },
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v2.schema.json#/$defs/profile"
+        },
+        {
+          "$ref": "#/$defs/profile"
+        }
+      ]
+    },
+    "versions_any": {
+      "oneOf": [
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v1.schema.json#/$defs/versions"
+        },
+        {
+          "$ref": "https://fieldruntime.dev/schemas/preparation-work.v2.schema.json#/$defs/versions"
+        },
+        {
+          "$ref": "#/$defs/versions"
+        }
+      ]
+    },
+    "resource_counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "retained_bundles": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coverage_rows": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "associated_support_artifacts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "parsed_utf8_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "questions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "retained_bundles",
+        "coverage_rows",
+        "associated_support_artifacts",
+        "parsed_utf8_bytes",
+        "questions"
+      ]
+    },
+    "preflight": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eligible": {
+          "type": "boolean"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 50
+        },
+        "counts": {
+          "$ref": "#/$defs/resource_counts"
+        },
+        "limits": {
+          "$ref": "#/$defs/resource_counts"
+        },
+        "bundle_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10000
+        },
+        "permission_granted": {
+          "const": false
+        }
+      },
+      "required": [
+        "eligible",
+        "reasons",
+        "counts",
+        "limits",
+        "bundle_ids",
+        "permission_granted"
+      ]
+    }
+  }
+}

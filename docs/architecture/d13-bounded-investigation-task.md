@@ -19,7 +19,7 @@ Implementation status and evidence are recorded separately in STATUS.md.
 ## Approved implementation and separately gated activation
 
 Permit one explicitly published, operator-started **synthetic text investigation**
-using an isolated OpenAI Responses adapter, with the inputs, one-call budget and
+using an isolated adapter boundary (fake transport in this implementation), with the inputs, one-call budget and
 retained evidence below. Extend the existing preparation journal with a separately
 versioned result/usage envelope through an additive compatibility migration. Keep
 old pack v1/v2/v3 and worker v1/v2 interpretation, current exact bindings, publication,
@@ -62,7 +62,7 @@ confirmation must remain separate. A second unseen record with valid supplied
 support must produce different scoped questions; amounts/IDs/conclusions are not
 hard-coded. A model claim is never the D-039 basis check or an authorization.
 
-## Access, budget and custody proposal
+## Separately gated live access, budget and custody proposal
 
 | Item                 | Proposed limit / failure behavior                                                                                                                                                                                                                                                                                                                                                                  |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -84,7 +84,7 @@ These public-document reads are not provider inference or evidence of account ac
 
 ## Output, failure and reproducibility
 
-Proposed strict `investigation-proposal.v1`: exact input/record hash, supported
+Strict `investigation-proposal.v1`: exact input/record hash, supported
 claims and counterclaims with source spans, material uncertainty, consequential gaps,
 checklist, unsent follow-up and abstention reasons. Every citation resolves to
 permitted retained bytes and the claim's scoped subject. Unsupported fields, wrong
@@ -137,3 +137,13 @@ evaluation; retain deterministic default if gates fail. No new Workbench framewo
 Real-data comparisons separately require named participants, permitted files/custody,
 access/storage/retention/deletion approval and a comparable baseline. They may begin
 with existing preparation once approved and need not wait for this model task.
+
+## Implementation on the review branch
+
+The [hermetic implementation and executable API handoff](../guides/bounded-investigation.md)
+records pack v4, work/profile/result v3, migration 0012, scoped complete input,
+one durable reservation per start and retained response replay. Live transport and
+activation remain unavailable; all calls in implementation tests use a fake. The
+synthetic accounting profile reserves the full per-call ceiling without refunds or
+automatic resets, including unknown outcomes. This conservative bookkeeping is not
+spending or an evaluation result. Existing deterministic preparation remains default.

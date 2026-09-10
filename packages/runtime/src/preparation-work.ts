@@ -1,4 +1,10 @@
 import {
+  investigationRequest,
+  investigationReservation,
+  validateInvestigationEvidence,
+  investigationResult,
+} from "./investigation.js";
+import {
   preparationResources,
   requirePreparationResources,
   exactBundleBindings,
@@ -6,6 +12,7 @@ import {
 import {
   assertValidPreparationWorkContract,
   assertValidPreparationWorkV2Contract,
+  assertValidPreparationWorkV3Contract,
   canonicalJson,
   immutableJson,
   sha256Json,
@@ -27,6 +34,7 @@ import {
   historicalPackSupport,
   syntheticWorkerPackContext,
   syntheticContinuationPackContext,
+  syntheticInvestigationPackContext,
   type PackState,
   type PackContext,
   type PackTarget,
@@ -37,6 +45,7 @@ import {
   workActor,
   syntheticWorkerProfile,
   syntheticContinuationProfile,
+  syntheticInvestigationProfile,
 } from "./preparation-worker-profile.js";
 import { prepareDisposition } from "./disposition-preparation.js";
 export interface WorkState {
@@ -59,16 +68,28 @@ export function syntheticContinuationContext(): WorkContext {
     profile: syntheticContinuationProfile(),
   };
 }
+export function syntheticInvestigationContext(): WorkContext {
+  return {
+    pack: syntheticInvestigationPackContext(),
+    profile: syntheticInvestigationProfile(),
+  };
+}
 const generation = (v: Obj): number =>
-  v.worker_implementation_id === "disposition-code.v3" ||
-  String(v.schema_version).endsWith(".v2")
-    ? 2
-    : 1;
+  v.implementation_id === "disposition-investigation.v1" ||
+  v.worker_implementation_id === "disposition-investigation.v1" ||
+  String(v.schema_version).endsWith(".v3")
+    ? 3
+    : v.worker_implementation_id === "disposition-code.v3" ||
+        String(v.schema_version).endsWith(".v2")
+      ? 2
+      : 1;
 function validateWork(
   kind: Parameters<typeof assertValidPreparationWorkContract>[0],
   v: unknown,
 ): asserts v is Obj {
-  if (v && typeof v === "object" && generation(v as Obj) === 2)
+  if (v && typeof v === "object" && generation(v as Obj) === 3)
+    assertValidPreparationWorkV3Contract(kind, v);
+  else if (v && typeof v === "object" && generation(v as Obj) === 2)
     assertValidPreparationWorkV2Contract(kind, v);
   else assertValidPreparationWorkContract(kind, v);
 }
@@ -181,13 +202,17 @@ function currentBinding(
   ensure(
     a &&
       o(a).schema_version ===
-        (generation(c.profile) === 2
-          ? "preparation-pack.v3"
-          : "preparation-pack.v2"),
+        (generation(c.profile) === 3
+          ? "preparation-pack.v4"
+          : generation(c.profile) === 2
+            ? "preparation-pack.v3"
+            : "preparation-pack.v2"),
     "WORK_COMPATIBILITY_REQUIRED",
-    generation(c.profile) === 2
-      ? "Explicit compatible v3 publication is required; historical publications do not gain new capacity"
-      : "Explicit worker-capable v2 publication is required; v1 prohibits dispatch",
+    generation(c.profile) === 3
+      ? "Explicit compatible v4 investigation publication is required; older publications do not gain model capacity"
+      : generation(c.profile) === 2
+        ? "Explicit compatible v3 publication is required; historical publications do not gain new capacity"
+        : "Explicit worker-capable v2 publication is required; v1 prohibits dispatch",
   );
   ensure(
     o(v.current).eligible,
@@ -198,11 +223,11 @@ function currentBinding(
     basis = o(artifact.binding),
     manifest = o(basis.manifest);
   const resources =
-    generation(c.profile) === 2
+    generation(c.profile) >= 2
       ? preparationResources(s.pack, artifact, c.profile)
       : null;
   if (resources) requirePreparationResources(resources.preflight);
-  return checked("binding", {
+  const binding = checked("binding", {
     tenant_id: INTAKE_TENANT,
     case_id: t.case_id,
     record_key: t.record_key,
@@ -220,6 +245,40 @@ function currentBinding(
       ? { retained_bundles: exactBundleBindings(resources.bundles) }
       : {}),
   });
+  if (generation(c.profile) === 3)
+    investigationRequest(bindingInput(s, binding));
+  return binding;
+}
+function bindingInput(s: WorkState, b: Obj): Obj {
+  const artifact = s.pack.entries.find(
+    (e) => e.operation === "publish" && e.artifact_hash === b.artifact_hash,
+  )?.artifact;
+  ensure(
+    artifact,
+    "WORK_INTEGRITY",
+    "Published investigation artifact unavailable",
+  );
+  const resources = preparationResources(
+    s.pack,
+    o(artifact),
+    o(
+      s.pack.entries.find((e) => e.artifact_hash === b.artifact_hash)
+        ?.worker_profile,
+    ),
+  );
+  requirePreparationResources(resources.preflight);
+  const selected = resources.bundles.find(
+    (x) => x.id === o(o(b.basis).manifest).bundle_id,
+  );
+  const record =
+    selected && l(selected.records).find((r) => r.record_key === b.record_key);
+  ensure(record, "WORK_INTEGRITY", "Investigation record unavailable");
+  return {
+    binding: b,
+    artifact,
+    selected_record: record,
+    retained_bundles: resources.bundles,
+  };
 }
 function startOf(s: WorkState, id: unknown): Obj {
   const e = s.entries.find(
@@ -262,7 +321,7 @@ export function workInput(s: WorkState, start: Obj): Obj {
     "WORK_INTEGRITY",
     "Original worker subject is missing",
   );
-  const modern = generation(b) === 2;
+  const modern = generation(b) >= 2;
   const resources = modern
     ? preparationResources(s.pack, o(artifact), o(start.worker_profile))
     : null;
@@ -303,9 +362,12 @@ export function workInput(s: WorkState, start: Obj): Obj {
       "The fixed worker input limit was exceeded; no evidence was truncated",
     );
   return checked("input", {
-    schema_version: modern
-      ? "preparation-worker-input.v2"
-      : "preparation-worker-input.v1",
+    schema_version:
+      generation(b) === 3
+        ? "preparation-worker-input.v3"
+        : modern
+          ? "preparation-worker-input.v2"
+          : "preparation-worker-input.v1",
     invocation_id: start.invocation_id,
     started_entry_hash: start.hash,
     binding: b,
@@ -378,7 +440,15 @@ function baseEntry(
     input_manifest: workSupport(s.pack),
     recorded_at: at,
     versions: versions(o(start?.worker_profile ?? c.profile)),
-    computation_budget_ms: 5000,
+    computation_budget_ms:
+      generation(o(start?.worker_profile ?? c.profile)) === 3 ? 60000 : 5000,
+    ...(Math.max(
+      generation(c.profile),
+      start ? generation(start) : 1,
+      command ? generation(command) : 1,
+    ) === 3
+      ? { reservation: start?.reservation ?? null, investigation: null }
+      : {}),
     outcome: "recorded",
     result: null,
     result_hash: null,
@@ -632,18 +702,31 @@ export function appendWorkCommand(
       "WORK_REPLACEMENT_REQUIRED",
       "A new run must explicitly name the prior completed or interrupted invocation; no task review transfers",
     );
+    const provisional = withHash({
+      ...baseEntry(
+        s,
+        command,
+        undefined,
+        c,
+        at,
+        workActor(c.profile, "prepare_disposition_packet", at),
+      ),
+      outcome: "started",
+    });
+    const input = workInput(s, provisional);
     const e = checked(
       "journal",
       withHash({
-        ...baseEntry(
-          s,
-          command,
-          undefined,
-          c,
-          at,
-          workActor(c.profile, "prepare_disposition_packet", at),
-        ),
-        outcome: "started",
+        ...withoutHash(provisional),
+        ...(generation(c.profile) === 3
+          ? {
+              reservation: investigationReservation(
+                s.entries,
+                input,
+                c.profile,
+              ),
+            }
+          : {}),
       }),
     );
     workInput(s, e);
@@ -780,7 +863,12 @@ export function validateWorkerResult(input: Obj, value: unknown): Obj {
     "Worker output exceeds its fixed resource bound",
   );
   ensure(
-    same(value, prepareDisposition(input)),
+    same(
+      value,
+      generation(input) === 3
+        ? investigationResult(input, o(value.investigation))
+        : prepareDisposition(input),
+    ),
     "WORK_RESULT_CONFORMANCE",
     "Worker claims, citations or conclusions differ from canonical scoped preparation",
   );
@@ -794,6 +882,7 @@ export function appendWorkTerminal(
   timing: Obj,
   at: string,
   c: WorkContext = syntheticWorkContext(),
+  investigation: Obj | null = null,
 ): Obj | null {
   const start = startOf(s, invocation);
   assertAt(s, at);
@@ -803,14 +892,16 @@ export function appendWorkTerminal(
     "WORK_HEAD_CONFLICT",
     "A late result cannot cross an intervening work entry",
   );
+  const budget = generation(o(start.worker_profile)) === 3 ? 60000 : 5000;
   ensure(
-    String(timing.computation_started_at) >= String(start.recorded_at) &&
+    timing.computation_budget_ms === budget &&
+      String(timing.computation_started_at) >= String(start.recorded_at) &&
       String(timing.computation_completed_at) >=
         String(timing.computation_started_at) &&
       String(timing.computation_completed_at) <= at &&
       timing.terminal_evaluated_at === at &&
       timing.completed_within_budget ===
-        Number(timing.computation_elapsed_ms) <= 5000,
+        Number(timing.computation_elapsed_ms) <= budget,
     "WORK_INTEGRITY",
     "Invalid parent timing evidence",
   );
@@ -822,7 +913,26 @@ export function appendWorkTerminal(
     ),
     entries: s.entries,
   };
-  if (result) validateWorkerResult(workInput(historical, start), result);
+  const input = workInput(historical, start);
+  if (generation(start) === 3) {
+    ensure(
+      investigation,
+      "WORK_INTEGRITY",
+      "Investigation terminal must retain its provider evidence",
+    );
+    validateInvestigationEvidence(input, investigation);
+    ensure(
+      same(result, investigationResult(input, investigation)),
+      "WORK_INTEGRITY",
+      "Result differs from the retained provider evidence",
+    );
+  } else
+    ensure(
+      investigation === null,
+      "WORK_INTEGRITY",
+      "Legacy computation cannot acquire provider evidence",
+    );
+  if (result) validateWorkerResult(input, result);
   ensure(
     result !== null || diagnostics.length > 0,
     "WORK_INTEGRITY",
@@ -856,6 +966,7 @@ export function appendWorkTerminal(
       conformance: result ? "passed" : "failed",
       diagnostics: why,
       parent_timing: timing,
+      ...(generation(start) === 3 ? { investigation } : {}),
     }),
   );
 }
@@ -873,12 +984,33 @@ export function assertWorkState(s: WorkState): void {
   assertPackState(s.pack);
   const previous: Obj[] = [],
     keys = new Set<string>();
-  for (const entry of [...s.entries].sort(
+  const remaining = [...s.entries].sort(
     (a, b) =>
       String(a.recorded_at).localeCompare(String(b.recorded_at)) ||
       String(a.case_id).localeCompare(String(b.case_id)) ||
       Number(a.sequence) - Number(b.sequence),
-  )) {
+  );
+  while (remaining.length) {
+    const earliest = remaining[0]?.recorded_at;
+    const index = remaining.findIndex(
+      (e) =>
+        e.recorded_at === earliest &&
+        (e.previous_entry_hash === null ||
+          previous.some((p) => p.hash === e.previous_entry_hash)) &&
+        (e.event !== "started" ||
+          !e.reservation ||
+          o(e.reservation).previous_reservation_entry_hash === null ||
+          previous.some(
+            (p) => p.hash === o(e.reservation).previous_reservation_entry_hash,
+          )),
+    );
+    ensure(
+      index >= 0,
+      "WORK_INTEGRITY",
+      "Invalid work/reservation order or future predecessor",
+    );
+    const entry = remaining.splice(index, 1)[0];
+    ensure(entry, "WORK_INTEGRITY", "Missing next work entry");
     validateWork("journal", entry);
     ensure(
       entry.hash === sha256Json(withoutHash(entry)),
@@ -923,6 +1055,7 @@ export function assertWorkState(s: WorkState): void {
         o(entry.parent_timing),
         String(entry.recorded_at),
         c,
+        entry.investigation ? o(entry.investigation) : null,
       );
     } else {
       const key = canonicalJson([
@@ -961,7 +1094,7 @@ export function readWork(
   recordKey: string,
   at: string,
   c: WorkContext = syntheticWorkContext(),
-  resourceAware = generation(c.profile) === 2,
+  resourceAware = generation(c.profile) >= 2,
 ): Obj {
   assertWorkReader(c.profile);
   const t = target(s, caseId, recordKey),
@@ -987,6 +1120,12 @@ export function readWork(
       assertAt(s, at);
       const current = currentBinding(s, t, at, c);
       binding = current;
+      if (generation(c.profile) === 3)
+        investigationReservation(
+          s.entries,
+          bindingInput(s, current),
+          c.profile,
+        );
       if (resourceAware && generation(c.profile) === 1) {
         const a = s.pack.entries.find(
           (e) =>
@@ -1067,10 +1206,13 @@ export function readWork(
     "read",
     withHash({
       schema_version:
-        resourceAware || s.entries.some((e) => generation(e) === 2)
-          ? "preparation-work-read.v2"
-          : "preparation-work-read.v1",
-      ...(resourceAware || s.entries.some((e) => generation(e) === 2)
+        generation(c.profile) === 3 ||
+        s.entries.some((e) => generation(e) === 3)
+          ? "preparation-work-read.v3"
+          : resourceAware || s.entries.some((e) => generation(e) >= 2)
+            ? "preparation-work-read.v2"
+            : "preparation-work-read.v1",
+      ...(resourceAware || s.entries.some((e) => generation(e) >= 2)
         ? { resource_preflight: preflight }
         : {}),
       case_id: caseId,
@@ -1100,12 +1242,17 @@ export function exportWorkState(s: WorkState): Obj {
     "export",
     withHash({
       schema_version:
-        s.entries.some((e) => generation(e) === 2) ||
+        s.entries.some((e) => generation(e) === 3) ||
         s.pack.entries.some(
-          (e) => e.schema_version === "pack-selection-entry.v3",
+          (e) => e.schema_version === "pack-selection-entry.v4",
         )
-          ? "preparation-work-export.v2"
-          : "preparation-work-export.v1",
+          ? "preparation-work-export.v3"
+          : s.entries.some((e) => generation(e) === 2) ||
+              s.pack.entries.some(
+                (e) => e.schema_version === "pack-selection-entry.v3",
+              )
+            ? "preparation-work-export.v2"
+            : "preparation-work-export.v1",
       pack: exportPackState(s.pack),
       entries: s.entries,
       authority_granted: false,

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.dev/schemas/dispute-result-export.v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "work",
+    "authority",
+    "catalog_heads",
+    "entries",
+    "hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "dispute-result-export.v2"
+    },
+    "work": {
+      "$ref": "https://fieldruntime.dev/schemas/preparation-work.v3.schema.json#/$defs/export"
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entries",
+        "snapshots"
+      ],
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "https://fieldruntime.ai/schemas/authority-request-journal-entry.v1.schema.json"
+              },
+              {
+                "$ref": "https://fieldruntime.ai/schemas/authority-request-journal-entry.dispute.v1.schema.json"
+              }
+            ]
+          }
+        },
+        "snapshots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tenant_id",
+              "hash",
+              "kind",
+              "content"
+            ],
+            "properties": {
+              "tenant_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "kind": {
+                "enum": [
+                  "catalog",
+                  "material",
+                  "evaluation"
+                ]
+              },
+              "content": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "catalog_heads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tenant_id",
+          "revision",
+          "snapshot_hash",
+          "last_recorded_at"
+        ],
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{2,127}$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "snapshot_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "last_recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          }
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "https://fieldruntime.ai/schemas/dispute-result.v1.schema.json#/$defs/entry"
+      }
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

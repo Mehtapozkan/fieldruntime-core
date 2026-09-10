@@ -1,0 +1,72 @@
+{
+  "schema_version": "synthetic-preparation-worker.v3",
+  "tenant_id": "tenant_intake_demo",
+  "profile_id": "synthetic_investigation_worker.v1",
+  "implementation_id": "disposition-investigation.v1",
+  "identities": [
+    {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_disposition_worker_demo",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "service",
+      "status": "active"
+    },
+    {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_intake_operator",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "human",
+      "status": "active"
+    },
+    {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_pack_reviewer_demo",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "human",
+      "status": "active"
+    }
+  ],
+  "read_scope_ids": ["scope_entity_north", "scope_entity_south"],
+  "work_scope_ids": ["scope_entity_north"],
+  "grants": [
+    {
+      "identity_id": "identity_disposition_worker_demo",
+      "purpose": "prepare_disposition_packet",
+      "status": "active",
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_until": "2027-01-01T00:00:00.000Z"
+    },
+    {
+      "identity_id": "identity_intake_operator",
+      "purpose": "review_preparation_task",
+      "status": "active",
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_until": "2027-01-01T00:00:00.000Z"
+    },
+    {
+      "identity_id": "identity_pack_reviewer_demo",
+      "purpose": "review_synthetic_evaluation_candidate",
+      "status": "active",
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_until": "2027-01-01T00:00:00.000Z"
+    }
+  ],
+  "investigation": {
+    "mode": "hermetic_only",
+    "provider": "fake",
+    "model_snapshot": "hermetic-model.v1",
+    "tokenizer": "utf8-byte-tokenizer.hermetic.v1",
+    "prompt_version": "investigation-prompt.v1",
+    "batch_id": "synthetic-investigation-hermetic.v1",
+    "input_bytes": 32768,
+    "input_tokens": 16000,
+    "output_tokens": 2000,
+    "response_bytes": 65536,
+    "computation_ms": 60000,
+    "reservation_usd_minor": 50,
+    "batch_budget_usd_minor": 1500,
+    "batch_invocations": 30,
+    "accounting": "synthetic_reservation_not_spending",
+    "live_activation": false
+  }
+}

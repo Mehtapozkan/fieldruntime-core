@@ -1,0 +1,614 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.dev/schemas/investigation.v1.schema.json",
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "const": "hermetic_only"
+        },
+        "provider": {
+          "const": "fake"
+        },
+        "model_snapshot": {
+          "const": "hermetic-model.v1"
+        },
+        "tokenizer": {
+          "const": "utf8-byte-tokenizer.hermetic.v1"
+        },
+        "prompt_version": {
+          "const": "investigation-prompt.v1"
+        },
+        "batch_id": {
+          "const": "synthetic-investigation-hermetic.v1"
+        },
+        "input_bytes": {
+          "const": 32768
+        },
+        "input_tokens": {
+          "const": 16000
+        },
+        "output_tokens": {
+          "const": 2000
+        },
+        "response_bytes": {
+          "const": 65536
+        },
+        "computation_ms": {
+          "const": 60000
+        },
+        "reservation_usd_minor": {
+          "const": 50
+        },
+        "batch_budget_usd_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1500
+        },
+        "batch_invocations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 30
+        },
+        "accounting": {
+          "const": "synthetic_reservation_not_spending"
+        },
+        "live_activation": {
+          "const": false
+        }
+      },
+      "required": [
+        "mode",
+        "provider",
+        "model_snapshot",
+        "tokenizer",
+        "prompt_version",
+        "batch_id",
+        "input_bytes",
+        "input_tokens",
+        "output_tokens",
+        "response_bytes",
+        "computation_ms",
+        "reservation_usd_minor",
+        "batch_budget_usd_minor",
+        "batch_invocations",
+        "accounting",
+        "live_activation"
+      ]
+    },
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2097152
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2097152
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        }
+      },
+      "required": [
+        "source_id",
+        "start",
+        "end",
+        "quote"
+      ]
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "record",
+            "delivery"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "record_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "record_key"
+      ]
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject": {
+          "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/subject"
+        },
+        "interpretation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/span"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "status": {
+          "const": "unreviewed_interpretation"
+        }
+      },
+      "required": [
+        "subject",
+        "interpretation",
+        "spans",
+        "status"
+      ]
+    },
+    "gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject": {
+          "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/subject"
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "why_it_matters": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/span"
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "evidence_status": {
+          "enum": [
+            "not_in_permitted_inputs",
+            "reported_but_unverified",
+            "ambiguous_applicability",
+            "human_access_or_judgment_required"
+          ]
+        }
+      },
+      "required": [
+        "subject",
+        "question",
+        "why_it_matters",
+        "spans",
+        "evidence_status"
+      ]
+    },
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "investigation-proposal.v1"
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/claim"
+          },
+          "minItems": 0,
+          "maxItems": 32
+        },
+        "contradictions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "subject": {
+                "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/subject"
+              },
+              "interpretation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "spans": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/span"
+                },
+                "minItems": 2,
+                "maxItems": 16
+              },
+              "status": {
+                "const": "unreviewed_interpretation"
+              }
+            },
+            "required": [
+              "subject",
+              "interpretation",
+              "spans",
+              "status"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/gap"
+          },
+          "minItems": 0,
+          "maxItems": 32
+        },
+        "uncertainties": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "follow_up": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        },
+        "abstention_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "human_interpretation_review_required": {
+          "const": true
+        },
+        "authority_granted": {
+          "const": false
+        },
+        "independently_verified": {
+          "const": false
+        },
+        "sent": {
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "input_hash",
+        "claims",
+        "contradictions",
+        "gaps",
+        "uncertainties",
+        "follow_up",
+        "abstention_reasons",
+        "human_interpretation_review_required",
+        "authority_granted",
+        "independently_verified",
+        "sent"
+      ]
+    },
+    "reservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "batch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "previous_reservation_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "profile_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "reserved_usd_minor": {
+          "const": 50
+        },
+        "currency": {
+          "const": "USD"
+        },
+        "budget_usd_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1500
+        },
+        "budget_invocations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 30
+        },
+        "accounting": {
+          "const": "synthetic_reservation_not_spending"
+        }
+      },
+      "required": [
+        "batch_id",
+        "ordinal",
+        "previous_reservation_entry_hash",
+        "request_hash",
+        "profile_hash",
+        "reserved_usd_minor",
+        "currency",
+        "budget_usd_minor",
+        "budget_invocations",
+        "accounting"
+      ]
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16000
+        },
+        "output_tokens": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2000
+        }
+      },
+      "required": [
+        "input_tokens",
+        "output_tokens"
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "investigation-evidence.v1"
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "request": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "model": {
+              "const": "hermetic-model.v1"
+            },
+            "input": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32768
+            },
+            "instructions": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            "store": {
+              "const": false
+            },
+            "stream": {
+              "const": false
+            },
+            "tools": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "truncation": {
+              "const": "disabled"
+            },
+            "max_output_tokens": {
+              "const": 2000
+            },
+            "response_contract": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "model",
+            "input",
+            "instructions",
+            "store",
+            "stream",
+            "tools",
+            "truncation",
+            "max_output_tokens",
+            "response_contract"
+          ]
+        },
+        "status": {
+          "enum": [
+            "response_received",
+            "refused",
+            "invalid_response",
+            "unavailable",
+            "timeout_uncertain",
+            "outcome_uncertain"
+          ]
+        },
+        "raw_response": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 65536
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "raw_response_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "response_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "returned_model": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "usage": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/usage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "usage_qualification": {
+          "enum": [
+            "reported_by_fake_provider",
+            "unknown"
+          ]
+        },
+        "price_basis": {
+          "const": "hermetic_no_invoice_no_spending"
+        },
+        "actual_spend_usd_minor": {
+          "const": null
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "proposal": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/proposal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "semantic_correctness": {
+          "const": "not_established"
+        },
+        "interpretation_review_required": {
+          "const": true
+        },
+        "provider_calls_permitted": {
+          "const": 1
+        },
+        "live_activation": {
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_hash",
+        "request",
+        "status",
+        "raw_response",
+        "raw_response_hash",
+        "response_bytes",
+        "request_id",
+        "returned_model",
+        "usage",
+        "usage_qualification",
+        "price_basis",
+        "actual_spend_usd_minor",
+        "diagnostics",
+        "proposal",
+        "semantic_correctness",
+        "interpretation_review_required",
+        "provider_calls_permitted",
+        "live_activation"
+      ]
+    }
+  }
+}

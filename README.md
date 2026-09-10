@@ -27,15 +27,17 @@ new DEL-4 material, fresh descriptive review/publication and a separately review
 second packet, with visible resource limits. It does not change the historical
 prerelease or establish customer outcomes.
 
-This Workbench review branch connects [the same imported-dispute result](docs/guides/dispute-result-workbench.md)
+The preserved Workbench dependency, PR #42, connects [the same imported-dispute result](docs/guides/dispute-result-workbench.md)
 to Accepted D-039's implemented API: original-proof checking, named authority,
 reported no-adjustment disposition, independent observation and separate business
 acceptance/reopening. It is stacked on open PR #41 (`4a1f536f`), then open PR #40;
 none is merged or in the published prerelease. The normal shipped source remains
 open and correctly produces mismatch/refused acceptance. Matched/reopened outcomes
-use disposable test fixtures only. Model integration remains unimplemented; its
-[bounded investigation proposal](docs/architecture/d13-bounded-investigation-task.md)
-is a separate decision, not a dependency of these controls.
+use disposable test fixtures only. This separate review branch implements the optional
+[bounded investigation adapter](docs/guides/bounded-investigation.md) under Accepted
+D-040, using fake responses only. Deterministic preparation remains the appliance
+default. Live provider activation, inference spending and customer processing remain
+unapproved; usefulness comparisons have not run.
 
 ## What works today
 
@@ -195,9 +197,9 @@ history. They remain isolated from Orchid.
   [Remaining D13 MVP work](PLAN.md#remaining-d13-mvp-sequence) prioritizes the proposed
   same-dispute result API, immediate Workbench result controls and a separately
   approved bounded model-assisted investigation task. Current preparation remains
-  deterministic; the result API and this Workbench are in review, while a provider adapter remains unimplemented.
+  deterministic; the result API and this Workbench are in review, while the optional fake-provider adapter is implemented for review under D-040.
 
-Production authentication, real connectors, provider adapters, general workers,
+Production authentication, real connectors, live provider activation, general workers,
 external actions and complete Case closure remain unimplemented. Later distribution
 and production capabilities require their own evidence and decisions; a general
 Action Gateway is not supplied by the one-credit synthetic operation.

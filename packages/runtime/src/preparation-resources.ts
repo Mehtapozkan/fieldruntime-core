@@ -95,10 +95,11 @@ export function preparationResources(
       0,
     ),
   };
-  const budget =
-    artifact.schema_version === "preparation-pack.v3"
-      ? CONTINUATION_LIMITS
-      : WORK_LIMITS;
+  const budget = ["preparation-pack.v3", "preparation-pack.v4"].includes(
+    String(artifact.schema_version),
+  )
+    ? CONTINUATION_LIMITS
+    : WORK_LIMITS;
   const limits = Object.fromEntries(
     Object.keys(counts).map((k) => [k, budget[k as keyof typeof budget]]),
   );

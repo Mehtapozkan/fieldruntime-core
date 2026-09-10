@@ -840,6 +840,7 @@ async function validatePackArtifact(a, hash) {
       "preparation-pack.v1",
       "preparation-pack.v2",
       "preparation-pack.v3",
+      "preparation-pack.v4",
     ].includes(a?.schema_version) &&
       a.pack_id === "pack_synthetic_invoice_dispute_north" &&
       a.authority_granted === false &&
@@ -875,6 +876,7 @@ export async function validatePackEntry(e) {
       "pack-selection-entry.v1",
       "pack-selection-entry.v2",
       "pack-selection-entry.v3",
+      "pack-selection-entry.v4",
     ].includes(e?.schema_version) &&
       e.tenant_id === "tenant_intake_demo" &&
       e.pack_id === "pack_synthetic_invoice_dispute_north" &&
@@ -924,6 +926,7 @@ export async function validatePackResult(v, command) {
       "pack-selection-result.v1",
       "pack-selection-result.v2",
       "pack-selection-result.v3",
+      "pack-selection-result.v4",
     ].includes(v?.schema_version) &&
       v.status === "recorded" &&
       v.historical_receipt === true &&
@@ -940,6 +943,7 @@ export async function validatePackView(v, target) {
       "pack-selection-read.v1",
       "pack-selection-read.v2",
       "pack-selection-read.v3",
+      "pack-selection-read.v4",
     ].includes(v?.schema_version) &&
       v.pack_id === "pack_synthetic_invoice_dispute_north" &&
       v.authority_granted === false &&
@@ -1002,9 +1006,11 @@ export function workPath(target) {
 }
 export async function validateWorkEntry(e) {
   requireData(
-    ["preparation-work-entry.v1", "preparation-work-entry.v2"].includes(
-      e?.schema_version,
-    ) &&
+    [
+      "preparation-work-entry.v1",
+      "preparation-work-entry.v2",
+      "preparation-work-entry.v3",
+    ].includes(e?.schema_version) &&
       e.tenant_id === "tenant_intake_demo" &&
       e.authority_granted === false &&
       e.closure_permission === false,
@@ -1041,16 +1047,24 @@ export async function validateWorkEntry(e) {
         e.result.case_closure_permission === false &&
         e.result.follow_up.sent === false &&
         e.result.disposition.recommended_credit_minor === null &&
-        e.result.execution_facts.model_calls === 0,
+        e.result.execution_facts.model_calls ===
+          (e.schema_version === "preparation-work-entry.v3" ? 1 : 0) &&
+        (e.schema_version !== "preparation-work-entry.v3" ||
+          (e.result.investigation?.live_activation === false &&
+            e.result.investigation?.semantic_correctness ===
+              "not_established" &&
+            e.result.investigation?.interpretation_review_required === true)),
     );
   }
   return e;
 }
 export async function validateWorkReceipt(v, command) {
   requireData(
-    ["preparation-work-receipt.v1", "preparation-work-receipt.v2"].includes(
-      v?.schema_version,
-    ) &&
+    [
+      "preparation-work-receipt.v1",
+      "preparation-work-receipt.v2",
+      "preparation-work-receipt.v3",
+    ].includes(v?.schema_version) &&
       v.historical_receipt === true &&
       v.authority_granted === false &&
       v.closure_permission === false,
@@ -1061,9 +1075,11 @@ export async function validateWorkReceipt(v, command) {
 }
 export async function validateWorkView(v, target) {
   requireData(
-    ["preparation-work-read.v1", "preparation-work-read.v2"].includes(
-      v?.schema_version,
-    ) &&
+    [
+      "preparation-work-read.v1",
+      "preparation-work-read.v2",
+      "preparation-work-read.v3",
+    ].includes(v?.schema_version) &&
       v.case_id === target.case_id &&
       v.record_key === target.record_key &&
       v.authority_granted === false &&
@@ -1120,7 +1136,11 @@ export async function validateWorkView(v, target) {
     v.work_revision === (last?.sequence ?? 0) &&
       v.work_head === (last?.hash ?? null),
   );
-  if (v.schema_version === "preparation-work-read.v2") {
+  if (
+    ["preparation-work-read.v2", "preparation-work-read.v3"].includes(
+      v.schema_version,
+    )
+  ) {
     const p = v.resource_preflight;
     requireData(
       p === null ||

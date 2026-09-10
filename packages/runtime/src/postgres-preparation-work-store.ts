@@ -1,4 +1,10 @@
 import {
+  isInvestigation,
+  investigationResponse,
+  investigationFailure,
+  investigationResult,
+} from "./investigation.js";
+import {
   canonicalJson,
   immutableJson,
   sha256Json,
@@ -174,6 +180,12 @@ export class PostgresPreparationWorkStore {
         );
         return { receipt: workReceipt(prior), input: null };
       }
+      if (command.operation === "start" && isInvestigation(context.profile))
+        ensure(
+          this.port !== fixedPreparationPort,
+          "INVESTIGATION_UNAVAILABLE",
+          "Optional investigation transport is unavailable; the normal appliance remains deterministic",
+        );
       const entry = appendWorkCommand(s, command, now().toISOString(), context),
         input = command.operation === "start" ? workInput(s, entry) : null;
       await persist(c, entry);
@@ -181,6 +193,10 @@ export class PostgresPreparationWorkStore {
     });
     if (first.input === null) return first.receipt;
     // Parent timing starts only after the start COMMIT. Nothing resumes on startup.
+    const model =
+      o(first.input.binding).worker_implementation_id ===
+      "disposition-investigation.v1";
+    const budget = model ? 60000 : 5000;
     const began = now().toISOString(),
       tick = this.monotonic();
     let result: Obj | null = null,
@@ -188,38 +204,66 @@ export class PostgresPreparationWorkStore {
       execution: ReturnType<PreparationPort> | undefined,
       timeout: ReturnType<typeof setTimeout> | undefined;
     let raw: unknown;
+    let investigation: Obj | null = null;
+    const completionState = { timedOut: false };
     try {
       execution = this.port(first.input);
       raw = await Promise.race([
         execution.completion,
         new Promise((_, reject) => {
           timeout = setTimeout(() => {
+            completionState.timedOut = true;
             reject(
               new Error(
-                "Preparation exceeded the five-second computation budget",
+                model
+                  ? "Investigation exceeded the sixty-second computation budget"
+                  : "Preparation exceeded the five-second computation budget",
               ),
             );
-          }, 5000);
+          }, budget);
         }),
       ]);
     } catch (error) {
       diagnostics = [
-        error instanceof Error
-          ? error.message.slice(0, 1800)
-          : "Preparation failed",
+        model
+          ? completionState.timedOut
+            ? "timeout_uncertain"
+            : "provider_outcome_uncertain"
+          : error instanceof Error
+            ? error.message.slice(0, 1800)
+            : "Preparation failed",
       ];
     } finally {
       if (timeout) clearTimeout(timeout);
-      execution?.cancel();
+      try {
+        execution?.cancel();
+      } catch {
+        /* Cancellation cannot erase an uncertain invocation. */
+      }
     }
     // Capture completion and budget BEFORE waiting for the writer transaction.
     const elapsed = Math.max(0, this.monotonic() - tick),
       completed = now().toISOString(),
-      within = elapsed <= 5000,
+      within = elapsed <= budget,
       validationStart = this.monotonic();
     if (!within)
-      diagnostics = ["Preparation exceeded the five-second computation budget"];
-    else if (!diagnostics.length)
+      diagnostics = [
+        model
+          ? "timeout_uncertain"
+          : "Preparation exceeded the five-second computation budget",
+      ];
+    if (model) {
+      investigation = diagnostics.length
+        ? investigationFailure(
+            first.input,
+            completionState.timedOut || !within
+              ? "timeout_uncertain"
+              : "outcome_uncertain",
+          )
+        : investigationResponse(first.input, raw);
+      result = investigationResult(first.input, investigation);
+      if (!result) diagnostics = investigation.diagnostics as string[];
+    } else if (within && !diagnostics.length)
       try {
         result = validateWorkerResult(first.input, raw);
       } catch (error) {
@@ -239,7 +283,7 @@ export class PostgresPreparationWorkStore {
         computation_started_at: began,
         computation_completed_at: completed,
         computation_elapsed_ms: elapsed,
-        computation_budget_ms: 5000,
+        computation_budget_ms: budget,
         completed_within_budget: within,
         measurement_source: "runtime_parent_monotonic_clock",
         validation_elapsed_ms: validationElapsed,
@@ -255,6 +299,7 @@ export class PostgresPreparationWorkStore {
         timing,
         at,
         this.snapshot(),
+        investigation,
       );
       if (entry) await persist(c, entry);
     });
