@@ -49,8 +49,11 @@ export function blindedPacket(id, invocation, sources, label) {
     status: result
       ? "output_available"
       : invocation
-        ? "failed_or_open"
+        ? invocation.terminal_entry_hash
+          ? "failed"
+          : "open"
         : "not_run",
+    outcome: invocation?.outcome ?? null,
     output,
     sources,
     semantic_correctness: "not_established",

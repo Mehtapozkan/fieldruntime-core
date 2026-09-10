@@ -68,15 +68,20 @@ export async function runThreeArmComparison(
           run = await runEvaluationArm(h, x, arm, { http, key });
         }
         validateWorkExport(run.archive);
+        if (!run.invocation)
+          throw new Error(
+            "The receipt's invocation is unavailable; inspect before continuing.",
+          );
         const result = {
           fixture: id,
           arm,
           key,
-          status: run.invocation?.result
+          status: run.invocation.result
             ? "output_available"
-            : run.invocation?.terminal
+            : run.invocation.terminal_entry_hash
               ? "failed"
-              : "failed_or_open",
+              : "open",
+          outcome: run.invocation.outcome,
           run,
         };
         results.push(result);

@@ -431,3 +431,47 @@ test("comparison PostgreSQL/API: fixed three-arm runner retains actual outputs a
   assert.equal(tampered.results[0].run, null);
   assert.equal(calls, 2);
 });
+
+test("comparison PostgreSQL/API: runner counts terminal refusals as failed after restart, never open or useful", async (t) => {
+  const { runThreeArmComparison } =
+    await import("./lib/investigation-comparison-runner.mjs");
+  const h = await intakeHost(t, { work: true }),
+    x = await prepareEvaluationFixture(h, "H01");
+  let calls = 0;
+  const targets = [{ id: "H01", ...x }],
+    http = httpMock(
+      () => calls++,
+      (body) => ({
+        ...body,
+        output: [
+          {
+            type: "message",
+            role: "assistant",
+            status: "completed",
+            content: [{ type: "refusal", refusal: "Cannot prepare" }],
+          },
+        ],
+      }),
+    );
+  const first = await runThreeArmComparison(h, targets, { http });
+  assert.equal(first.status, "completed_for_review");
+  assert.deepEqual(
+    first.results.map((r) => r.status),
+    ["output_available", "failed", "failed"],
+  );
+  for (const r of first.results.slice(1)) {
+    assert.ok(r.run.invocation.terminal_entry_hash);
+    assert.equal(r.run.invocation.result, null);
+    assert.equal(r.outcome, r.run.invocation.outcome);
+    assert.equal(r.run.archive.entries.at(-1).investigation.status, "refused");
+  }
+  const before = await h.snapshot();
+  await h.restart();
+  const retry = await runThreeArmComparison(h, targets, { http });
+  assert.deepEqual(
+    retry.results.map((r) => r.status),
+    first.results.map((r) => r.status),
+  );
+  assert.equal(calls, 2);
+  assert.deepEqual(await h.snapshot(), before);
+});

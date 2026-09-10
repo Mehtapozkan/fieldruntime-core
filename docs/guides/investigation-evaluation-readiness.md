@@ -32,6 +32,9 @@ for confirmation, terms and ownership even where a scoped report or supplied
 excerpt exists. Those limitations are retained for blind review; the deterministic
 worker was not tuned to this holdout. Provider calls: zero. Failed/open preparations
 remain in `summary.json` and cause a nonzero demonstration exit, not silent exclusion.
+The comparison runner and blinded exports distinguish a retained terminal failure
+from an open invocation using its terminal entry hash, and retain the recorded
+outcome. Invalid recovery exports stop the run for inspection.
 
 `review/` contains producer-blinded labels, actual output text, source bytes and
 associations, and empty quality/effort/cost fields. `coordinator/` contains the

@@ -78,4 +78,22 @@ test("readiness: complete call plan covers both model arms and retains unknown c
   assert.equal(e.status, "not_run");
   assert.equal(e.costs.model_usd, null);
   assert.equal(e.review.serious_errors, null);
+  const failed = blindedPacket(
+    "H01",
+    { result: null, terminal_entry_hash: "retained", outcome: "failed" },
+    [],
+    "Y",
+  );
+  assert.equal(failed.status, "failed");
+  assert.equal(failed.outcome, "failed");
+  assert.equal(failed.output, null);
+  assert.equal(
+    blindedPacket(
+      "H01",
+      { result: null, terminal_entry_hash: null, outcome: "started" },
+      [],
+      "Z",
+    ).status,
+    "open",
+  );
 });
