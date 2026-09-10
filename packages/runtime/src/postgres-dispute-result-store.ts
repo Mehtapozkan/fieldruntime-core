@@ -74,8 +74,20 @@ export class PostgresDisputeResultStore {
     readonly pool: SqlPool,
     readonly reader: DisputeReader = fixedDisputeReader,
   ) {}
-  async assertReady(): Promise<void> {
-    await authorityTransaction(this.pool, true, loadDisputeStore);
+  async assertReady(requiredCatalogTenant?: string): Promise<void> {
+    await authorityTransaction(this.pool, true, async (c) => {
+      // loadWorkStore includes intake -> authority -> Case/credit/verification replay.
+      // loadDisputeStore additionally checks the complete result history.
+      const state = await loadDisputeStore(c);
+      if (
+        requiredCatalogTenant !== undefined &&
+        !state.heads.some((h) => h.tenant_id === requiredCatalogTenant)
+      )
+        throw new PostgresStoreError(
+          "STORE_INTEGRITY",
+          "synthetic authority catalog missing",
+        );
+    });
   }
   read(caseId: string, key: string, now: () => Date): Promise<Obj> {
     return authorityTransaction(this.pool, true, async (c) =>

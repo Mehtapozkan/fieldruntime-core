@@ -35,9 +35,9 @@ tenant and frozen ECC are untouched. No new Workbench or model/provider code.
 
 - `pnpm validate`: **323/323 repository tests**, format/lint/typecheck and public-release
   checks passed locally (Node 24.19.0/tzdata 2026b).
-- New real PostgreSQL 18.4/API BR suite: **64/64** checks pass, including source
+- New real PostgreSQL 18.4/API BR suite: **65/65** checks pass, including source
   timing/reader-grant controls, both-read consistency, reliable reversal proof and
-  source-free rejection/escalation. The captured
+  source-free rejection/escalation and complete read-only readiness. The captured
   path retains both preparation packets, accepts the exact independently observed
   result, restarts/retries without another review, then records negative observation
   and reopen. [Actual receipts and export hashes](docs/examples/d039-runtime-receipts.json)
@@ -77,6 +77,15 @@ no-action and acceptance, and inconclusive proof supporting a zero-count reopen.
 Both source reads now participate in every prerequisite comparison, including
 historical replay. Reopen requires reliable subsequent mismatch evidence; unavailable
 or malformed checks keep coverage unknown and cannot create a reversal receipt.
+
+A prior CI run passed the PostgreSQL suites but exceeded the unchanged three-second
+appliance readiness probe after restart. Readiness now uses the result store's complete
+reconstruction chain once instead of repeating overlapping Case/authority/credit/work
+checks. Required catalog presence and every underlying integrity check remain enforced;
+a regression rejects a missing catalog and altered canonical Case history without
+writes. A disposable local mixed-history walkthrough (D6/D7/publication/preparation/
+result) and API restarts passed; observed readiness was 17–837 ms. This is local
+measurement, not a throughput guarantee or a local container/PG-server restart claim.
 
 The retained D12 upgrade test now expects eleven migrations after adding 0011; its
 prior migration-row equality and unchanged business-history assertions remain.

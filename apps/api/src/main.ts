@@ -335,11 +335,10 @@ async function start(): Promise<void> {
       intake: intakeWorker,
       isReady: async () => {
         if (!(await applianceIsReady(pool, migrations, fixture))) return false;
-        await creditStore.assertReady();
-        await resultStore.assertReady();
-        await store.assertReady();
-        await workStore.assertReady();
-        await authorityStore.assertReady(SYNTHETIC_AUTHORITY_TENANT);
+        // Result reconstruction already includes every Case, authority, credit,
+        // verification, intake, Discovery, publication and work integrity check.
+        // Avoid replaying those histories again for this same readiness response.
+        await resultStore.assertReady(SYNTHETIC_AUTHORITY_TENANT);
         return true;
       },
       dispute: {

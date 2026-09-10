@@ -1213,3 +1213,24 @@ test("D13 BR7 coherent first-read alteration cannot survive no-action replay, re
   await r.h.restart();
   assert.ok((await r.h.call(r.path)).status >= 500);
 });
+
+test("D13 BR7 consolidated readiness preserves the required catalog and Case integrity checks without writes", async (t) => {
+  const r = await checkedCandidate(t),
+    store = new PostgresDisputeResultStore(r.h.pool);
+  const before = await r.h.snapshot();
+  await store.assertReady("tenant_intake_demo");
+  await assert.rejects(store.assertReady("tenant_orchid"), /catalog missing/);
+  assert.deepEqual(await r.h.snapshot(), before);
+  // Corrupt a canonical Case journal payload, leaving every result row intact.
+  await r.h.pg.query("ALTER TABLE case_journal DISABLE TRIGGER USER");
+  try {
+    await r.h.pg.query(
+      "UPDATE case_journal SET recorded_at='2026-09-07T16:05:59.000Z',entry=jsonb_set(entry,'{recorded_at}',to_jsonb('2026-09-07T16:05:59.000Z'::text)) WHERE case_id=$1 AND sequence=1",
+      [r.first.case_id],
+    );
+  } finally {
+    await r.h.pg.query("ALTER TABLE case_journal ENABLE TRIGGER USER");
+  }
+  await assert.rejects(store.assertReady("tenant_intake_demo"));
+  assert.ok((await r.h.call("/readyz")).status >= 500);
+});
