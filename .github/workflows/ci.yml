@@ -12,8 +12,9 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     # Retained PostgreSQL/browser suites, Challenge replay and appliance restarts.
-    # Retain all suites plus D-039 proof/restart and real-API Workbench scenarios.
-    timeout-minutes: 90
+    # Retain all suites plus D-039 and both readiness rehearsals. The prior suite
+    # takes about 80 minutes; allow the new mock-HTTP and 24-case baseline checks.
+    timeout-minutes: 110
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
