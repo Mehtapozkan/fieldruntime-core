@@ -72,15 +72,7 @@ export function comparisonFixture(input: Obj): string {
   );
   return fixture.id;
 }
-export function comparisonRequest(input: Obj): Obj {
-  comparisonFixture(input);
-  const arm = String(o(input.binding).comparison_arm);
-  ensure(
-    arm === "bounded_investigation" || arm === "generic_assistant",
-    "WORK_INTEGRITY",
-    "Unknown comparison arm",
-  );
-  const material = investigationMaterial(input);
+export function comparisonProposalSchema(): unknown {
   const contract: unknown = JSON.parse(
     JSON.stringify({
       ...schema.$defs.proposal,
@@ -91,6 +83,35 @@ export function comparisonRequest(input: Obj): Obj {
       ),
     }).replaceAll(`${schema.$id}#`, "#"),
   );
+  // Keep the historical validator unchanged. The provider-facing schema spells
+  // out literal types instead of relying on JSON Schema inference for const/enum.
+  const literals = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(literals);
+    if (value === null || typeof value !== "object") return value;
+    const node = Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, literals(v)]),
+    );
+    if (!node.type && Object.hasOwn(node, "const"))
+      node.type = typeof node.const;
+    if (
+      !node.type &&
+      Array.isArray(node.enum) &&
+      node.enum.every((v) => typeof v === "string")
+    )
+      node.type = "string";
+    return node;
+  };
+  return literals(contract);
+}
+export function comparisonRequest(input: Obj): Obj {
+  comparisonFixture(input);
+  const arm = String(o(input.binding).comparison_arm);
+  ensure(
+    arm === "bounded_investigation" || arm === "generic_assistant",
+    "WORK_INTEGRITY",
+    "Unknown comparison arm",
+  );
+  const material = investigationMaterial(input);
   const request = {
     model: COMPARISON_MODEL,
     instructions: COMPARISON_PROMPTS[arm],
@@ -108,7 +129,7 @@ export function comparisonRequest(input: Obj): Obj {
         type: "json_schema",
         name: "investigation_proposal",
         strict: true,
-        schema: contract,
+        schema: comparisonProposalSchema(),
       },
     },
   };

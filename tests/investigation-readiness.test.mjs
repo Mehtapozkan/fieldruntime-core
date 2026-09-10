@@ -6,6 +6,7 @@ import {
   decodedSources,
 } from "../scripts/lib/investigation-fixtures.mjs";
 import { liveComparisonPort } from "../dist/packages/adapters/src/investigation-http.js";
+import { comparisonProposalSchema } from "../dist/packages/runtime/src/investigation-comparison.js";
 import {
   syntheticComparisonContext,
   syntheticInvestigationContext,
@@ -64,6 +65,26 @@ test("readiness: explicit profile version preserves historical fake contracts", 
 });
 test("readiness: live boundary remains unavailable without reading credentials", () => {
   assert.throws(() => liveComparisonPort(), /Live activation unavailable/);
+});
+
+test("readiness: provider schema has explicit literal types and closed required objects", () => {
+  const schema = comparisonProposalSchema();
+  const visit = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (Object.hasOwn(node, "const"))
+      assert.equal(node.type, typeof node.const);
+    if (node.enum) assert.equal(node.type, "string");
+    if (node.type === "object") {
+      assert.equal(node.additionalProperties, false);
+      assert.deepEqual(
+        [...node.required].sort(),
+        Object.keys(node.properties).sort(),
+      );
+    }
+    if (node.$ref) assert.match(node.$ref, /^#\/\$defs\//);
+    Object.values(node).forEach(visit);
+  };
+  visit(schema);
 });
 
 test("readiness: complete call plan covers both model arms and retains unknown costs", async () => {

@@ -75,6 +75,10 @@ These are retained source reports, not independent delivery verification. H15/H1
 contain actual related-record/other-entity material, without transferring it into
 the selected record's model input. All identifiers, source bytes and associations
 are inspectable; assertions cannot stand in for missing fixture material.
+Freeze-note erratum: the frozen `CHANGES.md` overincludes H10 in its two-bundle
+list. The checksummed manifest and executable H10 both use one bundle; H07 and
+H24 use two. No fixture, expected assertion or frozen checksum is changed by this
+clarification.
 
 All arms use the same retained permitted selection. The unchanged deterministic
 worker also retains its existing structured coverage/context; model arms receive
@@ -100,6 +104,9 @@ normal appliance startup after backup; no old migration, entry, Case, C/R/S or
 receipt is edited. New exports admit old histories and replay the correct interpreter.
 The existing Workbench remains the deterministic default; comparison review uses
 exports, with no model activation or catalog editor in the browser.
+The provider-facing output schema uses local references, closed required objects
+and explicit literal types; the historical proposal validator is unchanged.
+Mock HTTP checks do not establish live provider acceptance or semantic correctness.
 
 The same writer transaction commits one reservation before the HTTP callback.
 The comparison refuses any record, source byte hash, identity or association outside
@@ -133,6 +140,7 @@ Approve only the frozen synthetic v2 comparison, after confirming every open ite
 
 Official sources: [model snapshot/features/pricing](https://developers.openai.com/api/docs/models/gpt-4.1-mini),
 [Responses request and response fields](https://developers.openai.com/api/reference/cli/resources/responses/methods/create),
+[Structured Outputs schema format](https://developers.openai.com/api/docs/guides/structured-outputs),
 [project data controls and retention](https://developers.openai.com/api/docs/guides/your-data),
 [pinned tokenizer model mapping](https://github.com/openai/tiktoken/blob/0.12.0/tiktoken/model.py).
 `store:false` does not itself remove abuse-monitoring or model-cache retention.
