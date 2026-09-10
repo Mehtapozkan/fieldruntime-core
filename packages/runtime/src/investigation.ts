@@ -386,6 +386,15 @@ export function investigationResult(input: Obj, evidence: Obj): Obj | null {
     ...baseline,
     schema_version: "disposition-preparation-result.v3",
     title: "Unreviewed investigation proposal — scoped preparation only",
+    steps: l(baseline.steps).map((step) =>
+      step.id === "S2"
+        ? {
+            ...step,
+            result:
+              "Compared scoped facts deterministically and retained a cited, unreviewed interpretation and question agenda. Citation conformance does not establish semantic correctness.",
+          }
+        : step,
+    ),
     follow_up: { ...o(baseline.follow_up), draft: proposal.follow_up },
     execution_facts: { ...o(baseline.execution_facts), model_calls: 1 },
     investigation: evidence,

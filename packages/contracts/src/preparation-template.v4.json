@@ -49,7 +49,7 @@
     {
       "id": "S2",
       "label": "Interpret unfamiliar scoped reports and propose a consequential gap agenda",
-      "mechanism": "code",
+      "mechanism": "bounded_model",
       "depends_on": ["S1"],
       "subject_binding": "selected record_key; claims preserve their own entity/kind/id and explicit source associations",
       "inputs": [
