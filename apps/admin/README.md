@@ -237,3 +237,11 @@ reviewer progress and controls without horizontal overflow. Mobile still require
 vertical scrolling. Final validation results are recorded in STATUS/PR; no
 screen-reader, Safari/Firefox, real-user effectiveness or economic measurement is
 claimed.
+
+## Same imported-dispute result (review branch)
+
+From a committed record's workflow brief, **Follow this dispute’s result** opens
+the existing D-039 API without writes. [Executable walkthrough, recovery and scope](../../docs/guides/dispute-result-workbench.md).
+The normal source remains open: mismatch/refused acceptance is expected. Disposable
+PostgreSQL/browser tests demonstrate accepted, stale, inconclusive and reopened
+states. This Workbench is stacked on open PR #41/#40, not merged or released.

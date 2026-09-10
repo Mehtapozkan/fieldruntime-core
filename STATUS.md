@@ -1,14 +1,54 @@
 # Status
 
-Current milestone: **Accepted D-039 synthetic result API implemented on this review
-branch; local validation and captured handoff completed; required CI is tracked in the PR.** D-038 and its completed second-packet
-acceptance evidence remain preserved at PR #40's reviewed `1f387d470a90dfe41df69335732b3c48c831750a`.
-This separate API branch is stacked on that open PR; neither is merged by this task.
-Real-customer processing remains unapproved. Workbench result controls and the
-model investigation (subject to separate approval) are the immediate following builds, not
-implemented here; no D14 work.
+Current milestone: **Minimum same-dispute Workbench implemented for review**, stacked
+on open PR #41 at `4a1f536fb7b6b441a968f518499235443930c723`, then open PR #40
+at `1f387d470a90dfe41df69335732b3c48c831750a`. Neither dependency nor this Workbench
+is merged by this assignment. D-038's second-task acceptance, awaiting-review snapshot,
+exact retries and D-039's Accepted approval/API implementation are preserved.
 
-The owner approved D-039 at that exact head on 2026-09-10 UTC, including the corrected
+The existing Case/intake view now offers an explicit **Follow this dispute’s result**
+read: actual prepared excerpt/unsent draft, exact scoped source comparisons, current
+responsible role and next action, named authority interventions, no-action/report,
+independent check, separate business review and reopening. Payment commitments retain
+owner/due time, including after a fresh candidate. DEL-5 and closure remain separate.
+Current eligibility never comes from a retained receipt or synthetic role selection.
+
+The shared atomic recovery slot retains result bytes/key across tabs, reload and
+restart. Confirmed receipts survive a failed read; mismatches/inconclusive observations
+and historical acceptance remain distinct. Reads stay free of durable side effects.
+No runtime contract, migration, provider integration or source-editor endpoint is added.
+[Executable Workbench guide](docs/guides/dispute-result-workbench.md).
+
+[Proposed D-040](docs/architecture/d13-bounded-investigation-task.md) describes one
+bounded synthetic model task and evaluation. No credentials or inference calls were
+used; provider/model access and its supporting journal admission await separate
+approval. Named customer participants, data arrangements and baseline remain missing.
+Real-customer processing, release/deployment and D14 remain outside this task.
+
+### Workbench validation
+
+The initial browser scenario failed at the missing result panel before implementation.
+A later real click exposed the intake sidebar footer overlapping result controls;
+its positioning is corrected without removing keyboard/visibility assertions.
+The combined real PostgreSQL 18.4/API/Chromium result suite passes **77/77** locally,
+including all **65** retained BR1–BR8 checks and **12** new browser scenarios:
+normal mismatch/refused acceptance, separate business review/reopen, unknown/stale
+proof, current and expired authority interventions, replacement, wrong scope, failed
+refresh, two-tab claims, lost response, restart and exact retry. Keyboard checks cover
+the skip link, disclosure, Tab navigation and direct next-action link. Desktop 1440px
+and narrow 390px captures are inspected; no Safari, screen-reader or customer study
+is claimed. Final repository/retained-suite results and CI provenance are linked in
+the PR. Docker is absent locally; Compose/appliance claims require that CI evidence.
+Local `pnpm validate` passes **325/325**, formatting, lint, types and release checks.
+ECC passes **620/620**; the negative control deliberately fails **152/620**, exit 1,
+with the intended hard-gate receipt. `git diff --check` passes. All 19 requirement IDs,
+applied migrations, D-038 evidence and D-039 API receipts remain unchanged. The
+[desktop/390px evidence](docs/evidence/d039-workbench/README.md) is inspectable.
+The full retained PostgreSQL/API/browser run and required final-head CI are reported
+in this PR's validation evidence; neither a pending run nor the dependency's pass is
+this commit's pass. The following API evidence is the preserved PR #41 baseline.
+
+The owner approved D-039 at `1f387d470a90dfe41df69335732b3c48c831750a` on 2026-09-10 UTC, including the corrected
 product handoff. The API supports one explicitly enrolled North/Orchid/dispute-17/
 DEL-4 `uphold_invoice_no_adjustment` path. Original synthetic POD/allocation/terms and
 complete grounds are independently checked; Morgan supplies named D6 authority;
@@ -29,7 +69,7 @@ The fixed normal-appliance source begins open: a human-reported disposition ther
 checks as mismatch until a supported source observation establishes the result. Only
 the disposable test host controls successful/reversed source states. The API has no
 fault switch, arbitrary source path, caller identity or success claim. The D7 credit
-tenant and frozen ECC are untouched. No new Workbench or model/provider code.
+tenant and frozen ECC are untouched. That API checkpoint added no Workbench or model/provider code; this follow-up adds presentation only.
 
 ### D-039 API validation (review branch)
 

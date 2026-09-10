@@ -27,12 +27,15 @@ new DEL-4 material, fresh descriptive review/publication and a separately review
 second packet, with visible resource limits. It does not change the historical
 prerelease or establish customer outcomes.
 
-This API review branch adds [one synthetic imported-dispute result](docs/guides/synthetic-dispute-result.md)
-under Accepted D-039: original-proof checking, named authority, reported no-adjustment
-disposition, independent observation, separate acceptance and reopening. It is stacked
-on open PR #40, not merged or part of the published prerelease. Workbench result
-controls and a separately approved bounded model task follow this API; neither is
-implemented here.
+This Workbench review branch connects [the same imported-dispute result](docs/guides/dispute-result-workbench.md)
+to Accepted D-039's implemented API: original-proof checking, named authority,
+reported no-adjustment disposition, independent observation and separate business
+acceptance/reopening. It is stacked on open PR #41 (`4a1f536f`), then open PR #40;
+none is merged or in the published prerelease. The normal shipped source remains
+open and correctly produces mismatch/refused acceptance. Matched/reopened outcomes
+use disposable test fixtures only. Model integration remains unimplemented; its
+[bounded investigation proposal](docs/architecture/d13-bounded-investigation-task.md)
+is a separate decision, not a dependency of these controls.
 
 ## What works today
 
@@ -61,7 +64,7 @@ The historical prerelease has the smaller boundary described under [Distribution
 | Reviewed preparation pack                                 | Compact intake panel: inspect, publish, compare, withdraw, roll back and export                                 | Strict fixed template, scoped publication profile, exact current basis and immutable selection replay                   | Main (D11-B); not in historical prerelease; no worker execution                       |
 | Bounded evidence-request preparation                      | Explicit publish v2 → prepare → inspect cited packet → human task review; correction/recovery remain accessible | Fixed zero-model worker, one supporting journal, interruption, independent evaluation and bounded synthetic proof notes | Merged; not historical prerelease                                                     |
 | Supplied-evidence continuation                            | Explicit fresh v3 publication → second packet → separate task review; visible input limits                      | Two exact bundles, full occurrence/scope preflight and immutable versioned replay                                       | D-038 continuation review branch; not historical prerelease                           |
-| Imported no-adjustment dispute result                     | Controls pending                                                                                                | Fixed synthetic proof reader, exact D6 authority, independent result, separate recipient acceptance and reopening       | D-039 API review branch only                                                          |
+| Imported no-adjustment dispute result                     | Explicit enrollment, proof/review/report/check and separate acceptance/reopen                                   | Fixed synthetic proof reader, exact D6 authority, independent result, separate recipient acceptance and reopening       | API: PR #41; Workbench: this stacked review branch                                    |
 | Customer outcome, measured economics and complete closure | Unavailable                                                                                                     | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof                                          | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
@@ -138,8 +141,8 @@ files → Review this candidate → Inspect exact commit → Commit reviewed mat
 [Exact API/retry/export walkthrough and migration limits](docs/guides/synthetic-intake.md).
 Intake does not enroll imported Cases for credit review or execution.
 
-For this API review branch, use the [complete disposable PostgreSQL/API rehearsal](docs/guides/synthetic-dispute-result.md#run-the-complete-reproducible-example)
-or its explicit appliance command examples. Current main and the historical prerelease
+For this Workbench review branch, use the [same-dispute walkthrough](docs/guides/dispute-result-workbench.md)
+and its disposable PostgreSQL/browser rehearsal. The existing [API examples](docs/guides/synthetic-dispute-result.md) remain available. Current main and the historical prerelease
 do not acquire a capability merely because it is demonstrated in an open PR.
 
 ## Separate walkthroughs
@@ -192,7 +195,7 @@ history. They remain isolated from Orchid.
   [Remaining D13 MVP work](PLAN.md#remaining-d13-mvp-sequence) prioritizes the proposed
   same-dispute result API, immediate Workbench result controls and a separately
   approved bounded model-assisted investigation task. Current preparation remains
-  deterministic; this plan implements neither the result path nor a provider adapter.
+  deterministic; the result API and this Workbench are in review, while a provider adapter remains unimplemented.
 
 Production authentication, real connectors, provider adapters, general workers,
 external actions and complete Case closure remain unimplemented. Later distribution
