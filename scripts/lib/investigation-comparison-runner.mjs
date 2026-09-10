@@ -82,7 +82,6 @@ export async function runThreeArmComparison(
         results.push(result);
         await onResult(result);
       } catch (error) {
-        validateWorkExport(run.archive);
         const result = {
           fixture: id,
           arm,
