@@ -36,7 +36,8 @@ normal mismatch/refused acceptance, separate business review/reopen, unknown/sta
 proof, current and expired authority interventions, replacement, wrong scope, failed
 refresh, two-tab claims, lost response, restart and exact retry. Keyboard checks cover
 the skip link, disclosure, Tab navigation and direct next-action link. Desktop 1440px
-and narrow 390px captures are inspected; no Safari, screen-reader or customer study
+and narrow 390px captures are inspected. The capture helper uses reduced motion for
+settled scroll frames; all 12 browser cases pass again. No Safari, screen-reader or customer study
 is claimed. Final repository/retained-suite results and CI provenance are linked in
 the PR. Docker is absent locally; Compose/appliance claims require that CI evidence.
 Local `pnpm validate` passes **325/325**, formatting, lint, types and release checks.

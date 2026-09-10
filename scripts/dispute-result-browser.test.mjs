@@ -74,6 +74,8 @@ async function submit(page, label) {
   return r.json();
 }
 async function shot(page, name) {
+  // Capture settled layouts, not intermediate frames from the existing smooth scroll.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
     await page.locator(".dispute-result").scrollIntoViewIfNeeded();
@@ -87,17 +89,21 @@ async function shot(page, name) {
       await page.locator(".dispute-result h2").first().scrollIntoViewIfNeeded();
       await page.screenshot({
         path: `${process.env.D039_UI_SCREENSHOTS}/${name}-${width}-viewport.png`,
+        animations: "disabled",
       });
       await page.locator(".result-controls").screenshot({
         path: `${process.env.D039_UI_SCREENSHOTS}/${name}-${width}-controls.png`,
+        animations: "disabled",
       });
       await page.screenshot({
         path: `${process.env.D039_UI_SCREENSHOTS}/${name}-${width}.png`,
         fullPage: true,
+        animations: "disabled",
       });
     }
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
 }
 test("D039 Workbench: deliberate enrollment and normal-source mismatch; no writes on reads", async (t) => {
   const x = await resultHost(t, { prepare: true }),

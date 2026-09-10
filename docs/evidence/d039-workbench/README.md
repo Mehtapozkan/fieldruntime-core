@@ -4,7 +4,8 @@ Actual Chromium screenshots from `scripts/dispute-result-browser.test.mjs` again
 disposable PostgreSQL 18.4/API fixtures, generated from this PR's implementation tree.
 The final commit association and final-head CI are in the PR description. No mockup,
 image generation or source-state editor was used. Viewport captures use 1440×1000
-and 390×844; controls captures show the complete existing control group at that width.
+and 390×844; controls captures show the complete existing control group at that width. Captures temporarily use the existing reduced-motion preference
+to avoid intermediate smooth-scroll frames; functional actions run with normal motion.
 The complete page captures are also supplied in the downloadable handoff.
 
 Only the first two rows use the normal shipped source. The first has both retained
