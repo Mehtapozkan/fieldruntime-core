@@ -22,10 +22,17 @@ Real customer activation remains unapproved.
 
 PR #39 delivers a reproducible offline [synthetic Challenge report](docs/guides/challenge-report.md)
 and a [proposed customer comparison protocol](docs/guides/challenge-customer-protocol.md).
-This continuation review branch implements [bounded supplied-evidence preparation](docs/guides/challenge-follow-through.md):
+PR #40's continuation implements [bounded supplied-evidence preparation](docs/guides/challenge-follow-through.md):
 new DEL-4 material, fresh descriptive review/publication and a separately reviewed
 second packet, with visible resource limits. It does not change the historical
 prerelease or establish customer outcomes.
+
+This API review branch adds [one synthetic imported-dispute result](docs/guides/synthetic-dispute-result.md)
+under Accepted D-039: original-proof checking, named authority, reported no-adjustment
+disposition, independent observation, separate acceptance and reopening. It is stacked
+on open PR #40, not merged or part of the published prerelease. Workbench result
+controls and a separately approved bounded model task follow this API; neither is
+implemented here.
 
 ## What works today
 
@@ -40,21 +47,22 @@ checklist/reconciliation and unsent follow-up, separate human task review, corre
 evaluation and manual synthetic proof notes. No financial recommendation or closure.
 The historical prerelease has the smaller boundary described under [Distribution](#distribution).
 
-| Functionality                                     | Workbench                                                                                                       | API / runtime                                                                                                           | Availability                                                                          |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Case and evidence history                         | Explicit Orchid initialization; retained sources, uncertainty and changed-evidence demonstration                | Canonical PostgreSQL Case commands and replay                                                                           | Main                                                                                  |
-| Decision Packet and human review                  | Finance/Executive approve; reject, modify or escalate; reload history                                           | Deterministic authority, exact C/R/S and immutable consent; replacements start unapproved                               | Main (D6)                                                                             |
-| Record simulated credit                           | Explicit preparation and **Record simulated credit**                                                            | Scoped enrollment, one bound $15,000 Orchid credit, atomic source/action history                                        | Main (D7-B/D7-D)                                                                      |
-| Independently check credit                        | **Check simulated source**; match, mismatch or inconclusive result; exact retry after uncertain response        | Separate verifier and source read; retained evidence and restart replay                                                 | Main (D7-C/D7-D)                                                                      |
-| ECC and legacy illustration                       | Separate Acme fixture story; illustrated action, verification and outcome screens                               | Thirty frozen synthetic cases and deterministic evaluation                                                              | Main and historical prerelease; legacy screens never invoke runtime action/check APIs |
-| Case progress and evidence receipt                | Expand proposal, attributed decisions, action, independent observation and unresolved gaps in History           | Reuses existing Case, review and action/check reads; no new records or permission                                       | Main (D8-A)                                                                           |
-| Failure walkthrough and measurement readiness     | Existing failure/result views remain unchanged                                                                  | Five selected PostgreSQL/API control and failure fixtures with evidence output                                          | Main (D8-B)                                                                           |
-| Synthetic file intake                             | Explicit prepare, review target, commit and reopen; source citations and gaps                                   | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay                                 | Main (D9-B); real data unapproved                                                     |
-| Cited workflow preparation and descriptive review | Open retained intake, inspect seven records/six outputs, answer/correct/confirm and reopen history              | Deterministic brief, exact Case/material/review bindings, one immutable journal and portable provenance                 | Main (D10-B); not in historical prerelease; complete Discovery remains pending        |
-| Reviewed preparation pack                         | Compact intake panel: inspect, publish, compare, withdraw, roll back and export                                 | Strict fixed template, scoped publication profile, exact current basis and immutable selection replay                   | Main (D11-B); not in historical prerelease; no worker execution                       |
-| Bounded evidence-request preparation              | Explicit publish v2 → prepare → inspect cited packet → human task review; correction/recovery remain accessible | Fixed zero-model worker, one supporting journal, interruption, independent evaluation and bounded synthetic proof notes | Merged; not historical prerelease                                                     |
-| Supplied-evidence continuation                    | Explicit fresh v3 publication → second packet → separate task review; visible input limits                      | Two exact bundles, full occurrence/scope preflight and immutable versioned replay                                       | D-038 continuation review branch; not historical prerelease                           |
-| Accepted outcome, economics and complete closure  | Unavailable                                                                                                     | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof                                          | Future                                                                                |
+| Functionality                                             | Workbench                                                                                                       | API / runtime                                                                                                           | Availability                                                                          |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Case and evidence history                                 | Explicit Orchid initialization; retained sources, uncertainty and changed-evidence demonstration                | Canonical PostgreSQL Case commands and replay                                                                           | Main                                                                                  |
+| Decision Packet and human review                          | Finance/Executive approve; reject, modify or escalate; reload history                                           | Deterministic authority, exact C/R/S and immutable consent; replacements start unapproved                               | Main (D6)                                                                             |
+| Record simulated credit                                   | Explicit preparation and **Record simulated credit**                                                            | Scoped enrollment, one bound $15,000 Orchid credit, atomic source/action history                                        | Main (D7-B/D7-D)                                                                      |
+| Independently check credit                                | **Check simulated source**; match, mismatch or inconclusive result; exact retry after uncertain response        | Separate verifier and source read; retained evidence and restart replay                                                 | Main (D7-C/D7-D)                                                                      |
+| ECC and legacy illustration                               | Separate Acme fixture story; illustrated action, verification and outcome screens                               | Thirty frozen synthetic cases and deterministic evaluation                                                              | Main and historical prerelease; legacy screens never invoke runtime action/check APIs |
+| Case progress and evidence receipt                        | Expand proposal, attributed decisions, action, independent observation and unresolved gaps in History           | Reuses existing Case, review and action/check reads; no new records or permission                                       | Main (D8-A)                                                                           |
+| Failure walkthrough and measurement readiness             | Existing failure/result views remain unchanged                                                                  | Five selected PostgreSQL/API control and failure fixtures with evidence output                                          | Main (D8-B)                                                                           |
+| Synthetic file intake                                     | Explicit prepare, review target, commit and reopen; source citations and gaps                                   | Scoped bytes, deterministic reimports, atomic Case/provenance receipts, portable replay                                 | Main (D9-B); real data unapproved                                                     |
+| Cited workflow preparation and descriptive review         | Open retained intake, inspect seven records/six outputs, answer/correct/confirm and reopen history              | Deterministic brief, exact Case/material/review bindings, one immutable journal and portable provenance                 | Main (D10-B); not in historical prerelease; complete Discovery remains pending        |
+| Reviewed preparation pack                                 | Compact intake panel: inspect, publish, compare, withdraw, roll back and export                                 | Strict fixed template, scoped publication profile, exact current basis and immutable selection replay                   | Main (D11-B); not in historical prerelease; no worker execution                       |
+| Bounded evidence-request preparation                      | Explicit publish v2 → prepare → inspect cited packet → human task review; correction/recovery remain accessible | Fixed zero-model worker, one supporting journal, interruption, independent evaluation and bounded synthetic proof notes | Merged; not historical prerelease                                                     |
+| Supplied-evidence continuation                            | Explicit fresh v3 publication → second packet → separate task review; visible input limits                      | Two exact bundles, full occurrence/scope preflight and immutable versioned replay                                       | D-038 continuation review branch; not historical prerelease                           |
+| Imported no-adjustment dispute result                     | Controls pending                                                                                                | Fixed synthetic proof reader, exact D6 authority, independent result, separate recipient acceptance and reopening       | D-039 API review branch only                                                          |
+| Customer outcome, measured economics and complete closure | Unavailable                                                                                                     | Incomplete-proof closure denied; no recovered-revenue or customer-impact proof                                          | Future                                                                                |
 
 An approval is not an effect. A verified simulated credit establishes only the
 credit row's expected account, Case, amount, currency and originating attempt. It
@@ -130,6 +138,10 @@ files → Review this candidate → Inspect exact commit → Commit reviewed mat
 [Exact API/retry/export walkthrough and migration limits](docs/guides/synthetic-intake.md).
 Intake does not enroll imported Cases for credit review or execution.
 
+For this API review branch, use the [complete disposable PostgreSQL/API rehearsal](docs/guides/synthetic-dispute-result.md#run-the-complete-reproducible-example)
+or its explicit appliance command examples. Current main and the historical prerelease
+do not acquire a capability merely because it is demonstrated in an open PR.
+
 ## Separate walkthroughs
 
 **Persistent Orchid review:** the default page uses canonical runtime evidence,
@@ -177,6 +189,10 @@ history. They remain isolated from Orchid.
   Assisted evaluations may begin during D9–D12 within an approved data boundary;
   measured quality, total effort and repeat use determine continuation. Connected
   shadow operation and production writes retain their later gates.
+  [Remaining D13 MVP work](PLAN.md#remaining-d13-mvp-sequence) prioritizes the proposed
+  same-dispute result API, immediate Workbench result controls and a separately
+  approved bounded model-assisted investigation task. Current preparation remains
+  deterministic; this plan implements neither the result path nor a provider adapter.
 
 Production authentication, real connectors, provider adapters, general workers,
 external actions and complete Case closure remain unimplemented. Later distribution

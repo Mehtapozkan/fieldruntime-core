@@ -46,3 +46,10 @@ export {
 } from "./validators.js";
 export { requestV1ToV0, decisionV1ToV0 } from "./authority-review-contracts.js";
 export type { ReviewObject } from "./authority-review-contracts.js";
+
+export {
+  assertValidDisputeResultContract,
+  assertValidDisputeAuthorityContract,
+} from "./validators.js";
+
+export { assertUniqueJsonKeys } from "./canonical-json.js";

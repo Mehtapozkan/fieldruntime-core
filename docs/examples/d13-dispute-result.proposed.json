@@ -1,6 +1,6 @@
 {
-  "example_version": "d039-dispute-result-design.v1",
-  "status": "Proposed",
+  "example_version": "d039-dispute-result-design.v2",
+  "status": "Accepted",
   "runtime_contract": false,
   "business_scenarios_executed": false,
   "actual_preparation_evidence": {
@@ -444,11 +444,7 @@
         "source_id": "POD-4",
         "source_version": 2,
         "validity": "rescinded"
-      },
-      "expected_next_comparison": "mismatch",
-      "current_accepted_dispute_count": 0,
-      "historical_accepted_dispute_count": 1,
-      "reopened_record_count": 1
+      }
     },
     "ar_basis_source": {
       "source_id": "AR-dispute-17",
@@ -830,11 +826,7 @@
               "source_id": "POD-4",
               "source_version": 2,
               "validity": "rescinded"
-            },
-            "expected_next_comparison": "mismatch",
-            "current_accepted_dispute_count": 0,
-            "historical_accepted_dispute_count": 1,
-            "reopened_record_count": 1
+            }
           },
           "comparison": "mismatch",
           "observed_at": "2026-09-08T09:01:00.000Z",
@@ -846,19 +838,19 @@
             "status": "active"
           }
         },
-        "hash": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc"
+        "hash": "sha256:f3bf6ceb5ac25c15dbc9e6f77c93fcc08beb700605a2f3390269842c69411a66"
       },
       {
         "example_only": true,
         "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
         "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
         "sequence": 8,
-        "previous_entry_hash": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc",
+        "previous_entry_hash": "sha256:f3bf6ceb5ac25c15dbc9e6f77c93fcc08beb700605a2f3390269842c69411a66",
         "event": "reopened",
         "recorded_at": "2026-09-08T09:02:00.000Z",
         "data": {
           "prior_acceptance_entry_hash": "sha256:4da0dcb694af57e97c46e24701344090076031180433baf58896ce1bb7d333f8",
-          "observation_hash": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc",
+          "observation_hash": "sha256:f3bf6ceb5ac25c15dbc9e6f77c93fcc08beb700605a2f3390269842c69411a66",
           "actor": {
             "schema_version": "identity-reference.v0",
             "identity_id": "identity_dispute_recipient",
@@ -867,10 +859,10 @@
             "status": "active"
           },
           "expected_result_revision": 7,
-          "expected_result_head": "sha256:f25e22e0a77ff2181e83d403a3472b5c72efb2930792c1a6a900ff93a4d174dc",
+          "expected_result_head": "sha256:f3bf6ceb5ac25c15dbc9e6f77c93fcc08beb700605a2f3390269842c69411a66",
           "reason": "Authoritative synthetic source rescinded the delivery proof and reopened the same dispute"
         },
-        "hash": "sha256:89b5af057907b178208a63f1ee8d7b38b7444a5b611a8e14550e801e1dbf7fcf"
+        "hash": "sha256:9c8c8e5d5f70cd323dc2be1c81100496dca9c391644eb413f39e0749ee8b18d6"
       }
     ]
   },
@@ -940,5 +932,32 @@
       "expected": "Inconclusive, not absence, no current verified label and no new business acceptance. Current coverage unknown; original match/acceptance remain historical."
     }
   ],
-  "example_hash": "sha256:f9dcba901735b583ddc17f17b2e681fc50ad4cc83571bc4d55a82138295dfa78"
+  "expected_cutoffs": {
+    "qualification": "Hypothetical design expectations, not source facts or executed API receipts",
+    "O6": {
+      "entry_hash": "sha256:4da0dcb694af57e97c46e24701344090076031180433baf58896ce1bb7d333f8",
+      "accepted_disputed_records": 1,
+      "reopened_records": 0,
+      "cash_collected": null,
+      "credits_issued": null,
+      "work_newly_attended_to": null,
+      "human_attention_released": null
+    },
+    "O8": {
+      "entry_hash": "sha256:9c8c8e5d5f70cd323dc2be1c81100496dca9c391644eb413f39e0749ee8b18d6",
+      "accepted_disputed_records": 0,
+      "historical_accepted_disputed_records": 1,
+      "reopened_records": 1,
+      "cash_collected": null,
+      "credits_issued": null,
+      "work_newly_attended_to": null,
+      "human_attention_released": null
+    }
+  },
+  "revision_note": {
+    "reviewed_design_commit": "1f387d470a90dfe41df69335732b3c48c831750a",
+    "prior_example_hash": "sha256:f9dcba901735b583ddc17f17b2e681fc50ad4cc83571bc4d55a82138295dfa78",
+    "change": "Accepted owner clarification: source facts exclude expected comparisons/counters; O6 accepted cutoff is separate from O8 reopened cutoff. Actual D-038 preparation evidence is unchanged."
+  },
+  "example_hash": "sha256:dfdd4f5933555359ca89a9c5b7f79d37ff97fba2ea8dd2373f574ac8f539081c"
 }

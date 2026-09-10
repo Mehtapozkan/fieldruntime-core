@@ -1,0 +1,68 @@
+openapi: 3.1.0
+info:
+  title: Field Runtime synthetic imported-dispute result
+  version: 1.0.0
+  description: Accepted D-039. One exact North Orchid dispute, fixed local source reader, separate synthetic purpose profiles. No financial writes or Case closure. See docs/guides/synthetic-dispute-result.md.
+servers:
+  - url: http://127.0.0.1:3210
+paths:
+  /v1/intake/dispute-results:
+    get:
+      summary: Read current result guidance or export immutable evidence without durable side effects
+      parameters:
+        - name: case_id
+          in: query
+          required: true
+          schema: { type: string }
+        - name: record_key
+          in: query
+          required: true
+          schema: { type: string }
+        - name: representation
+          in: query
+          schema: { type: string, enum: [export] }
+      responses:
+        "200":
+          description: Exact bindings, current guidance and retained history; export contains intake-tenant evidence only
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: ../schemas/dispute-result.v1.schema.json#/$defs/read
+                  - $ref: ../schemas/dispute-result.v1.schema.json#/$defs/export
+        "400":
+          { description: Invalid query or unsupported exact synthetic subject }
+        "409": { description: Missing explicit record association }
+        "500": { description: Sanitized integrity or persistence failure }
+  /v1/intake/dispute-results/commands:
+    post:
+      summary: Explicit enrollment, candidate, check, authority review, no-action, report or separate business review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/dispute-result.v1.schema.json#/$defs/command
+      responses:
+        "200":
+          description: Immutable historical receipt, including exact retries; never a financial permission flag
+          content:
+            application/json:
+              schema:
+                $ref: ../schemas/dispute-result.v1.schema.json#/$defs/receipt
+        "400":
+          {
+            description: Invalid strict command; supplied identities,
+            source paths and success claims are rejected,
+          }
+        "409":
+          {
+            description: Exact binding,
+            lifecycle,
+            current role,
+            freshness or idempotency conflict; explicit refresh and consent required,
+          }
+        "500":
+          {
+            description: Uncertain persistence response; retain and retry the identical command/key,
+          }

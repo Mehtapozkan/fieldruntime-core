@@ -442,22 +442,116 @@ Five proof measures remain separate and unknown without their own evidence. Cust
 comparisons and improvement proof remain unperformed; real data still requires named
 participants, approved arrangements and a pre-intervention baseline.
 
-### Next bounded D13 business-result design (Proposed)
+### Bounded D13 business result (Accepted; API in review)
 
-[D-039](../architecture/d13-imported-dispute-result.md) makes one imported-dispute
-no-adjustment path concrete without implementing it. Original delivery/allocation,
-applicable terms and complete grounds must be independently checked before a named
-owner authorizes the exact no-action consequence. A reported off-runtime disposition
-is separate from observed source state and separately eligible business acceptance.
-Missing proof, wrong-record evidence, stale authority, unavailable reads and later
-reversal cannot yield or preserve an apparently current success.
+[D-039](../architecture/d13-imported-dispute-result.md) was approved at
+`1f387d470a90dfe41df69335732b3c48c831750a`, including the corrected product handoff.
+The [API implementation](../guides/synthetic-dispute-result.md) is in review on a
+branch preserving PR #40, distinct from merged main and the historical release.
+It checks fixed synthetic original delivery/allocation/terms and complete grounds,
+obtains named exact authority, records a no-financial-action/report, independently
+observes the source and retains separate acceptance/reopen for that imported record.
+The old status note and both task approvals supply none of that business proof.
 
-The worked example links the actual second preparation acceptance and then labels
-all proposed POD/terms, grants and business events hypothetical. A fixed synthetic
-source-reader/profile boundary and one supporting journal require approval. Reuse
-Case, evidence, D6 authority and Outcome concepts; do not widen the preparation
-bundle limit, D7 credit enrollment or the closure boundary. Historical task approval
-never accepts a business result. Current cash/credit, newly attended and effort
-measures remain unknown; only a future evidenced accepted-disposition measure may
-count the exact synthetic record, with reopen/reversal and incomplete coverage shown.
-The 19 requirements, customer activation/baseline gates and existing roadmap remain.
+One supporting result journal and pinned D6 material metadata retain exact inputs,
+source bytes, purpose grants, independent comparison, consent and retries. R does
+not advance O or C. API reads remain read-only; the source fixture is not a third
+preparation bundle. Only this synthetic accepted-disposition measure can count one
+record then remove it on reopening. Cash, credits, newly attended work and released
+attention remain unknown without their separate evidence. The 19 requirements and
+customer activation/baseline gates remain incomplete. Workbench result controls and
+model integration are not implemented in this API PR.
+
+### Remaining D13 MVP completion
+
+Required product direction: people choose the business objective and the next
+improvement; Field Runtime prepares and coordinates the permitted work, makes its
+evidence and blockers inspectable, and distinguishes each verified result from work
+still owed. Keep the existing invoice-dispute entry and ECC foundation. An upstream
+payment match may be supplied and checked within its admitted scope; generalized
+cash application is not a prerequisite or a new first product.
+
+The minimum product demonstration follows one exact imported dispute through:
+useful cited investigation, a fresh evidence arrival, a revised next step, one
+supported authorized disposition, independent result observation, separate eligible
+business acceptance and any later reversal. Keep other records, remaining commitments
+and historical receipts visible. A no-adjustment branch is a bounded first result,
+not complete dispute management. Missing proof, unsupported dispositions and cash
+status remain explicit. Task acceptance, decision approval, recorded disposition,
+source verification, business acceptance and Case closure are different facts.
+
+Review the [D-039](../architecture/d13-imported-dispute-result.md) API under its
+recorded approval, without a model prerequisite. Immediately follow with minimum result
+controls in the existing Workbench. Design the single investigation task now;
+implement it alongside those controls after the API and its own approved boundary.
+This is a narrow D13 task. D15 still owns broader worker/model routing. The precise
+sequence and dependencies live in [PLAN](../../PLAN.md#remaining-d13-mvp-sequence).
+
+**Proposed bounded investigation task, not currently implemented or approved:**
+
+- Interpret unfamiliar wording in a supported, explicitly permitted retained invoice,
+  delivery, remittance or correspondence subset. Start with one bounded model call
+  where sufficient. Unsupported formats and input limits remain visible; no silent
+  truncation, broader read scope or automatic retrieval is admitted.
+- Produce record-scoped claims with resolvable source spans, competing explanations,
+  material gaps, evidence that would change the next decision, a useful unsent draft
+  and a next-step recommendation. Distinguish source assertions from verified facts.
+  Keep arithmetic, identity, exact bindings, policy checks and authority deterministic.
+- Reuse existing Case, intake, review, preparation and receipt boundaries through an
+  explicit versioned adapter/profile. Preserve the zero-model path, historical replay
+  and publication limits. Provider output is retained as proposed work, never treated
+  as authoritative source, financial permission, independent verification or acceptance.
+- Propose one precise model/provider/data boundary before provider integration:
+  allowed inputs and endpoint, credential isolation, retention/egress, resource and
+  output limits, timeout/failure handling, cancellation, retries and stopping rules.
+  Keep the default credential-free evaluation and automated tests hermetic. Any
+  approved live-model evaluation is separate and reports its actual inputs and costs.
+- Treat source documents as data, including apparent instructions in them. Test
+  cross-record leakage, invented citations, wrong arithmetic, contradictory evidence,
+  prompt injection, unsupported recommendations, missed exceptions and abstention.
+  No agent loop, external tool or message sending is justified merely by adding a model.
+
+Missing evidence must explain what can happen next. Distinguish retrieval unsupported,
+permitted but unattempted, attempted and failed, retrieved but unverified, and a genuine
+need for access, ownership or human judgment. Display only states supported by current
+capabilities and attempt evidence. Today the preparation worker performs no external
+retrieval; a model integration must not imply it does.
+
+**Product and evaluation acceptance:**
+
+- The operator can inspect work already performed, the unresolved issue, the specific
+  decision needed, its applicable authority and what follows in the same record.
+  Supported result controls use the D-039 API; wording never creates a new decision
+  type. Known responsible roles are distinct from guessed people and confirmed owners.
+- New material invalidates affected consent; refreshed preparation does not inherit
+  earlier task or business acceptance. DEL-5 and other records remain unaffected.
+  Failed refresh, lost responses, retries, reversal and incomplete observation remain
+  intelligible; old success never substitutes for current eligibility.
+- Separate reusable workflow setup from daily preparation/review in the design.
+  Preserve exact per-record evidence bindings and current explicit gates. Changing
+  automatic invocation, consent reuse or permissions needs a separate approved boundary.
+- Evaluate on representative unseen permitted inputs against the current deterministic
+  worker and, under an approved customer boundary, the manual process and a generic
+  assistant with comparable inputs/tools/budgets. Agree quality and effort criteria
+  before the comparison. Measure preparation, review, corrections, verification,
+  follow-up, founder/support/setup effort and model/tool/infrastructure costs.
+- Accept the model against pre-agreed usefulness, quality, coverage and total effort/
+  cost criteria, not valid JSON, speed alone or a demonstration count. Newly attended
+  work or better investigation may justify an agreed cost without releasing attention;
+  report those benefits separately. Narrow the task or retain the deterministic path
+  if review/correction costs and risks erase the intended benefit.
+- An assisted customer preparation comparison may begin as soon as its data and
+  baseline prerequisites are approved; it need not wait for this worker or connectors.
+  Cost per accepted preparation can be measured before resolved-dispute evidence;
+  cost per resolved dispute requires a defined, evidenced result denominator.
+- Present one evidence-backed improvement option with reducible delay, incremental
+  benefit hypothesis, full costs, feasibility, alternatives and preserved controls.
+  A person chooses it, tests a comparable next batch and decides where attention or
+  investment should go next. Team-declared available attention is separate from
+  measured attention released. Keep cash collected, disputes resolved, credits issued,
+  work newly attended to and human attention released separate; unknown is not zero.
+
+Synthetic completion demonstrates behavior, not customer outcomes or PMF. Customer
+usefulness, observed business results, economics and repeated demand require their own
+evidence. D-039 is Accepted; its implementation remains in review. Model integration,
+real customer activation, production writes and Case closure retain separate boundaries.

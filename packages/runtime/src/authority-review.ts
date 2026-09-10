@@ -1,3 +1,4 @@
+import { assertValidDisputeAuthorityContract } from "../../contracts/src/index.js";
 import {
   assertValidAuthorityReviewContract,
   assertValidAuthorityPolicy,
@@ -56,6 +57,30 @@ export type {
   ReviewSnapshot,
 } from "./authority-review-types.js";
 
+export function assertReviewContract(
+  kind: Parameters<typeof assertValidAuthorityReviewContract>[0],
+  value: unknown,
+): void {
+  const v = object(value);
+  if (
+    typeof v.schema_version === "string" &&
+    v.schema_version.includes(".dispute.")
+  ) {
+    requireIntegrity(
+      ["command", "journal", "read", "material", "evaluation"].includes(kind),
+      "invalid dispute authority contract",
+    );
+    assertValidDisputeAuthorityContract(
+      kind as "command" | "journal" | "read" | "material" | "evaluation",
+      v,
+    );
+  } else assertValidAuthorityReviewContract(kind, value);
+}
+export const DISPUTE_REVIEW_VERSIONS: ReviewVersions = {
+  engine: "authority-review-engine.dispute.v1",
+  resolver: "authority-resolution.d6c.v2",
+  projection: "authority-packet.dispute.v1",
+};
 export interface AuthorityCommandResult {
   readonly status: "applied" | "duplicate" | "conflict";
   readonly code?: string;
@@ -77,7 +102,7 @@ export function reviewSnapshot(
   kind: SnapshotKind,
   content: ObjectValue,
 ): ReviewSnapshot {
-  assertValidAuthorityReviewContract(kind, content);
+  assertReviewContract(kind, content);
   return immutableJson({
     tenant_id: string(content.tenant_id),
     hash: sha256Json(content),
@@ -192,11 +217,14 @@ export function normalizeAuthorityCatalogData(
 function currentPolicy(
   data: ObjectValue,
   now: string,
+  dispute = false,
 ): ObjectValue | undefined {
-  const policies = objects(data.policies).filter(
-    (policy) =>
-      policy.authority_class === "financial_remedy" &&
-      policy.action_class === "customer_credit",
+  const policies = objects(data.policies).filter((policy) =>
+    dispute
+      ? policy.authority_class === "invoice_dispute_no_adjustment" &&
+        policy.action_class === "uphold_invoice_no_adjustment"
+      : policy.authority_class === "financial_remedy" &&
+        policy.action_class === "customer_credit",
   );
   if (policies.length !== 1) return undefined;
   const policy = policies[0];
@@ -439,6 +467,7 @@ function applyCommand(
   actorKey: ReviewActor,
   dependencies: ReviewDependencies,
   versions: ReviewVersions = REVIEW_VERSIONS,
+  positionBase = state.entries.length,
 ): AuthorityCommandResult {
   const fingerprint = sha256Json({ command, actor_key: actorKey });
   const conflict = (code: string): AuthorityCommandResult => ({
@@ -477,7 +506,11 @@ function applyCommand(
   const now = dependencies.now().toISOString();
   const floor = clockFloor(cases, head);
   if (now < floor) return conflict("clock_regression");
-  const policy = currentPolicy(data, now);
+  const policy = currentPolicy(
+    data,
+    now,
+    versions.engine === "authority-review-engine.dispute.v1",
+  );
   if (policy === undefined) return conflict("policy_unavailable");
   const identity = actor(data, actorKey);
   if (identity.identity_kind !== "human" || identity.status !== "active")
@@ -534,7 +567,10 @@ function applyCommand(
     const evaluation = reviewSnapshot(
       "evaluation",
       json({
-        schema_version: "authority-evaluation.v1",
+        schema_version:
+          versions.engine === "authority-review-engine.dispute.v1"
+            ? "authority-evaluation.dispute.v1"
+            : "authority-evaluation.v1",
         tenant_id: tenant,
         request_binding_hash: sha256Json(request),
         prior_review_revision: previous?.review_revision ?? 0,
@@ -548,14 +584,17 @@ function applyCommand(
     );
     additions.push(evaluation);
     const unhashed = json({
-      schema_version: "authority-request-journal-entry.v1",
+      schema_version:
+        versions.engine === "authority-review-engine.dispute.v1"
+          ? "authority-request-journal-entry.dispute.v1"
+          : "authority-request-journal-entry.v1",
       id,
       tenant_id: tenant,
       case_id: command.case_id,
       authority_request_id: request.authority_request_id,
       review_revision:
         previous === undefined ? 0 : integer(previous.review_revision) + 1,
-      position: state.entries.length + entries.length + 1,
+      position: positionBase + entries.length + 1,
       event_type:
         decision === undefined
           ? "authority.request.created"
@@ -578,7 +617,7 @@ function applyCommand(
       ...links,
     });
     const entry = json({ ...unhashed, event_hash: sha256Json(unhashed) });
-    assertValidAuthorityReviewContract("journal", entry);
+    assertReviewContract("journal", entry);
     entries.push(entry);
   };
   const create = (
@@ -588,7 +627,20 @@ function applyCommand(
     predecessor: string | undefined,
     links: ObjectValue,
   ): ObjectValue => {
-    const material = syntheticReviewMaterial(aggregate, proposal, versions);
+    const dispute = versions.engine === "authority-review-engine.dispute.v1";
+    const material = dispute
+      ? object(command.material)
+      : syntheticReviewMaterial(aggregate, proposal, versions);
+    if (dispute) {
+      assertValidDisputeAuthorityContract("material", material);
+      requireIntegrity(
+        tenant === "tenant_intake_demo" &&
+          material.case_id === aggregate.case_id &&
+          material.case_version === aggregate.journal.length &&
+          material.proposal_key === proposal,
+        "dispute material binding drift",
+      );
+    }
     additions.push(reviewSnapshot("material", material));
     const request = json({
       schema_version: "authority-request.v1",
@@ -597,8 +649,8 @@ function applyCommand(
       case_id: command.case_id,
       case_version: command.expected_case_version,
       prepared_by_identity: actor(data, "operator"),
-      requested_authority_class: "financial_remedy",
-      requested_action_class: "customer_credit",
+      requested_authority_class: policy.authority_class,
+      requested_action_class: policy.action_class,
       proposed_consequence_hash: sha256Json(material.consequence),
       policy_reference: {
         policy_id: policy.policy_id,
@@ -615,7 +667,7 @@ function applyCommand(
       requested_at: now,
       requested_at_source_timezone: "UTC",
       expires_at: new Date(
-        Date.parse(now) + SYNTHETIC_REVIEW_TTL_MS,
+        Date.parse(now) + (dispute ? 15 * 60 * 1000 : SYNTHETIC_REVIEW_TTL_MS),
       ).toISOString(),
       expires_at_source_timezone: "UTC",
       correlation_id: command.correlation_id,
@@ -705,7 +757,8 @@ function applyCommand(
       return conflict("principal_already_approved");
     if (
       command.decision === "modify" &&
-      command.replacement_proposal_key === material.proposal_key
+      command.replacement_proposal_key === material.proposal_key &&
+      versions.engine !== "authority-review-engine.dispute.v1"
     )
       return conflict("replacement_unchanged");
     const replacementId =
@@ -854,7 +907,7 @@ export function assertAuthorityStateIntegrity(
   for (let index = 0; index < state.entries.length;) {
     const entry = state.entries[index];
     requireIntegrity(entry !== undefined, "missing journal entry");
-    assertValidAuthorityReviewContract("journal", entry);
+    assertReviewContract("journal", entry);
     requireIntegrity(
       entry.position === index + 1 && entry.replaces_entry_id === undefined,
       "journal gap or orphan replacement",
@@ -968,9 +1021,15 @@ export function executeAuthorityCommand(
   input: unknown,
   actorKey: ReviewActor,
   dependencies: ReviewDependencies,
+  positionBase = state.entries.length,
 ): AuthorityCommandResult {
-  assertValidAuthorityReviewContract("command", input);
+  assertReviewContract("command", input);
   const command = json(input);
+  requireIntegrity(
+    positionBase === state.entries.length ||
+      command.schema_version === "authority-command.dispute.v1",
+    "Only the pinned dispute export adapter admits a retained global position",
+  );
   if (
     ![
       "operator",
@@ -986,7 +1045,18 @@ export function executeAuthorityCommand(
     );
   // The store verifies the complete cross-tenant state before calling this pure
   // command function; direct callers can use the exported replay verifier too.
-  return applyCommand(state, cases, head, command, actorKey, dependencies);
+  return applyCommand(
+    state,
+    cases,
+    head,
+    command,
+    actorKey,
+    dependencies,
+    command.schema_version === "authority-command.dispute.v1"
+      ? DISPUTE_REVIEW_VERSIONS
+      : REVIEW_VERSIONS,
+    positionBase,
+  );
 }
 
 export function readAuthorityRequest(
@@ -1024,7 +1094,10 @@ export function readAuthorityRequest(
     clockFloor(cases, head),
   );
   const packet = json({
-    schema_version: "authority-request-read-response.v1",
+    schema_version:
+      material.schema_version === "authority-review-material.dispute.v1"
+        ? "authority-request-read-response.dispute.v1"
+        : "authority-request-read-response.v1",
     tenant_id: head.tenant_id,
     case_id: request.case_id,
     authority_request_id: requestId,
@@ -1046,10 +1119,13 @@ export function readAuthorityRequest(
       ),
     ),
     current: evaluated.result,
-    implementation_versions: REVIEW_VERSIONS,
+    implementation_versions:
+      material.schema_version === "authority-review-material.dispute.v1"
+        ? DISPUTE_REVIEW_VERSIONS
+        : REVIEW_VERSIONS,
     simulation: true,
     action_permission: false,
   });
-  assertValidAuthorityReviewContract("read", packet);
+  assertReviewContract("read", packet);
   return packet;
 }

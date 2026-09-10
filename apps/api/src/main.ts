@@ -1,3 +1,5 @@
+import { PostgresDisputeResultStore } from "../../../packages/runtime/src/postgres-dispute-result-store.js";
+import { json as resultJson } from "../../../packages/runtime/src/authority-review-types.js";
 import { syntheticContinuationContext } from "../../../packages/runtime/src/preparation-work.js";
 import { PostgresPreparationWorkStore } from "../../../packages/runtime/src/postgres-preparation-work-store.js";
 import { syntheticContinuationPackContext } from "../../../packages/runtime/src/preparation-pack.js";
@@ -158,6 +160,7 @@ async function start(): Promise<void> {
     packMigrationSql,
     workMigrationSql,
     continuationMigrationSql,
+    resultMigrationSql,
     fixtureDocument,
     walkthroughDocument,
   ] = await Promise.all([
@@ -233,6 +236,13 @@ async function start(): Promise<void> {
     ),
     readFile(
       new URL(
+        "../../../packages/runtime/migrations/0011_dispute_result.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
         "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
         import.meta.url,
       ),
@@ -269,6 +279,9 @@ async function start(): Promise<void> {
       continuationMigrationSql,
     ),
   );
+  migrations.push(
+    createMigrationSource("0011_dispute_result", resultMigrationSql),
+  );
   const fixture = createEvaluationFixtureRecord(fixtureDocument);
   const walkthrough = createGuidedWalkthroughRecord(
     walkthroughDocument,
@@ -280,6 +293,7 @@ async function start(): Promise<void> {
 
   const store = new PostgresCaseStore(pool);
   const worker = new TransactionalCaseWorker(store);
+  const resultStore = new PostgresDisputeResultStore(pool);
   const authorityStore = new PostgresAuthorityStore(pool);
   await authorityStore.initializeCatalog(
     SYNTHETIC_AUTHORITY_TENANT,
@@ -322,10 +336,19 @@ async function start(): Promise<void> {
       isReady: async () => {
         if (!(await applianceIsReady(pool, migrations, fixture))) return false;
         await creditStore.assertReady();
+        await resultStore.assertReady();
         await store.assertReady();
         await workStore.assertReady();
         await authorityStore.assertReady(SYNTHETIC_AUTHORITY_TENANT);
         return true;
+      },
+      dispute: {
+        submit: async (command) =>
+          resultJson(await resultStore.submit(command, () => new Date())),
+        read: async (caseId, key) =>
+          resultJson(await resultStore.read(caseId, key, () => new Date())),
+        export: async (caseId, key) =>
+          resultJson(await resultStore.export(caseId, key, () => new Date())),
       },
       credit: {
         execute: (command) => creditWorker.execute(command),

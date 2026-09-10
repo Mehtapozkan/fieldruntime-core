@@ -1,8 +1,68 @@
 # Status
 
-Current milestone: **D13 report/follow-through preserved; Accepted D-038 bounded
-preparation continuation implemented on this review branch; its acceptance handoff is completed, and D-039 business-result design is Proposed.** Real-customer processing
-remains unapproved; customer comparison and improvement proof are still pending.
+Current milestone: **Accepted D-039 synthetic result API implemented on this review
+branch; local validation and captured handoff completed; required CI is tracked in the PR.** D-038 and its completed second-packet
+acceptance evidence remain preserved at PR #40's reviewed `1f387d470a90dfe41df69335732b3c48c831750a`.
+This separate API branch is stacked on that open PR; neither is merged by this task.
+Real-customer processing remains unapproved. Workbench result controls and the
+separately approved model investigation are the immediate following builds, not
+implemented here; no D14 work.
+
+The owner approved D-039 at that exact head on 2026-09-10 UTC, including the corrected
+product handoff. The API supports one explicitly enrolled North/Orchid/dispute-17/
+DEL-4 `uphold_invoice_no_adjustment` path. Original synthetic POD/allocation/terms and
+complete grounds are independently checked; Morgan supplies named D6 authority;
+a reported disposition is separate from a source-checked result and Robin's exact
+business acceptance. Payment remains unknown and owned for follow-up. DEL-5 and
+Case closure remain unresolved/denied. No financial or external source write exists.
+
+Additive migration 0011 creates one result journal and admits separately versioned
+D6 material metadata, preserving 0001–0010 checksums/history. C/D/P/U are unchanged;
+authority creation/review advances only R, enrollment changes S, result operations
+advance O. Read/export is a consistent read-only snapshot. Exact retries, current
+purpose grants, source/time rechecks, stale inputs, terminal requests, rollback and
+historical reconstruction remain enforced. New observations never inherit old
+acceptance. A later mismatch/reopen removes current success; inconclusive is unknown.
+
+[Executable API, original/disposition/reversal fixtures, receipts, migration and BR1–BR8](docs/guides/synthetic-dispute-result.md).
+The fixed normal-appliance source begins open: a human-reported disposition therefore
+checks as mismatch until a supported source observation establishes the result. Only
+the disposable test host controls successful/reversed source states. The API has no
+fault switch, arbitrary source path, caller identity or success claim. The D7 credit
+tenant and frozen ECC are untouched. No new Workbench or model/provider code.
+
+### D-039 API validation (review branch)
+
+- `pnpm validate`: **323/323 repository tests**, format/lint/typecheck and public-release
+  checks passed locally (Node 24.19.0/tzdata 2026b).
+- New real PostgreSQL 18.4/API BR suite: **44/44** plus **3/3** independent-profile
+  denial controls. The captured path retains both preparation packets, accepts the
+  exact independently observed result, restarts/retries without another review,
+  then records negative observation and reopen. [Actual receipts and export hashes](docs/examples/d039-runtime-receipts.json).
+- Preserved D6–D8 PostgreSQL/API/Chromium authority, action, verification and receipt
+  suites: **178/178** locally. D-038 browser/resource/replay controls passed; the one
+  additive-upgrade snapshot assertion was corrected and its full F1/F2/F5 test rerun
+  successfully, preserving the prior acceptance/export hashes.
+- The normal appliance entry point, shipped fixed reader and additive fresh migration
+  passed locally against a disposable PostgreSQL database; API restart reconstructed
+  its exact receipts/export. No local PostgreSQL server restart/container pass is claimed.
+- ECC **620/620**; intended negative control **152/620**, hard gates fail and exit 1,
+  with a complete assertion receipt. No crash/setup failure.
+- `git diff --check`, example hashes/references, 198 local Markdown targets and all
+  **19 unchanged requirement IDs** pass. Actual prior D-038 evidence is unchanged.
+- Docker is unavailable locally (`docker compose config --quiet`: exit 127). The
+  existing final-head CI gate retains all PostgreSQL/API/browser suites, Compose,
+  fresh install and PostgreSQL/core restart smokes, with BR1–BR8 added. CI results
+  are linked in the implementation PR; a pending/failed run is not a pass.
+
+The preserved D-038 upgrade assertion now compares the new journal's empty content
+before/after additive installation; no old rows/checksums are altered. Its focused
+F1/F2/F5 restart/retry regression passes with the exact prior receipt/export hashes.
+Workbench code/layout is unchanged in this API PR; no new visual inspection is claimed.
+The canonical customer comparison, full effort/cost evidence, actual acceptance,
+model/provider approval and complete closure requirements remain gaps.
+
+The following D-038 account describes PR #40's preserved implementation and handoff.
 
 PR #39 preserves the completed read-only [Challenge report](docs/guides/challenge-report.md)
 and [original follow-through rehearsal](docs/guides/challenge-follow-through.md).
@@ -10,7 +70,7 @@ The owner approved D-038 at `639889f677a83a522996dd241d5082ddbadfc1bf` on 2026-0
 that approval was recorded in PR #39 at `f2d2068b`. PR #39 merged normally at
 `6b59801d98cf7ba239701bccc1ca69016f384696` after [required CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34398187483).
 The review finding was resolved; required PR, strict up-to-date validate, deletion and
-force-push protections remain. This implementation starts from that main and stays unmerged.
+force-push protections remain. PR #40 started from that main and remains open. The API branch preserves its head.
 
 The current API/Workbench explicitly publishes pack v3 and runs worker v2
 (`disposition-code.v3`) across at most two exact retained bundles. After Orchid's new
@@ -48,13 +108,9 @@ one review binds the new invocation/result, U stays 6, the export/database stay
 unchanged, and the original approval remains historical. No runtime behavior changes.
 
 [D-039 — imported-dispute result](docs/architecture/d13-imported-dispute-result.md)
-is **Proposed**, with a worked no-adjustment path and BR1–BR8 future gates. It requires
-original delivery/allocation and applicable terms proof, a separately authorized
-business decision, independent synthetic source observation and separate eligible
-business acceptance. The present status note supplies none of those prerequisites.
-The new source/profile and one supporting result journal need human approval;
-no business result, original-delivery verification, customer acceptance or new
-persistence is implemented by the design. The two-bundle ceiling is unchanged.
+is **Accepted** and implemented by this API branch. The old status note still cannot
+supply original proof or business authority. Its fixed proof reader is purpose-bound,
+not another preparation bundle. The two-bundle ceiling is unchanged.
 
 [Executable continuation, API steps and F1–F7](docs/guides/challenge-follow-through.md).
 Local and final-head CI evidence is recorded in the validation section below and PR.
@@ -98,12 +154,21 @@ Task acceptance and evaluation approval are separate, confer no business proof a
 never automatically promote worker code, policy or a pack. Full customer comparison,
 source/variant rules, active effort/cost baselines and customer acceptance remain gaps.
 
-**Next:** review the completed continuation evidence and Proposed D-039 before any
-imported-dispute business-result implementation. The proof/access/owner/terms experiment
-and comparable customer batch remain unrun. Do not start D14.
-Name the customer/cohort/custodian and approve the data arrangements plus baseline
-before any real comparison. Business outcomes, customer acceptance and complete costs
-remain missing. No release or deployment.
+**Next (September 10 planning reconciliation):** review the completed continuation
+and obtain the owner's decision on Proposed D-039; after approval, implement its
+bounded synthetic result API. Design one model-assisted investigation task and its
+separate provider/data boundary alongside that work. Immediately after the API,
+add minimum result controls in the existing Workbench and, once separately approved,
+implement the bounded worker alongside those controls. This is remaining D13 work;
+it does not wait for broad D15 routing. See [the delivery sequence](PLAN.md#remaining-d13-mvp-sequence).
+
+These are planning changes, not new implementation, model access or recorded D-039
+approval. Current preparation remains deterministic. General payment matching is not
+an MVP prerequisite. The proof/access/owner/terms experiment and customer comparison
+remain unrun. An assisted preparation comparison may start before the model is ready,
+but first needs named participants, approved custody/access/deletion and a valid
+baseline. Business outcomes, customer acceptance and complete costs remain missing.
+Do not start D14, real-data processing, release or deployment under this update.
 The current source is Apache-2.0; the published evaluation prerelease remains historical.
 
 **D9-B merged in PR #30 at `ca9543289894fffdaa40ecfe794d83addc2c19de`.** The reviewed

@@ -1,0 +1,1505 @@
+{
+  "qualification": "Actual disposable synthetic PostgreSQL/API receipts from BR1/BR6. No real customer result, payment, credit or Case closure. Full canonical exports are reproducible with the documented capture command.",
+  "reproduction": "D039_CAPTURE_DIR=d039-evidence node --test --test-name-pattern=BR1/BR6 scripts/dispute-result-postgres.test.mjs",
+  "accepted_export_hash": "sha256:dea78a1b3a75554ba2d74e71626f3efbcf820d861b8253934972d76eca6e6420",
+  "reopened_export_hash": "sha256:44e36fa920ff8270ac9995204cdebf44b76be74d26a59cf407586deba73ae7aa",
+  "receipts": {
+    "no_action": {
+      "entry": {
+        "actor": {
+          "identity_id": "identity_dispute_morgan",
+          "identity_kind": "human",
+          "schema_version": "identity-reference.v0",
+          "status": "active",
+          "tenant_id": "tenant_intake_demo"
+        },
+        "authority_position": 2,
+        "authority_state_revision": 1,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "command": {
+          "basis_hash": "sha256:6b6da8f1409205bd9a12f8e028d9d8f4c888df7e55aaed61ca299bac2268b27f",
+          "binding": {
+            "authority_state_revision": 1,
+            "business_input_hash": "sha256:92d4e9e995ddbdbe821c45e0bc3fcedd9611973cadf2c533eaebdb0a227781f7",
+            "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "case_version": 3,
+            "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "result_head": "sha256:ee82c6f9caf6f11d575e756d540db69106406822a9a6b75aa02ad7d53313261c",
+            "result_revision": 3
+          },
+          "candidate_hash": "sha256:11a7ec4d8ea81dba43c21b98f7046d3f9650afd1d0953fcb06467f2f6204f79a",
+          "idempotency_key": "no_action-6",
+          "operation": "no_action",
+          "review": {
+            "authority_request_id": "request_718564e2d350160c2b4d0db7f7d916080025d3db7c1122d2_1",
+            "expected_review_revision": 1,
+            "request_binding_hash": "sha256:5550f60045aeb4aec81188250b21935490b7feabdd37b5a6f4af58c08f84693d"
+          },
+          "schema_version": "dispute-result-command.v1"
+        },
+        "command_fingerprint": "sha256:f2cb1f653051d4c1069c721cc62315cfeed3a1b36ff06bd203bd750301aa8832",
+        "context": {
+          "authority_position": 2,
+          "authority_state_revision": 1,
+          "bundle_hashes": [
+            "sha256:82fb429cd5b530e375aa766d7e0f360d4f49a779c2d66722a597de1e948859f8",
+            "sha256:b1c61d552f52f5ef845fc8354cd0ca95bacd8cc693d3e293b77ef034efc90158"
+          ],
+          "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+          "case_version": 3,
+          "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+          "clock_floor": "2026-09-07T16:06:00.000Z",
+          "commit_hashes": [
+            "sha256:6c6dd46c89f2b4e1a8a87cb02e9b73ad0f33ed8677cee99a369a8d634ba61c8f",
+            "sha256:b8b79902f9b250fb988d111511dc9b818fc2f1df9e3e28b68ff6c14e527ac6e2",
+            "sha256:ebab968dedd68cba19897936b72b6723b066b78d497a13f5a7ed18f924e13219"
+          ],
+          "work_hashes": [
+            "sha256:2eaa7bacb88ed595ce8ed9af550ff861db02e5777d94eede35eaa9981c1fb9a5",
+            "sha256:36e9110d2c9fc2d319b28e6d81875204ea1b2ade2e6c0879e0143117177a5f57",
+            "sha256:fa65f2aaf4452c5070bca14c3d746827ee8003f84f9e80d80c3dbafe3b6cccbe",
+            "sha256:a0c070ff60f22cd62f9a1a55810b2497c072e6570ca974df655fba05557b23ec",
+            "sha256:1ae5f44088053cfaeb94ce8182ea843b7558796745cb9e300c017d4df0ed0d87",
+            "sha256:7fe605b6209b3f3ccb8e38c6b536d5126ad0943aee1a505cedf67cc5e79142b1"
+          ]
+        },
+        "data": {
+          "authorization": {
+            "authority_decision_ids": [
+              "decision_0134f0f3684aead86b0ca89e73f7e00c83672a7304fe1df2_2"
+            ],
+            "authority_owner": {
+              "identity_id": "identity_dispute_morgan",
+              "identity_kind": "human",
+              "schema_version": "identity-reference.v0",
+              "status": "active",
+              "tenant_id": "tenant_intake_demo"
+            },
+            "authority_request_id": "request_718564e2d350160c2b4d0db7f7d916080025d3db7c1122d2_1",
+            "authority_requirements": [
+              {
+                "authority_class": "invoice_dispute_no_adjustment",
+                "eligible_approvers": [
+                  {
+                    "authority_rank": 1,
+                    "evidence_refs": [
+                      "synthetic://dispute-result/sha256:c5c332b716e8b5548b12eeed1400795ecb926614d19242651ea25713ff2a51f5/decision"
+                    ],
+                    "identity": {
+                      "identity_id": "identity_dispute_morgan",
+                      "identity_kind": "human",
+                      "schema_version": "identity-reference.v0",
+                      "status": "active",
+                      "tenant_id": "tenant_intake_demo"
+                    }
+                  }
+                ],
+                "evidence_refs": [
+                  "authority-request://request_718564e2d350160c2b4d0db7f7d916080025d3db7c1122d2_1/sha256:5550f60045aeb4aec81188250b21935490b7feabdd37b5a6f4af58c08f84693d/revision/0",
+                  "synthetic://dispute-result/policy/no-adjustment/1",
+                  "synthetic://dispute-result/policy/no-adjustment/1#rule_dispute_no_adjustment",
+                  "synthetic://dispute-result/sha256:c5c332b716e8b5548b12eeed1400795ecb926614d19242651ea25713ff2a51f5/decision"
+                ],
+                "policy_rule_ref": "synthetic://dispute-result/policy/no-adjustment/1#rule_dispute_no_adjustment",
+                "remaining_approval_count": 0,
+                "required_approval_count": 1,
+                "requirement_id": "requirement_dispute_morgan",
+                "satisfied_approval_ids": [
+                  "decision_0134f0f3684aead86b0ca89e73f7e00c83672a7304fe1df2_2"
+                ],
+                "status": "satisfied"
+              }
+            ],
+            "authority_resolution_id": "authority_resolution_9e6d0cf3e726f72fe18c28ccfb440001",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "case_version": 3,
+            "causation_event_id": "journal_entry_5",
+            "correlation_id": "result_718564e2d350160c2b4d0db7f7d916080025d3db7c1122d252d6f0c183d7ac1e",
+            "evaluated_at": "2026-09-07T16:06:00.000Z",
+            "evaluated_at_source_timezone": "UTC",
+            "evaluated_by_identity": {
+              "identity_id": "identity_dispute_evaluator",
+              "identity_kind": "service",
+              "schema_version": "identity-reference.v0",
+              "status": "active",
+              "tenant_id": "tenant_intake_demo"
+            },
+            "outcome": "authorized",
+            "policy_reference": {
+              "policy_id": "policy_dispute_no_adjustment",
+              "policy_version": "1.0.0"
+            },
+            "proposed_consequence_hash": "sha256:7246fb033b4e1a441fb116a4ab2d9e39b587739bd11918fc8eba7ad9c5c6d902",
+            "reason_codes": ["authority.all_requirements_satisfied"],
+            "schema_version": "authority-resolution-result.v0",
+            "tenant_id": "tenant_intake_demo"
+          },
+          "basis": {
+            "authority_state_revision": 1,
+            "basis_observation_hash": "sha256:ee82c6f9caf6f11d575e756d540db69106406822a9a6b75aa02ad7d53313261c",
+            "business_bundle_hashes": [
+              "sha256:82fb429cd5b530e375aa766d7e0f360d4f49a779c2d66722a597de1e948859f8",
+              "sha256:b1c61d552f52f5ef845fc8354cd0ca95bacd8cc693d3e293b77ef034efc90158"
+            ],
+            "business_commit_hashes": [
+              "sha256:6c6dd46c89f2b4e1a8a87cb02e9b73ad0f33ed8677cee99a369a8d634ba61c8f",
+              "sha256:b8b79902f9b250fb988d111511dc9b818fc2f1df9e3e28b68ff6c14e527ac6e2",
+              "sha256:ebab968dedd68cba19897936b72b6723b066b78d497a13f5a7ed18f924e13219"
+            ],
+            "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+            "case_version": 3,
+            "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+            "expires_at": "2026-09-07T16:21:00.000Z",
+            "observed_at": "2026-09-07T16:06:00.000Z",
+            "policy_content_hash": "sha256:e96c685f323aa575c6e94cff414a1f4ed1b27cb44dd57923f98d3652c249e558",
+            "policy_id": "policy_dispute_no_adjustment",
+            "policy_version": "1.0.0",
+            "preparation_entry_hashes": [
+              "sha256:2eaa7bacb88ed595ce8ed9af550ff861db02e5777d94eede35eaa9981c1fb9a5",
+              "sha256:36e9110d2c9fc2d319b28e6d81875204ea1b2ade2e6c0879e0143117177a5f57",
+              "sha256:fa65f2aaf4452c5070bca14c3d746827ee8003f84f9e80d80c3dbafe3b6cccbe",
+              "sha256:a0c070ff60f22cd62f9a1a55810b2497c072e6570ca974df655fba05557b23ec",
+              "sha256:1ae5f44088053cfaeb94ce8182ea843b7558796745cb9e300c017d4df0ed0d87",
+              "sha256:7fe605b6209b3f3ccb8e38c6b536d5126ad0943aee1a505cedf67cc5e79142b1"
+            ],
+            "schema_version": "dispute-result-basis.v1",
+            "source": {
+              "ar": {
+                "active_grounds": ["non_delivery"],
+                "adjustment_minor": 0,
+                "credit_ids": [],
+                "decision_reference": null,
+                "disposed_grounds": [],
+                "event_at": "2026-09-02T14:00:00.000Z",
+                "grounds_complete": true,
+                "object_id": "AR-dispute-17",
+                "payment_status": "unknown",
+                "prior_hash": null,
+                "prior_version": null,
+                "source_timezone": "UTC",
+                "status": "open",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "version": 0
+              },
+              "pod": {
+                "allocation_complete": true,
+                "custodian": "Synthetic delivery registry",
+                "event_at": "2026-09-01T14:00:00.000Z",
+                "issuer": "Synthetic carrier fixture",
+                "line_id": "line-4",
+                "object_id": "POD-4",
+                "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                "quantity": 10,
+                "recipient": "Synthetic receiving desk North",
+                "rescinded": false,
+                "source_timezone": "UTC",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              },
+              "revision": 0,
+              "schema_version": "synthetic-dispute-source.v1",
+              "terms": {
+                "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                "clause_id": "N1-matched-delivery-only",
+                "effective_from": "2026-01-01T00:00:00.000Z",
+                "effective_until": "2027-01-01T00:00:00.000Z",
+                "object_id": "TERMS-N1",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              }
+            },
+            "source_hash": "sha256:042554a9f4fd814d6bd71d7ee71eeb4a7b185d1b8fd9aeadb794fadd1abb54da",
+            "subject": {
+              "amount_minor": 1500000,
+              "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+              "currency": "USD",
+              "customer": "Orchid",
+              "delivery_id": "DEL-4",
+              "dispute_id": "dispute-17",
+              "entity": "entity_north",
+              "invoice_id": "INV-101",
+              "order_id": "PO-9",
+              "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+              "tenant_id": "tenant_intake_demo"
+            }
+          },
+          "consequence_hash": "sha256:7246fb033b4e1a441fb116a4ab2d9e39b587739bd11918fc8eba7ad9c5c6d902",
+          "kind": "no_action",
+          "request_hash": "sha256:5550f60045aeb4aec81188250b21935490b7feabdd37b5a6f4af58c08f84693d",
+          "review_head": "sha256:a02960596c6e10dba39b091d4049ddae8451f82566b0c7cf39c69393efd1751c"
+        },
+        "hash": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+        "id": "result_f2cb1f653051d4c1069c721cc62315cfeed3a1b36ff06bd203bd750301aa8832",
+        "idempotency_key": "no_action-6",
+        "operation": "no_action",
+        "previous_entry_hash": "sha256:ee82c6f9caf6f11d575e756d540db69106406822a9a6b75aa02ad7d53313261c",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "recorded_at": "2026-09-07T16:06:00.000Z",
+        "schema_version": "dispute-result-entry.v1",
+        "sequence": 4,
+        "source_precondition": {
+          "observed_at": "2026-09-07T16:06:00.000Z",
+          "read": {
+            "byte_hash": "sha256:042554a9f4fd814d6bd71d7ee71eeb4a7b185d1b8fd9aeadb794fadd1abb54da",
+            "bytes_base64": "eyJhciI6eyJhY3RpdmVfZ3JvdW5kcyI6WyJub25fZGVsaXZlcnkiXSwiYWRqdXN0bWVudF9taW5vciI6MCwiY3JlZGl0X2lkcyI6W10sImRlY2lzaW9uX3JlZmVyZW5jZSI6bnVsbCwiZGlzcG9zZWRfZ3JvdW5kcyI6W10sImV2ZW50X2F0IjoiMjAyNi0wOS0wMlQxNDowMDowMC4wMDBaIiwiZ3JvdW5kc19jb21wbGV0ZSI6dHJ1ZSwib2JqZWN0X2lkIjoiQVItZGlzcHV0ZS0xNyIsInBheW1lbnRfc3RhdHVzIjoidW5rbm93biIsInByaW9yX2hhc2giOm51bGwsInByaW9yX3ZlcnNpb24iOm51bGwsInNvdXJjZV90aW1lem9uZSI6IlVUQyIsInN0YXR1cyI6Im9wZW4iLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In0sInZlcnNpb24iOjB9LCJwb2QiOnsiYWxsb2NhdGlvbl9jb21wbGV0ZSI6dHJ1ZSwiY3VzdG9kaWFuIjoiU3ludGhldGljIGRlbGl2ZXJ5IHJlZ2lzdHJ5IiwiZXZlbnRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJpc3N1ZXIiOiJTeW50aGV0aWMgY2FycmllciBmaXh0dXJlIiwibGluZV9pZCI6ImxpbmUtNCIsIm9iamVjdF9pZCI6IlBPRC00Iiwib3JpZ2luYWxfYnl0ZXNfYmFzZTY0IjoiZXlKa1pXeHBkbVZ5WldSZllYUWlPaUl5TURJMkxUQTVMVEF4VkRFME9qQXdPakF3TGpBd01Gb2lMQ0pzYVc1bFgybGtJam9pYkdsdVpTMDBJaXdpY1hWaGJuUnBkSGtpT2pFd0xDSnlaV05wY0dsbGJuUWlPaUpUZVc1MGFHVjBhV01nY21WalpXbDJhVzVuSUdSbGMyc2dUbTl5ZEdnaUxDSnpkV0pxWldOMElqcDdJbUZ0YjNWdWRGOXRhVzV2Y2lJNk1UVXdNREF3TUN3aVkzVnljbVZ1WTNraU9pSlZVMFFpTENKamRYTjBiMjFsY2lJNklrOXlZMmhwWkNJc0ltUmxiR2wyWlhKNVgybGtJam9pUkVWTUxUUWlMQ0prYVhOd2RYUmxYMmxrSWpvaVpHbHpjSFYwWlMweE55SXNJbVZ1ZEdsMGVTSTZJbVZ1ZEdsMGVWOXViM0owYUNJc0ltbHVkbTlwWTJWZmFXUWlPaUpKVGxZdE1UQXhJaXdpYjNKa1pYSmZhV1FpT2lKUVR5MDVJbjE5Iiwib3JpZ2luYWxfaGFzaCI6InNoYTI1NjpjN2Y4YWQ4NzJhNjNlMjUyNzQ0M2U0ODFmZjczZGFjYzg0MTlhNjZiZWQ2MWYwMWQ2YzdjYjdmNTU4Y2ZlZjA1IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJyZXNjaW5kZWQiOmZhbHNlLCJzb3VyY2VfdGltZXpvbmUiOiJVVEMiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In0sInZhbGlkIjp0cnVlLCJ2ZXJzaW9uIjoxfSwicmV2aXNpb24iOjAsInNjaGVtYV92ZXJzaW9uIjoic3ludGhldGljLWRpc3B1dGUtc291cmNlLnYxIiwidGVybXMiOnsiY2xhdXNlIjoiU3ludGhldGljIHRlc3QgdGVybTogdXBob2xkIG9ubHkgdGhlIG1hdGNoZWQgZGVsaXZlcmVkIHBvcnRpb24gd2l0aCBubyBvdGhlciBhY3RpdmUgZGlzcHV0ZSBncm91bmQ7IHBheW1lbnQgb2JsaWdhdGlvbnMgcmVtYWluLiIsImNsYXVzZV9pZCI6Ik4xLW1hdGNoZWQtZGVsaXZlcnktb25seSIsImVmZmVjdGl2ZV9mcm9tIjoiMjAyNi0wMS0wMVQwMDowMDowMC4wMDBaIiwiZWZmZWN0aXZlX3VudGlsIjoiMjAyNy0wMS0wMVQwMDowMDowMC4wMDBaIiwib2JqZWN0X2lkIjoiVEVSTVMtTjEiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In0sInZhbGlkIjp0cnVlLCJ2ZXJzaW9uIjoxfX0=",
+            "source": {
+              "ar": {
+                "active_grounds": ["non_delivery"],
+                "adjustment_minor": 0,
+                "credit_ids": [],
+                "decision_reference": null,
+                "disposed_grounds": [],
+                "event_at": "2026-09-02T14:00:00.000Z",
+                "grounds_complete": true,
+                "object_id": "AR-dispute-17",
+                "payment_status": "unknown",
+                "prior_hash": null,
+                "prior_version": null,
+                "source_timezone": "UTC",
+                "status": "open",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "version": 0
+              },
+              "pod": {
+                "allocation_complete": true,
+                "custodian": "Synthetic delivery registry",
+                "event_at": "2026-09-01T14:00:00.000Z",
+                "issuer": "Synthetic carrier fixture",
+                "line_id": "line-4",
+                "object_id": "POD-4",
+                "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                "quantity": 10,
+                "recipient": "Synthetic receiving desk North",
+                "rescinded": false,
+                "source_timezone": "UTC",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              },
+              "revision": 0,
+              "schema_version": "synthetic-dispute-source.v1",
+              "terms": {
+                "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                "clause_id": "N1-matched-delivery-only",
+                "effective_from": "2026-01-01T00:00:00.000Z",
+                "effective_until": "2027-01-01T00:00:00.000Z",
+                "object_id": "TERMS-N1",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              }
+            },
+            "status": "read"
+          },
+          "recheck": {
+            "byte_hash": "sha256:042554a9f4fd814d6bd71d7ee71eeb4a7b185d1b8fd9aeadb794fadd1abb54da",
+            "bytes_base64": "eyJhciI6eyJhY3RpdmVfZ3JvdW5kcyI6WyJub25fZGVsaXZlcnkiXSwiYWRqdXN0bWVudF9taW5vciI6MCwiY3JlZGl0X2lkcyI6W10sImRlY2lzaW9uX3JlZmVyZW5jZSI6bnVsbCwiZGlzcG9zZWRfZ3JvdW5kcyI6W10sImV2ZW50X2F0IjoiMjAyNi0wOS0wMlQxNDowMDowMC4wMDBaIiwiZ3JvdW5kc19jb21wbGV0ZSI6dHJ1ZSwib2JqZWN0X2lkIjoiQVItZGlzcHV0ZS0xNyIsInBheW1lbnRfc3RhdHVzIjoidW5rbm93biIsInByaW9yX2hhc2giOm51bGwsInByaW9yX3ZlcnNpb24iOm51bGwsInNvdXJjZV90aW1lem9uZSI6IlVUQyIsInN0YXR1cyI6Im9wZW4iLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In0sInZlcnNpb24iOjB9LCJwb2QiOnsiYWxsb2NhdGlvbl9jb21wbGV0ZSI6dHJ1ZSwiY3VzdG9kaWFuIjoiU3ludGhldGljIGRlbGl2ZXJ5IHJlZ2lzdHJ5IiwiZXZlbnRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJpc3N1ZXIiOiJTeW50aGV0aWMgY2FycmllciBmaXh0dXJlIiwibGluZV9pZCI6ImxpbmUtNCIsIm9iamVjdF9pZCI6IlBPRC00Iiwib3JpZ2luYWxfYnl0ZXNfYmFzZTY0IjoiZXlKa1pXeHBkbVZ5WldSZllYUWlPaUl5TURJMkxUQTVMVEF4VkRFME9qQXdPakF3TGpBd01Gb2lMQ0pzYVc1bFgybGtJam9pYkdsdVpTMDBJaXdpY1hWaGJuUnBkSGtpT2pFd0xDSnlaV05wY0dsbGJuUWlPaUpUZVc1MGFHVjBhV01nY21WalpXbDJhVzVuSUdSbGMyc2dUbTl5ZEdnaUxDSnpkV0pxWldOMElqcDdJbUZ0YjNWdWRGOXRhVzV2Y2lJNk1UVXdNREF3TUN3aVkzVnljbVZ1WTNraU9pSlZVMFFpTENKamRYTjBiMjFsY2lJNklrOXlZMmhwWkNJc0ltUmxiR2wyWlhKNVgybGtJam9pUkVWTUxUUWlMQ0prYVhOd2RYUmxYMmxrSWpvaVpHbHpjSFYwWlMweE55SXNJbVZ1ZEdsMGVTSTZJbVZ1ZEdsMGVWOXViM0owYUNJc0ltbHVkbTlwWTJWZmFXUWlPaUpKVGxZdE1UQXhJaXdpYjNKa1pYSmZhV1FpT2lKUVR5MDVJbjE5Iiwib3JpZ2luYWxfaGFzaCI6InNoYTI1NjpjN2Y4YWQ4NzJhNjNlMjUyNzQ0M2U0ODFmZjczZGFjYzg0MTlhNjZiZWQ2MWYwMWQ2YzdjYjdmNTU4Y2ZlZjA1IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJyZXNjaW5kZWQiOmZhbHNlLCJzb3VyY2VfdGltZXpvbmUiOiJVVEMiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In0sInZhbGlkIjp0cnVlLCJ2ZXJzaW9uIjoxfSwicmV2aXNpb24iOjAsInNjaGVtYV92ZXJzaW9uIjoic3ludGhldGljLWRpc3B1dGUtc291cmNlLnYxIiwidGVybXMiOnsiY2xhdXNlIjoiU3ludGhldGljIHRlc3QgdGVybTogdXBob2xkIG9ubHkgdGhlIG1hdGNoZWQgZGVsaXZlcmVkIHBvcnRpb24gd2l0aCBubyBvdGhlciBhY3RpdmUgZGlzcHV0ZSBncm91bmQ7IHBheW1lbnQgb2JsaWdhdGlvbnMgcmVtYWluLiIsImNsYXVzZV9pZCI6Ik4xLW1hdGNoZWQtZGVsaXZlcnktb25seSIsImVmZmVjdGl2ZV9mcm9tIjoiMjAyNi0wMS0wMVQwMDowMDowMC4wMDBaIiwiZWZmZWN0aXZlX3VudGlsIjoiMjAyNy0wMS0wMVQwMDowMDowMC4wMDBaIiwib2JqZWN0X2lkIjoiVEVSTVMtTjEiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In0sInZhbGlkIjp0cnVlLCJ2ZXJzaW9uIjoxfX0=",
+            "source": {
+              "ar": {
+                "active_grounds": ["non_delivery"],
+                "adjustment_minor": 0,
+                "credit_ids": [],
+                "decision_reference": null,
+                "disposed_grounds": [],
+                "event_at": "2026-09-02T14:00:00.000Z",
+                "grounds_complete": true,
+                "object_id": "AR-dispute-17",
+                "payment_status": "unknown",
+                "prior_hash": null,
+                "prior_version": null,
+                "source_timezone": "UTC",
+                "status": "open",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "version": 0
+              },
+              "pod": {
+                "allocation_complete": true,
+                "custodian": "Synthetic delivery registry",
+                "event_at": "2026-09-01T14:00:00.000Z",
+                "issuer": "Synthetic carrier fixture",
+                "line_id": "line-4",
+                "object_id": "POD-4",
+                "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                "quantity": 10,
+                "recipient": "Synthetic receiving desk North",
+                "rescinded": false,
+                "source_timezone": "UTC",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              },
+              "revision": 0,
+              "schema_version": "synthetic-dispute-source.v1",
+              "terms": {
+                "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                "clause_id": "N1-matched-delivery-only",
+                "effective_from": "2026-01-01T00:00:00.000Z",
+                "effective_until": "2027-01-01T00:00:00.000Z",
+                "object_id": "TERMS-N1",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              }
+            },
+            "status": "read"
+          },
+          "recorded_at": "2026-09-07T16:06:00.000Z",
+          "started_at": "2026-09-07T16:06:00.000Z"
+        },
+        "tenant_id": "tenant_intake_demo",
+        "versions": {
+          "engine": "dispute-result.v1",
+          "material": "dispute-authority-material.v1",
+          "reader": "synthetic-dispute-source.v1"
+        }
+      },
+      "historical_only": true,
+      "schema_version": "dispute-result-receipt.v1"
+    },
+    "accept": {
+      "entry": {
+        "actor": {
+          "identity_id": "identity_dispute_robin",
+          "identity_kind": "human",
+          "schema_version": "identity-reference.v0",
+          "status": "active",
+          "tenant_id": "tenant_intake_demo"
+        },
+        "authority_position": 2,
+        "authority_state_revision": 1,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "command": {
+          "binding": {
+            "authority_state_revision": 1,
+            "business_input_hash": "sha256:92d4e9e995ddbdbe821c45e0bc3fcedd9611973cadf2c533eaebdb0a227781f7",
+            "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "case_version": 3,
+            "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "result_head": "sha256:629893f6adbbd3d9134cbae5b3ceedde368ad17d79e0733ce6b0d04388e1aa36",
+            "result_revision": 6
+          },
+          "candidate_hash": "sha256:11a7ec4d8ea81dba43c21b98f7046d3f9650afd1d0953fcb06467f2f6204f79a",
+          "commitments": [
+            {
+              "description": "Obtain payment status for the upheld disputed portion",
+              "due_at": "2026-09-08T16:06:00.000Z",
+              "evidence_ref": "dispute-result://sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d/payment-follow-up",
+              "id": "commitment_payment_follow_up",
+              "owner_identity_id": "identity_dispute_morgan",
+              "status": "owned"
+            }
+          ],
+          "decision_hash": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+          "idempotency_key": "accept-9",
+          "observation_hash": "sha256:629893f6adbbd3d9134cbae5b3ceedde368ad17d79e0733ce6b0d04388e1aa36",
+          "operation": "accept",
+          "outcome_hash": "sha256:050e93c3954c4bec3960d3454f0404787711fff1d6aaeeba8351087f935082c1",
+          "reason": "Robin accepts only the synthetic no-adjustment disputed portion, not payment, customer impact or Case closure",
+          "schema_version": "dispute-result-command.v1"
+        },
+        "command_fingerprint": "sha256:509c669d276eb0e0bde67e0b767192649031937b2b9be2000ee0643d45a12f87",
+        "context": {
+          "authority_position": 2,
+          "authority_state_revision": 1,
+          "bundle_hashes": [
+            "sha256:82fb429cd5b530e375aa766d7e0f360d4f49a779c2d66722a597de1e948859f8",
+            "sha256:b1c61d552f52f5ef845fc8354cd0ca95bacd8cc693d3e293b77ef034efc90158"
+          ],
+          "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+          "case_version": 3,
+          "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+          "clock_floor": "2026-09-07T16:06:00.000Z",
+          "commit_hashes": [
+            "sha256:6c6dd46c89f2b4e1a8a87cb02e9b73ad0f33ed8677cee99a369a8d634ba61c8f",
+            "sha256:b8b79902f9b250fb988d111511dc9b818fc2f1df9e3e28b68ff6c14e527ac6e2",
+            "sha256:ebab968dedd68cba19897936b72b6723b066b78d497a13f5a7ed18f924e13219"
+          ],
+          "work_hashes": [
+            "sha256:2eaa7bacb88ed595ce8ed9af550ff861db02e5777d94eede35eaa9981c1fb9a5",
+            "sha256:36e9110d2c9fc2d319b28e6d81875204ea1b2ade2e6c0879e0143117177a5f57",
+            "sha256:fa65f2aaf4452c5070bca14c3d746827ee8003f84f9e80d80c3dbafe3b6cccbe",
+            "sha256:a0c070ff60f22cd62f9a1a55810b2497c072e6570ca974df655fba05557b23ec",
+            "sha256:1ae5f44088053cfaeb94ce8182ea843b7558796745cb9e300c017d4df0ed0d87",
+            "sha256:7fe605b6209b3f3ccb8e38c6b536d5126ad0943aee1a505cedf67cc5e79142b1"
+          ]
+        },
+        "data": {
+          "commitments": [
+            {
+              "description": "Obtain payment status for the upheld disputed portion",
+              "due_at": "2026-09-08T16:06:00.000Z",
+              "evidence_ref": "dispute-result://sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d/payment-follow-up",
+              "id": "commitment_payment_follow_up",
+              "owner_identity_id": "identity_dispute_morgan",
+              "status": "owned"
+            }
+          ],
+          "kind": "accept",
+          "observation_hash": "sha256:629893f6adbbd3d9134cbae5b3ceedde368ad17d79e0733ce6b0d04388e1aa36",
+          "outcome_hash": "sha256:050e93c3954c4bec3960d3454f0404787711fff1d6aaeeba8351087f935082c1",
+          "remaining_obligations": [
+            "Payment status remains unknown; Morgan owns the stated follow-up.",
+            "DEL-5 and wider Case obligations remain unresolved."
+          ]
+        },
+        "hash": "sha256:08bdda6f7eef9948a1d11e80099136fd968ba705ce79fadf6c620af3b812a489",
+        "id": "result_509c669d276eb0e0bde67e0b767192649031937b2b9be2000ee0643d45a12f87",
+        "idempotency_key": "accept-9",
+        "operation": "accept",
+        "previous_entry_hash": "sha256:629893f6adbbd3d9134cbae5b3ceedde368ad17d79e0733ce6b0d04388e1aa36",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "recorded_at": "2026-09-07T16:06:00.000Z",
+        "schema_version": "dispute-result-entry.v1",
+        "sequence": 7,
+        "source_precondition": {
+          "observed_at": "2026-09-07T16:06:00.000Z",
+          "read": {
+            "byte_hash": "sha256:89ee031124924f4b78658dd12e523b357f775bc467a990fc1cd1b0616b70b7f9",
+            "bytes_base64": "eyJhciI6eyJhY3RpdmVfZ3JvdW5kcyI6W10sImFkanVzdG1lbnRfbWlub3IiOjAsImNyZWRpdF9pZHMiOltdLCJkZWNpc2lvbl9yZWZlcmVuY2UiOiJzaGEyNTY6MmMwNjE3YmY2ZjZkYjUwNjQ0ZTlmYTFhMjY3YWY0Nzc1YmRhOGRhYjlmYWNhODExNzM5MjNiOTliYjRkYjgwZCIsImRpc3Bvc2VkX2dyb3VuZHMiOlsibm9uX2RlbGl2ZXJ5Il0sImV2ZW50X2F0IjoiMjAyNi0wOS0wN1QxNjowNjowMC4wMDBaIiwiZ3JvdW5kc19jb21wbGV0ZSI6dHJ1ZSwib2JqZWN0X2lkIjoiQVItZGlzcHV0ZS0xNyIsInBheW1lbnRfc3RhdHVzIjoidW5rbm93biIsInByaW9yX2hhc2giOiJzaGEyNTY6OTkyNDdmNTk0NWIwZjk4ODJiOTYyYTJlYWM4ODM4OThiYzhiNWI1Y2EzNDMyZGZiNDc0YzFlZThkZDcxOTQxNSIsInByaW9yX3ZlcnNpb24iOjAsInNvdXJjZV90aW1lem9uZSI6IlVUQyIsInN0YXR1cyI6InVwaGVsZF9ub19hZGp1c3RtZW50Iiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2ZXJzaW9uIjoxfSwicG9kIjp7ImFsbG9jYXRpb25fY29tcGxldGUiOnRydWUsImN1c3RvZGlhbiI6IlN5bnRoZXRpYyBkZWxpdmVyeSByZWdpc3RyeSIsImV2ZW50X2F0IjoiMjAyNi0wOS0wMVQxNDowMDowMC4wMDBaIiwiaXNzdWVyIjoiU3ludGhldGljIGNhcnJpZXIgZml4dHVyZSIsImxpbmVfaWQiOiJsaW5lLTQiLCJvYmplY3RfaWQiOiJQT0QtNCIsIm9yaWdpbmFsX2J5dGVzX2Jhc2U2NCI6ImV5SmtaV3hwZG1WeVpXUmZZWFFpT2lJeU1ESTJMVEE1TFRBeFZERTBPakF3T2pBd0xqQXdNRm9pTENKc2FXNWxYMmxrSWpvaWJHbHVaUzAwSWl3aWNYVmhiblJwZEhraU9qRXdMQ0p5WldOcGNHbGxiblFpT2lKVGVXNTBhR1YwYVdNZ2NtVmpaV2wyYVc1bklHUmxjMnNnVG05eWRHZ2lMQ0p6ZFdKcVpXTjBJanA3SW1GdGIzVnVkRjl0YVc1dmNpSTZNVFV3TURBd01Dd2lZM1Z5Y21WdVkza2lPaUpWVTBRaUxDSmpkWE4wYjIxbGNpSTZJazl5WTJocFpDSXNJbVJsYkdsMlpYSjVYMmxrSWpvaVJFVk1MVFFpTENKa2FYTndkWFJsWDJsa0lqb2laR2x6Y0hWMFpTMHhOeUlzSW1WdWRHbDBlU0k2SW1WdWRHbDBlVjl1YjNKMGFDSXNJbWx1ZG05cFkyVmZhV1FpT2lKSlRsWXRNVEF4SWl3aWIzSmtaWEpmYVdRaU9pSlFUeTA1SW4xOSIsIm9yaWdpbmFsX2hhc2giOiJzaGEyNTY6YzdmOGFkODcyYTYzZTI1Mjc0NDNlNDgxZmY3M2RhY2M4NDE5YTY2YmVkNjFmMDFkNmM3Y2I3ZjU1OGNmZWYwNSIsInF1YW50aXR5IjoxMCwicmVjaXBpZW50IjoiU3ludGhldGljIHJlY2VpdmluZyBkZXNrIE5vcnRoIiwicmVzY2luZGVkIjpmYWxzZSwic291cmNlX3RpbWV6b25lIjoiVVRDIiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2YWxpZCI6dHJ1ZSwidmVyc2lvbiI6MX0sInJldmlzaW9uIjoxLCJzY2hlbWFfdmVyc2lvbiI6InN5bnRoZXRpYy1kaXNwdXRlLXNvdXJjZS52MSIsInRlcm1zIjp7ImNsYXVzZSI6IlN5bnRoZXRpYyB0ZXN0IHRlcm06IHVwaG9sZCBvbmx5IHRoZSBtYXRjaGVkIGRlbGl2ZXJlZCBwb3J0aW9uIHdpdGggbm8gb3RoZXIgYWN0aXZlIGRpc3B1dGUgZ3JvdW5kOyBwYXltZW50IG9ibGlnYXRpb25zIHJlbWFpbi4iLCJjbGF1c2VfaWQiOiJOMS1tYXRjaGVkLWRlbGl2ZXJ5LW9ubHkiLCJlZmZlY3RpdmVfZnJvbSI6IjIwMjYtMDEtMDFUMDA6MDA6MDAuMDAwWiIsImVmZmVjdGl2ZV91bnRpbCI6IjIwMjctMDEtMDFUMDA6MDA6MDAuMDAwWiIsIm9iamVjdF9pZCI6IlRFUk1TLU4xIiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2YWxpZCI6dHJ1ZSwidmVyc2lvbiI6MX19",
+            "source": {
+              "ar": {
+                "active_grounds": [],
+                "adjustment_minor": 0,
+                "credit_ids": [],
+                "decision_reference": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+                "disposed_grounds": ["non_delivery"],
+                "event_at": "2026-09-07T16:06:00.000Z",
+                "grounds_complete": true,
+                "object_id": "AR-dispute-17",
+                "payment_status": "unknown",
+                "prior_hash": "sha256:99247f5945b0f9882b962a2eac883898bc8b5b5ca3432dfb474c1ee8dd719415",
+                "prior_version": 0,
+                "source_timezone": "UTC",
+                "status": "upheld_no_adjustment",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "version": 1
+              },
+              "pod": {
+                "allocation_complete": true,
+                "custodian": "Synthetic delivery registry",
+                "event_at": "2026-09-01T14:00:00.000Z",
+                "issuer": "Synthetic carrier fixture",
+                "line_id": "line-4",
+                "object_id": "POD-4",
+                "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                "quantity": 10,
+                "recipient": "Synthetic receiving desk North",
+                "rescinded": false,
+                "source_timezone": "UTC",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              },
+              "revision": 1,
+              "schema_version": "synthetic-dispute-source.v1",
+              "terms": {
+                "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                "clause_id": "N1-matched-delivery-only",
+                "effective_from": "2026-01-01T00:00:00.000Z",
+                "effective_until": "2027-01-01T00:00:00.000Z",
+                "object_id": "TERMS-N1",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              }
+            },
+            "status": "read"
+          },
+          "recheck": {
+            "byte_hash": "sha256:89ee031124924f4b78658dd12e523b357f775bc467a990fc1cd1b0616b70b7f9",
+            "bytes_base64": "eyJhciI6eyJhY3RpdmVfZ3JvdW5kcyI6W10sImFkanVzdG1lbnRfbWlub3IiOjAsImNyZWRpdF9pZHMiOltdLCJkZWNpc2lvbl9yZWZlcmVuY2UiOiJzaGEyNTY6MmMwNjE3YmY2ZjZkYjUwNjQ0ZTlmYTFhMjY3YWY0Nzc1YmRhOGRhYjlmYWNhODExNzM5MjNiOTliYjRkYjgwZCIsImRpc3Bvc2VkX2dyb3VuZHMiOlsibm9uX2RlbGl2ZXJ5Il0sImV2ZW50X2F0IjoiMjAyNi0wOS0wN1QxNjowNjowMC4wMDBaIiwiZ3JvdW5kc19jb21wbGV0ZSI6dHJ1ZSwib2JqZWN0X2lkIjoiQVItZGlzcHV0ZS0xNyIsInBheW1lbnRfc3RhdHVzIjoidW5rbm93biIsInByaW9yX2hhc2giOiJzaGEyNTY6OTkyNDdmNTk0NWIwZjk4ODJiOTYyYTJlYWM4ODM4OThiYzhiNWI1Y2EzNDMyZGZiNDc0YzFlZThkZDcxOTQxNSIsInByaW9yX3ZlcnNpb24iOjAsInNvdXJjZV90aW1lem9uZSI6IlVUQyIsInN0YXR1cyI6InVwaGVsZF9ub19hZGp1c3RtZW50Iiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2ZXJzaW9uIjoxfSwicG9kIjp7ImFsbG9jYXRpb25fY29tcGxldGUiOnRydWUsImN1c3RvZGlhbiI6IlN5bnRoZXRpYyBkZWxpdmVyeSByZWdpc3RyeSIsImV2ZW50X2F0IjoiMjAyNi0wOS0wMVQxNDowMDowMC4wMDBaIiwiaXNzdWVyIjoiU3ludGhldGljIGNhcnJpZXIgZml4dHVyZSIsImxpbmVfaWQiOiJsaW5lLTQiLCJvYmplY3RfaWQiOiJQT0QtNCIsIm9yaWdpbmFsX2J5dGVzX2Jhc2U2NCI6ImV5SmtaV3hwZG1WeVpXUmZZWFFpT2lJeU1ESTJMVEE1TFRBeFZERTBPakF3T2pBd0xqQXdNRm9pTENKc2FXNWxYMmxrSWpvaWJHbHVaUzAwSWl3aWNYVmhiblJwZEhraU9qRXdMQ0p5WldOcGNHbGxiblFpT2lKVGVXNTBhR1YwYVdNZ2NtVmpaV2wyYVc1bklHUmxjMnNnVG05eWRHZ2lMQ0p6ZFdKcVpXTjBJanA3SW1GdGIzVnVkRjl0YVc1dmNpSTZNVFV3TURBd01Dd2lZM1Z5Y21WdVkza2lPaUpWVTBRaUxDSmpkWE4wYjIxbGNpSTZJazl5WTJocFpDSXNJbVJsYkdsMlpYSjVYMmxrSWpvaVJFVk1MVFFpTENKa2FYTndkWFJsWDJsa0lqb2laR2x6Y0hWMFpTMHhOeUlzSW1WdWRHbDBlU0k2SW1WdWRHbDBlVjl1YjNKMGFDSXNJbWx1ZG05cFkyVmZhV1FpT2lKSlRsWXRNVEF4SWl3aWIzSmtaWEpmYVdRaU9pSlFUeTA1SW4xOSIsIm9yaWdpbmFsX2hhc2giOiJzaGEyNTY6YzdmOGFkODcyYTYzZTI1Mjc0NDNlNDgxZmY3M2RhY2M4NDE5YTY2YmVkNjFmMDFkNmM3Y2I3ZjU1OGNmZWYwNSIsInF1YW50aXR5IjoxMCwicmVjaXBpZW50IjoiU3ludGhldGljIHJlY2VpdmluZyBkZXNrIE5vcnRoIiwicmVzY2luZGVkIjpmYWxzZSwic291cmNlX3RpbWV6b25lIjoiVVRDIiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2YWxpZCI6dHJ1ZSwidmVyc2lvbiI6MX0sInJldmlzaW9uIjoxLCJzY2hlbWFfdmVyc2lvbiI6InN5bnRoZXRpYy1kaXNwdXRlLXNvdXJjZS52MSIsInRlcm1zIjp7ImNsYXVzZSI6IlN5bnRoZXRpYyB0ZXN0IHRlcm06IHVwaG9sZCBvbmx5IHRoZSBtYXRjaGVkIGRlbGl2ZXJlZCBwb3J0aW9uIHdpdGggbm8gb3RoZXIgYWN0aXZlIGRpc3B1dGUgZ3JvdW5kOyBwYXltZW50IG9ibGlnYXRpb25zIHJlbWFpbi4iLCJjbGF1c2VfaWQiOiJOMS1tYXRjaGVkLWRlbGl2ZXJ5LW9ubHkiLCJlZmZlY3RpdmVfZnJvbSI6IjIwMjYtMDEtMDFUMDA6MDA6MDAuMDAwWiIsImVmZmVjdGl2ZV91bnRpbCI6IjIwMjctMDEtMDFUMDA6MDA6MDAuMDAwWiIsIm9iamVjdF9pZCI6IlRFUk1TLU4xIiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2YWxpZCI6dHJ1ZSwidmVyc2lvbiI6MX19",
+            "source": {
+              "ar": {
+                "active_grounds": [],
+                "adjustment_minor": 0,
+                "credit_ids": [],
+                "decision_reference": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+                "disposed_grounds": ["non_delivery"],
+                "event_at": "2026-09-07T16:06:00.000Z",
+                "grounds_complete": true,
+                "object_id": "AR-dispute-17",
+                "payment_status": "unknown",
+                "prior_hash": "sha256:99247f5945b0f9882b962a2eac883898bc8b5b5ca3432dfb474c1ee8dd719415",
+                "prior_version": 0,
+                "source_timezone": "UTC",
+                "status": "upheld_no_adjustment",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "version": 1
+              },
+              "pod": {
+                "allocation_complete": true,
+                "custodian": "Synthetic delivery registry",
+                "event_at": "2026-09-01T14:00:00.000Z",
+                "issuer": "Synthetic carrier fixture",
+                "line_id": "line-4",
+                "object_id": "POD-4",
+                "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                "quantity": 10,
+                "recipient": "Synthetic receiving desk North",
+                "rescinded": false,
+                "source_timezone": "UTC",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              },
+              "revision": 1,
+              "schema_version": "synthetic-dispute-source.v1",
+              "terms": {
+                "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                "clause_id": "N1-matched-delivery-only",
+                "effective_from": "2026-01-01T00:00:00.000Z",
+                "effective_until": "2027-01-01T00:00:00.000Z",
+                "object_id": "TERMS-N1",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              }
+            },
+            "status": "read"
+          },
+          "recorded_at": "2026-09-07T16:06:00.000Z",
+          "started_at": "2026-09-07T16:06:00.000Z"
+        },
+        "tenant_id": "tenant_intake_demo",
+        "versions": {
+          "engine": "dispute-result.v1",
+          "material": "dispute-authority-material.v1",
+          "reader": "synthetic-dispute-source.v1"
+        }
+      },
+      "historical_only": true,
+      "schema_version": "dispute-result-receipt.v1"
+    },
+    "reopen": {
+      "entry": {
+        "actor": {
+          "identity_id": "identity_dispute_robin",
+          "identity_kind": "human",
+          "schema_version": "identity-reference.v0",
+          "status": "active",
+          "tenant_id": "tenant_intake_demo"
+        },
+        "authority_position": 2,
+        "authority_state_revision": 1,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "command": {
+          "acceptance_hash": "sha256:08bdda6f7eef9948a1d11e80099136fd968ba705ce79fadf6c620af3b812a489",
+          "binding": {
+            "authority_state_revision": 1,
+            "business_input_hash": "sha256:92d4e9e995ddbdbe821c45e0bc3fcedd9611973cadf2c533eaebdb0a227781f7",
+            "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "case_version": 3,
+            "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "result_head": "sha256:627ddda25fd531e3f897369e76ddfe4ca18e0684932e17c2de6197a5b6f2ad2f",
+            "result_revision": 8
+          },
+          "candidate_hash": "sha256:11a7ec4d8ea81dba43c21b98f7046d3f9650afd1d0953fcb06467f2f6204f79a",
+          "idempotency_key": "reopen-11",
+          "observation_hash": "sha256:627ddda25fd531e3f897369e76ddfe4ca18e0684932e17c2de6197a5b6f2ad2f",
+          "operation": "reopen",
+          "reason": "Independent synthetic source retracted original delivery proof and reopened this exact dispute",
+          "schema_version": "dispute-result-command.v1"
+        },
+        "command_fingerprint": "sha256:7918ad74103731e84cb8a745fed7b092149f5a0aa718cc6395e6d959d615fe32",
+        "context": {
+          "authority_position": 2,
+          "authority_state_revision": 1,
+          "bundle_hashes": [
+            "sha256:82fb429cd5b530e375aa766d7e0f360d4f49a779c2d66722a597de1e948859f8",
+            "sha256:b1c61d552f52f5ef845fc8354cd0ca95bacd8cc693d3e293b77ef034efc90158"
+          ],
+          "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+          "case_version": 3,
+          "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+          "clock_floor": "2026-09-07T16:06:00.000Z",
+          "commit_hashes": [
+            "sha256:6c6dd46c89f2b4e1a8a87cb02e9b73ad0f33ed8677cee99a369a8d634ba61c8f",
+            "sha256:b8b79902f9b250fb988d111511dc9b818fc2f1df9e3e28b68ff6c14e527ac6e2",
+            "sha256:ebab968dedd68cba19897936b72b6723b066b78d497a13f5a7ed18f924e13219"
+          ],
+          "work_hashes": [
+            "sha256:2eaa7bacb88ed595ce8ed9af550ff861db02e5777d94eede35eaa9981c1fb9a5",
+            "sha256:36e9110d2c9fc2d319b28e6d81875204ea1b2ade2e6c0879e0143117177a5f57",
+            "sha256:fa65f2aaf4452c5070bca14c3d746827ee8003f84f9e80d80c3dbafe3b6cccbe",
+            "sha256:a0c070ff60f22cd62f9a1a55810b2497c072e6570ca974df655fba05557b23ec",
+            "sha256:1ae5f44088053cfaeb94ce8182ea843b7558796745cb9e300c017d4df0ed0d87",
+            "sha256:7fe605b6209b3f3ccb8e38c6b536d5126ad0943aee1a505cedf67cc5e79142b1"
+          ]
+        },
+        "data": {
+          "kind": "reopen",
+          "reason": "Independent synthetic source retracted original delivery proof and reopened this exact dispute"
+        },
+        "hash": "sha256:e8c33bda3e8ed6be0eeafbb286e1f2da9565030b04e6263768c91c1bd3f2fa56",
+        "id": "result_7918ad74103731e84cb8a745fed7b092149f5a0aa718cc6395e6d959d615fe32",
+        "idempotency_key": "reopen-11",
+        "operation": "reopen",
+        "previous_entry_hash": "sha256:627ddda25fd531e3f897369e76ddfe4ca18e0684932e17c2de6197a5b6f2ad2f",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "recorded_at": "2026-09-07T16:06:00.000Z",
+        "schema_version": "dispute-result-entry.v1",
+        "sequence": 9,
+        "source_precondition": null,
+        "tenant_id": "tenant_intake_demo",
+        "versions": {
+          "engine": "dispute-result.v1",
+          "material": "dispute-authority-material.v1",
+          "reader": "synthetic-dispute-source.v1"
+        }
+      },
+      "historical_only": true,
+      "schema_version": "dispute-result-receipt.v1"
+    },
+    "independent_match": {
+      "entry": {
+        "actor": {
+          "identity_id": "identity_dispute_verifier",
+          "identity_kind": "service",
+          "schema_version": "identity-reference.v0",
+          "status": "active",
+          "tenant_id": "tenant_intake_demo"
+        },
+        "authority_position": 2,
+        "authority_state_revision": 1,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "command": {
+          "binding": {
+            "authority_state_revision": 1,
+            "business_input_hash": "sha256:92d4e9e995ddbdbe821c45e0bc3fcedd9611973cadf2c533eaebdb0a227781f7",
+            "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "case_version": 3,
+            "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "result_head": "sha256:f2bdcce8a83be35d0c82e2238a90fbd0df794a5c0911312095e55f3f95b5a093",
+            "result_revision": 5
+          },
+          "candidate_hash": "sha256:11a7ec4d8ea81dba43c21b98f7046d3f9650afd1d0953fcb06467f2f6204f79a",
+          "decision_hash": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+          "idempotency_key": "result_check-8",
+          "operation": "result_check",
+          "schema_version": "dispute-result-command.v1"
+        },
+        "command_fingerprint": "sha256:1ec758f847d739f16fd2286d5d8aae16b7e5077c11daaf628bbaa5d71f93bd4f",
+        "context": {
+          "authority_position": 2,
+          "authority_state_revision": 1,
+          "bundle_hashes": [
+            "sha256:82fb429cd5b530e375aa766d7e0f360d4f49a779c2d66722a597de1e948859f8",
+            "sha256:b1c61d552f52f5ef845fc8354cd0ca95bacd8cc693d3e293b77ef034efc90158"
+          ],
+          "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+          "case_version": 3,
+          "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+          "clock_floor": "2026-09-07T16:06:00.000Z",
+          "commit_hashes": [
+            "sha256:6c6dd46c89f2b4e1a8a87cb02e9b73ad0f33ed8677cee99a369a8d634ba61c8f",
+            "sha256:b8b79902f9b250fb988d111511dc9b818fc2f1df9e3e28b68ff6c14e527ac6e2",
+            "sha256:ebab968dedd68cba19897936b72b6723b066b78d497a13f5a7ed18f924e13219"
+          ],
+          "work_hashes": [
+            "sha256:2eaa7bacb88ed595ce8ed9af550ff861db02e5777d94eede35eaa9981c1fb9a5",
+            "sha256:36e9110d2c9fc2d319b28e6d81875204ea1b2ade2e6c0879e0143117177a5f57",
+            "sha256:fa65f2aaf4452c5070bca14c3d746827ee8003f84f9e80d80c3dbafe3b6cccbe",
+            "sha256:a0c070ff60f22cd62f9a1a55810b2497c072e6570ca974df655fba05557b23ec",
+            "sha256:1ae5f44088053cfaeb94ce8182ea843b7558796745cb9e300c017d4df0ed0d87",
+            "sha256:7fe605b6209b3f3ccb8e38c6b536d5126ad0943aee1a505cedf67cc5e79142b1"
+          ]
+        },
+        "data": {
+          "comparison": {
+            "expected": {
+              "amount_minor": 1500000,
+              "currency": "USD",
+              "customer": "Orchid",
+              "delivery_id": "DEL-4",
+              "dispute_id": "dispute-17",
+              "entity": "entity_north",
+              "invoice_id": "INV-101",
+              "order_id": "PO-9"
+            },
+            "observed": {
+              "ar": {
+                "active_grounds": [],
+                "adjustment_minor": 0,
+                "credit_ids": [],
+                "decision_reference": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+                "disposed_grounds": ["non_delivery"],
+                "event_at": "2026-09-07T16:06:00.000Z",
+                "grounds_complete": true,
+                "object_id": "AR-dispute-17",
+                "payment_status": "unknown",
+                "prior_hash": "sha256:99247f5945b0f9882b962a2eac883898bc8b5b5ca3432dfb474c1ee8dd719415",
+                "prior_version": 0,
+                "source_timezone": "UTC",
+                "status": "upheld_no_adjustment",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "version": 1
+              },
+              "pod": {
+                "allocation_complete": true,
+                "custodian": "Synthetic delivery registry",
+                "event_at": "2026-09-01T14:00:00.000Z",
+                "issuer": "Synthetic carrier fixture",
+                "line_id": "line-4",
+                "object_id": "POD-4",
+                "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                "quantity": 10,
+                "recipient": "Synthetic receiving desk North",
+                "rescinded": false,
+                "source_timezone": "UTC",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              },
+              "revision": 1,
+              "schema_version": "synthetic-dispute-source.v1",
+              "terms": {
+                "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                "clause_id": "N1-matched-delivery-only",
+                "effective_from": "2026-01-01T00:00:00.000Z",
+                "effective_until": "2027-01-01T00:00:00.000Z",
+                "object_id": "TERMS-N1",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              }
+            },
+            "phase": "result",
+            "reasons": [],
+            "status": "match"
+          },
+          "kind": "result_check",
+          "observation": {
+            "observed_at": "2026-09-07T16:06:00.000Z",
+            "read": {
+              "byte_hash": "sha256:89ee031124924f4b78658dd12e523b357f775bc467a990fc1cd1b0616b70b7f9",
+              "bytes_base64": "eyJhciI6eyJhY3RpdmVfZ3JvdW5kcyI6W10sImFkanVzdG1lbnRfbWlub3IiOjAsImNyZWRpdF9pZHMiOltdLCJkZWNpc2lvbl9yZWZlcmVuY2UiOiJzaGEyNTY6MmMwNjE3YmY2ZjZkYjUwNjQ0ZTlmYTFhMjY3YWY0Nzc1YmRhOGRhYjlmYWNhODExNzM5MjNiOTliYjRkYjgwZCIsImRpc3Bvc2VkX2dyb3VuZHMiOlsibm9uX2RlbGl2ZXJ5Il0sImV2ZW50X2F0IjoiMjAyNi0wOS0wN1QxNjowNjowMC4wMDBaIiwiZ3JvdW5kc19jb21wbGV0ZSI6dHJ1ZSwib2JqZWN0X2lkIjoiQVItZGlzcHV0ZS0xNyIsInBheW1lbnRfc3RhdHVzIjoidW5rbm93biIsInByaW9yX2hhc2giOiJzaGEyNTY6OTkyNDdmNTk0NWIwZjk4ODJiOTYyYTJlYWM4ODM4OThiYzhiNWI1Y2EzNDMyZGZiNDc0YzFlZThkZDcxOTQxNSIsInByaW9yX3ZlcnNpb24iOjAsInNvdXJjZV90aW1lem9uZSI6IlVUQyIsInN0YXR1cyI6InVwaGVsZF9ub19hZGp1c3RtZW50Iiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2ZXJzaW9uIjoxfSwicG9kIjp7ImFsbG9jYXRpb25fY29tcGxldGUiOnRydWUsImN1c3RvZGlhbiI6IlN5bnRoZXRpYyBkZWxpdmVyeSByZWdpc3RyeSIsImV2ZW50X2F0IjoiMjAyNi0wOS0wMVQxNDowMDowMC4wMDBaIiwiaXNzdWVyIjoiU3ludGhldGljIGNhcnJpZXIgZml4dHVyZSIsImxpbmVfaWQiOiJsaW5lLTQiLCJvYmplY3RfaWQiOiJQT0QtNCIsIm9yaWdpbmFsX2J5dGVzX2Jhc2U2NCI6ImV5SmtaV3hwZG1WeVpXUmZZWFFpT2lJeU1ESTJMVEE1TFRBeFZERTBPakF3T2pBd0xqQXdNRm9pTENKc2FXNWxYMmxrSWpvaWJHbHVaUzAwSWl3aWNYVmhiblJwZEhraU9qRXdMQ0p5WldOcGNHbGxiblFpT2lKVGVXNTBhR1YwYVdNZ2NtVmpaV2wyYVc1bklHUmxjMnNnVG05eWRHZ2lMQ0p6ZFdKcVpXTjBJanA3SW1GdGIzVnVkRjl0YVc1dmNpSTZNVFV3TURBd01Dd2lZM1Z5Y21WdVkza2lPaUpWVTBRaUxDSmpkWE4wYjIxbGNpSTZJazl5WTJocFpDSXNJbVJsYkdsMlpYSjVYMmxrSWpvaVJFVk1MVFFpTENKa2FYTndkWFJsWDJsa0lqb2laR2x6Y0hWMFpTMHhOeUlzSW1WdWRHbDBlU0k2SW1WdWRHbDBlVjl1YjNKMGFDSXNJbWx1ZG05cFkyVmZhV1FpT2lKSlRsWXRNVEF4SWl3aWIzSmtaWEpmYVdRaU9pSlFUeTA1SW4xOSIsIm9yaWdpbmFsX2hhc2giOiJzaGEyNTY6YzdmOGFkODcyYTYzZTI1Mjc0NDNlNDgxZmY3M2RhY2M4NDE5YTY2YmVkNjFmMDFkNmM3Y2I3ZjU1OGNmZWYwNSIsInF1YW50aXR5IjoxMCwicmVjaXBpZW50IjoiU3ludGhldGljIHJlY2VpdmluZyBkZXNrIE5vcnRoIiwicmVzY2luZGVkIjpmYWxzZSwic291cmNlX3RpbWV6b25lIjoiVVRDIiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2YWxpZCI6dHJ1ZSwidmVyc2lvbiI6MX0sInJldmlzaW9uIjoxLCJzY2hlbWFfdmVyc2lvbiI6InN5bnRoZXRpYy1kaXNwdXRlLXNvdXJjZS52MSIsInRlcm1zIjp7ImNsYXVzZSI6IlN5bnRoZXRpYyB0ZXN0IHRlcm06IHVwaG9sZCBvbmx5IHRoZSBtYXRjaGVkIGRlbGl2ZXJlZCBwb3J0aW9uIHdpdGggbm8gb3RoZXIgYWN0aXZlIGRpc3B1dGUgZ3JvdW5kOyBwYXltZW50IG9ibGlnYXRpb25zIHJlbWFpbi4iLCJjbGF1c2VfaWQiOiJOMS1tYXRjaGVkLWRlbGl2ZXJ5LW9ubHkiLCJlZmZlY3RpdmVfZnJvbSI6IjIwMjYtMDEtMDFUMDA6MDA6MDAuMDAwWiIsImVmZmVjdGl2ZV91bnRpbCI6IjIwMjctMDEtMDFUMDA6MDA6MDAuMDAwWiIsIm9iamVjdF9pZCI6IlRFUk1TLU4xIiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2YWxpZCI6dHJ1ZSwidmVyc2lvbiI6MX19",
+              "source": {
+                "ar": {
+                  "active_grounds": [],
+                  "adjustment_minor": 0,
+                  "credit_ids": [],
+                  "decision_reference": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+                  "disposed_grounds": ["non_delivery"],
+                  "event_at": "2026-09-07T16:06:00.000Z",
+                  "grounds_complete": true,
+                  "object_id": "AR-dispute-17",
+                  "payment_status": "unknown",
+                  "prior_hash": "sha256:99247f5945b0f9882b962a2eac883898bc8b5b5ca3432dfb474c1ee8dd719415",
+                  "prior_version": 0,
+                  "source_timezone": "UTC",
+                  "status": "upheld_no_adjustment",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "version": 1
+                },
+                "pod": {
+                  "allocation_complete": true,
+                  "custodian": "Synthetic delivery registry",
+                  "event_at": "2026-09-01T14:00:00.000Z",
+                  "issuer": "Synthetic carrier fixture",
+                  "line_id": "line-4",
+                  "object_id": "POD-4",
+                  "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                  "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                  "quantity": 10,
+                  "recipient": "Synthetic receiving desk North",
+                  "rescinded": false,
+                  "source_timezone": "UTC",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "valid": true,
+                  "version": 1
+                },
+                "revision": 1,
+                "schema_version": "synthetic-dispute-source.v1",
+                "terms": {
+                  "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                  "clause_id": "N1-matched-delivery-only",
+                  "effective_from": "2026-01-01T00:00:00.000Z",
+                  "effective_until": "2027-01-01T00:00:00.000Z",
+                  "object_id": "TERMS-N1",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "valid": true,
+                  "version": 1
+                }
+              },
+              "status": "read"
+            },
+            "recheck": {
+              "byte_hash": "sha256:89ee031124924f4b78658dd12e523b357f775bc467a990fc1cd1b0616b70b7f9",
+              "bytes_base64": "eyJhciI6eyJhY3RpdmVfZ3JvdW5kcyI6W10sImFkanVzdG1lbnRfbWlub3IiOjAsImNyZWRpdF9pZHMiOltdLCJkZWNpc2lvbl9yZWZlcmVuY2UiOiJzaGEyNTY6MmMwNjE3YmY2ZjZkYjUwNjQ0ZTlmYTFhMjY3YWY0Nzc1YmRhOGRhYjlmYWNhODExNzM5MjNiOTliYjRkYjgwZCIsImRpc3Bvc2VkX2dyb3VuZHMiOlsibm9uX2RlbGl2ZXJ5Il0sImV2ZW50X2F0IjoiMjAyNi0wOS0wN1QxNjowNjowMC4wMDBaIiwiZ3JvdW5kc19jb21wbGV0ZSI6dHJ1ZSwib2JqZWN0X2lkIjoiQVItZGlzcHV0ZS0xNyIsInBheW1lbnRfc3RhdHVzIjoidW5rbm93biIsInByaW9yX2hhc2giOiJzaGEyNTY6OTkyNDdmNTk0NWIwZjk4ODJiOTYyYTJlYWM4ODM4OThiYzhiNWI1Y2EzNDMyZGZiNDc0YzFlZThkZDcxOTQxNSIsInByaW9yX3ZlcnNpb24iOjAsInNvdXJjZV90aW1lem9uZSI6IlVUQyIsInN0YXR1cyI6InVwaGVsZF9ub19hZGp1c3RtZW50Iiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2ZXJzaW9uIjoxfSwicG9kIjp7ImFsbG9jYXRpb25fY29tcGxldGUiOnRydWUsImN1c3RvZGlhbiI6IlN5bnRoZXRpYyBkZWxpdmVyeSByZWdpc3RyeSIsImV2ZW50X2F0IjoiMjAyNi0wOS0wMVQxNDowMDowMC4wMDBaIiwiaXNzdWVyIjoiU3ludGhldGljIGNhcnJpZXIgZml4dHVyZSIsImxpbmVfaWQiOiJsaW5lLTQiLCJvYmplY3RfaWQiOiJQT0QtNCIsIm9yaWdpbmFsX2J5dGVzX2Jhc2U2NCI6ImV5SmtaV3hwZG1WeVpXUmZZWFFpT2lJeU1ESTJMVEE1TFRBeFZERTBPakF3T2pBd0xqQXdNRm9pTENKc2FXNWxYMmxrSWpvaWJHbHVaUzAwSWl3aWNYVmhiblJwZEhraU9qRXdMQ0p5WldOcGNHbGxiblFpT2lKVGVXNTBhR1YwYVdNZ2NtVmpaV2wyYVc1bklHUmxjMnNnVG05eWRHZ2lMQ0p6ZFdKcVpXTjBJanA3SW1GdGIzVnVkRjl0YVc1dmNpSTZNVFV3TURBd01Dd2lZM1Z5Y21WdVkza2lPaUpWVTBRaUxDSmpkWE4wYjIxbGNpSTZJazl5WTJocFpDSXNJbVJsYkdsMlpYSjVYMmxrSWpvaVJFVk1MVFFpTENKa2FYTndkWFJsWDJsa0lqb2laR2x6Y0hWMFpTMHhOeUlzSW1WdWRHbDBlU0k2SW1WdWRHbDBlVjl1YjNKMGFDSXNJbWx1ZG05cFkyVmZhV1FpT2lKSlRsWXRNVEF4SWl3aWIzSmtaWEpmYVdRaU9pSlFUeTA1SW4xOSIsIm9yaWdpbmFsX2hhc2giOiJzaGEyNTY6YzdmOGFkODcyYTYzZTI1Mjc0NDNlNDgxZmY3M2RhY2M4NDE5YTY2YmVkNjFmMDFkNmM3Y2I3ZjU1OGNmZWYwNSIsInF1YW50aXR5IjoxMCwicmVjaXBpZW50IjoiU3ludGhldGljIHJlY2VpdmluZyBkZXNrIE5vcnRoIiwicmVzY2luZGVkIjpmYWxzZSwic291cmNlX3RpbWV6b25lIjoiVVRDIiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2YWxpZCI6dHJ1ZSwidmVyc2lvbiI6MX0sInJldmlzaW9uIjoxLCJzY2hlbWFfdmVyc2lvbiI6InN5bnRoZXRpYy1kaXNwdXRlLXNvdXJjZS52MSIsInRlcm1zIjp7ImNsYXVzZSI6IlN5bnRoZXRpYyB0ZXN0IHRlcm06IHVwaG9sZCBvbmx5IHRoZSBtYXRjaGVkIGRlbGl2ZXJlZCBwb3J0aW9uIHdpdGggbm8gb3RoZXIgYWN0aXZlIGRpc3B1dGUgZ3JvdW5kOyBwYXltZW50IG9ibGlnYXRpb25zIHJlbWFpbi4iLCJjbGF1c2VfaWQiOiJOMS1tYXRjaGVkLWRlbGl2ZXJ5LW9ubHkiLCJlZmZlY3RpdmVfZnJvbSI6IjIwMjYtMDEtMDFUMDA6MDA6MDAuMDAwWiIsImVmZmVjdGl2ZV91bnRpbCI6IjIwMjctMDEtMDFUMDA6MDA6MDAuMDAwWiIsIm9iamVjdF9pZCI6IlRFUk1TLU4xIiwic3ViamVjdCI6eyJhbW91bnRfbWlub3IiOjE1MDAwMDAsImN1cnJlbmN5IjoiVVNEIiwiY3VzdG9tZXIiOiJPcmNoaWQiLCJkZWxpdmVyeV9pZCI6IkRFTC00IiwiZGlzcHV0ZV9pZCI6ImRpc3B1dGUtMTciLCJlbnRpdHkiOiJlbnRpdHlfbm9ydGgiLCJpbnZvaWNlX2lkIjoiSU5WLTEwMSIsIm9yZGVyX2lkIjoiUE8tOSJ9LCJ2YWxpZCI6dHJ1ZSwidmVyc2lvbiI6MX19",
+              "source": {
+                "ar": {
+                  "active_grounds": [],
+                  "adjustment_minor": 0,
+                  "credit_ids": [],
+                  "decision_reference": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+                  "disposed_grounds": ["non_delivery"],
+                  "event_at": "2026-09-07T16:06:00.000Z",
+                  "grounds_complete": true,
+                  "object_id": "AR-dispute-17",
+                  "payment_status": "unknown",
+                  "prior_hash": "sha256:99247f5945b0f9882b962a2eac883898bc8b5b5ca3432dfb474c1ee8dd719415",
+                  "prior_version": 0,
+                  "source_timezone": "UTC",
+                  "status": "upheld_no_adjustment",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "version": 1
+                },
+                "pod": {
+                  "allocation_complete": true,
+                  "custodian": "Synthetic delivery registry",
+                  "event_at": "2026-09-01T14:00:00.000Z",
+                  "issuer": "Synthetic carrier fixture",
+                  "line_id": "line-4",
+                  "object_id": "POD-4",
+                  "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                  "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                  "quantity": 10,
+                  "recipient": "Synthetic receiving desk North",
+                  "rescinded": false,
+                  "source_timezone": "UTC",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "valid": true,
+                  "version": 1
+                },
+                "revision": 1,
+                "schema_version": "synthetic-dispute-source.v1",
+                "terms": {
+                  "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                  "clause_id": "N1-matched-delivery-only",
+                  "effective_from": "2026-01-01T00:00:00.000Z",
+                  "effective_until": "2027-01-01T00:00:00.000Z",
+                  "object_id": "TERMS-N1",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "valid": true,
+                  "version": 1
+                }
+              },
+              "status": "read"
+            },
+            "recorded_at": "2026-09-07T16:06:00.000Z",
+            "started_at": "2026-09-07T16:06:00.000Z"
+          },
+          "outcome": {
+            "accepted": false,
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "evidence_ids": [
+              "result_1ec758f847d739f16fd2286d5d8aae16b7e5077c11daaf628bbaa5d71f93bd4f",
+              "result_f2cb1f653051d4c1069c721cc62315cfeed3a1b36ff06bd203bd750301aa8832"
+            ],
+            "id": "outcome_670c0bb5deb9aa94c03179c70b7781c9d7121cc24f78a78c6da3f718bc2574fc",
+            "metrics": {
+              "cash_collected": null,
+              "currency": "USD",
+              "disputed_amount_minor": 1500000
+            },
+            "status": "achieved",
+            "type": "invoice_dispute_no_adjustment",
+            "verified_at": "2026-09-07T16:06:00.000Z",
+            "verified_by_identity_id": "identity_dispute_verifier"
+          }
+        },
+        "hash": "sha256:629893f6adbbd3d9134cbae5b3ceedde368ad17d79e0733ce6b0d04388e1aa36",
+        "id": "result_1ec758f847d739f16fd2286d5d8aae16b7e5077c11daaf628bbaa5d71f93bd4f",
+        "idempotency_key": "result_check-8",
+        "operation": "result_check",
+        "previous_entry_hash": "sha256:f2bdcce8a83be35d0c82e2238a90fbd0df794a5c0911312095e55f3f95b5a093",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "recorded_at": "2026-09-07T16:06:00.000Z",
+        "schema_version": "dispute-result-entry.v1",
+        "sequence": 6,
+        "source_precondition": null,
+        "tenant_id": "tenant_intake_demo",
+        "versions": {
+          "engine": "dispute-result.v1",
+          "material": "dispute-authority-material.v1",
+          "reader": "synthetic-dispute-source.v1"
+        }
+      },
+      "historical_only": true,
+      "schema_version": "dispute-result-receipt.v1"
+    },
+    "independent_reversal": {
+      "entry": {
+        "actor": {
+          "identity_id": "identity_dispute_verifier",
+          "identity_kind": "service",
+          "schema_version": "identity-reference.v0",
+          "status": "active",
+          "tenant_id": "tenant_intake_demo"
+        },
+        "authority_position": 2,
+        "authority_state_revision": 1,
+        "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+        "command": {
+          "binding": {
+            "authority_state_revision": 1,
+            "business_input_hash": "sha256:92d4e9e995ddbdbe821c45e0bc3fcedd9611973cadf2c533eaebdb0a227781f7",
+            "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+            "case_id": "case_intake_6afeaa5cdfcb2cc56ed494dc464b8129ec5a9ec5f7a4cc24f602563f8c4ffbdf",
+            "case_version": 3,
+            "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+            "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+            "result_head": "sha256:08bdda6f7eef9948a1d11e80099136fd968ba705ce79fadf6c620af3b812a489",
+            "result_revision": 7
+          },
+          "candidate_hash": "sha256:11a7ec4d8ea81dba43c21b98f7046d3f9650afd1d0953fcb06467f2f6204f79a",
+          "decision_hash": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+          "idempotency_key": "result_check-10",
+          "operation": "result_check",
+          "schema_version": "dispute-result-command.v1"
+        },
+        "command_fingerprint": "sha256:b133db31146a10175f4448b0c5046d9fe15bbf4e9a6d20a90ffb7bc9d960fa7a",
+        "context": {
+          "authority_position": 2,
+          "authority_state_revision": 1,
+          "bundle_hashes": [
+            "sha256:82fb429cd5b530e375aa766d7e0f360d4f49a779c2d66722a597de1e948859f8",
+            "sha256:b1c61d552f52f5ef845fc8354cd0ca95bacd8cc693d3e293b77ef034efc90158"
+          ],
+          "case_head_hash": "sha256:fd22d67189c05f588fba740f08d34dc29b206da8df2fedc7df432390bf1e57ff",
+          "case_version": 3,
+          "catalog_hash": "sha256:7c19ffe62ec80664067a5464af5b74b58c2baf42a4ae1e1ff75cb6fcf8f45bc7",
+          "clock_floor": "2026-09-07T16:06:00.000Z",
+          "commit_hashes": [
+            "sha256:6c6dd46c89f2b4e1a8a87cb02e9b73ad0f33ed8677cee99a369a8d634ba61c8f",
+            "sha256:b8b79902f9b250fb988d111511dc9b818fc2f1df9e3e28b68ff6c14e527ac6e2",
+            "sha256:ebab968dedd68cba19897936b72b6723b066b78d497a13f5a7ed18f924e13219"
+          ],
+          "work_hashes": [
+            "sha256:2eaa7bacb88ed595ce8ed9af550ff861db02e5777d94eede35eaa9981c1fb9a5",
+            "sha256:36e9110d2c9fc2d319b28e6d81875204ea1b2ade2e6c0879e0143117177a5f57",
+            "sha256:fa65f2aaf4452c5070bca14c3d746827ee8003f84f9e80d80c3dbafe3b6cccbe",
+            "sha256:a0c070ff60f22cd62f9a1a55810b2497c072e6570ca974df655fba05557b23ec",
+            "sha256:1ae5f44088053cfaeb94ce8182ea843b7558796745cb9e300c017d4df0ed0d87",
+            "sha256:7fe605b6209b3f3ccb8e38c6b536d5126ad0943aee1a505cedf67cc5e79142b1"
+          ]
+        },
+        "data": {
+          "comparison": {
+            "expected": {
+              "amount_minor": 1500000,
+              "currency": "USD",
+              "customer": "Orchid",
+              "delivery_id": "DEL-4",
+              "dispute_id": "dispute-17",
+              "entity": "entity_north",
+              "invoice_id": "INV-101",
+              "order_id": "PO-9"
+            },
+            "observed": {
+              "ar": {
+                "active_grounds": ["non_delivery"],
+                "adjustment_minor": 0,
+                "credit_ids": [],
+                "decision_reference": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+                "disposed_grounds": ["non_delivery"],
+                "event_at": "2026-09-07T16:06:00.000Z",
+                "grounds_complete": true,
+                "object_id": "AR-dispute-17",
+                "payment_status": "unknown",
+                "prior_hash": "sha256:99247f5945b0f9882b962a2eac883898bc8b5b5ca3432dfb474c1ee8dd719415",
+                "prior_version": 0,
+                "source_timezone": "UTC",
+                "status": "reopened",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "version": 1
+              },
+              "pod": {
+                "allocation_complete": true,
+                "custodian": "Synthetic delivery registry",
+                "event_at": "2026-09-01T14:00:00.000Z",
+                "issuer": "Synthetic carrier fixture",
+                "line_id": "line-4",
+                "object_id": "POD-4",
+                "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                "quantity": 10,
+                "recipient": "Synthetic receiving desk North",
+                "rescinded": true,
+                "source_timezone": "UTC",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              },
+              "revision": 2,
+              "schema_version": "synthetic-dispute-source.v1",
+              "terms": {
+                "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                "clause_id": "N1-matched-delivery-only",
+                "effective_from": "2026-01-01T00:00:00.000Z",
+                "effective_until": "2027-01-01T00:00:00.000Z",
+                "object_id": "TERMS-N1",
+                "subject": {
+                  "amount_minor": 1500000,
+                  "currency": "USD",
+                  "customer": "Orchid",
+                  "delivery_id": "DEL-4",
+                  "dispute_id": "dispute-17",
+                  "entity": "entity_north",
+                  "invoice_id": "INV-101",
+                  "order_id": "PO-9"
+                },
+                "valid": true,
+                "version": 1
+              }
+            },
+            "phase": "result",
+            "reasons": [
+              "Original delivery proof is rescinded, incomplete or invalid",
+              "Governing POD or terms changed since the authorized basis",
+              "Authoritative AR state has no upheld no-adjustment result"
+            ],
+            "status": "mismatch"
+          },
+          "kind": "result_check",
+          "observation": {
+            "observed_at": "2026-09-07T16:06:00.000Z",
+            "read": {
+              "byte_hash": "sha256:8457ddf1dcc78be6587b8f480a2965a6f2e80748e613d7a1a9173332b678f4e9",
+              "bytes_base64": "eyJhciI6eyJhY3RpdmVfZ3JvdW5kcyI6WyJub25fZGVsaXZlcnkiXSwiYWRqdXN0bWVudF9taW5vciI6MCwiY3JlZGl0X2lkcyI6W10sImRlY2lzaW9uX3JlZmVyZW5jZSI6InNoYTI1NjoyYzA2MTdiZjZmNmRiNTA2NDRlOWZhMWEyNjdhZjQ3NzViZGE4ZGFiOWZhY2E4MTE3MzkyM2I5OWJiNGRiODBkIiwiZGlzcG9zZWRfZ3JvdW5kcyI6WyJub25fZGVsaXZlcnkiXSwiZXZlbnRfYXQiOiIyMDI2LTA5LTA3VDE2OjA2OjAwLjAwMFoiLCJncm91bmRzX2NvbXBsZXRlIjp0cnVlLCJvYmplY3RfaWQiOiJBUi1kaXNwdXRlLTE3IiwicGF5bWVudF9zdGF0dXMiOiJ1bmtub3duIiwicHJpb3JfaGFzaCI6InNoYTI1Njo5OTI0N2Y1OTQ1YjBmOTg4MmI5NjJhMmVhYzg4Mzg5OGJjOGI1YjVjYTM0MzJkZmI0NzRjMWVlOGRkNzE5NDE1IiwicHJpb3JfdmVyc2lvbiI6MCwic291cmNlX3RpbWV6b25lIjoiVVRDIiwic3RhdHVzIjoicmVvcGVuZWQiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In0sInZlcnNpb24iOjF9LCJwb2QiOnsiYWxsb2NhdGlvbl9jb21wbGV0ZSI6dHJ1ZSwiY3VzdG9kaWFuIjoiU3ludGhldGljIGRlbGl2ZXJ5IHJlZ2lzdHJ5IiwiZXZlbnRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJpc3N1ZXIiOiJTeW50aGV0aWMgY2FycmllciBmaXh0dXJlIiwibGluZV9pZCI6ImxpbmUtNCIsIm9iamVjdF9pZCI6IlBPRC00Iiwib3JpZ2luYWxfYnl0ZXNfYmFzZTY0IjoiZXlKa1pXeHBkbVZ5WldSZllYUWlPaUl5TURJMkxUQTVMVEF4VkRFME9qQXdPakF3TGpBd01Gb2lMQ0pzYVc1bFgybGtJam9pYkdsdVpTMDBJaXdpY1hWaGJuUnBkSGtpT2pFd0xDSnlaV05wY0dsbGJuUWlPaUpUZVc1MGFHVjBhV01nY21WalpXbDJhVzVuSUdSbGMyc2dUbTl5ZEdnaUxDSnpkV0pxWldOMElqcDdJbUZ0YjNWdWRGOXRhVzV2Y2lJNk1UVXdNREF3TUN3aVkzVnljbVZ1WTNraU9pSlZVMFFpTENKamRYTjBiMjFsY2lJNklrOXlZMmhwWkNJc0ltUmxiR2wyWlhKNVgybGtJam9pUkVWTUxUUWlMQ0prYVhOd2RYUmxYMmxrSWpvaVpHbHpjSFYwWlMweE55SXNJbVZ1ZEdsMGVTSTZJbVZ1ZEdsMGVWOXViM0owYUNJc0ltbHVkbTlwWTJWZmFXUWlPaUpKVGxZdE1UQXhJaXdpYjNKa1pYSmZhV1FpT2lKUVR5MDVJbjE5Iiwib3JpZ2luYWxfaGFzaCI6InNoYTI1NjpjN2Y4YWQ4NzJhNjNlMjUyNzQ0M2U0ODFmZjczZGFjYzg0MTlhNjZiZWQ2MWYwMWQ2YzdjYjdmNTU4Y2ZlZjA1IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJyZXNjaW5kZWQiOnRydWUsInNvdXJjZV90aW1lem9uZSI6IlVUQyIsInN1YmplY3QiOnsiYW1vdW50X21pbm9yIjoxNTAwMDAwLCJjdXJyZW5jeSI6IlVTRCIsImN1c3RvbWVyIjoiT3JjaGlkIiwiZGVsaXZlcnlfaWQiOiJERUwtNCIsImRpc3B1dGVfaWQiOiJkaXNwdXRlLTE3IiwiZW50aXR5IjoiZW50aXR5X25vcnRoIiwiaW52b2ljZV9pZCI6IklOVi0xMDEiLCJvcmRlcl9pZCI6IlBPLTkifSwidmFsaWQiOnRydWUsInZlcnNpb24iOjF9LCJyZXZpc2lvbiI6Miwic2NoZW1hX3ZlcnNpb24iOiJzeW50aGV0aWMtZGlzcHV0ZS1zb3VyY2UudjEiLCJ0ZXJtcyI6eyJjbGF1c2UiOiJTeW50aGV0aWMgdGVzdCB0ZXJtOiB1cGhvbGQgb25seSB0aGUgbWF0Y2hlZCBkZWxpdmVyZWQgcG9ydGlvbiB3aXRoIG5vIG90aGVyIGFjdGl2ZSBkaXNwdXRlIGdyb3VuZDsgcGF5bWVudCBvYmxpZ2F0aW9ucyByZW1haW4uIiwiY2xhdXNlX2lkIjoiTjEtbWF0Y2hlZC1kZWxpdmVyeS1vbmx5IiwiZWZmZWN0aXZlX2Zyb20iOiIyMDI2LTAxLTAxVDAwOjAwOjAwLjAwMFoiLCJlZmZlY3RpdmVfdW50aWwiOiIyMDI3LTAxLTAxVDAwOjAwOjAwLjAwMFoiLCJvYmplY3RfaWQiOiJURVJNUy1OMSIsInN1YmplY3QiOnsiYW1vdW50X21pbm9yIjoxNTAwMDAwLCJjdXJyZW5jeSI6IlVTRCIsImN1c3RvbWVyIjoiT3JjaGlkIiwiZGVsaXZlcnlfaWQiOiJERUwtNCIsImRpc3B1dGVfaWQiOiJkaXNwdXRlLTE3IiwiZW50aXR5IjoiZW50aXR5X25vcnRoIiwiaW52b2ljZV9pZCI6IklOVi0xMDEiLCJvcmRlcl9pZCI6IlBPLTkifSwidmFsaWQiOnRydWUsInZlcnNpb24iOjF9fQ==",
+              "source": {
+                "ar": {
+                  "active_grounds": ["non_delivery"],
+                  "adjustment_minor": 0,
+                  "credit_ids": [],
+                  "decision_reference": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+                  "disposed_grounds": ["non_delivery"],
+                  "event_at": "2026-09-07T16:06:00.000Z",
+                  "grounds_complete": true,
+                  "object_id": "AR-dispute-17",
+                  "payment_status": "unknown",
+                  "prior_hash": "sha256:99247f5945b0f9882b962a2eac883898bc8b5b5ca3432dfb474c1ee8dd719415",
+                  "prior_version": 0,
+                  "source_timezone": "UTC",
+                  "status": "reopened",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "version": 1
+                },
+                "pod": {
+                  "allocation_complete": true,
+                  "custodian": "Synthetic delivery registry",
+                  "event_at": "2026-09-01T14:00:00.000Z",
+                  "issuer": "Synthetic carrier fixture",
+                  "line_id": "line-4",
+                  "object_id": "POD-4",
+                  "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                  "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                  "quantity": 10,
+                  "recipient": "Synthetic receiving desk North",
+                  "rescinded": true,
+                  "source_timezone": "UTC",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "valid": true,
+                  "version": 1
+                },
+                "revision": 2,
+                "schema_version": "synthetic-dispute-source.v1",
+                "terms": {
+                  "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                  "clause_id": "N1-matched-delivery-only",
+                  "effective_from": "2026-01-01T00:00:00.000Z",
+                  "effective_until": "2027-01-01T00:00:00.000Z",
+                  "object_id": "TERMS-N1",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "valid": true,
+                  "version": 1
+                }
+              },
+              "status": "read"
+            },
+            "recheck": {
+              "byte_hash": "sha256:8457ddf1dcc78be6587b8f480a2965a6f2e80748e613d7a1a9173332b678f4e9",
+              "bytes_base64": "eyJhciI6eyJhY3RpdmVfZ3JvdW5kcyI6WyJub25fZGVsaXZlcnkiXSwiYWRqdXN0bWVudF9taW5vciI6MCwiY3JlZGl0X2lkcyI6W10sImRlY2lzaW9uX3JlZmVyZW5jZSI6InNoYTI1NjoyYzA2MTdiZjZmNmRiNTA2NDRlOWZhMWEyNjdhZjQ3NzViZGE4ZGFiOWZhY2E4MTE3MzkyM2I5OWJiNGRiODBkIiwiZGlzcG9zZWRfZ3JvdW5kcyI6WyJub25fZGVsaXZlcnkiXSwiZXZlbnRfYXQiOiIyMDI2LTA5LTA3VDE2OjA2OjAwLjAwMFoiLCJncm91bmRzX2NvbXBsZXRlIjp0cnVlLCJvYmplY3RfaWQiOiJBUi1kaXNwdXRlLTE3IiwicGF5bWVudF9zdGF0dXMiOiJ1bmtub3duIiwicHJpb3JfaGFzaCI6InNoYTI1Njo5OTI0N2Y1OTQ1YjBmOTg4MmI5NjJhMmVhYzg4Mzg5OGJjOGI1YjVjYTM0MzJkZmI0NzRjMWVlOGRkNzE5NDE1IiwicHJpb3JfdmVyc2lvbiI6MCwic291cmNlX3RpbWV6b25lIjoiVVRDIiwic3RhdHVzIjoicmVvcGVuZWQiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In0sInZlcnNpb24iOjF9LCJwb2QiOnsiYWxsb2NhdGlvbl9jb21wbGV0ZSI6dHJ1ZSwiY3VzdG9kaWFuIjoiU3ludGhldGljIGRlbGl2ZXJ5IHJlZ2lzdHJ5IiwiZXZlbnRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJpc3N1ZXIiOiJTeW50aGV0aWMgY2FycmllciBmaXh0dXJlIiwibGluZV9pZCI6ImxpbmUtNCIsIm9iamVjdF9pZCI6IlBPRC00Iiwib3JpZ2luYWxfYnl0ZXNfYmFzZTY0IjoiZXlKa1pXeHBkbVZ5WldSZllYUWlPaUl5TURJMkxUQTVMVEF4VkRFME9qQXdPakF3TGpBd01Gb2lMQ0pzYVc1bFgybGtJam9pYkdsdVpTMDBJaXdpY1hWaGJuUnBkSGtpT2pFd0xDSnlaV05wY0dsbGJuUWlPaUpUZVc1MGFHVjBhV01nY21WalpXbDJhVzVuSUdSbGMyc2dUbTl5ZEdnaUxDSnpkV0pxWldOMElqcDdJbUZ0YjNWdWRGOXRhVzV2Y2lJNk1UVXdNREF3TUN3aVkzVnljbVZ1WTNraU9pSlZVMFFpTENKamRYTjBiMjFsY2lJNklrOXlZMmhwWkNJc0ltUmxiR2wyWlhKNVgybGtJam9pUkVWTUxUUWlMQ0prYVhOd2RYUmxYMmxrSWpvaVpHbHpjSFYwWlMweE55SXNJbVZ1ZEdsMGVTSTZJbVZ1ZEdsMGVWOXViM0owYUNJc0ltbHVkbTlwWTJWZmFXUWlPaUpKVGxZdE1UQXhJaXdpYjNKa1pYSmZhV1FpT2lKUVR5MDVJbjE5Iiwib3JpZ2luYWxfaGFzaCI6InNoYTI1NjpjN2Y4YWQ4NzJhNjNlMjUyNzQ0M2U0ODFmZjczZGFjYzg0MTlhNjZiZWQ2MWYwMWQ2YzdjYjdmNTU4Y2ZlZjA1IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJyZXNjaW5kZWQiOnRydWUsInNvdXJjZV90aW1lem9uZSI6IlVUQyIsInN1YmplY3QiOnsiYW1vdW50X21pbm9yIjoxNTAwMDAwLCJjdXJyZW5jeSI6IlVTRCIsImN1c3RvbWVyIjoiT3JjaGlkIiwiZGVsaXZlcnlfaWQiOiJERUwtNCIsImRpc3B1dGVfaWQiOiJkaXNwdXRlLTE3IiwiZW50aXR5IjoiZW50aXR5X25vcnRoIiwiaW52b2ljZV9pZCI6IklOVi0xMDEiLCJvcmRlcl9pZCI6IlBPLTkifSwidmFsaWQiOnRydWUsInZlcnNpb24iOjF9LCJyZXZpc2lvbiI6Miwic2NoZW1hX3ZlcnNpb24iOiJzeW50aGV0aWMtZGlzcHV0ZS1zb3VyY2UudjEiLCJ0ZXJtcyI6eyJjbGF1c2UiOiJTeW50aGV0aWMgdGVzdCB0ZXJtOiB1cGhvbGQgb25seSB0aGUgbWF0Y2hlZCBkZWxpdmVyZWQgcG9ydGlvbiB3aXRoIG5vIG90aGVyIGFjdGl2ZSBkaXNwdXRlIGdyb3VuZDsgcGF5bWVudCBvYmxpZ2F0aW9ucyByZW1haW4uIiwiY2xhdXNlX2lkIjoiTjEtbWF0Y2hlZC1kZWxpdmVyeS1vbmx5IiwiZWZmZWN0aXZlX2Zyb20iOiIyMDI2LTAxLTAxVDAwOjAwOjAwLjAwMFoiLCJlZmZlY3RpdmVfdW50aWwiOiIyMDI3LTAxLTAxVDAwOjAwOjAwLjAwMFoiLCJvYmplY3RfaWQiOiJURVJNUy1OMSIsInN1YmplY3QiOnsiYW1vdW50X21pbm9yIjoxNTAwMDAwLCJjdXJyZW5jeSI6IlVTRCIsImN1c3RvbWVyIjoiT3JjaGlkIiwiZGVsaXZlcnlfaWQiOiJERUwtNCIsImRpc3B1dGVfaWQiOiJkaXNwdXRlLTE3IiwiZW50aXR5IjoiZW50aXR5X25vcnRoIiwiaW52b2ljZV9pZCI6IklOVi0xMDEiLCJvcmRlcl9pZCI6IlBPLTkifSwidmFsaWQiOnRydWUsInZlcnNpb24iOjF9fQ==",
+              "source": {
+                "ar": {
+                  "active_grounds": ["non_delivery"],
+                  "adjustment_minor": 0,
+                  "credit_ids": [],
+                  "decision_reference": "sha256:2c0617bf6f6db50644e9fa1a267af4775bda8dab9faca81173923b99bb4db80d",
+                  "disposed_grounds": ["non_delivery"],
+                  "event_at": "2026-09-07T16:06:00.000Z",
+                  "grounds_complete": true,
+                  "object_id": "AR-dispute-17",
+                  "payment_status": "unknown",
+                  "prior_hash": "sha256:99247f5945b0f9882b962a2eac883898bc8b5b5ca3432dfb474c1ee8dd719415",
+                  "prior_version": 0,
+                  "source_timezone": "UTC",
+                  "status": "reopened",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "version": 1
+                },
+                "pod": {
+                  "allocation_complete": true,
+                  "custodian": "Synthetic delivery registry",
+                  "event_at": "2026-09-01T14:00:00.000Z",
+                  "issuer": "Synthetic carrier fixture",
+                  "line_id": "line-4",
+                  "object_id": "POD-4",
+                  "original_bytes_base64": "eyJkZWxpdmVyZWRfYXQiOiIyMDI2LTA5LTAxVDE0OjAwOjAwLjAwMFoiLCJsaW5lX2lkIjoibGluZS00IiwicXVhbnRpdHkiOjEwLCJyZWNpcGllbnQiOiJTeW50aGV0aWMgcmVjZWl2aW5nIGRlc2sgTm9ydGgiLCJzdWJqZWN0Ijp7ImFtb3VudF9taW5vciI6MTUwMDAwMCwiY3VycmVuY3kiOiJVU0QiLCJjdXN0b21lciI6Ik9yY2hpZCIsImRlbGl2ZXJ5X2lkIjoiREVMLTQiLCJkaXNwdXRlX2lkIjoiZGlzcHV0ZS0xNyIsImVudGl0eSI6ImVudGl0eV9ub3J0aCIsImludm9pY2VfaWQiOiJJTlYtMTAxIiwib3JkZXJfaWQiOiJQTy05In19",
+                  "original_hash": "sha256:c7f8ad872a63e2527443e481ff73dacc8419a66bed61f01d6c7cb7f558cfef05",
+                  "quantity": 10,
+                  "recipient": "Synthetic receiving desk North",
+                  "rescinded": true,
+                  "source_timezone": "UTC",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "valid": true,
+                  "version": 1
+                },
+                "revision": 2,
+                "schema_version": "synthetic-dispute-source.v1",
+                "terms": {
+                  "clause": "Synthetic test term: uphold only the matched delivered portion with no other active dispute ground; payment obligations remain.",
+                  "clause_id": "N1-matched-delivery-only",
+                  "effective_from": "2026-01-01T00:00:00.000Z",
+                  "effective_until": "2027-01-01T00:00:00.000Z",
+                  "object_id": "TERMS-N1",
+                  "subject": {
+                    "amount_minor": 1500000,
+                    "currency": "USD",
+                    "customer": "Orchid",
+                    "delivery_id": "DEL-4",
+                    "dispute_id": "dispute-17",
+                    "entity": "entity_north",
+                    "invoice_id": "INV-101",
+                    "order_id": "PO-9"
+                  },
+                  "valid": true,
+                  "version": 1
+                }
+              },
+              "status": "read"
+            },
+            "recorded_at": "2026-09-07T16:06:00.000Z",
+            "started_at": "2026-09-07T16:06:00.000Z"
+          },
+          "outcome": null
+        },
+        "hash": "sha256:627ddda25fd531e3f897369e76ddfe4ca18e0684932e17c2de6197a5b6f2ad2f",
+        "id": "result_b133db31146a10175f4448b0c5046d9fe15bbf4e9a6d20a90ffb7bc9d960fa7a",
+        "idempotency_key": "result_check-10",
+        "operation": "result_check",
+        "previous_entry_hash": "sha256:08bdda6f7eef9948a1d11e80099136fd968ba705ce79fadf6c620af3b812a489",
+        "record_key": "sha256:97160955c77108e16dcd73e61d541695e1df377b9291d31f743fc2793a4389a4",
+        "recorded_at": "2026-09-07T16:06:00.000Z",
+        "schema_version": "dispute-result-entry.v1",
+        "sequence": 8,
+        "source_precondition": null,
+        "tenant_id": "tenant_intake_demo",
+        "versions": {
+          "engine": "dispute-result.v1",
+          "material": "dispute-authority-material.v1",
+          "reader": "synthetic-dispute-source.v1"
+        }
+      },
+      "historical_only": true,
+      "schema_version": "dispute-result-receipt.v1"
+    }
+  },
+  "capture_files_sha256": {
+    "accepted-export.json": "8a546114c932f271d3b0c745ad0299cb3476d727a78504e8345bd7dc22d6c898",
+    "accepted-view.json": "fafcc00dda67eada22e368578088108eedeb63671b4d4c497ee55f09378b19ee",
+    "commands.json": "822f83e178d1a4e2e621240620b5b7745f30d402d7fd9274d54627cfd5ec7211",
+    "preparation-export.json": "df5cab3f2099d0df6dee5bb0e40e4dd8e2cf75491e66cf7f6a2d455e4e31adb8",
+    "receipts.json": "7c136e44d771d5d360ed55a9c6c24a23c76824d21c6d5ec7ae260ff718993c04",
+    "reopened-export.json": "761fbdc60d0f48136d2b5399f5a4c57d0630633a87a175c2c20f2ef23045e108",
+    "reopened-view.json": "a2ffd145189365f3340cd147030e2ccb14909313d23ce41b61ec089e91f22b70",
+    "source-disposition.json": "0e91b65420bd5743f6ae93e20f2cd9da088fc7d55a60e60647b2c8b8968b4253",
+    "source-original.json": "e14b34ba8f4448c5aaee41abfe00f9bea0c9a32ae532d694ab767287006c2fb2",
+    "source-reversal.json": "5196ef98e5d71c3ce5851949a3d322f4e5d237a769bab0c2c5a9d85c9c207469"
+  }
+}
