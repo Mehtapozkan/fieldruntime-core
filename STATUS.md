@@ -8,8 +8,9 @@ exact retries and deterministic replay. Default preparation stays deterministic.
 [Walkthrough, limitations and activation handoff](docs/guides/bounded-investigation.md).
 The 24-record evaluation/rubric is frozen; usefulness comparisons have not run.
 Local validation: `pnpm validate` passes 328 tests, formatting, lint, type checks
-and the public-release boundary. All 34 focused investigation PostgreSQL/API
-scenarios have passed across the full run and final focused rerun. This is local
+and the public-release boundary. The investigation PostgreSQL/API suite now has 41 focused scenarios, including
+seven red-before-repair review regressions. The retained worker, continuation and
+D-039 API/browser suites passed 157/157 locally before this output-only correction. This is local
 PostgreSQL 18.4/Node 24.19.0 evidence; final-head CI must also exercise the pinned
 PostgreSQL 17.11 appliance and retained browser/restart suites. Docker is unavailable
 locally (`docker compose config --quiet`: exit 127), so Compose/appliance results
@@ -18,6 +19,12 @@ admitted for a DEL-5 proposal on the same record; the new interpreter now binds
 delivery citations to explicit associations or exact identifiers. Record context
 remains available, and citation validity still does not establish interpretation.
 Historical Discovery and deterministic preparation semantics are unchanged.
+PR review also reproduced unrelated draft citations, duplicate provider JSON keys
+and dispatch instructions being admitted. The corrected optional interpreter keeps
+the deterministic cited draft intact and retains the model draft separately as
+unreviewed material; it rejects duplicate keys and text outside a conservative
+descriptive/evidence-request grammar. This grammar is not semantic correctness proof.
+Final-head run results, including all retained coverage, are reported in the PR.
 
 Prior milestone: **Minimum same-dispute Workbench implemented for review**, stacked
 on open PR #41 at `4a1f536fb7b6b441a968f518499235443930c723`, then open PR #40

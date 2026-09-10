@@ -150,6 +150,38 @@ const gate = () => {
 
 for (const [name, transport, status] of [
   ["malformed", async () => "{", "invalid_response"],
+  [
+    "duplicate envelope key",
+    async (q) =>
+      fakeResponse(q).replace(
+        '"status":"completed"',
+        '"status":"refused","status":"completed"',
+      ),
+    "invalid_response",
+  ],
+  [
+    "duplicate nested key",
+    async (q) =>
+      fakeResponse(q).replace(
+        '"authority_granted":false',
+        '"authority_granted":true,"authority_granted":false',
+      ),
+    "invalid_response",
+  ],
+  ...[
+    "Email the customer immediately.",
+    "Dispatch this message now.",
+    "The operator should forward this message.",
+    "Please transmit the follow-up.",
+  ].map((directive) => [
+    `dispatch instruction ${directive}`,
+    async (q) =>
+      fakeResponse(q, (v) => {
+        v.output.follow_up = directive;
+        return v;
+      }),
+    "invalid_response",
+  ]),
   ["oversized", async () => "x".repeat(65537), "invalid_response"],
   [
     "refused",
@@ -234,7 +266,7 @@ test("D040 unknown usage is not zero; citation conformance is not semantic proof
       fakeResponse(q, (v) => {
         v.usage = null;
         v.output.claims[0].interpretation =
-          "This report could describe a warehouse acknowledgment; a person must examine that interpretation.";
+          "This report could describe a warehouse acknowledgment; that interpretation remains unconfirmed.";
         return v;
       }),
   });
@@ -828,4 +860,31 @@ test("D040 separate delivery notes and explicit shared-object evidence retain us
       );
     validateWorkExport(await x.h.ok(x.path + "&representation=export"));
   }
+});
+
+import { prepareDisposition } from "../dist/packages/runtime/src/disposition-preparation.js";
+test("D040 generated follow-up does not inherit unrelated baseline citations or requests", async (t) => {
+  const x = await investigation(t);
+  await x.run();
+  const v = await x.view(),
+    run = v.invocations[0];
+  const state = validateWorkExport(
+    await x.h.ok(x.path + "&representation=export"),
+  );
+  const input = workInput(state, state.entries[0]);
+  const baseline = prepareDisposition({
+    ...input,
+    schema_version: "preparation-worker-input.v2",
+  });
+  assert.notEqual(
+    run.result.investigation.proposal.follow_up,
+    baseline.follow_up.draft,
+  );
+  assert.deepEqual(
+    run.result.follow_up,
+    JSON.parse(JSON.stringify(baseline.follow_up)),
+    "The displayed deterministic draft keeps its own citations; the model draft stays a separate unreviewed proposal",
+  );
+  await x.h.restart();
+  validateWorkExport(await x.h.ok(x.path + "&representation=export"));
 });

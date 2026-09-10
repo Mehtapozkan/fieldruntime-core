@@ -75,6 +75,21 @@ output tokens. The parent enforces 60 seconds before writer-lock waiting and rec
 permission at the terminal transaction. Oversized raw output is represented by its
 byte count/hash and failure, rather than retained unbounded content.
 
+The deterministic draft, request list and their citations remain together. The
+model's alternative draft and scoped claim/gap spans are retained separately in
+`result.investigation.proposal`; no baseline citation is attached as support for
+changed prose. Inspect this unreviewed proposal in the receipt/export. The existing
+Workbench still displays the deterministic draft; a live-model presentation is not
+enabled by this adapter implementation.
+
+Duplicate JSON keys are rejected before parsing, including nested proposal fields.
+The synthetic interpreter admits conservative descriptive clauses and bounded
+requests for evidence, access, ownership or terms; imperative dispatch, embedded
+obligations and text outside that subset fail closed. This can reject harmless
+wording too; use explicit deterministic/person preparation rather than treating the
+guard as a general language-understanding or semantic-correctness check. Source
+quotations remain data. Human interpretation review is still required.
+
 Each committed start reserves one call and 50 USD minor units in the named hermetic
 batch, up to 30 calls/1,500 minor units. These are **synthetic budget reservations,
 not actual expenditure**. They live in the existing U journal, with an explicit

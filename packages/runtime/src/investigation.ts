@@ -2,6 +2,7 @@ import investigationSchema from "../../contracts/schemas/investigation.v1.schema
 // D-040 deterministic boundary. No network, credentials or provider SDK access.
 import {
   assertValidInvestigationContract,
+  assertUniqueJsonKeys,
   canonicalJson,
   immutableJson,
   sha256Json,
@@ -179,9 +180,29 @@ export function investigationReservation(
     accounting: "synthetic_reservation_not_spending",
   });
 }
+// This synthetic interpreter admits descriptive clauses and bounded evidence
+// requests, not arbitrary instructions. Fail closed outside that language subset;
+// neither this grammar nor valid citations certify an interpretation's meaning.
 const guardedText = (text: string): void => {
+  const clauses = text
+    .split(/[.!?;\n]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
   ensure(
-    !/\b(issue|refund|pay|approve|authorize|execute|send)\b|\b(is|was|has been) (verified|approved|resolved|accepted)\b/i.test(
+    clauses.length > 0 &&
+      clauses.every((clause) =>
+        /^(?:(?:the|this|that|these|those|a|an|it|there)\b|(?:original|independent|underlying|missing|source|reported|remaining|confirmation|evidence|delivery|ownership|governing|accountable|permitted|access|terms|business|unknown)\b|please (?:provide|identify|explain|clarify|reconcile) (?:the |this |original |underlying |permitted |applicable |governing |accountable |missing |reported |evidence|proof|access|ownership|terms|confirmation))/i.test(
+          clause,
+        ),
+      ) &&
+      !/\b(?:must|should|shall|ought to|have to|has to|need to|needs to|is to|are to|time to|then|recommend\w*|instruct\w*)\b/i.test(
+        text,
+      ),
+    "INVESTIGATION_OUTPUT_INVALID",
+    "Proposal is outside the bounded descriptive/evidence-request language; use explicit human or deterministic preparation",
+  );
+  ensure(
+    !/\b(issue|refund|pay|approve|authorize|execute|send|email|dispatch|transmit|forward|deliver|contact)\b|\b(is|was|has been) (verified|approved|resolved|accepted)\b/i.test(
       text,
     ),
     "INVESTIGATION_OUTPUT_INVALID",
@@ -292,6 +313,7 @@ export function investigationResponse(input: Obj, response: unknown): Obj {
   if (bytes > 65536) return evidence;
   evidence.raw_response = response;
   try {
+    assertUniqueJsonKeys(response);
     const value = o(JSON.parse(response));
     ensure(
       Object.keys(value).sort().join() === "id,model,output,status,usage",
@@ -393,7 +415,6 @@ export function investigationResult(input: Obj, evidence: Obj): Obj | null {
     ...input,
     schema_version: "preparation-worker-input.v2",
   });
-  const proposal = o(evidence.proposal);
   return immutableJson({
     ...baseline,
     schema_version: "disposition-preparation-result.v3",
@@ -407,7 +428,10 @@ export function investigationResult(input: Obj, evidence: Obj): Obj | null {
           }
         : step,
     ),
-    follow_up: { ...o(baseline.follow_up), draft: proposal.follow_up },
+    // The deterministic draft/requests keep their own citations. The model's
+    // separate unreviewed follow-up is retained under investigation.proposal;
+    // it must never inherit the baseline's proof links or be silently substituted.
+    follow_up: baseline.follow_up,
     execution_facts: { ...o(baseline.execution_facts), model_calls: 1 },
     investigation: evidence,
   });
