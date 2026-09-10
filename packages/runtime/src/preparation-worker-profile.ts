@@ -7,6 +7,7 @@ import {
   assertValidPreparationWorkV2Contract,
   assertValidPreparationWorkV3Contract,
   assertValidPreparationWorkV4Contract,
+  assertValidPreparationWorkV5Contract,
   assertValidIdentityReference,
   canonicalJson,
   immutableJson,
@@ -42,6 +43,27 @@ export function syntheticComparisonProfile(
     investigation: { ...profileV4.investigation, arm },
   });
 }
+export function syntheticLiveComparisonProfile(
+  arm: "bounded_investigation" | "generic_assistant",
+  activationHash: string,
+): Obj {
+  return immutableJson({
+    ...profileV4,
+    schema_version: "synthetic-preparation-worker.v5",
+    profile_id: "synthetic_live_comparison_worker.v1",
+    implementation_id: "disposition-investigation.v3",
+    investigation: {
+      ...profileV4.investigation,
+      arm,
+      mode: "live_synthetic_only",
+      provider: "openai_responses",
+      tokenizer: "tiktoken-js.1.0.22.o200k_base",
+      accounting: "live_reservation_not_actual_spend",
+      live_activation: true,
+      activation_hash: activationHash,
+    },
+  });
+}
 export function syntheticInvestigationProfile(): Obj {
   return immutableJson(profileV3);
 }
@@ -59,7 +81,9 @@ export function syntheticWorkerProfile(): Obj {
   return immutableJson(profile);
 }
 export function workIdentity(p: Obj, id: string, kind: string): Obj {
-  if (p.schema_version === "synthetic-preparation-worker.v4")
+  if (p.schema_version === "synthetic-preparation-worker.v5")
+    assertValidPreparationWorkV5Contract("profile", p);
+  else if (p.schema_version === "synthetic-preparation-worker.v4")
     assertValidPreparationWorkV4Contract("profile", p);
   else if (p.schema_version === "synthetic-preparation-worker.v3")
     assertValidPreparationWorkV3Contract("profile", p);

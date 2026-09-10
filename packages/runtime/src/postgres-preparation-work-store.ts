@@ -196,6 +196,7 @@ export class PostgresPreparationWorkStore {
     const model = [
       "disposition-investigation.v1",
       "disposition-investigation.v2",
+      "disposition-investigation.v3",
     ].includes(String(o(first.input.binding).worker_implementation_id));
     const budget = model ? 60000 : 5000;
     const began = now().toISOString(),

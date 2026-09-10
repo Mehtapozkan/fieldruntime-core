@@ -2,8 +2,10 @@
 
 D13 evaluation-readiness update: a 24-case executable synthetic v2 and deterministic
 baseline are delivered on the stacked branch; model arms and human usefulness
-scoring remain not run. The disabled mock HTTP comparison has explicit versions
-and shared durable reservations. This adds evaluation evidence for scoped inputs,
+scoring remain not run. The comparison has explicit mock/live versions and shared durable reservations.
+The 48-call/USD 0.96 conditional approval is recorded; the activation connection is
+tested with mocked HTTP only. Actual project/custody/storage confirmations and
+complete input accounting remain gates. This adds evaluation evidence for scoped inputs,
 prepared work and reproducibility, not completion of business outcome, customer
 comparison or measured-economics gaps. All 19 IDs and existing statuses below are
 preserved. See [readiness/activation handoff](../guides/investigation-evaluation-readiness.md).
@@ -53,8 +55,9 @@ stacked on PR #41 (`4a1f536f`), not main or the published prerelease. It exposes
 D-039 operations, exact pending recovery and historical/current result distinctions.
 [Accepted D-040][investigation] has a bounded fake-provider implementation on a
 separate branch stacked on #42. Pack v4/work v3, migration 0012, exact reservations
-and replay preserve history. Live access/spending/customer processing remain
-unapproved; frozen comparisons have not run. All 19 requirement IDs are retained.
+and replay preserve history. PR #44 adds a separately versioned activation connection
+and conditional synthetic-only comparison approval. Account prerequisites remain
+open, model comparisons have not run, and customer processing remains unapproved. All 19 requirement IDs are retained.
 
 ## Requirement matrix
 

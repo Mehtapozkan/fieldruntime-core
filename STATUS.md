@@ -1,6 +1,39 @@
 # Status
 
-## D13 evaluation readiness — implemented on the stacked review branch
+## Conditional D-040 activation connection — not a completed comparison
+
+The owner approved frozen v2 at PR #44 `7144571` subject to prerequisites: one send
+per fixture/model arm, 48 calls total and a USD 0.96 reservation/spending ceiling,
+no extra slots or automatic retries. Mehtap Özkan combines custodian and reviewer;
+producer labels are concealed but independence/blinding limitations are disclosed.
+[That head's full CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34526990810),
+including pinned PostgreSQL, browser, Compose and appliance/restart checks. All PRs
+remain open/unmerged.
+
+The connection adds explicit live evidence versions, a locally supplied dedicated
+credential boundary and offline tokenizer accounting. Frozen v1/v2, prompts,
+proposal schema, deterministic baseline, historical mock receipts and migrations
+0001–0013 are preserved. Migration 0014 only admits new versions in the existing
+supporting journals. The normal appliance remains deterministic and credential-free.
+
+No live provider request has been sent. Project availability/pricing/data controls,
+credential path/custody, storage/access/backups/deletion and complete framing
+accounting remain unconfirmed. Local token sequences match official tiktoken 0.12.0
+for all 48 illustrative requests; that is not an exact provider-framing count.
+The counting endpoint has not been called; its relationship to the 48-call cap is
+pending clarification. Scores, effort, billing and business outcomes remain unknown.
+[Implementation, commands and exact remaining gates](docs/guides/investigation-evaluation-readiness.md#conditional-activation-handoff).
+
+Local validation: `pnpm validate` passes 341 tests plus format/lint/types and
+release/license checks; ECC passes 620/620 and its negative control exits 1 on
+intended assertions. The retained PostgreSQL/API/browser run passed 163 retained
+checks. An early new test used the wrong error field and then selected another
+fixture's terminal entry; both test defects were corrected without weakening the
+assertions. All 10 activation PostgreSQL/API tests now pass, including the exact-invocation
+tamper and credential-custody tests. Final CI results are reported in the PR, separately from that
+starting-head CI. Docker is unavailable locally (Compose exits 127). No customer data, business action, D14, release or deployment.
+
+## Prior D13 evaluation-readiness checkpoint
 
 This branch preserves PR #43 at `4217000` and its open dependencies. The three
 review threads were addressed with that head's repair/regression and passing CI

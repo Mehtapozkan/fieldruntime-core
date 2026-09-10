@@ -1,10 +1,12 @@
-# Synthetic investigation comparison: ready for activation review
+# Synthetic investigation comparison: conditional activation
 
 This branch is stacked on PR #43 at `42170005f960abbc3d56cd0c8932cdd0587c00fe`.
 PRs #40–#43 remain open dependencies. The normal appliance is still deterministic.
 This implementation prepares an experiment; it does not establish that a model is
-useful. **Live activation, credentials, spending and customer processing are not
-approved.** The live factory refuses before reading a credential or sending HTTP.
+useful. The frozen v2 comparison is now conditionally approved. Account/custody/storage
+and complete input-accounting gates are still pending; no live requests have been
+sent. Customer processing remains unapproved. The original readiness evidence below
+is preserved; the activation connection is described in the final section.
 
 ## What can be run now
 
@@ -119,7 +121,7 @@ current. Reads/previews/exports reserve nothing. A valid citation is not proof o
 correct interpretation; the conservative v1 proposal grammar remains an admitted
 language subset and can reject harmless prose. That rejection is a visible failure.
 
-## Proposed activation request — not approved
+## Original activation request — superseded by the conditional approval below
 
 Approve only the frozen synthetic v2 comparison, after confirming every open item:
 
@@ -163,3 +165,93 @@ is not a verified effect. D-039 exact authorization, independent observation,
 business acceptance, payment commitments, DEL-5 separation and closure denial are
 unchanged. A real-customer session still requires named participants, approved data
 arrangements and a comparable baseline. D13 continues; D14 is not started here.
+
+## Conditional activation handoff
+
+The owner's approval of `7144571` permits only the 48 planned model-arm slots and
+USD 0.96 total. The earlier fake contracts/call plan remain historical, including
+`mock_http_only` and `reported_by_mock_http`. Live pack v6/work v5/evidence v3 bind
+the confirmed non-secret activation record hash and require separate publication.
+`0014_investigation_activation.sql` extends the two existing version constraints;
+apply normally after backup. No table, backfill, budget reset or checksum edit.
+Old mock slots in the same journal remain consumed. Never copy/reset the isolated
+database to obtain another slot. The custodian controls the complete dataset.
+
+The dedicated credential file must be absolute, owned by the adapter's OS user,
+regular, unlinked elsewhere and inaccessible to group/others. Symlinks and unsafe
+files fail closed. Only the adapter reads it, after prerequisite validation and a
+committed reservation. It sends one non-streaming fixed-endpoint POST without
+redirects, tools or retries. Exceptions are sanitized; a credential echo is not
+retained. Neither browser/API commands nor environment variables enable live use.
+
+The exact-pinned local encoder is `tiktoken` JS/WASM 1.0.22 (`o200k_base`). Its full
+token sequences match official Python `tiktoken` 0.12.0 on all 48 illustrative
+request bodies: at most **3,448 local tokens / 10,446 UTF-8 bytes**. The
+[cross-check](../evidence/investigation-readiness/tokenizer-cross-check.json) and
+[offline vectors](../../tests/fixtures/investigation-tokenizer-vectors.json) retain
+that evidence. Actual published bindings are recomputed and counted at execution.
+The frozen 12,000-byte ceiling plus 4,000 framing allowance is conservative
+accounting, **not an exact Responses/schema framing count**. Official
+[token-counting guidance](https://developers.openai.com/api/docs/guides/token-counting)
+states that exact counting includes additional structural tokens. No counting or
+inference request has been made. Clarify whether non-inference count requests are
+permitted under the cap before claiming this prerequisite complete.
+
+Live receipts retain returned model/response identity and usage as
+`reported_by_provider`, with an uncached price estimate in USD millionths. Actual
+billing stays null until evidenced; an estimate is not a charged amount. Missing
+response/usage preserves the full two-cent reservation and unknown cost. Replay
+uses retained responses and the versioned interpreter, never another provider call.
+
+The [pending activation template](../examples/d040-activation-pending.json) deliberately
+contains null prerequisites and cannot activate the adapter. Keep the completed
+non-secret record and credential file separate.
+
+After the project and storage facts are explicitly confirmed, and the clean final
+activation head has passing CI, the coordinator command is:
+
+```sh
+D040_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime_d040_v2 \
+  node scripts/investigation-live-comparison.mjs --execute-confirmed \
+  /approved/private/activation.json /approved/private/project-credential \
+  /approved/private/existing-deterministic-baseline /approved/private/comparison
+```
+
+These are placeholders, **not confirmed locations or a command executed here**.
+Use the existing baseline's exact validated archives; it is not rerun or tuned.
+The dedicated loopback database retains the fixed `d040_live_comparison_v2` schema
+and existing U journal across coordinator restarts. The directory binds the baseline,
+activation hash and validated head. An operational `RUNNING` file prevents a second
+coordinator; after a crash, inspect the journal and exact original keys before a
+person removes that file for recovery. Recovery does not resend committed starts.
+Do not delete the database or choose another key to recover uncertainty. The
+coordinator never auto-removes this fence or starts replacement runs.
+
+`review/` holds shuffled labels, actual output and supporting sources, with scores,
+effort and costs blank. `coordinator/` separately holds the mapping, original commands,
+canonical exports, reservations, usage and failures. Mehtap Özkan is both custodian
+and reviewer: do not inspect producer mappings while scoring, and disclose that
+combined roles and recognizable output styles limit blinding/independence.
+Failures/refusals/open attempts remain in the denominator; no customer/business
+outcome, measured labor saving or winner is implied. The normal appliance stays
+unchanged. D-039 payment obligations, DEL-5, all five measures and closure denial
+remain intact. All 19 requirement IDs and the revised D13 sequence are preserved.
+
+Pending confirmations are the actual dedicated project/model/rates and charges;
+data sharing/retention/cache/region/access; local credential path and custody;
+isolated database/export access and encryption, backups and complete deletion 30
+days after review; and complete input-accounting treatment. Public docs do not fill
+those blanks. No provider requests, credentials or spending are used for CI.
+
+Activation regression command (fake credentials/HTTP only):
+
+```sh
+D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime \
+  node --test scripts/investigation-activation-postgres.test.mjs
+```
+
+The local PostgreSQL 18.4 run passes all 10 tests: live attribution, preserved mock
+history/upgrade, exact restart retries, shared reservations, concurrent starts,
+failed start/terminal writes, lost acknowledgment, timeout, late-result fencing,
+coherent proof tampering and private-file custody. This is hermetic transport
+evidence; final-head PostgreSQL 17/Compose/appliance CI is linked from the PR.

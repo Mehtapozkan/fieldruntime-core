@@ -1,3 +1,4 @@
+import { fixtureManifest } from "./investigation-fixtures.mjs";
 // Fixed three-arm evaluation sequence over an injected, durable runtime/API host.
 // The caller owns persistence/custody. This module creates no ledger or database.
 import { discoveryCommand } from "../../tests/helpers/discovery.mjs";
@@ -13,12 +14,19 @@ import {
 export async function runThreeArmComparison(
   h,
   targets,
-  { http, onResult = async () => {} } = {},
+  {
+    http,
+    onResult = async () => {},
+    modelOnly = false,
+    contextForArm = syntheticComparisonContext,
+    port,
+    effectiveUntil,
+  } = {},
 ) {
   const results = [];
   for (const { id, ...x } of targets)
     for (const arm of [
-      "deterministic",
+      ...(modelOnly ? [] : ["deterministic"]),
       "bounded_investigation",
       "generic_assistant",
     ]) {
@@ -26,15 +34,36 @@ export async function runThreeArmComparison(
       h.setWorkContext(
         arm === "deterministic"
           ? syntheticContinuationContext()
-          : syntheticComparisonContext(arm),
+          : contextForArm(arm),
       );
       try {
+        const fixture = fixtureManifest.cases.find((c) => c.id === id);
+        const retained = await h.ok(`/v1/intake/bundles/${x.b.bundle_id}`);
+        const record = retained.bundle.records.find(
+          (r) => r.record_key === x.b.record_key,
+        );
+        if (
+          !fixture ||
+          record?.source_record_id !== fixture.selected_record ||
+          record?.entity !== fixture.entity
+        )
+          throw new Error(
+            "Comparison target/fixture attribution differs; no call is permitted",
+          );
         const view = await h.ok(x.path),
           previous = view.history.find(
             (e) => e.event === "started" && e.command?.idempotency_key === key,
           );
         let run;
         if (previous) {
+          if (
+            modelOnly &&
+            previous.worker_profile.implementation_id !==
+              "disposition-investigation.v3"
+          )
+            throw new Error(
+              "Historical mock receipt cannot stand in for a live comparison",
+            );
           const receipt = await h.ok(WORK + "/commands", previous.command),
             current = await h.ok(x.path);
           run = {
@@ -65,7 +94,13 @@ export async function runThreeArmComparison(
               review,
             );
           }
-          run = await runEvaluationArm(h, x, arm, { http, key });
+          run = await runEvaluationArm(h, x, arm, {
+            http,
+            key,
+            context: arm === "deterministic" ? undefined : contextForArm(arm),
+            port,
+            effectiveUntil,
+          });
         }
         validateWorkExport(run.archive);
         if (!run.invocation)
@@ -85,7 +120,6 @@ export async function runThreeArmComparison(
           run,
         };
         results.push(result);
-        await onResult(result);
       } catch (error) {
         const result = {
           fixture: id,
@@ -103,6 +137,7 @@ export async function runThreeArmComparison(
           remaining: "not_run; no automatic retry",
         };
       }
+      await onResult(results.at(-1));
     }
   return { status: "completed_for_review", results };
 }

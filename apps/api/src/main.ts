@@ -163,6 +163,7 @@ async function start(): Promise<void> {
     resultMigrationSql,
     investigationMigrationSql,
     comparisonMigrationSql,
+    activationMigrationSql,
     fixtureDocument,
     walkthroughDocument,
   ] = await Promise.all([
@@ -259,6 +260,13 @@ async function start(): Promise<void> {
     ),
     readFile(
       new URL(
+        "../../../packages/runtime/migrations/0014_investigation_activation.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
         "../../../packages/ecc-pack/fixtures/acme-sso-needs-review.case.json",
         import.meta.url,
       ),
@@ -304,6 +312,10 @@ async function start(): Promise<void> {
     createMigrationSource(
       "0013_investigation_comparison",
       comparisonMigrationSql,
+    ),
+    createMigrationSource(
+      "0014_investigation_activation",
+      activationMigrationSql,
     ),
   );
   const fixture = createEvaluationFixtureRecord(fixtureDocument);

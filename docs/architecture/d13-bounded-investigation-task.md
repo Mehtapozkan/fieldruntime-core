@@ -1,6 +1,6 @@
 # D-040 — One bounded synthetic investigation task
 
-Status: **Accepted for bounded implementation only. Live activation, inference spending and customer-data processing remain unapproved.**
+Status: **Accepted. The frozen v2 synthetic comparison is conditionally approved under the September 10 activation amendment below. Account, custody, storage and input-accounting prerequisites remain gates; customer-data processing is unapproved.**
 
 The owner approved implementation on 2026-09-10 from PR #42 at
 `1954f929daf60887053635a31a83179f74ee6d8e`. This approval does not amend D-039 or
@@ -160,3 +160,37 @@ business action. The [readiness guide](../guides/investigation-evaluation-readin
 records new compatibility versions, both-arm reservations, baseline evidence and
 account-specific facts still requiring confirmation. Historical fake-provider v1
 contracts, receipts and frozen evaluation v1 remain unchanged.
+
+## Conditional frozen-v2 comparison approval (2026-09-10)
+
+The owner approved the frozen comparison at PR #44
+`7144571ecb3fab62cced702f3c2eee8f03f994e7`, subject to completed CI and the explicit
+account/credential/input-accounting confirmations. The controlling instruction is:
+
+> “at most 48 provider calls, one per fixture/model arm, with a total reservation and spending ceiling of USD 0.96. No extra retry slots, automatic retries or replacement runs are approved.”
+
+Both model arms use `gpt-4.1-mini-2025-04-14`, the frozen v2 inputs, prompts, output
+contract and limits. The existing deterministic baseline remains unchanged. Any
+inference protocol check consumes a planned slot. Failures, refusals, timeouts,
+uncertain outcomes and unknown costs remain in the denominator; exact recovery
+never sends again. Human scores and effort stay blank until supplied. This narrow
+amendment supersedes the earlier proposed $15 budget and fresh-attempt language
+**for this comparison only**; it does not reset or refund any retained reservation.
+
+Mehtap Özkan is the approved combined custodian and reviewer. Producer labels stay
+concealed during scoring, but combined roles and recognizable prose limit blinding
+and independence. The coordinator record is separate from reviewer files.
+
+The owner specifically requires confirmation of the dedicated project's exact
+model availability, applicable complete pricing, data controls, credential custody,
+isolated storage and 30-day retention arrangements. Public documentation is not
+account evidence. The credential is supplied locally and excluded from chat, logs,
+inputs, histories and exports. If a prerequisite is unavailable or complete cost
+cannot fit, stop before sending. No extra provider calls are inferred for counting.
+
+The implementation connection uses explicit pack v6/work v5/evidence v3 and additive
+migration 0014 in the same supporting journals. Earlier mock interpretation is
+unchanged. Default appliance preparation remains deterministic and credential-free.
+Approval is not a claim that a comparison ran or passed, an individual business
+approval, customer-data permission, publication/release or deployment authorization.
+All PRs remain open and unmerged. See the [activation handoff](../guides/investigation-evaluation-readiness.md#conditional-activation-handoff).

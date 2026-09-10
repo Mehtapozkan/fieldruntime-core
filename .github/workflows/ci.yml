@@ -61,6 +61,7 @@ jobs:
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/dispute-result-postgres.test.mjs scripts/dispute-result-browser.test.mjs
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/investigation-postgres.test.mjs
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/investigation-readiness-postgres.test.mjs
+          D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node --test scripts/investigation-activation-postgres.test.mjs
           D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime node scripts/investigation-comparison.mjs --baseline /tmp/investigation-baseline
           node scripts/smoke-local-appliance.mjs applied
           node scripts/smoke-authority-api.mjs applied

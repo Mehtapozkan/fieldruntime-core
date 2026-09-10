@@ -99,24 +99,30 @@ export async function runEvaluationArm(
   h,
   x,
   arm,
-  { http = httpMock(), key = `${arm}-start` } = {},
+  {
+    http = httpMock(),
+    key = `${arm}-start`,
+    context,
+    port,
+    effectiveUntil,
+  } = {},
 ) {
   h.setWorkContext(
     arm === "deterministic"
       ? syntheticContinuationContext()
-      : syntheticComparisonContext(arm),
+      : (context ?? syntheticComparisonContext(arm)),
   );
   h.setWorkPort(
     arm === "deterministic"
       ? fixedPreparationPort
-      : mockHttpComparisonPort(http),
+      : (port ?? mockHttpComparisonPort(http)),
   );
   const candidate = await h.ok(x.packPath);
   assert.ok(candidate.candidate, JSON.stringify(candidate.current));
-  await h.ok(
-    `${PACK}/selections/publication`,
-    publication(candidate, `${key}-publish`),
-  );
+  await h.ok(`${PACK}/selections/publication`, {
+    ...publication(candidate, `${key}-publish`),
+    ...(effectiveUntil ? { effective_until: effectiveUntil } : {}),
+  });
   const view = await h.ok(x.path);
   assert.equal(view.current.can_start, true, JSON.stringify(view.current));
   const command = start(view, key),
