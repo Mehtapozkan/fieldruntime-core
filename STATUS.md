@@ -71,6 +71,11 @@ replay. The before-write reproduction now returns `REVIEWER_INELIGIBLE` (HTTP 40
 without reading or writing. Eligible rejection/escalation use no source read and
 retain their separate review permission, exact revision checks and retry receipts.
 
+The retained D12 upgrade test now expects eleven migrations after adding 0011; its
+prior migration-row equality and unchanged business-history assertions remain.
+The CI job allows 75 minutes for the retained suites plus BR1–BR8; no assertion,
+worker computation limit or runtime clock check is relaxed.
+
 The preserved D-038 upgrade assertion now compares the new journal's empty content
 before/after additive installation; no old rows/checksums are altered. Its focused
 F1/F2/F5 restart/retry regression passes with the exact prior receipt/export hashes.
