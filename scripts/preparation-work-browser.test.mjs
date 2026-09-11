@@ -7,6 +7,9 @@ import { setTimeout as delay } from "node:timers/promises";
 // UI completion includes persistence and read-only replay; it is not the worker's
 // five-second computation budget, which the PostgreSQL tests enforce separately.
 const expect = browserExpect.configure({ timeout: 15000 });
+// The Workbench aborts requests at 15s. A response observer must not fail at
+// the page's 12s interaction deadline while a valid command is still pending.
+const commandResponseTimeout = 20000;
 import {
   preparedWork,
   sharedCaseWork,
@@ -85,6 +88,15 @@ test("D12 W5 browser shared-Case A to B to A prepares the selected record", asyn
         ).toBeDisabled();
         await route.fulfill({ response });
       });
+    if (i === 2)
+      await page.route(`**${WORK}/commands`, async (route) => {
+        const began = Date.now();
+        const response = await route.fetch();
+        // Exercise delivery after the old 12s observer deadline but within the
+        // unchanged 15s UI request deadline. This is response latency, not work.
+        await delay(Math.max(0, 12500 - (Date.now() - began)));
+        await route.fulfill({ response });
+      });
     // Lose B's response after the real server commits, then recover after restart.
     if (i === 1)
       await page.route(`**${WORK}/commands`, async (route) => {
@@ -115,7 +127,9 @@ test("D12 W5 browser shared-Case A to B to A prepares the selected record", asyn
       ).toBeVisible();
       const before = await h.snapshot();
       const [recovered] = await Promise.all([
-        page.waitForResponse((r) => r.url().endsWith(`${WORK}/commands`)),
+        page.waitForResponse((r) => r.url().endsWith(`${WORK}/commands`), {
+          timeout: commandResponseTimeout,
+        }),
         page
           .getByRole("button", { name: /^Recover original submission/ })
           .click(),
@@ -130,7 +144,9 @@ test("D12 W5 browser shared-Case A to B to A prepares the selected record", asyn
       assert.deepEqual(await h.snapshot(), before);
     } else {
       const [response] = await Promise.all([
-        page.waitForResponse((r) => r.url().endsWith(`${WORK}/commands`)),
+        page.waitForResponse((r) => r.url().endsWith(`${WORK}/commands`), {
+          timeout: commandResponseTimeout,
+        }),
         action.click(),
       ]);
       statuses.push(response.status());
@@ -145,7 +161,10 @@ test("D12 W5 browser shared-Case A to B to A prepares the selected record", asyn
     await expect(
       page.getByRole("button", { name: /^Accept preparation packet/ }),
     ).toBeEnabled();
-    if (i === 2) await page.unroute(`**${WORK}?**`);
+    if (i === 2) {
+      await page.unroute(`**${WORK}?**`);
+      await page.unroute(`**${WORK}/commands`);
+    }
     await expect(page.locator(".work-preview")).toContainText(
       i === 1 ? "DEL-5" : "DEL-4",
     );

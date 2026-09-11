@@ -33,6 +33,20 @@ assertions. All 10 activation PostgreSQL/API tests now pass, including the exact
 tamper and credential-custody tests. Final CI results are reported in the PR, separately from that
 starting-head CI. Docker is unavailable locally (Compose exits 127). No customer data, business action, D14, release or deployment.
 
+### W5 CI timing repair
+
+Run [34537081261](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34537081261)
+at `8538e9a` failed the shared-Case A→B→A browser test at its 12-second
+response observer. The same run's API sequence passed. The Workbench permits
+15 seconds for a request. An unthrottled local control passed; a controlled
+12.5-second response delivery reproduced the failure after the real API committed
+HTTP 200. The repair gives that observer 20 seconds (including driver scheduling),
+without changing the product timeout or five-second worker computation budget.
+The retained delayed-response regression passes A/B/A with exact replacement,
+record-scoped output, no transferred acceptance, restart and byte-identical retry
+assertions intact. Full final-head CI, not this focused local pass, is required
+before activation. No provider request, reservation reset or evaluation result.
+
 ## Prior D13 evaluation-readiness checkpoint
 
 This branch preserves PR #43 at `4217000` and its open dependencies. The three

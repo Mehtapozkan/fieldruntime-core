@@ -255,3 +255,23 @@ history/upgrade, exact restart retries, shared reservations, concurrent starts,
 failed start/terminal writes, lost acknowledgment, timeout, late-result fencing,
 coherent proof tampering and private-file custody. This is hermetic transport
 evidence; final-head PostgreSQL 17/Compose/appliance CI is linked from the PR.
+
+### W5 response-window regression
+
+PR #44's `8538e9a` appliance run failed while waiting 12 seconds for the third
+A command response, before the existing 15-second browser request deadline. Its
+API A→B→A control passed. The repaired test allows 20 seconds for the response
+observer and deliberately delivers the third response at least 12.5 seconds after
+the request. The real server still commits normally; product timeouts and worker
+budgets are unchanged. All record, replacement, fresh-review, restart and exact
+retry assertions remain. This tests response latency, not measured human effort.
+
+```sh
+D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime \
+  node --test --test-name-pattern='D12 W5 browser shared-Case' \
+  scripts/preparation-work-browser.test.mjs
+```
+
+The unmodified local control passed; the controlled delayed response failed before
+the repair at 12 seconds despite HTTP 200, then passed after the repair. Required
+full CI on the resulting head is linked in the PR; a partial run is not a pass.
