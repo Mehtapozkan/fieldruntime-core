@@ -1,0 +1,345 @@
+{
+  "official": "tiktoken 0.12.0 / o200k_base",
+  "implementation": "tiktoken-js 1.0.22 / o200k_base",
+  "all_48_token_sequences_equal": true,
+  "provider_requests": 0,
+  "qualification": "Local serialized request tokens; not exact provider framing. Illustrative baseline bindings are not live permission.",
+  "requests": [
+    {
+      "fixture": "H01",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7107,
+      "count": 2177,
+      "token_hash": "3dbeb7ff5d52d6b767cf69a2e13c0ff7aa786df3a0b2ae9074b0cb63a1381205"
+    },
+    {
+      "fixture": "H01",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6668,
+      "count": 2101,
+      "token_hash": "7d850f6ec4d4dd720462f5ad932357b25a92da189b564b8ae208fda90504705b"
+    },
+    {
+      "fixture": "H02",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7117,
+      "count": 2210,
+      "token_hash": "f109105fe0b782a389e3c9e1097a9cc23bafcb753aa3d718ba01a6e49098a774"
+    },
+    {
+      "fixture": "H02",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6678,
+      "count": 2120,
+      "token_hash": "4ccd9a056989ef419f6aa2437ea1dc50642de473bfc43515a04dcb4fed30691a"
+    },
+    {
+      "fixture": "H03",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7093,
+      "count": 2205,
+      "token_hash": "18f838d77acd48ae225ee170eb793dd32fc5a2a4a9a4a70ef783e8b49559a985"
+    },
+    {
+      "fixture": "H03",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6654,
+      "count": 2105,
+      "token_hash": "e70280e52f6cd9e350fee84ad3e80d627484f216b011f79a3274c7974f709d8e"
+    },
+    {
+      "fixture": "H04",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7111,
+      "count": 2194,
+      "token_hash": "89e1763128e62a3c1883657be95706fc2735780aafe24b2e3ecc888d22b8d798"
+    },
+    {
+      "fixture": "H04",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6672,
+      "count": 2103,
+      "token_hash": "37dcddff823ec5f30449fd73dabfa3b1046bb505abbbf71f573cae3bbb9d3eff"
+    },
+    {
+      "fixture": "H05",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7100,
+      "count": 2213,
+      "token_hash": "842b0f79d4679b277a466dc99a32e3f1f596807b36a9e4c74362b586c2c07b8a"
+    },
+    {
+      "fixture": "H05",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6661,
+      "count": 2130,
+      "token_hash": "56d2755ad9bcfa731ffb32f4d6dcca879a8f5e55ade1869b7f0f6b77587a1464"
+    },
+    {
+      "fixture": "H06",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7124,
+      "count": 2218,
+      "token_hash": "2b72f68d5cd680705c3c6ee59d6f804a378101de059d8cbc18f43132ce493846"
+    },
+    {
+      "fixture": "H06",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6685,
+      "count": 2141,
+      "token_hash": "cd29b68505d3cc5bd7b635b3d2a6e35f563d3f223fbe389a75b6ee1c22a566c7"
+    },
+    {
+      "fixture": "H07",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 9162,
+      "count": 2962,
+      "token_hash": "b579c6cd5687cf21288c130d9e56060270d2c73a147e3811f2b96f3f863a1c0d"
+    },
+    {
+      "fixture": "H07",
+      "arm": "generic_assistant",
+      "utf8_bytes": 8723,
+      "count": 2882,
+      "token_hash": "52373aecec8833814a0d42f16ca5990ec88873085e3ef682f8e15134250b7aed"
+    },
+    {
+      "fixture": "H08",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7743,
+      "count": 2480,
+      "token_hash": "852d5c61860fc4f40efe9853afd90d57500a6b40221a2ff400d253e507c23310"
+    },
+    {
+      "fixture": "H08",
+      "arm": "generic_assistant",
+      "utf8_bytes": 7304,
+      "count": 2405,
+      "token_hash": "ce25d2ef81d8b82f8c4d4dec5f6e9631b459a229678a56a8737b984a90802d5d"
+    },
+    {
+      "fixture": "H09",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7795,
+      "count": 2443,
+      "token_hash": "ca259d250d0b2bfb25a46656e0526fe0203a52e6761dc870fdf16d8216ca8953"
+    },
+    {
+      "fixture": "H09",
+      "arm": "generic_assistant",
+      "utf8_bytes": 7356,
+      "count": 2361,
+      "token_hash": "52dea7c8b1ebfde07a36387318864ac5afd66b1081339377d254c74f790b71d5"
+    },
+    {
+      "fixture": "H10",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7779,
+      "count": 2497,
+      "token_hash": "113f47311071b634ea9348128a354c0009aea94da285381e21e94a6978c105e0"
+    },
+    {
+      "fixture": "H10",
+      "arm": "generic_assistant",
+      "utf8_bytes": 7340,
+      "count": 2411,
+      "token_hash": "48acbe32ecaac4cd6e806bede81e5f656401f049dfbfde3128f45f9bc81e6dea"
+    },
+    {
+      "fixture": "H11",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7056,
+      "count": 2184,
+      "token_hash": "d4f98c7b623a8873b2903840d9d757a8ed3cf00074cb68bff551e0a2f2ebffa2"
+    },
+    {
+      "fixture": "H11",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6617,
+      "count": 2113,
+      "token_hash": "0afb9924cf93476152c48eccbce64957252fbafb70b2cc44861124a318adec4c"
+    },
+    {
+      "fixture": "H12",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7095,
+      "count": 2152,
+      "token_hash": "141828f013265d957d8e8dc0b8930b252847c446706cf0cf00bcc5c0b4789dcd"
+    },
+    {
+      "fixture": "H12",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6656,
+      "count": 2072,
+      "token_hash": "6cc9327b312e46dffed1e4fae5f8c7623970c7065e524bfc7292dd977b47af3b"
+    },
+    {
+      "fixture": "H13",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7071,
+      "count": 2175,
+      "token_hash": "02d86959e8abd787bd083eaa03a87c95a35c93b86588f136c5d4c9e982814e74"
+    },
+    {
+      "fixture": "H13",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6632,
+      "count": 2094,
+      "token_hash": "a6bb288ccd2a1fd75b91f60dd9275fd2045228300dbd50973a0e9671ba4f2141"
+    },
+    {
+      "fixture": "H14",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7095,
+      "count": 2191,
+      "token_hash": "9ccc4fd9816cb4debdd05dfc2cd0639f51af41eacaaed9db169aa97fe7fb9199"
+    },
+    {
+      "fixture": "H14",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6656,
+      "count": 2110,
+      "token_hash": "d2301fdd9db5535230539d68a922d53fd866ffe6313b3728281fbb7b2d7391a8"
+    },
+    {
+      "fixture": "H15",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 6372,
+      "count": 1910,
+      "token_hash": "b74708c841d6a4c1211f71bf8b0fdad7ef06333e2c5bc869a016ce647c93f065"
+    },
+    {
+      "fixture": "H15",
+      "arm": "generic_assistant",
+      "utf8_bytes": 5933,
+      "count": 1821,
+      "token_hash": "a09788eb735f5075bdfa4ed46e488b5ab7d37151bd6531fb547fe6b8b889bffd"
+    },
+    {
+      "fixture": "H16",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 6372,
+      "count": 1902,
+      "token_hash": "45ed9351186cbc251e33d55ae1f400d02a266a3fc03e0e95cd83d717a26d99e3"
+    },
+    {
+      "fixture": "H16",
+      "arm": "generic_assistant",
+      "utf8_bytes": 5933,
+      "count": 1824,
+      "token_hash": "2de33af0d999b899cfda153fb3e7f7179ed4a8336420f0835e7c7196b082f48d"
+    },
+    {
+      "fixture": "H17",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7250,
+      "count": 2261,
+      "token_hash": "67e223f1a677ec4dace57d228b89c94215898c58975284a966b68fd9da5f1c93"
+    },
+    {
+      "fixture": "H17",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6811,
+      "count": 2177,
+      "token_hash": "73708321c3e10d77ef3388ebcf28f14be4805967e442581e4869fd435abe75b5"
+    },
+    {
+      "fixture": "H18",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7103,
+      "count": 2172,
+      "token_hash": "bafaba9a4e893ba932c74f681e526098031147051bddf8df12e2a34a48b69a6c"
+    },
+    {
+      "fixture": "H18",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6664,
+      "count": 2090,
+      "token_hash": "47b631fbcc8656fb91301625de9d77dd9a36c0b119eebddc090bdaeb8e1673a6"
+    },
+    {
+      "fixture": "H19",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7093,
+      "count": 2178,
+      "token_hash": "dcd2e01421ff67e82acb7f8e37d5228725c20de88166f18d5c585ac9c55a8b1d"
+    },
+    {
+      "fixture": "H19",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6654,
+      "count": 2102,
+      "token_hash": "f4305ec42e99b2c88572ccfa7128761486546ef81dba336117499ed485d7c9d9"
+    },
+    {
+      "fixture": "H20",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7093,
+      "count": 2169,
+      "token_hash": "fcb275ef03727ddc41d06883f8022c2c375e700de1ac2ca56be8f8bafdac3074"
+    },
+    {
+      "fixture": "H20",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6654,
+      "count": 2097,
+      "token_hash": "4ba28081ca36060a014d0b30f47df9ecfc0392ab969fda003a3dfbf7d0219510"
+    },
+    {
+      "fixture": "H21",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7087,
+      "count": 2163,
+      "token_hash": "eaabd34ecb633c7bfa36bf7a927bb6b249f7582683cb6548673cfa7921cd4540"
+    },
+    {
+      "fixture": "H21",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6648,
+      "count": 2081,
+      "token_hash": "8bfc66aadf4311961a1963e955621f82c80b01f2b9299de6c83058373f8086e1"
+    },
+    {
+      "fixture": "H22",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 7093,
+      "count": 2205,
+      "token_hash": "5483ab983a8f4f4229106a7bbd2c54923ecdd2b841b5288f8b58028903f99acc"
+    },
+    {
+      "fixture": "H22",
+      "arm": "generic_assistant",
+      "utf8_bytes": 6654,
+      "count": 2126,
+      "token_hash": "e30d376a5e5dd94b1fcf52b326c3490de41e6df9d1904e475ccadb5ef9c96d20"
+    },
+    {
+      "fixture": "H23",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 9216,
+      "count": 2900,
+      "token_hash": "fef8c3a0dfc9b0466e84d6da0725f74cd431663f2cd185b7e2356ef92ec34fc4"
+    },
+    {
+      "fixture": "H23",
+      "arm": "generic_assistant",
+      "utf8_bytes": 8777,
+      "count": 2807,
+      "token_hash": "d845da2aa8324bd15219c95820e1cb7b346071143483c2a59fa9635fb263cbed"
+    },
+    {
+      "fixture": "H24",
+      "arm": "bounded_investigation",
+      "utf8_bytes": 10446,
+      "count": 3448,
+      "token_hash": "4998bd62de9329f3d0b907050f7519bad10eeaed4ef3bc2f7429fcceb90bc48c"
+    },
+    {
+      "fixture": "H24",
+      "arm": "generic_assistant",
+      "utf8_bytes": 10007,
+      "count": 3368,
+      "token_hash": "ae18b93c2d7573bd071c69ae463d84747d1cf808f5f6e55e1482c9c79c56da56"
+    }
+  ]
+}

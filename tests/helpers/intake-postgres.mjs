@@ -35,6 +35,8 @@ export const migrationNames = [
   "0010_preparation_continuation",
   "0011_dispute_result",
   "0012_bounded_investigation",
+  "0013_investigation_comparison",
+  "0014_investigation_activation",
 ];
 export const migrations = await Promise.all(
   migrationNames.map(async (name) =>
@@ -59,6 +61,9 @@ export async function intakeHost(
     beforeContinuation = false,
     beforeResult = false,
     beforeInvestigation = false,
+    beforeComparison = false,
+    beforeActivation = false,
+    retainedComparison = false,
     work = false,
   } = {},
 ) {
@@ -71,9 +76,13 @@ export async function intakeHost(
     ["localhost", "127.0.0.1"].includes(new URL(url).hostname) &&
       !new URL(url).search,
   );
-  const schema = `d9_test_${randomUUID().replaceAll("-", "")}`,
+  const schema = retainedComparison
+      ? "d040_live_comparison_v2"
+      : `d9_test_${randomUUID().replaceAll("-", "")}`,
     admin = new Pool({ connectionString: url });
-  await admin.query(`CREATE SCHEMA ${schema}`);
+  await admin.query(
+    `CREATE SCHEMA ${retainedComparison ? "IF NOT EXISTS " : ""}${schema}`,
+  );
   let serverPort = 0,
     packEnabled = !upgrade && !beforePack,
     workEnabled = work && !beforeWork;
@@ -103,7 +112,7 @@ export async function intakeHost(
     discarded = [];
   const now = () => {
     clockReads++;
-    return time;
+    return retainedComparison ? new Date() : time;
   };
   async function connect() {
     const c = await pg.connect();
@@ -148,7 +157,13 @@ export async function intakeHost(
   async function migrate(sources) {
     for (const m of sources) await applyMigration(pool, m);
   }
-  const dependencies = () => ({ now, nextId: (kind) => `${kind}_${++ids}` });
+  const dependencies = () => ({
+    now,
+    nextId: (kind) =>
+      retainedComparison
+        ? `${kind}_${randomUUID().replaceAll("-", "")}`
+        : `${kind}_${++ids}`,
+  });
   async function start() {
     const worker = new TransactionalCaseWorker(store, { create: dependencies }),
       iw = new TransactionalIntakeWorker(
@@ -232,7 +247,7 @@ export async function intakeHost(
   }
   t.after(async () => {
     await stop();
-    await admin.query(`DROP SCHEMA ${schema} CASCADE`);
+    if (!retainedComparison) await admin.query(`DROP SCHEMA ${schema} CASCADE`);
     await admin.end();
   });
   open();
@@ -249,7 +264,11 @@ export async function intakeHost(
               ? migrations.slice(0, 10)
               : beforeInvestigation
                 ? migrations.slice(0, 11)
-                : migrations,
+                : beforeComparison
+                  ? migrations.slice(0, 12)
+                  : beforeActivation
+                    ? migrations.slice(0, 13)
+                    : migrations,
   );
   if (!upgrade) await start();
 

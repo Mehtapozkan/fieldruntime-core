@@ -95,9 +95,12 @@ export function preparationResources(
       0,
     ),
   };
-  const budget = ["preparation-pack.v3", "preparation-pack.v4"].includes(
-    String(artifact.schema_version),
-  )
+  const budget = [
+    "preparation-pack.v3",
+    "preparation-pack.v4",
+    "preparation-pack.v5",
+    "preparation-pack.v6",
+  ].includes(String(artifact.schema_version))
     ? CONTINUATION_LIMITS
     : WORK_LIMITS;
   const limits = Object.fromEntries(

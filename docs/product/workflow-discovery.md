@@ -1,5 +1,11 @@
 # Workflow Discovery and the narrow MVP
 
+The stacked D13 [evaluation-readiness branch](../guides/investigation-evaluation-readiness.md) adds exact synthetic fixtures,
+a disabled mock-tested transport and a three-arm comparison handoff. Its deterministic
+baseline ran; model comparisons and human usefulness scoring did not. Live access,
+spending and customer processing remain separately gated. This does not change the
+published historical evaluation prerelease or establish measured business value.
+
 Status: **required product direction; future contracts and builds proposed**.
 This is the canonical specification for Discovery, Business Loop requirements and
 the reconciled MVP. The [single requirement/gaps matrix](requirements-implementation-matrix.md)

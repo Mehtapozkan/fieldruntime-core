@@ -11,6 +11,7 @@ licensed packages. Direct dependencies are:
 | `ajv`         | 8.20.0  | MIT     |
 | `ajv-formats` | 3.0.1   | MIT     |
 | `pg`          | 8.23.0  | MIT     |
+| `tiktoken`    | 1.0.22  | MIT     |
 | `yaml`        | 2.9.0   | ISC     |
 
 Transitive license metadata is checked by `pnpm release:check`. Each installed

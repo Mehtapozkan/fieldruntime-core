@@ -1,0 +1,642 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldruntime.dev/schemas/investigation.v3.schema.json",
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "const": "live_synthetic_only"
+        },
+        "provider": {
+          "const": "openai_responses"
+        },
+        "model_snapshot": {
+          "const": "gpt-4.1-mini-2025-04-14"
+        },
+        "tokenizer": {
+          "const": "tiktoken-js.1.0.22.o200k_base"
+        },
+        "prompt_version": {
+          "const": "comparison-prompt.v1"
+        },
+        "batch_id": {
+          "const": "synthetic-comparison-v2"
+        },
+        "input_bytes": {
+          "const": 32768
+        },
+        "input_tokens": {
+          "const": 16000
+        },
+        "output_tokens": {
+          "const": 2000
+        },
+        "response_bytes": {
+          "const": 65536
+        },
+        "computation_ms": {
+          "const": 60000
+        },
+        "reservation_usd_minor": {
+          "const": 2
+        },
+        "batch_budget_usd_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 96
+        },
+        "batch_invocations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "accounting": {
+          "const": "live_reservation_not_actual_spend"
+        },
+        "live_activation": {
+          "const": true
+        },
+        "arm": {
+          "enum": [
+            "bounded_investigation",
+            "generic_assistant"
+          ]
+        },
+        "activation_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "mode",
+        "provider",
+        "model_snapshot",
+        "tokenizer",
+        "prompt_version",
+        "batch_id",
+        "input_bytes",
+        "input_tokens",
+        "output_tokens",
+        "response_bytes",
+        "computation_ms",
+        "reservation_usd_minor",
+        "batch_budget_usd_minor",
+        "batch_invocations",
+        "accounting",
+        "live_activation",
+        "arm",
+        "activation_hash"
+      ]
+    },
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2097152
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2097152
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        }
+      },
+      "required": [
+        "source_id",
+        "start",
+        "end",
+        "quote"
+      ]
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "record",
+            "delivery"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "record_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "record_key"
+      ]
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject": {
+          "$ref": "https://fieldruntime.dev/schemas/investigation.v3.schema.json#/$defs/subject"
+        },
+        "interpretation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/investigation.v3.schema.json#/$defs/span"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "status": {
+          "const": "unreviewed_interpretation"
+        }
+      },
+      "required": [
+        "subject",
+        "interpretation",
+        "spans",
+        "status"
+      ]
+    },
+    "gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject": {
+          "$ref": "https://fieldruntime.dev/schemas/investigation.v3.schema.json#/$defs/subject"
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "why_it_matters": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "https://fieldruntime.dev/schemas/investigation.v3.schema.json#/$defs/span"
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "evidence_status": {
+          "enum": [
+            "not_in_permitted_inputs",
+            "reported_but_unverified",
+            "ambiguous_applicability",
+            "human_access_or_judgment_required"
+          ]
+        }
+      },
+      "required": [
+        "subject",
+        "question",
+        "why_it_matters",
+        "spans",
+        "evidence_status"
+      ]
+    },
+    "proposal": {
+      "$ref": "https://fieldruntime.dev/schemas/investigation.v1.schema.json#/$defs/proposal"
+    },
+    "reservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "batch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 48
+        },
+        "previous_reservation_entry_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "profile_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "reserved_usd_minor": {
+          "const": 2
+        },
+        "currency": {
+          "const": "USD"
+        },
+        "budget_usd_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 96
+        },
+        "budget_invocations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "accounting": {
+          "const": "live_reservation_not_actual_spend"
+        },
+        "fixture_id": {
+          "type": "string",
+          "pattern": "^H(0[1-9]|1[0-9]|2[0-4])$"
+        },
+        "arm": {
+          "enum": [
+            "bounded_investigation",
+            "generic_assistant"
+          ]
+        },
+        "input_accounting": {
+          "$ref": "https://fieldruntime.dev/schemas/investigation.v3.schema.json#/$defs/input_accounting"
+        }
+      },
+      "required": [
+        "batch_id",
+        "ordinal",
+        "previous_reservation_entry_hash",
+        "request_hash",
+        "profile_hash",
+        "reserved_usd_minor",
+        "currency",
+        "budget_usd_minor",
+        "budget_invocations",
+        "accounting",
+        "fixture_id",
+        "arm",
+        "input_accounting"
+      ]
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16000
+        },
+        "output_tokens": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2000
+        }
+      },
+      "required": [
+        "input_tokens",
+        "output_tokens"
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "investigation-evidence.v3"
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "request": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model",
+            "instructions",
+            "input",
+            "store",
+            "stream",
+            "background",
+            "tools",
+            "tool_choice",
+            "truncation",
+            "max_output_tokens",
+            "temperature",
+            "text"
+          ],
+          "properties": {
+            "model": {
+              "const": "gpt-4.1-mini-2025-04-14"
+            },
+            "instructions": {
+              "type": "string",
+              "maxLength": 8000
+            },
+            "input": {
+              "type": "string",
+              "maxLength": 12000
+            },
+            "store": {
+              "const": false
+            },
+            "stream": {
+              "const": false
+            },
+            "background": {
+              "const": false
+            },
+            "tools": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "tool_choice": {
+              "const": "none"
+            },
+            "truncation": {
+              "const": "disabled"
+            },
+            "max_output_tokens": {
+              "const": 2000
+            },
+            "temperature": {
+              "const": 0
+            },
+            "text": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "format"
+              ],
+              "properties": {
+                "format": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "type",
+                    "name",
+                    "strict",
+                    "schema"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "json_schema"
+                    },
+                    "name": {
+                      "const": "investigation_proposal"
+                    },
+                    "strict": {
+                      "const": true
+                    },
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "status": {
+          "enum": [
+            "response_received",
+            "refused",
+            "invalid_response",
+            "unavailable",
+            "timeout_uncertain",
+            "outcome_uncertain"
+          ]
+        },
+        "raw_response": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 65536
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "raw_response_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "response_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "returned_model": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "usage": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.dev/schemas/investigation.v3.schema.json#/$defs/usage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "usage_qualification": {
+          "enum": [
+            "reported_by_provider",
+            "unknown"
+          ]
+        },
+        "price_basis": {
+          "const": "openai-standard-2026-09-10.uncached-estimate-not-billing"
+        },
+        "actual_spend_usd_minor": {
+          "const": null
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "proposal": {
+          "anyOf": [
+            {
+              "$ref": "https://fieldruntime.dev/schemas/investigation.v3.schema.json#/$defs/proposal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "semantic_correctness": {
+          "const": "not_established"
+        },
+        "interpretation_review_required": {
+          "const": true
+        },
+        "provider_calls_permitted": {
+          "const": 1
+        },
+        "live_activation": {
+          "const": true
+        },
+        "input_accounting": {
+          "$ref": "https://fieldruntime.dev/schemas/investigation.v3.schema.json#/$defs/input_accounting"
+        },
+        "estimated_charge_usd_micros": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_hash",
+        "request",
+        "status",
+        "raw_response",
+        "raw_response_hash",
+        "response_bytes",
+        "request_id",
+        "returned_model",
+        "usage",
+        "usage_qualification",
+        "price_basis",
+        "actual_spend_usd_minor",
+        "diagnostics",
+        "proposal",
+        "semantic_correctness",
+        "interpretation_review_required",
+        "provider_calls_permitted",
+        "live_activation",
+        "input_accounting",
+        "estimated_charge_usd_micros"
+      ]
+    },
+    "input_accounting": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tokenizer": {
+          "const": "tiktoken-js.1.0.22.o200k_base"
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "serialized_utf8_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12000
+        },
+        "serialized_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12000
+        },
+        "instructions_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12000
+        },
+        "input_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12000
+        },
+        "schema_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12000
+        },
+        "framing_reserve_tokens": {
+          "const": 4000
+        },
+        "conservative_input_ceiling": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16000
+        },
+        "qualification": {
+          "const": "local_counts_and_conservative_allowance_not_provider_exact_count"
+        }
+      },
+      "required": [
+        "tokenizer",
+        "request_hash",
+        "serialized_utf8_bytes",
+        "serialized_tokens",
+        "instructions_tokens",
+        "input_tokens",
+        "schema_tokens",
+        "framing_reserve_tokens",
+        "conservative_input_ceiling",
+        "qualification"
+      ]
+    }
+  }
+}

@@ -1,0 +1,1 @@
+An ambiguous shared-object note does not specify this record allocation.

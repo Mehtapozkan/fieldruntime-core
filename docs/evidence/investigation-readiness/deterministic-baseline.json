@@ -1,0 +1,259 @@
+{
+  "schema_version": "comparison-baseline-run.v1",
+  "synthetic": true,
+  "fixture_version": "v2",
+  "deterministic_implementation": "disposition-code.v3",
+  "model_arms": "not_run",
+  "provider_calls": 0,
+  "quality_comparison": "not_run",
+  "results": [
+    {
+      "fixture": "H01",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:09852eb01a56c3091c9b4fd56b7930eff790188dfda96b76a51726501c4c3144",
+      "invocation": "preparation_716fcf790681a02be1b9db29236633e73a06801377f3d379070cb1f3691b1c7c",
+      "result_hash": "sha256:3fc9b8941c9c5582340cac196a9b33257622f475b287427512a33c31a28c396b",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H02",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:f61ee5bb4efdc3abbc564c63f2f545884d3b553e52de490a5e4e33dc6cde55c9",
+      "invocation": "preparation_72a7805bf635bbba3d339ffdd5e60d3edf33acb1ae5cc94d707cbb29a393952b",
+      "result_hash": "sha256:574fbe1069f6d69a9119b6c20e8e5403b73cdc92301060fb82c0fd9457dfedc7",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H03",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:b595c992afccdf5cd25008771bc6ba29aa805021bd00f2e692aa78ab1af5ef87",
+      "invocation": "preparation_a6f36a177e708026c980062c7e32fffcc62e332660200e4e2b4b3aaf44595d61",
+      "result_hash": "sha256:5e2b58d8d25b29a66a3b13fb2cab72a35237737040b31970a15c9af2edec3c67",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H04",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:25f762d2b35c54a6480048b58f57e8bba9a3c6b2d04415714bec1b1e600b02e9",
+      "invocation": "preparation_15671d61c8e166145a73ee29ff277eae79e018b80a7b9cd54356471fbc0b3332",
+      "result_hash": "sha256:e0cf0042f803e801ac8c21ab4e5f75a2229ef46458e825ce8292dbcfe46a9fba",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H05",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:bf57ed16f93d5f98db03806508404ba74591852cd4b794d3ecf1c5093d7a2026",
+      "invocation": "preparation_8ca664f513fbc0aab8f61ee0349fc10b53926490df8d28ed171ff4ec4eae57f9",
+      "result_hash": "sha256:a3e3a315bb972895a3e13501587902c04b469c0d78a9235bc29c33e0b7d6e70c",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H06",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:1f83edd8deb44d00e8ee8076caf8571e974a9d98ff2e5cf0b985df6aa368d848",
+      "invocation": "preparation_94c7fe239e4fdd06aaf2dcd3e928919b43801dd9c6c86595b86840225855eca9",
+      "result_hash": "sha256:f4ab60bc6984801c4608cbe0a4cef41381aaba47722a837427587026a34df246",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H07",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:3665fb26fa696ecaec1eebb819adbd6e9c491c30ea9f8f00a9b9265cc9402569",
+      "invocation": "preparation_6581e8943e75259a97b41274ebdae6faa72d875a50e675e88631144bbc134b08",
+      "result_hash": "sha256:d8cb21ea63c040178e53bd8370028644d6ece67137e1331f8bcb9a9ceccccd06",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H08",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:329bd683a68ff8a6ffed03f66d871332d38683fb978620306ee70db2477a2e62",
+      "invocation": "preparation_276446a30bc483667c3c51ea9c9b3aac65d496b92bd3b9826ce0db2158d096af",
+      "result_hash": "sha256:27752f8f2795b2b789df67f0974c985bff57b3ad997ff63695e67fe53773d1f3",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H09",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:297eb3ae4f7a6a5717809d764bb838c8a792e9d3ad84e4d422f313e2774ebb6e",
+      "invocation": "preparation_d808f8429071df8a333eb0c687e04ffb29ad15d212cd8071d491d984bf9b275f",
+      "result_hash": "sha256:a668faba41f68810dc596a73443a11d46be38403c56e5a358cace66e870f7a51",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H10",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:1ece853bcd5552ad3810d07f90422ee818b4bb0af3085e5c479c99d5b8643752",
+      "invocation": "preparation_ce14dad30ebc2118c0f0e73f5bd870ebf824394b89d7729c723abb554901971e",
+      "result_hash": "sha256:d2651bd37b87da3c804b9cb108bb8c5a27c56a444e23dd4b471e9435a3747298",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H11",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:7123aac2635e1d4f8e1ca4e610357d4150e72bbb8f376d87073ee544041a0027",
+      "invocation": "preparation_574d8ac66e731dc5c7d079f56bff73345729a36c8947994972bac9c5f9f22b47",
+      "result_hash": "sha256:4fe456bceea0a25a8a4109f8ab45e2da8f1ac21c7bca5959d14fdaf7a8c023f6",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H12",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:b94cd5ddf8a7c1b75af7f1129f0a27e6fa398356ff4b3325f45394491fbfa2b2",
+      "invocation": "preparation_cc99660273483e991e7d299e802733a608b9f128e45efb7c94ae62a564eea8ce",
+      "result_hash": "sha256:147f97d36df034df2e4427506983809863cf83a2bd3a0c97b9bf7b62c5308371",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H13",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:872f8aa16d9e2a192ec22d3a1a918a265fad6d62ba4be1839e83fd67e30cde3d",
+      "invocation": "preparation_dd2ff72796c437b156a6d3b6afa05e6b31dfcffd094f17543c6f0ccc61c8e818",
+      "result_hash": "sha256:fce2b2a729c1b7fe7585994ab68dd63998f87b8c7eeb373aaabcb7bafd74bed7",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H14",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:95ae05f56c7951973298132e41ea553b230374935db96a164aa623bf7519aaf1",
+      "invocation": "preparation_d84361bb037e50b304d95aac22cd288979607bc04828b66ebd1d43a19fa738db",
+      "result_hash": "sha256:7496c160084fcc931848a5bd11c590288fe4a1306ef2d67b6129c6939dd894a5",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H15",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:a6c688614356a11afc14392c81ec24aff2018f06a25a00c368f0766126525762",
+      "invocation": "preparation_723cb876cf6ab2a0ad270dfba511f7c9960894c2116e108016552331e864b44a",
+      "result_hash": "sha256:1b500ed4c424618dc9eb5d29aa8eae401d8783a9955ae9260892e8099baa12ad",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H16",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:4fc201ca8455a00906ce2d5b21ab44f68473a23fbece6e6eb6146a6991983768",
+      "invocation": "preparation_8715ef7fc115e5b717622279a9eb0f332937acd75740a2197dacb71dd658d889",
+      "result_hash": "sha256:3688f0e30d116fc7ede2abf787c7f5c7605f9d5e266fa89aa3d5bdf4d3099521",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H17",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:518e29f620cfe3f5050f18d9926b6e6cd39cd66509a5272b0c9cee524ba3c3f3",
+      "invocation": "preparation_13093a890df14971ec2fe97c56963d0db355c388665cce291d3c5a15a014e2e8",
+      "result_hash": "sha256:edac4170c0d6c3106f99e097a3b98729278ae192b7a0cb87ac520075526e1636",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H18",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:bdac195755d3386aaef5831806de769267ef55d1adadbd36189daaa9fd00988f",
+      "invocation": "preparation_2e4e2b51a70ba374bd95f3142d1da6e78506a5a3cfcc1df0abda05fb796967f5",
+      "result_hash": "sha256:54d04e3a957c577e5a8b857b5267c9c5de8552e97ac915b13dd8fa055dc688e8",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H19",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:861614a6fd1f9275f7d8058fe6110e354b4531d5034d214c3639cc6e40c1da4d",
+      "invocation": "preparation_e6ff6a40818a2f29111454bdd186318fda657238dfea135774f18f8c497cf81b",
+      "result_hash": "sha256:19bde1cc056af892bfb75f15c33612e2c5c15a6670db30aedce4d633b64b0cf1",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H20",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:f369114df4c34825c4963ee0b2c779fd95d60eb5e2f0960f8318cc0cb76e6f33",
+      "invocation": "preparation_07993002ad82a6a39959c35f28ceef2725d07a76ade1fd279c36e93f415367e9",
+      "result_hash": "sha256:696ca723ccf2a63758969cf1e6dc35bfbb2e4d143feb6b0fe3f5b14931cccd51",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H21",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:fcab80f1f50abdeed2bf47d4b16d179988cb79980bec96494b2bd031f35164bb",
+      "invocation": "preparation_f26b617b020489bd890f27f559bd6e9d176fd4b7fa9bcdb94e1218e0628c0497",
+      "result_hash": "sha256:bf18843db1427923efe8a6ec286b403a4221424e9b5225fde1c4c1500f68020d",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H22",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:2667971a274a8b261ee5fdcca2a0ec1ec8bcd8d42a169b8e8707d9c8b7ed7d36",
+      "invocation": "preparation_59c5aafbc8ea4f7020d7a75fcd7e4c0d79917274ea18e21f4d3e35cd7831102a",
+      "result_hash": "sha256:5371c365856736299a066743b68ab83d293e234a42b7e18209e252bf9681adf4",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H23",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:fe532b515b37f0c7d48ab86ea320e022c21f96271a55953c04082fc829042137",
+      "invocation": "preparation_0bc9e1bad845f1b547ea94f4f919e57c9ec3ab169edf82ace92a133d9561cab4",
+      "result_hash": "sha256:b4e39c550ee903a365d487f9a0fa2bf8feebf955396813d548c9368750abf69d",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    },
+    {
+      "fixture": "H24",
+      "status": "prepared_awaiting_review",
+      "error": null,
+      "archive_hash": "sha256:3ca72721f979081b7db23a86eff7e315c54eafca8232199621d9401f60e49c6f",
+      "invocation": "preparation_304178bc42de7cddb1aaad0a3d68d0ed4e115a1180f777220e244adcf5066cc0",
+      "result_hash": "sha256:468a1bfd932282e21a9baa7531fa19bc3120935f9d5d2da803823b1ac89b1926",
+      "provider_calls": 0,
+      "usefulness": "not_reviewed"
+    }
+  ],
+  "measures": {
+    "cash_collected": null,
+    "disputes_resolved": null,
+    "credits_issued": null,
+    "work_newly_attended_to": null,
+    "human_attention_released": null
+  },
+  "hash": "00fd0c2759b76bc3088bcd6d25f431ba39c63f5ba59becd3ab810e32d8460f8a"
+}

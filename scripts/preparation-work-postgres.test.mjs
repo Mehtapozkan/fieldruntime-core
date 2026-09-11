@@ -939,7 +939,8 @@ test("D12 W3/W8 upgrade preserves v1 publication, Discovery and successful keys;
     ).rows.slice(0, 8),
     checksums,
   );
-  assert.equal(migrations.length, 12);
+  assert.equal(migrations.length, 14);
+  assert.equal(migrations.at(-1).version, "0014_investigation_activation");
   const w = await h.ok(path);
   assert.equal(w.current.can_start, false);
   assert.equal((await h.call(POST, { ...start(w), binding: {} })).status, 400);

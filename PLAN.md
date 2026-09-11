@@ -1,5 +1,45 @@
 # Delivery Plan
 
+## Conditional synthetic comparison: next gates
+
+PR #44 preserves the frozen v2 inputs/prompts and deterministic baseline. The owner
+conditionally approved 48 model-arm calls, USD 0.96 total and combined custodian/
+reviewer roles. The versioned activation connection is implemented for review;
+mocked HTTP validation does not establish live comparison results.
+
+Before sending, confirm the actual project/model/pricing/data controls, dedicated
+local credential custody, isolated storage/access/30-day deletion and complete
+input accounting. Validate the final head, then run each planned key at most once
+and hand blinded outputs to the human reviewer. No replacement runs or tuning.
+[Concrete commands, accounting limits and remaining gates](docs/guides/investigation-evaluation-readiness.md#conditional-activation-handoff).
+All PRs stay open. Customer processing and business outcomes remain separately
+gated; D-039, five proof measures, all 19 requirements and the D13 sequence below
+are unchanged. D14 is not started.
+
+## Prior synthetic comparison-readiness checkpoint
+
+This branch preserves PR #43 at `4217000` and its open dependencies. The three
+review threads were addressed with that head's repair/regression and passing CI
+references; no PR was merged. Executable fixture v2 corrects H17/H23/H24 and
+materializes all 24 cases while frozen v1 is unchanged. Explicit pack v5/work v4
+and HTTP evidence v2 use one additive compatibility migration (0013) and the
+existing supporting journal. Both mocked model arms share 48 reservations; reads
+remain side-effect free and deterministic preparation stays the appliance default.
+
+The local deterministic baseline produced 24 packets, including restart and exact
+retry, all awaiting human review. Fixture execution is not model usefulness proof.
+Both model arms, blinded scoring and customer comparisons are **not run**. The
+[readiness guide and proposed activation request](docs/guides/investigation-evaluation-readiness.md)
+define exact inputs, source controls, both-arm pricing, unknown costs and account
+confirmations. Live activation/spending, customer data and automatic promotion are
+unapproved. Remaining work is separate activation approval and the bounded
+comparison; D13 result/authority/payment/DEL-5/closure boundaries and all five
+proof measures remain unchanged. No D14, release or deployment.
+
+Final-head validation evidence is reported in the PR handoff; local PostgreSQL is
+18.4. Pinned PostgreSQL 17.11, Compose and appliance gates require CI; Docker is
+not installed locally. Historical milestone entries below are retained.
+
 Each pull request must remain independently reviewable and leave the repository in
 a passing state.
 

@@ -1,0 +1,22 @@
+{
+  "official_package": "tiktoken 0.12.0",
+  "encoding": "o200k_base",
+  "vectors": [
+    {
+      "text": "hello world",
+      "tokens": [24912, 2375]
+    },
+    {
+      "text": "DEL-4 confirmation remains unverified.",
+      "tokens": [72457, 12, 19, 27658, 14777, 537, 41802, 13]
+    },
+    {
+      "text": "Türkçe müşteri",
+      "tokens": [53775, 74, 42100, 84588, 45289]
+    },
+    {
+      "text": "<|endoftext|>",
+      "tokens": [27, 91, 419, 1440, 919, 91, 29]
+    }
+  ]
+}

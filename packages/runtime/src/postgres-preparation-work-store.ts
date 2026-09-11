@@ -3,7 +3,7 @@ import {
   investigationResponse,
   investigationFailure,
   investigationResult,
-} from "./investigation.js";
+} from "./investigation-dispatch.js";
 import {
   canonicalJson,
   immutableJson,
@@ -193,9 +193,11 @@ export class PostgresPreparationWorkStore {
     });
     if (first.input === null) return first.receipt;
     // Parent timing starts only after the start COMMIT. Nothing resumes on startup.
-    const model =
-      o(first.input.binding).worker_implementation_id ===
-      "disposition-investigation.v1";
+    const model = [
+      "disposition-investigation.v1",
+      "disposition-investigation.v2",
+      "disposition-investigation.v3",
+    ].includes(String(o(first.input.binding).worker_implementation_id));
     const budget = model ? 60000 : 5000;
     const began = now().toISOString(),
       tick = this.monotonic();

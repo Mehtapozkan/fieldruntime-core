@@ -61,3 +61,17 @@ export {
 } from "./validators.js";
 
 export { assertValidDisputeExportV2 } from "./validators.js";
+
+export {
+  assertValidInvestigationV2Contract,
+  assertValidPreparationPackV5Contract,
+  assertValidPreparationWorkV4Contract,
+  assertValidDisputeExportV3,
+} from "./validators.js";
+
+export {
+  assertValidInvestigationV3Contract,
+  assertValidPreparationPackV6Contract,
+  assertValidPreparationWorkV5Contract,
+  assertValidDisputeExportV4,
+} from "./validators.js";

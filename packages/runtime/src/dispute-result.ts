@@ -1,4 +1,8 @@
-import { assertValidDisputeExportV2 } from "../../contracts/src/index.js";
+import {
+  assertValidDisputeExportV2,
+  assertValidDisputeExportV3,
+  assertValidDisputeExportV4,
+} from "../../contracts/src/index.js";
 import {
   assertValidDisputeResultContract,
   canonicalJson,
@@ -1394,7 +1398,11 @@ export function readDispute(
   return result;
 }
 const checkDisputeExport = (value: unknown): Obj => {
-  if (o(value).schema_version === "dispute-result-export.v2")
+  if (o(value).schema_version === "dispute-result-export.v4")
+    assertValidDisputeExportV4(value);
+  else if (o(value).schema_version === "dispute-result-export.v3")
+    assertValidDisputeExportV3(value);
+  else if (o(value).schema_version === "dispute-result-export.v2")
     assertValidDisputeExportV2(value);
   else assertValidDisputeResultContract("export", value);
   return value;
@@ -1403,9 +1411,13 @@ export function exportDispute(s: DisputeState): Obj {
   const work = exportWorkState(s.work);
   const e = hashed({
     schema_version:
-      work.schema_version === "preparation-work-export.v3"
-        ? "dispute-result-export.v2"
-        : "dispute-result-export.v1",
+      work.schema_version === "preparation-work-export.v5"
+        ? "dispute-result-export.v4"
+        : work.schema_version === "preparation-work-export.v4"
+          ? "dispute-result-export.v3"
+          : work.schema_version === "preparation-work-export.v3"
+            ? "dispute-result-export.v2"
+            : "dispute-result-export.v1",
     work,
     authority: {
       entries: s.authority.entries.filter((e) => e.tenant_id === INTAKE_TENANT),

@@ -1,0 +1,1 @@
+SYNTHETIC TERMS EXCERPT T24: invoice INV-324 requires a signed acknowledgment for each allocated delivery. Accountable AR role: Casey Test. Applicability, access and authorization remain unconfirmed.

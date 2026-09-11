@@ -1,5 +1,98 @@
 # Status
 
+## Conditional D-040 activation connection — not a completed comparison
+
+The owner approved frozen v2 at PR #44 `7144571` subject to prerequisites: one send
+per fixture/model arm, 48 calls total and a USD 0.96 reservation/spending ceiling,
+no extra slots or automatic retries. Mehtap Özkan combines custodian and reviewer;
+producer labels are concealed but independence/blinding limitations are disclosed.
+[That head's full CI passed](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34526990810),
+including pinned PostgreSQL, browser, Compose and appliance/restart checks. All PRs
+remain open/unmerged.
+
+The connection adds explicit live evidence versions, a locally supplied dedicated
+credential boundary and offline tokenizer accounting. Frozen v1/v2, prompts,
+proposal schema, deterministic baseline, historical mock receipts and migrations
+0001–0013 are preserved. Migration 0014 only admits new versions in the existing
+supporting journals. The normal appliance remains deterministic and credential-free.
+
+No live provider request has been sent. Project availability/pricing/data controls,
+credential path/custody, storage/access/backups/deletion and complete framing
+accounting remain unconfirmed. Local token sequences match official tiktoken 0.12.0
+for all 48 illustrative requests; that is not an exact provider-framing count.
+The counting endpoint has not been called. An additional 48 count-request allowance
+is now recorded below; count pricing and account controls remain blocking. Scores, effort, billing and business outcomes remain unknown.
+[Implementation, commands and exact remaining gates](docs/guides/investigation-evaluation-readiness.md#conditional-activation-handoff).
+
+Prior activation-head local validation: `pnpm validate` passed 341 tests plus format/lint/types and
+release/license checks; ECC passes 620/620 and its negative control exits 1 on
+intended assertions. The retained PostgreSQL/API/browser run passed 163 retained
+checks. An early new test used the wrong error field and then selected another
+fixture's terminal entry; both test defects were corrected without weakening the
+assertions. All 10 activation PostgreSQL/API tests now pass, including the exact-invocation
+tamper and credential-custody tests. Final CI results are reported in the PR, separately from that
+starting-head CI. Docker is unavailable locally (Compose exits 127). No customer data, business action, D14, release or deployment.
+
+### Approved count allowance; account/storage facts still pending
+
+The owner additionally approved 48 non-inference count requests (one per fixture/arm,
+no retries), alongside the existing 48 inference slots, with the same USD 0.96 ceiling.
+Activation config v2 and its mocked counting connection bind the actual complete
+request before inference and retain count evidence in private coordinator files.
+Existing start reservations prevent both requests on recovery; a failed count blocks
+inference and consumes its slot. Historical interpreters, contracts, migrations and
+frozen material are unchanged. The live coordinator now requires counted config v2.
+No real request has been sent; count pricing and project data controls are unknown.
+Storage/access/backup/deletion remain **unconfirmed**, as the owner explicitly asked.
+A guided account checklist replaces requests to certify unseen settings. Combined
+roles remain accepted; comparisons, scores, effort and business outcomes remain unmeasured.
+
+Counting-head local validation passes 342 repository tests and 23 activation
+PostgreSQL/API cases, using mocked HTTP only. The added tests cover complete input
+counts, refusal/malformed/over-limit data, failed evidence persistence, concurrent
+starts, restart/exact retry, lost acknowledgments and interruption/expiry between
+counting and inference. The latter uses a fresh read of the exact pending start
+and current binding; the runtime still independently fences terminal results.
+Required full final-head CI is linked in the PR. Docker remains unavailable locally.
+
+### W5 CI timing repair
+
+Run [34537081261](https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/34537081261)
+at `8538e9a` failed the shared-Case A→B→A browser test at its 12-second
+response observer. The same run's API sequence passed. The Workbench permits
+15 seconds for a request. An unthrottled local control passed; a controlled
+12.5-second response delivery reproduced the failure after the real API committed
+HTTP 200. The repair gives that observer 20 seconds (including driver scheduling),
+without changing the product timeout or five-second worker computation budget.
+The retained delayed-response regression passes A/B/A with exact replacement,
+record-scoped output, no transferred acceptance, restart and byte-identical retry
+assertions intact. Full final-head CI, not this focused local pass, is required
+before activation. No provider request, reservation reset or evaluation result.
+
+## Prior D13 evaluation-readiness checkpoint
+
+This branch preserves PR #43 at `4217000` and its open dependencies. The three
+review threads were addressed with that head's repair/regression and passing CI
+references; no PR was merged. Executable fixture v2 corrects H17/H23/H24 and
+materializes all 24 cases while frozen v1 is unchanged. Explicit pack v5/work v4
+and HTTP evidence v2 use one additive compatibility migration (0013) and the
+existing supporting journal. Both mocked model arms share 48 reservations; reads
+remain side-effect free and deterministic preparation stays the appliance default.
+
+The local deterministic baseline produced 24 packets, including restart and exact
+retry, all awaiting human review. Fixture execution is not model usefulness proof.
+Both model arms, blinded scoring and customer comparisons are **not run**. The
+[readiness guide and proposed activation request](docs/guides/investigation-evaluation-readiness.md)
+define exact inputs, source controls, both-arm pricing, unknown costs and account
+confirmations. Live activation/spending, customer data and automatic promotion are
+unapproved. Remaining work is separate activation approval and the bounded
+comparison; D13 result/authority/payment/DEL-5/closure boundaries and all five
+proof measures remain unchanged. No D14, release or deployment.
+
+Final-head validation evidence is reported in the PR handoff; local PostgreSQL is
+18.4. Pinned PostgreSQL 17.11, Compose and appliance gates require CI; Docker is
+not installed locally. Historical milestone entries below are retained.
+
 Current milestone: **D-040 optional investigation implemented for review**, stacked
 on PR #42 at `1954f929daf60887053635a31a83179f74ee6d8e`. No dependency is merged.
 Strict pack v4/work v3, additive migration 0012 and fake-only transport retain

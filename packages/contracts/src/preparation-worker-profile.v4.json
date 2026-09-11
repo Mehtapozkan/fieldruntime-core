@@ -1,0 +1,73 @@
+{
+  "schema_version": "synthetic-preparation-worker.v4",
+  "tenant_id": "tenant_intake_demo",
+  "profile_id": "synthetic_comparison_worker.v1",
+  "implementation_id": "disposition-investigation.v2",
+  "identities": [
+    {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_disposition_worker_demo",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "service",
+      "status": "active"
+    },
+    {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_intake_operator",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "human",
+      "status": "active"
+    },
+    {
+      "schema_version": "identity-reference.v0",
+      "identity_id": "identity_pack_reviewer_demo",
+      "tenant_id": "tenant_intake_demo",
+      "identity_kind": "human",
+      "status": "active"
+    }
+  ],
+  "read_scope_ids": ["scope_entity_north", "scope_entity_south"],
+  "work_scope_ids": ["scope_entity_north"],
+  "grants": [
+    {
+      "identity_id": "identity_disposition_worker_demo",
+      "purpose": "prepare_disposition_packet",
+      "status": "active",
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_until": "2027-01-01T00:00:00.000Z"
+    },
+    {
+      "identity_id": "identity_intake_operator",
+      "purpose": "review_preparation_task",
+      "status": "active",
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_until": "2027-01-01T00:00:00.000Z"
+    },
+    {
+      "identity_id": "identity_pack_reviewer_demo",
+      "purpose": "review_synthetic_evaluation_candidate",
+      "status": "active",
+      "effective_from": "2026-01-01T00:00:00.000Z",
+      "effective_until": "2027-01-01T00:00:00.000Z"
+    }
+  ],
+  "investigation": {
+    "mode": "mock_http_only",
+    "provider": "openai_responses_candidate",
+    "model_snapshot": "gpt-4.1-mini-2025-04-14",
+    "tokenizer": "o200k_base.byte_upper_bound.v1",
+    "prompt_version": "comparison-prompt.v1",
+    "batch_id": "synthetic-comparison-v2",
+    "input_bytes": 32768,
+    "input_tokens": 16000,
+    "output_tokens": 2000,
+    "response_bytes": 65536,
+    "computation_ms": 60000,
+    "reservation_usd_minor": 2,
+    "batch_budget_usd_minor": 96,
+    "batch_invocations": 48,
+    "accounting": "synthetic_reservation_not_spending",
+    "live_activation": false,
+    "arm": "bounded_investigation"
+  }
+}

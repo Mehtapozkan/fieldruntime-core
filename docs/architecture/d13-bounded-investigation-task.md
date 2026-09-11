@@ -1,6 +1,6 @@
 # D-040 — One bounded synthetic investigation task
 
-Status: **Accepted for bounded implementation only. Live activation, inference spending and customer-data processing remain unapproved.**
+Status: **Accepted. The frozen v2 synthetic comparison is conditionally approved under the September 10 activation amendment below. Account, custody, storage and input-accounting prerequisites remain gates; customer-data processing is unapproved.**
 
 The owner approved implementation on 2026-09-10 from PR #42 at
 `1954f929daf60887053635a31a83179f74ee6d8e`. This approval does not amend D-039 or
@@ -147,3 +147,79 @@ activation remain unavailable; all calls in implementation tests use a fake. The
 synthetic accounting profile reserves the full per-call ceiling without refunds or
 automatic resets, including unknown outcomes. This conservative bookkeeping is not
 spending or an evaluation result. Existing deterministic preparation remains default.
+
+## Bounded evaluation-readiness authorization (2026-09-10)
+
+The owner authorized a separate implementation stacked on PR #43 at
+`42170005f960abbc3d56cd0c8932cdd0587c00fe`: executable corrected synthetic fixtures,
+a disabled provider transport tested only with mock HTTP, a three-arm runner and
+a concrete activation request. The owner explicitly stated: “No live provider
+requests, credential use, spending or customer processing are authorized.”
+This does not approve activation, an individual publication, task acceptance or a
+business action. The [readiness guide](../guides/investigation-evaluation-readiness.md)
+records new compatibility versions, both-arm reservations, baseline evidence and
+account-specific facts still requiring confirmation. Historical fake-provider v1
+contracts, receipts and frozen evaluation v1 remain unchanged.
+
+## Conditional frozen-v2 comparison approval (2026-09-10)
+
+The owner approved the frozen comparison at PR #44
+`7144571ecb3fab62cced702f3c2eee8f03f994e7`, subject to completed CI and the explicit
+account/credential/input-accounting confirmations. The controlling instruction is:
+
+> “at most 48 provider calls, one per fixture/model arm, with a total reservation and spending ceiling of USD 0.96. No extra retry slots, automatic retries or replacement runs are approved.”
+
+Both model arms use `gpt-4.1-mini-2025-04-14`, the frozen v2 inputs, prompts, output
+contract and limits. The existing deterministic baseline remains unchanged. Any
+inference protocol check consumes a planned slot. Failures, refusals, timeouts,
+uncertain outcomes and unknown costs remain in the denominator; exact recovery
+never sends again. Human scores and effort stay blank until supplied. This narrow
+amendment supersedes the earlier proposed $15 budget and fresh-attempt language
+**for this comparison only**; it does not reset or refund any retained reservation.
+
+Mehtap Özkan is the approved combined custodian and reviewer. Producer labels stay
+concealed during scoring, but combined roles and recognizable prose limit blinding
+and independence. The coordinator record is separate from reviewer files.
+
+The owner specifically requires confirmation of the dedicated project's exact
+model availability, applicable complete pricing, data controls, credential custody,
+isolated storage and 30-day retention arrangements. Public documentation is not
+account evidence. The credential is supplied locally and excluded from chat, logs,
+inputs, histories and exports. If a prerequisite is unavailable or complete cost
+cannot fit, stop before sending. No extra provider calls are inferred for counting.
+
+The implementation connection uses explicit pack v6/work v5/evidence v3 and additive
+migration 0014 in the same supporting journals. Earlier mock interpretation is
+unchanged. Default appliance preparation remains deterministic and credential-free.
+Approval is not a claim that a comparison ran or passed, an individual business
+approval, customer-data permission, publication/release or deployment authorization.
+All PRs remain open and unmerged. See the [activation handoff](../guides/investigation-evaluation-readiness.md#conditional-activation-handoff).
+
+## Additional counting allowance (2026-09-10 Pacific / 2026-09-11 UTC)
+
+While continuing PR #44 from `8538e9a`, with the W5 repair published as `05b290d`,
+the owner approved:
+
+> “up to 48 additional non-inference token-counting requests, one per fixture/model arm, with no retries. These are additional to the already approved 48 inference slots. The combined total spending ceiling remains $0.96.”
+
+Pricing and data controls must be verified before either request type. Unknowns
+remain blocking. This is at most 96 POST attempts, with no extra inference slot,
+retry or replacement. The owner requested guided inspection of account settings
+and explicitly did **not** confirm storage/access/backup/deletion arrangements.
+Combined custodian/reviewer roles and the original conditional approval remain.
+
+The activation configuration is explicitly v2. The existing durable start reserves
+one pair's two-cent maximum before counting or inference. Count the actual request's
+complete model/instructions/input/output-schema/tool configuration, retain the exact
+count input/hash and bounded response privately, then send the unchanged inference
+input only with a valid count at most 16,000. A failed or uncertain count consumes
+its attempt and blocks inference; recovery never recounts or resends. The same
+60-second task budget covers both requests. No new journal, migration, fixture,
+prompt, result interpreter or historical receipt semantics are introduced.
+
+Count evidence is supporting coordinator material, not an authority or business
+receipt. Historical activation v1 evidence remains readable; the live coordinator
+requires v2 and count-price/data-control confirmation. Count charges and all other
+applicable charges must fit the unchanged 96-cent total, including unknown sends.
+No request is authorized merely by this implementation passing its mocked tests.
+Final-head CI and the remaining project/credential/storage prerequisites still apply.

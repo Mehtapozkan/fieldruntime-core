@@ -3,7 +3,7 @@ import {
   investigationReservation,
   validateInvestigationEvidence,
   investigationResult,
-} from "./investigation.js";
+} from "./investigation-dispatch.js";
 import {
   preparationResources,
   requirePreparationResources,
@@ -13,6 +13,8 @@ import {
   assertValidPreparationWorkContract,
   assertValidPreparationWorkV2Contract,
   assertValidPreparationWorkV3Contract,
+  assertValidPreparationWorkV4Contract,
+  assertValidPreparationWorkV5Contract,
   canonicalJson,
   immutableJson,
   sha256Json,
@@ -35,6 +37,8 @@ import {
   syntheticWorkerPackContext,
   syntheticContinuationPackContext,
   syntheticInvestigationPackContext,
+  syntheticComparisonPackContext,
+  syntheticLiveComparisonPackContext,
   type PackState,
   type PackContext,
   type PackTarget,
@@ -46,6 +50,8 @@ import {
   syntheticWorkerProfile,
   syntheticContinuationProfile,
   syntheticInvestigationProfile,
+  syntheticComparisonProfile,
+  syntheticLiveComparisonProfile,
 } from "./preparation-worker-profile.js";
 import { prepareDisposition } from "./disposition-preparation.js";
 export interface WorkState {
@@ -74,20 +80,49 @@ export function syntheticInvestigationContext(): WorkContext {
     profile: syntheticInvestigationProfile(),
   };
 }
+export function syntheticComparisonContext(
+  arm: "bounded_investigation" | "generic_assistant" = "bounded_investigation",
+): WorkContext {
+  return {
+    pack: syntheticComparisonPackContext(arm),
+    profile: syntheticComparisonProfile(arm),
+  };
+}
+export function syntheticLiveComparisonContext(
+  arm: "bounded_investigation" | "generic_assistant",
+  activationHash: string,
+): WorkContext {
+  return {
+    pack: syntheticLiveComparisonPackContext(arm, activationHash),
+    profile: syntheticLiveComparisonProfile(arm, activationHash),
+  };
+}
 const generation = (v: Obj): number =>
-  v.implementation_id === "disposition-investigation.v1" ||
-  v.worker_implementation_id === "disposition-investigation.v1" ||
-  String(v.schema_version).endsWith(".v3")
-    ? 3
-    : v.worker_implementation_id === "disposition-code.v3" ||
-        String(v.schema_version).endsWith(".v2")
-      ? 2
-      : 1;
+  v.implementation_id === "disposition-investigation.v3" ||
+  v.worker_implementation_id === "disposition-investigation.v3" ||
+  String(v.schema_version).endsWith(".v5")
+    ? 5
+    : v.implementation_id === "disposition-investigation.v2" ||
+        v.worker_implementation_id === "disposition-investigation.v2" ||
+        String(v.schema_version).endsWith(".v4")
+      ? 4
+      : v.implementation_id === "disposition-investigation.v1" ||
+          v.worker_implementation_id === "disposition-investigation.v1" ||
+          String(v.schema_version).endsWith(".v3")
+        ? 3
+        : v.worker_implementation_id === "disposition-code.v3" ||
+            String(v.schema_version).endsWith(".v2")
+          ? 2
+          : 1;
 function validateWork(
   kind: Parameters<typeof assertValidPreparationWorkContract>[0],
   v: unknown,
 ): asserts v is Obj {
-  if (v && typeof v === "object" && generation(v as Obj) === 3)
+  if (v && typeof v === "object" && generation(v as Obj) === 5)
+    assertValidPreparationWorkV5Contract(kind, v);
+  else if (v && typeof v === "object" && generation(v as Obj) === 4)
+    assertValidPreparationWorkV4Contract(kind, v);
+  else if (v && typeof v === "object" && generation(v as Obj) === 3)
     assertValidPreparationWorkV3Contract(kind, v);
   else if (v && typeof v === "object" && generation(v as Obj) === 2)
     assertValidPreparationWorkV2Contract(kind, v);
@@ -202,17 +237,25 @@ function currentBinding(
   ensure(
     a &&
       o(a).schema_version ===
-        (generation(c.profile) === 3
-          ? "preparation-pack.v4"
-          : generation(c.profile) === 2
-            ? "preparation-pack.v3"
-            : "preparation-pack.v2"),
+        (generation(c.profile) === 5
+          ? "preparation-pack.v6"
+          : generation(c.profile) === 4
+            ? "preparation-pack.v5"
+            : generation(c.profile) === 3
+              ? "preparation-pack.v4"
+              : generation(c.profile) === 2
+                ? "preparation-pack.v3"
+                : "preparation-pack.v2"),
     "WORK_COMPATIBILITY_REQUIRED",
-    generation(c.profile) === 3
-      ? "Explicit compatible v4 investigation publication is required; older publications do not gain model capacity"
-      : generation(c.profile) === 2
-        ? "Explicit compatible v3 publication is required; historical publications do not gain new capacity"
-        : "Explicit worker-capable v2 publication is required; v1 prohibits dispatch",
+    generation(c.profile) === 5
+      ? "Explicit compatible v6 live comparison publication is required; historical mock publications grant no live permission"
+      : generation(c.profile) === 4
+        ? "Explicit compatible v5 comparison publication is required; older publications grant no comparison permission"
+        : generation(c.profile) === 3
+          ? "Explicit compatible v4 investigation publication is required; older publications do not gain model capacity"
+          : generation(c.profile) === 2
+            ? "Explicit compatible v3 publication is required; historical publications do not gain new capacity"
+            : "Explicit worker-capable v2 publication is required; v1 prohibits dispatch",
   );
   ensure(
     o(v.current).eligible,
@@ -241,11 +284,17 @@ function currentBinding(
     basis,
     worker_implementation_id: c.profile.implementation_id,
     worker_profile_hash: sha256Json(c.profile),
+    ...(generation(c.profile) >= 4
+      ? { comparison_arm: o(c.profile.investigation).arm }
+      : {}),
+    ...(generation(c.profile) === 5
+      ? { activation_hash: o(c.profile.investigation).activation_hash }
+      : {}),
     ...(resources
       ? { retained_bundles: exactBundleBindings(resources.bundles) }
       : {}),
   });
-  if (generation(c.profile) === 3)
+  if (generation(c.profile) >= 3)
     investigationRequest(bindingInput(s, binding));
   return binding;
 }
@@ -363,11 +412,15 @@ export function workInput(s: WorkState, start: Obj): Obj {
     );
   return checked("input", {
     schema_version:
-      generation(b) === 3
-        ? "preparation-worker-input.v3"
-        : modern
-          ? "preparation-worker-input.v2"
-          : "preparation-worker-input.v1",
+      generation(b) === 5
+        ? "preparation-worker-input.v5"
+        : generation(b) === 4
+          ? "preparation-worker-input.v4"
+          : generation(b) === 3
+            ? "preparation-worker-input.v3"
+            : modern
+              ? "preparation-worker-input.v2"
+              : "preparation-worker-input.v1",
     invocation_id: start.invocation_id,
     started_entry_hash: start.hash,
     binding: b,
@@ -441,12 +494,12 @@ function baseEntry(
     recorded_at: at,
     versions: versions(o(start?.worker_profile ?? c.profile)),
     computation_budget_ms:
-      generation(o(start?.worker_profile ?? c.profile)) === 3 ? 60000 : 5000,
+      generation(o(start?.worker_profile ?? c.profile)) >= 3 ? 60000 : 5000,
     ...(Math.max(
       generation(c.profile),
       start ? generation(start) : 1,
       command ? generation(command) : 1,
-    ) === 3
+    ) >= 3
       ? { reservation: start?.reservation ?? null, investigation: null }
       : {}),
     outcome: "recorded",
@@ -718,7 +771,7 @@ export function appendWorkCommand(
       "journal",
       withHash({
         ...withoutHash(provisional),
-        ...(generation(c.profile) === 3
+        ...(generation(c.profile) >= 3
           ? {
               reservation: investigationReservation(
                 s.entries,
@@ -865,7 +918,7 @@ export function validateWorkerResult(input: Obj, value: unknown): Obj {
   ensure(
     same(
       value,
-      generation(input) === 3
+      generation(input) >= 3
         ? investigationResult(input, o(value.investigation))
         : prepareDisposition(input),
     ),
@@ -892,7 +945,7 @@ export function appendWorkTerminal(
     "WORK_HEAD_CONFLICT",
     "A late result cannot cross an intervening work entry",
   );
-  const budget = generation(o(start.worker_profile)) === 3 ? 60000 : 5000;
+  const budget = generation(o(start.worker_profile)) >= 3 ? 60000 : 5000;
   ensure(
     timing.computation_budget_ms === budget &&
       String(timing.computation_started_at) >= String(start.recorded_at) &&
@@ -914,7 +967,7 @@ export function appendWorkTerminal(
     entries: s.entries,
   };
   const input = workInput(historical, start);
-  if (generation(start) === 3) {
+  if (generation(start) >= 3) {
     ensure(
       investigation,
       "WORK_INTEGRITY",
@@ -966,7 +1019,7 @@ export function appendWorkTerminal(
       conformance: result ? "passed" : "failed",
       diagnostics: why,
       parent_timing: timing,
-      ...(generation(start) === 3 ? { investigation } : {}),
+      ...(generation(start) >= 3 ? { investigation } : {}),
     }),
   );
 }
@@ -1120,7 +1173,7 @@ export function readWork(
       assertAt(s, at);
       const current = currentBinding(s, t, at, c);
       binding = current;
-      if (generation(c.profile) === 3)
+      if (generation(c.profile) >= 3)
         investigationReservation(
           s.entries,
           bindingInput(s, current),
@@ -1206,12 +1259,18 @@ export function readWork(
     "read",
     withHash({
       schema_version:
-        generation(c.profile) === 3 ||
-        s.entries.some((e) => generation(e) === 3)
-          ? "preparation-work-read.v3"
-          : resourceAware || s.entries.some((e) => generation(e) >= 2)
-            ? "preparation-work-read.v2"
-            : "preparation-work-read.v1",
+        generation(c.profile) === 5 ||
+        s.entries.some((e) => generation(e) === 5)
+          ? "preparation-work-read.v5"
+          : generation(c.profile) === 4 ||
+              s.entries.some((e) => generation(e) === 4)
+            ? "preparation-work-read.v4"
+            : generation(c.profile) === 3 ||
+                s.entries.some((e) => generation(e) === 3)
+              ? "preparation-work-read.v3"
+              : resourceAware || s.entries.some((e) => generation(e) >= 2)
+                ? "preparation-work-read.v2"
+                : "preparation-work-read.v1",
       ...(resourceAware || s.entries.some((e) => generation(e) >= 2)
         ? { resource_preflight: preflight }
         : {}),
@@ -1242,17 +1301,27 @@ export function exportWorkState(s: WorkState): Obj {
     "export",
     withHash({
       schema_version:
-        s.entries.some((e) => generation(e) === 3) ||
+        s.entries.some((e) => generation(e) === 5) ||
         s.pack.entries.some(
-          (e) => e.schema_version === "pack-selection-entry.v4",
+          (e) => e.schema_version === "pack-selection-entry.v6",
         )
-          ? "preparation-work-export.v3"
-          : s.entries.some((e) => generation(e) === 2) ||
+          ? "preparation-work-export.v5"
+          : s.entries.some((e) => generation(e) === 4) ||
               s.pack.entries.some(
-                (e) => e.schema_version === "pack-selection-entry.v3",
+                (e) => e.schema_version === "pack-selection-entry.v5",
               )
-            ? "preparation-work-export.v2"
-            : "preparation-work-export.v1",
+            ? "preparation-work-export.v4"
+            : s.entries.some((e) => generation(e) === 3) ||
+                s.pack.entries.some(
+                  (e) => e.schema_version === "pack-selection-entry.v4",
+                )
+              ? "preparation-work-export.v3"
+              : s.entries.some((e) => generation(e) === 2) ||
+                  s.pack.entries.some(
+                    (e) => e.schema_version === "pack-selection-entry.v3",
+                  )
+                ? "preparation-work-export.v2"
+                : "preparation-work-export.v1",
       pack: exportPackState(s.pack),
       entries: s.entries,
       authority_granted: false,

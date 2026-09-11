@@ -1,0 +1,199 @@
+[
+  {
+    "fixture": "H17",
+    "archive_hash": "sha256:518e29f620cfe3f5050f18d9926b6e6cd39cd66509a5272b0c9cee524ba3c3f3",
+    "invocation_id": "preparation_13093a890df14971ec2fe97c56963d0db355c388665cce291d3c5a15a014e2e8",
+    "result_hash": "sha256:edac4170c0d6c3106f99e097a3b98729278ae192b7a0cb87ac520075526e1636",
+    "follow_up": {
+      "draft": "For entity_north/dispute-117 (Willow, INV-317): Please identify who can supply DEL-17A confirmation and the permitted retrieval route; this request assigns no owner. Please identify who can supply DEL-17B confirmation and the permitted retrieval route; this request assigns no owner. Please clarify the delivery identities and applicability of ambiguous or retained-only support; no content interpretation is assumed. Please identify the governing terms and the person accountable for reviewing a disposition. Source reports are not independent verification; missing confirmation does not establish non-delivery or justify a credit. No recipient or due date is assigned.",
+      "draft_citation_ids": [
+        "sha256:b2df199b14615e9a925e30e6e7e7d267bf677f1f9e8169e6134641a06aab082a",
+        "sha256:c0697f7e2c5521fed5de3f1120b7b5568fab6a840381a5feb225f03a06706ef4"
+      ],
+      "recipients": [
+        {
+          "identity_id": null,
+          "role": "delivery evidence owner",
+          "status": "unconfirmed"
+        },
+        {
+          "identity_id": null,
+          "role": "governing terms owner",
+          "status": "unconfirmed"
+        }
+      ],
+      "requests": [
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [
+            "sha256:b2df199b14615e9a925e30e6e7e7d267bf677f1f9e8169e6134641a06aab082a"
+          ],
+          "id": "sha256:a644c144fbd010c9a60023e500a5c3712b720d6118db74cdc3462f8f44ebfb77",
+          "subject": "entity_north/dispute-117/DEL-17A",
+          "text": "Please identify who can supply DEL-17A confirmation and the permitted retrieval route; this request assigns no owner."
+        },
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [
+            "sha256:b2df199b14615e9a925e30e6e7e7d267bf677f1f9e8169e6134641a06aab082a"
+          ],
+          "id": "sha256:02729ba8d87bc0222eca6cfe71ce16791d810c2c88231a41e26b1e79c5192d5b",
+          "subject": "entity_north/dispute-117/DEL-17B",
+          "text": "Please identify who can supply DEL-17B confirmation and the permitted retrieval route; this request assigns no owner."
+        },
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [
+            "sha256:c0697f7e2c5521fed5de3f1120b7b5568fab6a840381a5feb225f03a06706ef4"
+          ],
+          "id": "sha256:480f4b0691fbe337c6198804b7f0f908c22d20be471c25557d065963f1f57ed6",
+          "subject": "entity_north/dispute-117",
+          "text": "Please clarify the delivery identities and applicability of ambiguous or retained-only support; no content interpretation is assumed."
+        },
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [],
+          "id": "sha256:3a36bdf0123576615d79d477622938a120569f5841e1a5e0af8a754e496bfb78",
+          "subject": "entity_north/dispute-117",
+          "text": "Please identify the governing terms and the person accountable for reviewing a disposition."
+        }
+      ],
+      "sent": false
+    },
+    "review_status": "awaiting_review",
+    "quality_score": null,
+    "model_comparisons": "not_run"
+  },
+  {
+    "fixture": "H23",
+    "archive_hash": "sha256:fe532b515b37f0c7d48ab86ea320e022c21f96271a55953c04082fc829042137",
+    "invocation_id": "preparation_0bc9e1bad845f1b547ea94f4f919e57c9ec3ab169edf82ace92a133d9561cab4",
+    "result_hash": "sha256:b4e39c550ee903a365d487f9a0fa2bf8feebf955396813d548c9368750abf69d",
+    "follow_up": {
+      "draft": "For entity_north/dispute-123 (Maple, INV-323): Please identify who can supply DEL-23 confirmation and the permitted retrieval route; this request assigns no owner. Please clarify the delivery identities and applicability of ambiguous or retained-only support; no content interpretation is assumed. Please identify the governing terms and the person accountable for reviewing a disposition. Source reports are not independent verification; missing confirmation does not establish non-delivery or justify a credit. No recipient or due date is assigned.",
+      "draft_citation_ids": [
+        "sha256:42f25c8ef527289ecc4357c5f4123a134c4bff21511edcc4ee35f8e85e1cf2fb",
+        "sha256:43d896ca13d21f347208d7d39e1a9d48150b2bc02916666497004a48e2d39d26",
+        "sha256:778762ecb3fdbfcdc031fef35c6b0e2ec11d90c97e137e4e101cc2c6c65d5378",
+        "sha256:b44b10d9df912d114dd737445efe104db1b71cfe8e6fc6190baee232ab36d4fc"
+      ],
+      "recipients": [
+        {
+          "identity_id": null,
+          "role": "delivery evidence owner",
+          "status": "unconfirmed"
+        },
+        {
+          "identity_id": null,
+          "role": "governing terms owner",
+          "status": "unconfirmed"
+        }
+      ],
+      "requests": [
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [
+            "sha256:778762ecb3fdbfcdc031fef35c6b0e2ec11d90c97e137e4e101cc2c6c65d5378"
+          ],
+          "id": "sha256:d42d4a8a63bbabbcc4886aac6302b2814dfd0b31ebd6687a28e840f34be7c94e",
+          "subject": "entity_north/dispute-123/DEL-23",
+          "text": "Please identify who can supply DEL-23 confirmation and the permitted retrieval route; this request assigns no owner."
+        },
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [
+            "sha256:42f25c8ef527289ecc4357c5f4123a134c4bff21511edcc4ee35f8e85e1cf2fb",
+            "sha256:43d896ca13d21f347208d7d39e1a9d48150b2bc02916666497004a48e2d39d26",
+            "sha256:b44b10d9df912d114dd737445efe104db1b71cfe8e6fc6190baee232ab36d4fc"
+          ],
+          "id": "sha256:56e4dbc14e8a2c30b477fbe2ce994fc2966124d4b3a11287ad4fc09228a31660",
+          "subject": "entity_north/dispute-123",
+          "text": "Please clarify the delivery identities and applicability of ambiguous or retained-only support; no content interpretation is assumed."
+        },
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [],
+          "id": "sha256:a4834a0af907ff2ba33a0f3a64c8b661da2966c485997753e6666588bb30c8ad",
+          "subject": "entity_north/dispute-123",
+          "text": "Please identify the governing terms and the person accountable for reviewing a disposition."
+        }
+      ],
+      "sent": false
+    },
+    "review_status": "awaiting_review",
+    "quality_score": null,
+    "model_comparisons": "not_run"
+  },
+  {
+    "fixture": "H24",
+    "archive_hash": "sha256:3ca72721f979081b7db23a86eff7e315c54eafca8232199621d9401f60e49c6f",
+    "invocation_id": "preparation_304178bc42de7cddb1aaad0a3d68d0ed4e115a1180f777220e244adcf5066cc0",
+    "result_hash": "sha256:468a1bfd932282e21a9baa7531fa19bc3120935f9d5d2da803823b1ac89b1926",
+    "follow_up": {
+      "draft": "For entity_north/dispute-124 (Cedar, INV-324): Please identify who can supply DEL-24A confirmation and the permitted retrieval route; this request assigns no owner. Please identify who can supply DEL-24B confirmation and the permitted retrieval route; this request assigns no owner. Please clarify the delivery identities and applicability of ambiguous or retained-only support; no content interpretation is assumed. Please identify the governing terms and the person accountable for reviewing a disposition. Source reports are not independent verification; missing confirmation does not establish non-delivery or justify a credit. No recipient or due date is assigned.",
+      "draft_citation_ids": [
+        "sha256:052293ceb6d6611552d5b495e9067b29c7f0451aee04f1fbac49656d323182e2",
+        "sha256:0e58f1276415d36d58c050608edffad94ccd548be36660b9d8d5117ebd0998db",
+        "sha256:7176a9c5c6b048f20f1ed5ceb6009f92890f6f3193e7f48dbc694092b8fdbbf5",
+        "sha256:90e95b89183a6bfcc34eb8bb05f20da6eda4a058331535b361d2a0d73a53a1eb",
+        "sha256:ecb4cb004423b2c22693379f97c84e102918f306817fc6b4e0d9e9f111247c14"
+      ],
+      "recipients": [
+        {
+          "identity_id": null,
+          "role": "delivery evidence owner",
+          "status": "unconfirmed"
+        },
+        {
+          "identity_id": null,
+          "role": "governing terms owner",
+          "status": "unconfirmed"
+        }
+      ],
+      "requests": [
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [
+            "sha256:7176a9c5c6b048f20f1ed5ceb6009f92890f6f3193e7f48dbc694092b8fdbbf5",
+            "sha256:90e95b89183a6bfcc34eb8bb05f20da6eda4a058331535b361d2a0d73a53a1eb"
+          ],
+          "id": "sha256:6547671ce5500df6369f83ed47ab2b022d6939b91f180ebdaddaaa737b44510d",
+          "subject": "entity_north/dispute-124/DEL-24A",
+          "text": "Please identify who can supply DEL-24A confirmation and the permitted retrieval route; this request assigns no owner."
+        },
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [
+            "sha256:7176a9c5c6b048f20f1ed5ceb6009f92890f6f3193e7f48dbc694092b8fdbbf5",
+            "sha256:90e95b89183a6bfcc34eb8bb05f20da6eda4a058331535b361d2a0d73a53a1eb"
+          ],
+          "id": "sha256:5823a0274212b59da83a605eade526536b69a6d9f7b5a171ef263d9124d51e75",
+          "subject": "entity_north/dispute-124/DEL-24B",
+          "text": "Please identify who can supply DEL-24B confirmation and the permitted retrieval route; this request assigns no owner."
+        },
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [
+            "sha256:052293ceb6d6611552d5b495e9067b29c7f0451aee04f1fbac49656d323182e2",
+            "sha256:0e58f1276415d36d58c050608edffad94ccd548be36660b9d8d5117ebd0998db",
+            "sha256:ecb4cb004423b2c22693379f97c84e102918f306817fc6b4e0d9e9f111247c14"
+          ],
+          "id": "sha256:f3f8012979e83a2453d3544fc66fc9229bc6b92291eb11961f3d2c7fd0cbaa21",
+          "subject": "entity_north/dispute-124",
+          "text": "Please clarify the delivery identities and applicability of ambiguous or retained-only support; no content interpretation is assumed."
+        },
+        {
+          "basis": "proposed evidence request",
+          "citation_ids": [],
+          "id": "sha256:7a1739abfffde72b1d5834ee4f97669e18e333a984842ce9355889a19d5631fb",
+          "subject": "entity_north/dispute-124",
+          "text": "Please identify the governing terms and the person accountable for reviewing a disposition."
+        }
+      ],
+      "sent": false
+    },
+    "review_status": "awaiting_review",
+    "quality_score": null,
+    "model_comparisons": "not_run"
+  }
+]
