@@ -194,8 +194,9 @@ The frozen 12,000-byte ceiling plus 4,000 framing allowance is conservative
 accounting, **not an exact Responses/schema framing count**. Official
 [token-counting guidance](https://developers.openai.com/api/docs/guides/token-counting)
 states that exact counting includes additional structural tokens. No counting or
-inference request has been made. Clarify whether non-inference count requests are
-permitted under the cap before claiming this prerequisite complete.
+inference request has been made. The owner subsequently approved up to 48 additional non-inference count requests,
+with no retries and the unchanged total dollar ceiling. The remaining count-pricing
+and data-control prerequisites must be verified before either request type.
 
 Live receipts retain returned model/response identity and usage as
 `reported_by_provider`, with an uncached price estimate in USD millionths. Actual
@@ -203,8 +204,10 @@ billing stays null until evidenced; an estimate is not a charged amount. Missing
 response/usage preserves the full two-cent reservation and unknown cost. Replay
 uses retained responses and the versioned interpreter, never another provider call.
 
-The [pending activation template](../examples/d040-activation-pending.json) deliberately
-contains null prerequisites and cannot activate the adapter. Keep the completed
+The [counted activation v2 template](../examples/d040-counted-activation-pending.json) deliberately
+contains null prerequisites and cannot activate the adapter. The previous
+[activation v1 template](../examples/d040-activation-pending.json) is historical;
+the coordinator requires v2. Keep the completed
 non-secret record and credential file separate.
 
 After the project and storage facts are explicitly confirmed, and the clean final
@@ -275,3 +278,64 @@ D9_POSTGRES_URL=postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/f
 The unmodified local control passed; the controlled delayed response failed before
 the repair at 12 seconds despite HTTP 200, then passed after the repair. Required
 full CI on the resulting head is linked in the PR; a partial run is not a pass.
+
+### Approved counting connection and guided account setup
+
+The owner's additional allowance is at most 48 non-inference token-count POSTs,
+one per frozen fixture/model arm, alongside the existing 48 inference slots. No
+retries, repair requests, replacement runs or increase to USD 0.96. Both arms use
+`gpt-4.1-mini-2025-04-14`; frozen inputs/prompts/schema/baseline remain unchanged.
+
+Config `comparison-activation.v2` adds only `counting.max_calls: 48`, `retries: 0`,
+an explicitly confirmed `max_charge_usd_micros_per_call` and non-secret
+`pricing_and_data_controls` evidence. The last two fields start null. Unknown is
+not free. Complete worst-case pricing must include counting and any other charges
+within the existing two cents per fixture/arm and 96 cents overall. Public token
+rates bound inference at $0.4608; count charges are not documented by the reviewed
+endpoint guide and must be confirmed independently. No pricing or storage approval
+is inferred from the additional call allowance.
+
+After the existing durable start reservation, the adapter sends one fixed-endpoint
+POST to `/v1/responses/input_tokens`. Its body is the actual inference request's
+`model`, `instructions`, `input`, `text` (complete output schema), `tools`,
+`tool_choice` and `truncation`. Generation/transport-only options are omitted from
+counting; the inference body remains unchanged. The count must be strict valid
+JSON with unique fields, successful status, the expected object type and a positive
+integer no greater than 16,000. Before inference, a fresh validated read must still
+show the exact pending invocation/start hash and unchanged candidate binding. This
+read-only check stops known interruptions or changed inputs after counting; it is
+not an atomic permission lease, and the runtime still fences late terminal results.
+The existing 60-second worker budget covers both
+requests. No count response or error grants authority.
+
+Private `coordinator/counts/` evidence binds the exact original request and count
+payload hashes, payload, local time, status and bounded raw response. Exclusive
+files are synced before the count attempt and before inference. This is supporting
+coordinator evidence, not another ledger. The existing start journal/key is the
+no-resend boundary; restart or exact retry never invokes either request again.
+Uncertain count outcomes retain the full reservation; no inference is sent after
+failed evidence persistence, missing/invalid counts, cancellation or an exceeded
+limit. Existing live/mock receipts and runtime interpreters are unchanged. Their legacy
+`provider_calls_permitted` field does not enumerate the new count requests; use the
+coordinator count evidence alongside inference reservations for the complete request
+account. Count billing remains unknown until evidenced. No new
+migration, dependency, model loop or appliance activation endpoint is added.
+
+For guided setup, start at [Projects](https://platform.openai.com/settings/organization/projects):
+select or create a dedicated synthetic project, record its ID, inspect project
+model permissions, members/service accounts and key restrictions, then inspect
+organization Data controls and Billing. Report the non-secret values actually
+shown; an unavailable control is unknown. Keep sharing disabled for this project.
+The [official project/key guide](https://help.openai.com/en/articles/9186755-managing-your-work-in-the-api-platform-with-projects)
+and [sharing guide](https://help.openai.com/en/articles/10306912) explain these controls.
+No Playground inference or unplanned API probe is needed. Save the dedicated key
+in an owner-only local regular file and provide only its path. Close the secret
+display before screenshots; never put credentials in chat, logs, Git or exports.
+
+The owner explicitly requested inspection and guidance rather than certifying
+unseen settings. Project pricing/model/data facts, credential custody and isolated
+storage/access/backup/cloud-sync/deletion are still unconfirmed. Current local
+inspection and the precise storage proposal live in the private handoff, not in
+public Git. Combined custodian/reviewer roles remain recorded; human scores and
+effort stay blank until provided. Final-head mocked PostgreSQL/API and full CI
+results belong in the PR; tests are not a completed live comparison.

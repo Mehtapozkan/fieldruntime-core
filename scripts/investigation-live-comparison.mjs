@@ -1,11 +1,19 @@
 // Explicit synthetic coordinator. No normal-appliance or environment auto-activation.
-import { readFile, writeFile, mkdir, access, readdir } from "node:fs/promises";
+import {
+  readFile,
+  writeFile,
+  mkdir,
+  access,
+  readdir,
+  open,
+} from "node:fs/promises";
 import { resolve, isAbsolute } from "node:path";
 import { randomBytes } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import {
   validateActivation,
   createLiveComparisonPort,
+  assertCountedContinuation,
 } from "../dist/packages/adapters/src/investigation-live.js";
 import {
   sha256Json,
@@ -30,7 +38,10 @@ import {
 } from "./lib/investigation-review-export.mjs";
 import { runThreeArmComparison } from "./lib/investigation-comparison-runner.mjs";
 import { intakeHost } from "../tests/helpers/intake-postgres.mjs";
-import { prepareEvaluationFixture } from "../tests/helpers/investigation-comparison.mjs";
+import {
+  prepareEvaluationFixture,
+  WORK,
+} from "../tests/helpers/investigation-comparison.mjs";
 const [mode, configPath, credentialPath, baselinePath, outputPath] =
   process.argv.slice(2);
 if (
@@ -45,6 +56,10 @@ if (
 const config = validateActivation(
   JSON.parse(await readFile(configPath, "utf8")),
 );
+if (config.schema_version !== "comparison-activation.v2")
+  throw new Error(
+    "The approved count connection and confirmed counting prerequisites are required; no credential read.",
+  );
 const head = execFileSync("git", ["rev-parse", "HEAD"], {
   encoding: "utf8",
 }).trim();
@@ -300,7 +315,40 @@ try {
     targets.some((t) => !fixtureManifest.cases.some((c) => c.id === t.id))
   )
     throw new Error("All 24 exact fixture targets must be retained once");
-  const port = createLiveComparisonPort(config, { credentialPath });
+  const countDirectory = resolve(out, "coordinator/counts");
+  await mkdir(countDirectory, { recursive: true, mode: 0o700 });
+  const port = createLiveComparisonPort(config, {
+    credentialPath,
+    checkBeforeInference: async (input) => {
+      const binding = input.binding;
+      const view = await h.ok(
+        `${WORK}?case_id=${encodeURIComponent(binding.case_id)}&record_key=${encodeURIComponent(binding.record_key)}`,
+      );
+      assertCountedContinuation(input, view);
+    },
+    retainCount: async (record) => {
+      const file = await open(
+        resolve(
+          countDirectory,
+          `${record.request_hash.slice(7)}-${record.phase}.json`,
+        ),
+        "wx",
+        0o600,
+      );
+      try {
+        await file.writeFile(canonicalJson(record));
+        await file.sync();
+      } finally {
+        await file.close();
+      }
+      const directory = await open(countDirectory, "r");
+      try {
+        await directory.sync();
+      } finally {
+        await directory.close();
+      }
+    },
+  });
   const result = await runThreeArmComparison(h, targets, {
     modelOnly: true,
     contextForArm: (arm) =>
@@ -324,10 +372,20 @@ try {
       e.event === "started" &&
       e.reservation?.batch_id === "synthetic-comparison-v2",
   );
+  const countFiles = await readdir(countDirectory);
   await save("coordinator/summary.json", {
     status: result.status,
     live_synthetic: true,
     maximum_sends_reserved: starts.length,
+    count_requests_may_have_been_sent: countFiles.filter((n) =>
+      n.endsWith("-attempt.json"),
+    ).length,
+    count_responses_retained: countFiles.filter((n) =>
+      n.endsWith("-response.json"),
+    ).length,
+    count_actual_spend_usd_minor: null,
+    count_cost_qualification:
+      "confirmed_cap_is_not_billing_evidence; missing response remains unknown",
     reserved_usd_minor: starts.reduce(
       (n, e) => n + e.reservation.reserved_usd_minor,
       0,

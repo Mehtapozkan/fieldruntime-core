@@ -74,3 +74,12 @@ No account setting is inferred, and unavailable prerequisites stop sending. Huma
 scores/effort remain blank. This does not authorize customer processing, business
 actions, merges, release or deployment. The [full narrow amendment](docs/architecture/d13-bounded-investigation-task.md#conditional-frozen-v2-comparison-approval-2026-09-10)
 preserves the earlier approvals and their historical scope.
+
+On 2026-09-10 Pacific (2026-09-11 UTC), the owner additionally approved at most
+48 non-inference token-count requests, one per frozen fixture/model arm, with no
+retries, alongside the existing 48 inference slots. The combined reservation and
+spending ceiling remains USD 0.96; verified pricing/data controls remain prerequisites
+for either request type. Storage was explicitly **not confirmed**; guided account
+setup was requested. This does not change combined roles, frozen protocol, consumed
+reservations, customer/business restrictions or the no-merge/release/deploy boundary.
+[Precise additional allowance](docs/architecture/d13-bounded-investigation-task.md#additional-counting-allowance-2026-09-10-pacific--2026-09-11-utc).

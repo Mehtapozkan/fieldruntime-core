@@ -20,11 +20,11 @@ No live provider request has been sent. Project availability/pricing/data contro
 credential path/custody, storage/access/backups/deletion and complete framing
 accounting remain unconfirmed. Local token sequences match official tiktoken 0.12.0
 for all 48 illustrative requests; that is not an exact provider-framing count.
-The counting endpoint has not been called; its relationship to the 48-call cap is
-pending clarification. Scores, effort, billing and business outcomes remain unknown.
+The counting endpoint has not been called. An additional 48 count-request allowance
+is now recorded below; count pricing and account controls remain blocking. Scores, effort, billing and business outcomes remain unknown.
 [Implementation, commands and exact remaining gates](docs/guides/investigation-evaluation-readiness.md#conditional-activation-handoff).
 
-Local validation: `pnpm validate` passes 341 tests plus format/lint/types and
+Prior activation-head local validation: `pnpm validate` passed 341 tests plus format/lint/types and
 release/license checks; ECC passes 620/620 and its negative control exits 1 on
 intended assertions. The retained PostgreSQL/API/browser run passed 163 retained
 checks. An early new test used the wrong error field and then selected another
@@ -32,6 +32,28 @@ fixture's terminal entry; both test defects were corrected without weakening the
 assertions. All 10 activation PostgreSQL/API tests now pass, including the exact-invocation
 tamper and credential-custody tests. Final CI results are reported in the PR, separately from that
 starting-head CI. Docker is unavailable locally (Compose exits 127). No customer data, business action, D14, release or deployment.
+
+### Approved count allowance; account/storage facts still pending
+
+The owner additionally approved 48 non-inference count requests (one per fixture/arm,
+no retries), alongside the existing 48 inference slots, with the same USD 0.96 ceiling.
+Activation config v2 and its mocked counting connection bind the actual complete
+request before inference and retain count evidence in private coordinator files.
+Existing start reservations prevent both requests on recovery; a failed count blocks
+inference and consumes its slot. Historical interpreters, contracts, migrations and
+frozen material are unchanged. The live coordinator now requires counted config v2.
+No real request has been sent; count pricing and project data controls are unknown.
+Storage/access/backup/deletion remain **unconfirmed**, as the owner explicitly asked.
+A guided account checklist replaces requests to certify unseen settings. Combined
+roles remain accepted; comparisons, scores, effort and business outcomes remain unmeasured.
+
+Counting-head local validation passes 342 repository tests and 23 activation
+PostgreSQL/API cases, using mocked HTTP only. The added tests cover complete input
+counts, refusal/malformed/over-limit data, failed evidence persistence, concurrent
+starts, restart/exact retry, lost acknowledgments and interruption/expiry between
+counting and inference. The latter uses a fresh read of the exact pending start
+and current binding; the runtime still independently fences terminal results.
+Required full final-head CI is linked in the PR. Docker remains unavailable locally.
 
 ### W5 CI timing repair
 

@@ -1,0 +1,33 @@
+{
+  "schema_version": "comparison-activation.v2",
+  "reviewed_head": "7144571ecb3fab62cced702f3c2eee8f03f994e7",
+  "model": "gpt-4.1-mini-2025-04-14",
+  "fixture_version": "v2",
+  "max_calls": 48,
+  "max_usd_minor": 96,
+  "fresh_retry_slots": 0,
+  "custodian": "Mehtap Özkan",
+  "reviewer": "Mehtap Özkan",
+  "combined_roles_disclosed": true,
+  "project_id": null,
+  "validated_head": null,
+  "ci_url": null,
+  "input_usd_per_million": 0.4,
+  "output_usd_per_million": 1.6,
+  "total_worst_case_usd": null,
+  "confirmations": {
+    "model_available": null,
+    "pricing_with_all_charges_within_ceiling": null,
+    "project_data_controls": null,
+    "credential_custody": null,
+    "isolated_storage_access_encryption": null,
+    "backups_and_30_day_deletion": null,
+    "complete_input_accounting": null
+  },
+  "counting": {
+    "max_calls": 48,
+    "retries": 0,
+    "max_charge_usd_micros_per_call": null,
+    "pricing_and_data_controls": null
+  }
+}

@@ -1,4 +1,5 @@
 import test from "node:test";
+import { Buffer } from "node:buffer";
 import assert from "node:assert/strict";
 import { intakeHost } from "../tests/helpers/intake-postgres.mjs";
 import {
@@ -15,7 +16,10 @@ import {
   validateWorkExport,
 } from "../dist/packages/runtime/src/preparation-work.js";
 import { sha256Json } from "../dist/packages/contracts/src/index.js";
-import { createLiveComparisonPort } from "../dist/packages/adapters/src/investigation-live.js";
+import {
+  createLiveComparisonPort,
+  assertCountedContinuation,
+} from "../dist/packages/adapters/src/investigation-live.js";
 const config = {
   schema_version: "comparison-activation.v1",
   reviewed_head: "7144571ecb3fab62cced702f3c2eee8f03f994e7",
@@ -380,4 +384,317 @@ test("activation PostgreSQL/API: dedicated local credential rejects unsafe files
     assert.ok(!JSON.stringify(run.archive).includes(key));
   }
   assert.equal(sends, 1);
+});
+
+const countedConfig = {
+  ...config,
+  schema_version: "comparison-activation.v2",
+  total_worst_case_usd: 0.768,
+  counting: {
+    max_calls: 48,
+    retries: 0,
+    max_charge_usd_micros_per_call: 6400,
+    pricing_and_data_controls:
+      "Hermetic test only; no actual account or spending",
+  },
+};
+const countedContext = (arm = "bounded_investigation") =>
+  syntheticLiveComparisonContext(arm, sha256Json(countedConfig));
+const countReply = (
+  body = '{"object":"response.input_tokens","input_tokens":4000}',
+  status = 200,
+) => ({
+  status,
+  redirected: false,
+  body: (async function* () {
+    yield Buffer.from(body);
+  })(),
+});
+function countedPort(http, retainCount, checkBeforeInference = async () => {}) {
+  return createLiveComparisonPort(countedConfig, {
+    credentialPath: "/hermetic/only",
+    readCredential: async () => "HERMETIC-CREDENTIAL-NOT-A-REAL-KEY",
+    http,
+    retainCount,
+    checkBeforeInference,
+  });
+}
+test("activation counted API: both arms bind the actual complete request; concurrent recovery and restart never recount or infer again", async (t) => {
+  const h = await intakeHost(t, { work: true });
+  const records = [],
+    counts = [],
+    inferences = [];
+  const port = countedPort(
+    async (url, init) => {
+      if (url.endsWith("/input_tokens")) {
+        counts.push(JSON.parse(init.body));
+        return countReply();
+      }
+      inferences.push(JSON.parse(init.body));
+      return httpMock()(url, init);
+    },
+    async (r) => records.push(r),
+  );
+  for (const [id, arm] of [
+    ["H17", "bounded_investigation"],
+    ["H23", "generic_assistant"],
+  ]) {
+    const x = await prepareEvaluationFixture(h, id);
+    const run = await runEvaluationArm(h, x, arm, {
+      key: `counted-${id}`,
+      context: countedContext(arm),
+      port,
+    });
+    assert.ok(run.invocation.result);
+    const inference = inferences.at(-1),
+      payload = counts.at(-1);
+    assert.deepEqual(
+      payload,
+      Object.fromEntries(
+        [
+          "model",
+          "instructions",
+          "input",
+          "text",
+          "tools",
+          "tool_choice",
+          "truncation",
+        ].map((k) => [k, inference[k]]),
+      ),
+    );
+    assert.equal(records.at(-1).request_hash, sha256Json(inference));
+    assert.equal(records.at(-1).payload_hash, sha256Json(payload));
+    assert.equal(records.at(-1).activation_hash, sha256Json(countedConfig));
+    assert.equal(inference.max_output_tokens, 2000);
+    assert.equal(inference.store, false);
+    assert.equal(
+      run.invocation.result.investigation.usage_qualification,
+      "reported_by_provider",
+    );
+    const snap = await h.snapshot();
+    await h.restart();
+    const retries = await Promise.all([
+      h.ok(WORK + "/commands", run.command),
+      h.ok(WORK + "/commands", run.command),
+    ]);
+    for (const receipt of retries) assert.deepEqual(receipt, run.receipt);
+    assert.deepEqual(await h.snapshot(), snap);
+  }
+  assert.equal(counts.length, 2);
+  assert.equal(inferences.length, 2);
+  assert.deepEqual(
+    records.map((r) => r.phase),
+    ["attempt", "response", "attempt", "response"],
+  );
+});
+for (const [name, response] of [
+  [
+    "unavailable",
+    () => {
+      throw new Error("unavailable");
+    },
+  ],
+  ["refused", () => countReply('{"error":"rate limit"}', 429)],
+  ["malformed", () => countReply("{")],
+  [
+    "duplicate fields",
+    () =>
+      countReply(
+        '{"object":"response.input_tokens","input_tokens":17000,"input_tokens":3}',
+      ),
+  ],
+  [
+    "over ceiling",
+    () => countReply('{"object":"response.input_tokens","input_tokens":16001}'),
+  ],
+  ["credential echo", () => countReply("HERMETIC-CREDENTIAL-NOT-A-REAL-KEY")],
+])
+  test(`activation counted API: ${name} counting blocks inference and retains the slot across restart`, async (t) => {
+    const h = await intakeHost(t, { work: true }),
+      x = await prepareEvaluationFixture(h, "H01");
+    let calls = 0;
+    const retained = [];
+    const port = countedPort(
+      async (url) => {
+        calls++;
+        assert.ok(url.endsWith("/input_tokens"));
+        return response();
+      },
+      async (r) => retained.push(r),
+    );
+    const run = await runEvaluationArm(h, x, "bounded_investigation", {
+      key: "count-failure",
+      context: countedContext(),
+      port,
+    });
+    assert.equal(calls, 1);
+    assert.equal(run.invocation.result, null);
+    assert.ok(run.invocation.terminal_entry_hash);
+    assert.doesNotMatch(JSON.stringify(retained), /HERMETIC-CREDENTIAL/);
+    assert.equal(
+      run.archive.entries.filter((e) => e.event === "started").at(-1)
+        .reservation.reserved_usd_minor,
+      2,
+    );
+    await h.restart();
+    assert.deepEqual(await h.ok(WORK + "/commands", run.command), run.receipt);
+    assert.equal(calls, 1);
+  });
+for (const phase of ["attempt", "response"])
+  test(`activation counted API: failed ${phase} evidence persistence prevents inference and no-resend recovery`, async (t) => {
+    const h = await intakeHost(t, { work: true }),
+      x = await prepareEvaluationFixture(h, "H01");
+    let calls = 0;
+    const port = countedPort(
+      async (url) => {
+        calls++;
+        assert.ok(url.endsWith("/input_tokens"));
+        return countReply();
+      },
+      async (r) => {
+        if (r.phase === phase)
+          throw new Error("injected private evidence write failure");
+      },
+    );
+    const run = await runEvaluationArm(h, x, "bounded_investigation", {
+      key: "count-write-failure",
+      context: countedContext(),
+      port,
+    });
+    assert.equal(calls, phase === "attempt" ? 0 : 1);
+    assert.equal(run.invocation.result, null);
+    await h.restart();
+    assert.deepEqual(await h.ok(WORK + "/commands", run.command), run.receipt);
+    assert.equal(calls, phase === "attempt" ? 0 : 1);
+  });
+
+for (const interrupt of [false, true])
+  test(`activation counted API: ${interrupt ? "interrupted late count" : "concurrent start during count"} cannot create a second call`, async (t) => {
+    const h = await intakeHost(t, { work: true }),
+      x = await prepareEvaluationFixture(h, "H01");
+    let seen,
+      release,
+      counts = 0,
+      inference = 0;
+    const entered = new Promise((r) => (seen = r));
+    const port = countedPort(
+      async (url, init) => {
+        if (url.endsWith("/input_tokens")) {
+          counts++;
+          seen();
+          await new Promise((r) => (release = r));
+          return countReply();
+        }
+        inference++;
+        return httpMock()(url, init);
+      },
+      async () => {},
+      async (input) => assertCountedContinuation(input, await h.ok(x.path)),
+    );
+    h.setWorkContext(countedContext());
+    h.setWorkPort(port);
+    await h.ok(
+      PACK + "/selections/publication",
+      publication(await h.ok(x.packPath), "count-publish"),
+    );
+    const command = start(await h.ok(x.path), "one-count-slot");
+    const first = h.call(WORK + "/commands", command);
+    await entered;
+    const retry = await h.ok(WORK + "/commands", command);
+    if (interrupt) {
+      const v = await h.ok(x.path);
+      await h.ok(WORK + "/commands", {
+        schema_version: "preparation-interruption.v5",
+        operation: "interrupt",
+        invocation_id: v.current.pending_invocation,
+        expected_work_revision: v.work_revision,
+        expected_work_head: v.work_head,
+        reason: "Stop while independent token count is pending",
+        idempotency_key: "count-interruption",
+      });
+    }
+    release();
+    assert.deepEqual((await first).data, retry);
+    await h.restart();
+    assert.deepEqual(await h.ok(WORK + "/commands", command), retry);
+    assert.equal(counts, 1);
+    assert.equal(inference, interrupt ? 0 : 1);
+    assert.equal(
+      Boolean((await h.ok(x.path)).invocations[0].result),
+      !interrupt,
+    );
+  });
+test("activation counted API: lost terminal acknowledgment retains both receipts without repeating count or inference", async (t) => {
+  const h = await intakeHost(t, { work: true }),
+    x = await prepareEvaluationFixture(h, "H01");
+  let counts = 0,
+    inference = 0;
+  const records = [];
+  const port = countedPort(
+    async (url, init) => {
+      if (url.endsWith("/input_tokens")) {
+        counts++;
+        return countReply();
+      }
+      inference++;
+      return httpMock()(url, init);
+    },
+    async (r) => records.push(r),
+  );
+  h.setWorkContext(countedContext());
+  h.setWorkPort(port);
+  await h.ok(
+    PACK + "/selections/publication",
+    publication(await h.ok(x.packPath), "counted-ack-publish"),
+  );
+  const command = start(await h.ok(x.path), "counted-lost-ack");
+  h.fault({ tag: "COMMIT", remaining: 2, after: true });
+  assert.equal((await h.call(WORK + "/commands", command)).status, 500);
+  assert.ok((await h.ok(x.path)).invocations[0].result);
+  const snap = await h.snapshot();
+  await h.restart();
+  await h.ok(WORK + "/commands", command);
+  assert.equal(counts, 1);
+  assert.equal(inference, 1);
+  assert.equal(records.length, 2);
+  assert.deepEqual(await h.snapshot(), snap);
+});
+
+test("activation counted API: expired current worker profile after count prevents inference", async (t) => {
+  const h = await intakeHost(t, { work: true }),
+    x = await prepareEvaluationFixture(h, "H01");
+  let inference = 0;
+  const port = countedPort(
+    async (url, init) => {
+      if (url.endsWith("/input_tokens")) {
+        const context = countedContext();
+        h.setWorkContext({
+          ...context,
+          profile: {
+            ...context.profile,
+            grants: context.profile.grants.map((g) =>
+              g.purpose === "prepare_disposition_packet"
+                ? { ...g, effective_until: "2026-01-02T00:00:00.000Z" }
+                : g,
+            ),
+          },
+        });
+        return countReply();
+      }
+      inference++;
+      return httpMock()(url, init);
+    },
+    async () => {},
+    async (input) => assertCountedContinuation(input, await h.ok(x.path)),
+  );
+  const run = await runEvaluationArm(h, x, "bounded_investigation", {
+    key: "count-expiry",
+    context: countedContext(),
+    port,
+  });
+  assert.equal(inference, 0);
+  assert.equal(run.invocation.result, null);
+  await h.restart();
+  assert.deepEqual(await h.ok(WORK + "/commands", run.command), run.receipt);
+  assert.equal(inference, 0);
 });

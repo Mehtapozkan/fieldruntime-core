@@ -2,6 +2,8 @@
 import { open, constants } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 import {
+  assertUniqueJsonKeys,
+  assertValidPreparationWorkV5Contract,
   canonicalJson,
   immutableJson,
   sha256Json,
@@ -24,6 +26,7 @@ export function validateActivation(value: unknown): Obj {
     "Activation prerequisites have not been supplied",
   );
   const c = o(value);
+  const counted = c.schema_version === "comparison-activation.v2";
   ensure(
     Object.keys(c).sort().join() ===
       [
@@ -44,6 +47,7 @@ export function validateActivation(value: unknown): Obj {
         "output_usd_per_million",
         "total_worst_case_usd",
         "confirmations",
+        ...(counted ? ["counting"] : []),
       ]
         .sort()
         .join(),
@@ -51,7 +55,7 @@ export function validateActivation(value: unknown): Obj {
     "Activation accepts only the documented non-secret configuration fields",
   );
   ensure(
-    c.schema_version === "comparison-activation.v1" &&
+    (c.schema_version === "comparison-activation.v1" || counted) &&
       c.reviewed_head === "7144571ecb3fab62cced702f3c2eee8f03f994e7" &&
       c.model === "gpt-4.1-mini-2025-04-14" &&
       c.fixture_version === "v2" &&
@@ -113,7 +117,52 @@ export function validateActivation(value: unknown): Obj {
     "ACTIVATION_REQUIRED",
     "Confirmed complete price must fit the approved ceiling",
   );
+  if (counted) {
+    const counting = o(c.counting);
+    ensure(
+      Object.keys(counting).sort().join() ===
+        [
+          "max_calls",
+          "retries",
+          "max_charge_usd_micros_per_call",
+          "pricing_and_data_controls",
+        ]
+          .sort()
+          .join() &&
+        counting.max_calls === 48 &&
+        counting.retries === 0 &&
+        Number.isSafeInteger(counting.max_charge_usd_micros_per_call) &&
+        Number(counting.max_charge_usd_micros_per_call) >= 0 &&
+        Number(counting.max_charge_usd_micros_per_call) <= 10400 &&
+        typeof counting.pricing_and_data_controls === "string" &&
+        counting.pricing_and_data_controls.trim().length >= 12 &&
+        !/\b(unconfirmed|pending|unknown)\b/i.test(
+          counting.pricing_and_data_controls,
+        ) &&
+        Math.round(Number(c.total_worst_case_usd) * 1e6) >=
+          460800 + 48 * Number(counting.max_charge_usd_micros_per_call),
+      "ACTIVATION_REQUIRED",
+      "Counting price and data controls must be confirmed within the same 96-cent ceiling",
+    );
+  }
   return immutableJson(c);
+}
+// Reconcile a fresh server read before the second HTTP operation. This snapshot
+// does not replace the runtime's terminal transaction or grant renewed permission.
+export function assertCountedContinuation(input: Obj, view: unknown): void {
+  assertValidPreparationWorkV5Contract("read", view);
+  ensure(
+    o(view.current).pending_invocation === input.invocation_id &&
+      canonicalJson(view.candidate_binding) === canonicalJson(input.binding) &&
+      (view.history as Obj[]).some(
+        (e) =>
+          e.event === "started" &&
+          e.invocation_id === input.invocation_id &&
+          e.hash === input.started_entry_hash,
+      ),
+    "ACTIVATION_REQUIRED",
+    "Invocation interrupted or its current binding changed during counting",
+  );
 }
 async function credentialFile(path: string): Promise<string> {
   ensure(
@@ -165,6 +214,9 @@ export function createLiveComparisonPort(
     credentialPath?: string;
     readCredential?: (path: string) => Promise<string>;
     http?: MockHttp;
+    // Private coordinator evidence only. The existing durable start owns the slot.
+    retainCount?: (record: Obj) => Promise<void>;
+    checkBeforeInference?: (input: Obj) => Promise<void>;
   } = {},
 ): PreparationPort {
   const config = validateActivation(value),
@@ -174,9 +226,17 @@ export function createLiveComparisonPort(
     "ACTIVATION_REQUIRED",
     "An explicit locally supplied credential path is required",
   );
+  ensure(
+    config.schema_version !== "comparison-activation.v2" ||
+      (options.retainCount && options.checkBeforeInference),
+    "ACTIVATION_REQUIRED",
+    "Count evidence must be retained before inference",
+  );
   const path = options.credentialPath,
     read = options.readCredential ?? credentialFile,
-    http = options.http ?? realHttp;
+    http = options.http ?? realHttp,
+    retainCount = options.retainCount,
+    checkBeforeInference = options.checkBeforeInference;
   return (input) => {
     ensure(
       o(input.binding).worker_implementation_id ===
@@ -195,6 +255,93 @@ export function createLiveComparisonPort(
         try {
           if (controller.signal.aborted)
             throw new Error("Cancelled before send");
+          if (config.schema_version === "comparison-activation.v2") {
+            ensure(
+              retainCount,
+              "ACTIVATION_REQUIRED",
+              "Count evidence retention unavailable",
+            );
+            const payload = Object.fromEntries(
+              [
+                "model",
+                "instructions",
+                "input",
+                "text",
+                "tools",
+                "tool_choice",
+                "truncation",
+              ].map((key) => [key, request[key]]),
+            );
+            const binding = {
+              schema_version: "comparison-count.v1",
+              request_hash: sha256Json(request),
+              payload_hash: sha256Json(payload),
+              activation_hash: activationHash,
+              payload,
+            };
+            await retainCount({
+              ...binding,
+              phase: "attempt",
+              recorded_at: new Date().toISOString(),
+            });
+            controller.signal.throwIfAborted();
+            const countResponse = await http(
+              `${COMPARISON_ENDPOINT}/input_tokens`,
+              {
+                method: "POST",
+                redirect: "error",
+                headers: {
+                  "content-type": "application/json",
+                  authorization: `Bearer ${credential}`,
+                  "OpenAI-Project": String(config.project_id),
+                },
+                body: canonicalJson(payload),
+                signal: controller.signal,
+              },
+            );
+            if (countResponse.redirected)
+              throw new Error("Count redirect refused");
+            const countChunks: Uint8Array[] = [];
+            let countBytes = 0;
+            for await (const chunk of countResponse.body) {
+              controller.signal.throwIfAborted();
+              countBytes += chunk.byteLength;
+              if (countBytes > 4096) throw new Error("Count response limit");
+              countChunks.push(chunk);
+            }
+            const countBody = new TextDecoder("utf8", { fatal: true }).decode(
+              Buffer.concat(countChunks),
+            );
+            if (countBody.includes(credential))
+              throw new Error("Count credential echo refused");
+            // Preserve even a rejected/error response; never turn it into permission.
+            await retainCount({
+              ...binding,
+              phase: "response",
+              recorded_at: new Date().toISOString(),
+              http_status: countResponse.status,
+              body: countBody,
+            });
+            const observed = o(JSON.parse(countBody));
+            assertUniqueJsonKeys(countBody);
+            ensure(
+              countResponse.status === 200 &&
+                Object.keys(observed).sort().join() === "input_tokens,object" &&
+                observed.object === "response.input_tokens" &&
+                Number.isSafeInteger(observed.input_tokens) &&
+                Number(observed.input_tokens) > 0 &&
+                Number(observed.input_tokens) <= 16000,
+              "ACTIVATION_REQUIRED",
+              "Complete provider count unavailable or over the approved ceiling",
+            );
+            ensure(
+              checkBeforeInference,
+              "ACTIVATION_REQUIRED",
+              "Current invocation read unavailable",
+            );
+            await checkBeforeInference(input);
+            controller.signal.throwIfAborted();
+          }
           const response = await http(COMPARISON_ENDPOINT, {
             method: "POST",
             redirect: "error",

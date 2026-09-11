@@ -105,3 +105,50 @@ test("activation: pending handoff cannot enable credentials, arbitrary fields or
   ])
     assert.throws(() => live.validateActivation({ ...hermetic, ...extra }));
 });
+
+test("activation v2: counting allowance and complete combined cost fail closed", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const pending = JSON.parse(
+    await readFile("docs/examples/d040-activation-pending.json", "utf8"),
+  );
+  const c = {
+    ...pending,
+    schema_version: "comparison-activation.v2",
+    project_id: "proj_HERMETIC",
+    validated_head: "0".repeat(40),
+    ci_url: "https://github.com/Mehtapozkan/fieldruntime-core/actions/runs/1",
+    total_worst_case_usd: 0.768,
+    confirmations: Object.fromEntries(
+      Object.keys(pending.confirmations).map((k) => [
+        k,
+        "Hermetic fixture only; no actual account confirmation",
+      ]),
+    ),
+    counting: {
+      max_calls: 48,
+      retries: 0,
+      max_charge_usd_micros_per_call: 6400,
+      pricing_and_data_controls:
+        "Hermetic fixture only; no actual account confirmation",
+    },
+  };
+  assert.doesNotThrow(() => live.validateActivation(c));
+  for (const change of [
+    { max_calls: 49 },
+    { retries: 1 },
+    { max_charge_usd_micros_per_call: null },
+    { max_charge_usd_micros_per_call: 10401 },
+    { pricing_and_data_controls: "unknown pricing" },
+  ])
+    assert.throws(() =>
+      live.validateActivation({ ...c, counting: { ...c.counting, ...change } }),
+    );
+  assert.throws(() =>
+    live.validateActivation({ ...c, total_worst_case_usd: 0.4608 }),
+  );
+  assert.throws(
+    () =>
+      live.createLiveComparisonPort(c, { credentialPath: "/hermetic/only" }),
+    /Count evidence/,
+  );
+});
