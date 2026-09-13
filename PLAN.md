@@ -1,5 +1,9 @@
 # Delivery Plan
 
+## Current bounded assignment: D-041 Core seam
+
+Complete the owner-authorized generic synthetic-dispute profile and read-only source seam, reuse D-039/D6 and existing PostgreSQL journals, preserve v1 and all prior history, validate and open one draft PR stacked on PR #44. Stop at that Core handoff. Platform integration/pin changes and Case Receipt work require a separate instruction. The historical conditional comparison gates below remain unchanged and grant no activation in this assignment.
+
 ## Conditional synthetic comparison: next gates
 
 PR #44 preserves the frozen v2 inputs/prompts and deterministic baseline. The owner

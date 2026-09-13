@@ -75,3 +75,8 @@ export {
   assertValidPreparationWorkV5Contract,
   assertValidDisputeExportV4,
 } from "./validators.js";
+
+export {
+  assertValidSyntheticDisputeContract,
+  assertValidSyntheticDisputeAuthorityContract,
+} from "./validators.js";

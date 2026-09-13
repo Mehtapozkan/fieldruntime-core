@@ -12,10 +12,15 @@ export const REVIEW_VERSIONS = Object.freeze({
 });
 export type ReviewVersions = {
   readonly engine:
-    "authority-review-engine.v1" | "authority-review-engine.dispute.v1";
+    | "authority-review-engine.v1"
+    | "authority-review-engine.dispute.v1"
+    | "authority-review-engine.dispute.v2";
   readonly resolver:
     "authority-resolution.d6c.v1" | "authority-resolution.d6c.v2";
-  readonly projection: "authority-packet.v1" | "authority-packet.dispute.v1";
+  readonly projection:
+    | "authority-packet.v1"
+    | "authority-packet.dispute.v1"
+    | "authority-packet.dispute.v2";
 };
 export type ReviewActor =
   "operator" | "business" | "finance" | "executive" | "finance_delegate";

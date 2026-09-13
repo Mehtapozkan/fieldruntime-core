@@ -1,7 +1,5 @@
-import {
-  canonicalJson,
-  assertValidDisputeResultContract,
-} from "../../contracts/src/index.js";
+import { assertResultContract } from "./dispute-result.js";
+import { canonicalJson } from "../../contracts/src/index.js";
 import {
   intakeObject as o,
   requireIntake as ensure,
@@ -36,7 +34,7 @@ export async function loadDisputeEvidence(c: SqlClient): Promise<Obj[]> {
   );
   return rows.rows.map((r) => {
     const e = o(r.entry);
-    assertValidDisputeResultContract("entry", e);
+    assertResultContract("entry", e);
     ensure(
       !["request_authority", "review_authority"].includes(String(e.operation)),
       "RESULT_INTEGRITY",

@@ -1,4 +1,7 @@
-import { assertValidDisputeAuthorityContract } from "../../contracts/src/index.js";
+import {
+  assertValidDisputeAuthorityContract,
+  assertValidSyntheticDisputeAuthorityContract,
+} from "../../contracts/src/index.js";
 import {
   assertValidAuthorityReviewContract,
   assertValidAuthorityPolicy,
@@ -70,10 +73,11 @@ export function assertReviewContract(
       ["command", "journal", "read", "material", "evaluation"].includes(kind),
       "invalid dispute authority contract",
     );
-    assertValidDisputeAuthorityContract(
-      kind as "command" | "journal" | "read" | "material" | "evaluation",
-      v,
-    );
+    const contractKind = kind as
+      "command" | "journal" | "read" | "material" | "evaluation";
+    if (v.schema_version.endsWith(".v2"))
+      assertValidSyntheticDisputeAuthorityContract(contractKind, v);
+    else assertValidDisputeAuthorityContract(contractKind, v);
   } else assertValidAuthorityReviewContract(kind, value);
 }
 export const DISPUTE_REVIEW_VERSIONS: ReviewVersions = {
@@ -81,6 +85,16 @@ export const DISPUTE_REVIEW_VERSIONS: ReviewVersions = {
   resolver: "authority-resolution.d6c.v2",
   projection: "authority-packet.dispute.v1",
 };
+export const SYNTHETIC_DISPUTE_REVIEW_VERSIONS: ReviewVersions = {
+  engine: "authority-review-engine.dispute.v2",
+  resolver: "authority-resolution.d6c.v2",
+  projection: "authority-packet.dispute.v2",
+};
+const isDisputeVersion = (v: ReviewVersions): boolean =>
+  v.engine === "authority-review-engine.dispute.v1" ||
+  v.engine === "authority-review-engine.dispute.v2";
+const disputeVersionSuffix = (v: ReviewVersions): string =>
+  v.engine === "authority-review-engine.dispute.v2" ? "v2" : "v1";
 export interface AuthorityCommandResult {
   readonly status: "applied" | "duplicate" | "conflict";
   readonly code?: string;
@@ -218,10 +232,12 @@ function currentPolicy(
   data: ObjectValue,
   now: string,
   dispute = false,
+  policyId?: string,
 ): ObjectValue | undefined {
   const policies = objects(data.policies).filter((policy) =>
     dispute
-      ? policy.authority_class === "invoice_dispute_no_adjustment" &&
+      ? (policyId === undefined || policy.policy_id === policyId) &&
+        policy.authority_class === "invoice_dispute_no_adjustment" &&
         policy.action_class === "uphold_invoice_no_adjustment"
       : policy.authority_class === "financial_remedy" &&
         policy.action_class === "customer_credit",
@@ -502,14 +518,32 @@ function applyCommand(
   if (command.expected_authority_state_revision !== head.revision)
     return conflict("authority_state_changed");
   const catalog = snapshot(state, tenant, head.snapshot_hash, "catalog"),
-    data = object(catalog.data);
+    canonicalData = object(catalog.data);
+  const genericContext =
+    versions.engine === "authority-review-engine.dispute.v2"
+      ? object(command.result_context)
+      : null;
+  // Only this versioned internal result adapter supplies role bindings. The outer
+  // result store reconstructs them from the retained trusted profile on replay.
+  const data = genericContext
+    ? json({
+        ...canonicalData,
+        actors: {
+          ...object(canonicalData.actors),
+          operator: genericContext.operator_identity_id,
+          evaluator: genericContext.evaluator_identity_id,
+          [actorKey]: object(genericContext.actor).identity_id,
+        },
+      })
+    : canonicalData;
   const now = dependencies.now().toISOString();
   const floor = clockFloor(cases, head);
   if (now < floor) return conflict("clock_regression");
   const policy = currentPolicy(
     data,
     now,
-    versions.engine === "authority-review-engine.dispute.v1",
+    isDisputeVersion(versions),
+    genericContext ? string(genericContext.policy_id) : undefined,
   );
   if (policy === undefined) return conflict("policy_unavailable");
   const identity = actor(data, actorKey);
@@ -567,10 +601,9 @@ function applyCommand(
     const evaluation = reviewSnapshot(
       "evaluation",
       json({
-        schema_version:
-          versions.engine === "authority-review-engine.dispute.v1"
-            ? "authority-evaluation.dispute.v1"
-            : "authority-evaluation.v1",
+        schema_version: isDisputeVersion(versions)
+          ? `authority-evaluation.dispute.${disputeVersionSuffix(versions)}`
+          : "authority-evaluation.v1",
         tenant_id: tenant,
         request_binding_hash: sha256Json(request),
         prior_review_revision: previous?.review_revision ?? 0,
@@ -584,10 +617,9 @@ function applyCommand(
     );
     additions.push(evaluation);
     const unhashed = json({
-      schema_version:
-        versions.engine === "authority-review-engine.dispute.v1"
-          ? "authority-request-journal-entry.dispute.v1"
-          : "authority-request-journal-entry.v1",
+      schema_version: isDisputeVersion(versions)
+        ? `authority-request-journal-entry.dispute.${disputeVersionSuffix(versions)}`
+        : "authority-request-journal-entry.v1",
       id,
       tenant_id: tenant,
       case_id: command.case_id,
@@ -627,12 +659,12 @@ function applyCommand(
     predecessor: string | undefined,
     links: ObjectValue,
   ): ObjectValue => {
-    const dispute = versions.engine === "authority-review-engine.dispute.v1";
+    const dispute = isDisputeVersion(versions);
     const material = dispute
       ? object(command.material)
       : syntheticReviewMaterial(aggregate, proposal, versions);
     if (dispute) {
-      assertValidDisputeAuthorityContract("material", material);
+      assertReviewContract("material", material);
       requireIntegrity(
         tenant === "tenant_intake_demo" &&
           material.case_id === aggregate.case_id &&
@@ -758,7 +790,7 @@ function applyCommand(
     if (
       command.decision === "modify" &&
       command.replacement_proposal_key === material.proposal_key &&
-      versions.engine !== "authority-review-engine.dispute.v1"
+      !isDisputeVersion(versions)
     )
       return conflict("replacement_unchanged");
     const replacementId =
@@ -1014,7 +1046,7 @@ export function assertAuthorityStateIntegrity(
   }
 }
 
-export function executeAuthorityCommand(
+function executeAuthorityCommandInternal(
   state: AuthorityState,
   cases: CaseEngineState,
   head: AuthorityCatalogHead,
@@ -1022,12 +1054,23 @@ export function executeAuthorityCommand(
   actorKey: ReviewActor,
   dependencies: ReviewDependencies,
   positionBase = state.entries.length,
+  allowSyntheticProfile = false,
 ): AuthorityCommandResult {
   assertReviewContract("command", input);
   const command = json(input);
+  if (
+    command.schema_version === "authority-command.dispute.v2" &&
+    !allowSyntheticProfile
+  )
+    throw new AuthorityReviewError(
+      "REVIEW_INPUT_INVALID",
+      "V2 result authority requires the configured synthetic-dispute runtime boundary",
+    );
   requireIntegrity(
     positionBase === state.entries.length ||
-      command.schema_version === "authority-command.dispute.v1",
+      ["authority-command.dispute.v1", "authority-command.dispute.v2"].includes(
+        string(command.schema_version),
+      ),
     "Only the pinned dispute export adapter admits a retained global position",
   );
   if (
@@ -1052,10 +1095,54 @@ export function executeAuthorityCommand(
     command,
     actorKey,
     dependencies,
-    command.schema_version === "authority-command.dispute.v1"
-      ? DISPUTE_REVIEW_VERSIONS
-      : REVIEW_VERSIONS,
+    command.schema_version === "authority-command.dispute.v2"
+      ? SYNTHETIC_DISPUTE_REVIEW_VERSIONS
+      : command.schema_version === "authority-command.dispute.v1"
+        ? DISPUTE_REVIEW_VERSIONS
+        : REVIEW_VERSIONS,
     positionBase,
+  );
+}
+
+/** Existing public authority API does not admit host-only v2 result material. */
+export function executeAuthorityCommand(
+  state: AuthorityState,
+  cases: CaseEngineState,
+  head: AuthorityCatalogHead,
+  input: unknown,
+  actorKey: ReviewActor,
+  dependencies: ReviewDependencies,
+  positionBase = state.entries.length,
+): AuthorityCommandResult {
+  return executeAuthorityCommandInternal(
+    state,
+    cases,
+    head,
+    input,
+    actorKey,
+    dependencies,
+    positionBase,
+  );
+}
+/** Package-private integration: only the configured D-039 lifecycle calls this. */
+export function executeSyntheticDisputeAuthorityCommand(
+  state: AuthorityState,
+  cases: CaseEngineState,
+  head: AuthorityCatalogHead,
+  input: unknown,
+  actorKey: ReviewActor,
+  dependencies: ReviewDependencies,
+  positionBase = state.entries.length,
+): AuthorityCommandResult {
+  return executeAuthorityCommandInternal(
+    state,
+    cases,
+    head,
+    input,
+    actorKey,
+    dependencies,
+    positionBase,
+    true,
   );
 }
 
@@ -1087,7 +1174,16 @@ export function readAuthorityRequest(
     aggregate,
     request,
     material,
-    object(catalog.data),
+    material.schema_version === "authority-review-material.dispute.v2"
+      ? json({
+          ...object(catalog.data),
+          actors: {
+            ...object(object(catalog.data).actors),
+            evaluator: object(object(entries[0]?.command).result_context)
+              .evaluator_identity_id,
+          },
+        })
+      : object(catalog.data),
     decisionsOf(entries),
     head,
     now.toISOString(),
@@ -1095,9 +1191,11 @@ export function readAuthorityRequest(
   );
   const packet = json({
     schema_version:
-      material.schema_version === "authority-review-material.dispute.v1"
-        ? "authority-request-read-response.dispute.v1"
-        : "authority-request-read-response.v1",
+      material.schema_version === "authority-review-material.dispute.v2"
+        ? "authority-request-read-response.dispute.v2"
+        : material.schema_version === "authority-review-material.dispute.v1"
+          ? "authority-request-read-response.dispute.v1"
+          : "authority-request-read-response.v1",
     tenant_id: head.tenant_id,
     case_id: request.case_id,
     authority_request_id: requestId,
@@ -1120,9 +1218,11 @@ export function readAuthorityRequest(
     ),
     current: evaluated.result,
     implementation_versions:
-      material.schema_version === "authority-review-material.dispute.v1"
-        ? DISPUTE_REVIEW_VERSIONS
-        : REVIEW_VERSIONS,
+      material.schema_version === "authority-review-material.dispute.v2"
+        ? SYNTHETIC_DISPUTE_REVIEW_VERSIONS
+        : material.schema_version === "authority-review-material.dispute.v1"
+          ? DISPUTE_REVIEW_VERSIONS
+          : REVIEW_VERSIONS,
     simulation: true,
     action_permission: false,
   });
