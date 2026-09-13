@@ -1,3 +1,4 @@
+import { observeSyntheticDisputeSource } from "./synthetic-dispute-source.js";
 import { immutableJson, canonicalJson } from "../../contracts/src/index.js";
 import {
   intakeObject as o,
@@ -27,6 +28,8 @@ import {
 } from "./postgres-store.js";
 import {
   applyDisputeCommand,
+  resultActor,
+  resultCatalog,
   disputeNeedsSource,
   withDisputeAuthority,
   assertDisputeState,
@@ -41,18 +44,21 @@ import {
   exportDispute,
   type DisputeState,
 } from "./dispute-result.js";
-import { disputeActor, disputeCatalog } from "./dispute-profile.js";
 import {
   fixedDisputeReader,
   observeDisputeSource,
   type DisputeReader,
 } from "./dispute-source.js";
-export async function loadDisputeStore(c: SqlClient): Promise<DisputeState> {
+export async function loadDisputeStore(
+  c: SqlClient,
+  enrollmentProfile?: Obj,
+): Promise<DisputeState> {
   try {
     const work = await loadWorkStore(c),
       stored = await loadAuthorityStore(c),
       entries = await loadDisputeEvidence(c);
     const state = withDisputeAuthority({
+      ...(enrollmentProfile ? { enrollmentProfile } : {}),
       work,
       authority: stored.authority,
       heads: stored.heads,
@@ -73,12 +79,13 @@ export class PostgresDisputeResultStore {
   constructor(
     readonly pool: SqlPool,
     readonly reader: DisputeReader = fixedDisputeReader,
+    readonly enrollmentProfile?: Obj,
   ) {}
   async assertReady(requiredCatalogTenant?: string): Promise<void> {
     await authorityTransaction(this.pool, true, async (c) => {
       // loadWorkStore includes intake -> authority -> Case/credit/verification replay.
       // loadDisputeStore additionally checks the complete result history.
-      const state = await loadDisputeStore(c);
+      const state = await loadDisputeStore(c, this.enrollmentProfile);
       if (
         requiredCatalogTenant !== undefined &&
         !state.heads.some((h) => h.tenant_id === requiredCatalogTenant)
@@ -91,12 +98,17 @@ export class PostgresDisputeResultStore {
   }
   read(caseId: string, key: string, now: () => Date): Promise<Obj> {
     return authorityTransaction(this.pool, true, async (c) =>
-      readDispute(await loadDisputeStore(c), caseId, key, now().toISOString()),
+      readDispute(
+        await loadDisputeStore(c, this.enrollmentProfile),
+        caseId,
+        key,
+        now().toISOString(),
+      ),
     );
   }
   export(caseId: string, key: string, now: () => Date): Promise<Obj> {
     return authorityTransaction(this.pool, true, async (c) => {
-      const s = await loadDisputeStore(c);
+      const s = await loadDisputeStore(c, this.enrollmentProfile);
       readDispute(s, caseId, key, now().toISOString());
       return exportDispute(s);
     });
@@ -109,7 +121,7 @@ export class PostgresDisputeResultStore {
       op = String(command.operation);
     const needsRead = disputeNeedsSource(command);
     const pre = await authorityTransaction(this.pool, true, async (c) => {
-      const s = await loadDisputeStore(c),
+      const s = await loadDisputeStore(c, this.enrollmentProfile),
         duplicate = disputeDuplicate(s, command);
       if (duplicate) return { duplicate, at: "" };
       ensure(
@@ -125,7 +137,8 @@ export class PostgresDisputeResultStore {
         "Preflight clock regressed",
       );
       if (needsRead)
-        disputeActor(
+        resultActor(
+          s,
           catalogData(s),
           "verifier",
           disputeSubject(s, caseId, key),
@@ -135,7 +148,13 @@ export class PostgresDisputeResultStore {
     });
     if (pre.duplicate) return pre.duplicate;
     // File bytes are read independently, with no writer transaction or adapter success input.
-    const first = needsRead ? await observeDisputeSource(this.reader) : null,
+    const first = needsRead
+        ? await (
+            this.enrollmentProfile
+              ? observeSyntheticDisputeSource
+              : observeDisputeSource
+          )(this.reader)
+        : null,
       observedAt = now().toISOString();
     ensure(
       observedAt >= pre.at,
@@ -143,7 +162,7 @@ export class PostgresDisputeResultStore {
       "Observation time regressed",
     );
     return authorityTransaction(this.pool, false, async (c) => {
-      const s = await loadDisputeStore(c),
+      const s = await loadDisputeStore(c, this.enrollmentProfile),
         duplicate = disputeDuplicate(s, command);
       if (duplicate) return duplicate;
       const beforeRead = now().toISOString();
@@ -153,14 +172,19 @@ export class PostgresDisputeResultStore {
         "Writer time regressed",
       );
       if (needsRead)
-        disputeActor(
+        resultActor(
+          s,
           catalogData(s),
           "verifier",
           disputeSubject(s, caseId, key),
           beforeRead,
         );
       const recheck = needsRead
-          ? await observeDisputeSource(this.reader)
+          ? await (
+              this.enrollmentProfile
+                ? observeSyntheticDisputeSource
+                : observeDisputeSource
+            )(this.reader)
           : null,
         at = now().toISOString();
       ensure(at >= beforeRead, "CLOCK_REGRESSION", "Recording clock regressed");
@@ -177,7 +201,7 @@ export class PostgresDisputeResultStore {
       if (op === "enroll") {
         const subject = disputeSubject(s, caseId, key),
           prior = s.heads.find((h) => h.tenant_id === INTAKE_TENANT),
-          data = disputeCatalog(subject, prior ? catalogData(s) : undefined);
+          data = resultCatalog(s, subject, prior ? catalogData(s) : undefined);
         catalog = reviewSnapshot(
           "catalog",
           json({
@@ -251,7 +275,7 @@ export class PostgresDisputeResultStore {
         [INTAKE_TENANT, at],
       );
       await writerRevision(c);
-      const persisted = await loadDisputeStore(c);
+      const persisted = await loadDisputeStore(c, this.enrollmentProfile);
       ensure(
         persisted.entries.some(
           (e) => canonicalJson(e) === canonicalJson(entry),

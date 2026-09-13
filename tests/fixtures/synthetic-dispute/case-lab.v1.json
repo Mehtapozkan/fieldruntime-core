@@ -1,0 +1,60 @@
+{
+  "schema_version": "case-lab-dispute-fixture.v1",
+  "date": "2026-09-07",
+  "timezone": "UTC",
+  "arrival": "2026-09-07T14:43:00.000Z",
+  "deadline": "2026-09-07T15:00:00.000Z",
+  "unloading_completed": "2026-09-07T15:27:00.000Z",
+  "subject": {
+    "entity": "entity_north",
+    "customer": "Case Lab Customer",
+    "dispute_id": "case-lab-400",
+    "invoice_id": "CL-INV-10000",
+    "order_id": "CL-ORDER-1",
+    "delivery_id": "CL-DELIVERY-1",
+    "amount_minor": 40000,
+    "currency": "USD"
+  },
+  "invoice_minor": 1000000,
+  "payment_minor": 960000,
+  "governing_term": "Synthetic term CL-ARRIVAL-v1: delivery timing is measured at arrival; the fixed deadline is 2026-09-07T15:00:00.000Z (UTC).",
+  "ground": "late_delivery",
+  "expected_external_result": "deduction_withdrawn",
+  "evidence": [
+    {
+      "document_id": "cl-invoice",
+      "release": 1,
+      "text": "Synthetic invoice CL-INV-10000: USD 10000.00.\n"
+    },
+    {
+      "document_id": "cl-payment",
+      "release": 1,
+      "text": "Synthetic payment against CL-INV-10000: USD 9600.00.\n"
+    },
+    {
+      "document_id": "cl-difference",
+      "release": 1,
+      "text": "Synthetic disputed difference: USD 400.00, 40000 minor units.\n"
+    },
+    {
+      "document_id": "cl-reason",
+      "release": 1,
+      "text": "Customer-reported reason for case-lab-400: late delivery. This is a claim, not independent proof.\n"
+    },
+    {
+      "document_id": "cl-shipment",
+      "release": 2,
+      "text": "Synthetic shipment CL-DELIVERY-1 on 2026-09-07 UTC: arrival 14:43:00; unloading completed 15:27:00.\n"
+    },
+    {
+      "document_id": "cl-customer",
+      "release": 2,
+      "text": "Synthetic customer used unloading completion at 15:27 UTC to judge lateness.\n"
+    },
+    {
+      "document_id": "cl-term",
+      "release": 3,
+      "text": "Synthetic term CL-ARRIVAL-v1: delivery timing is measured at arrival; the fixed deadline is 2026-09-07T15:00:00.000Z (UTC).\n"
+    }
+  ]
+}

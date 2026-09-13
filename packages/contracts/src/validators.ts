@@ -1,3 +1,9 @@
+import schemaDisputeResultV2 from "../schemas/dispute-result.v2.schema.json" with { type: "json" };
+import schemaAuthorityCommandDisputeV2 from "../schemas/authority-command.dispute.v2.schema.json" with { type: "json" };
+import schemaAuthorityReviewSupportDisputeV2 from "../schemas/authority-review-support.dispute.v2.schema.json" with { type: "json" };
+import schemaAuthorityRequestJournalEntryDisputeV2 from "../schemas/authority-request-journal-entry.dispute.v2.schema.json" with { type: "json" };
+import schemaAuthorityRequestReadResponseDisputeV2 from "../schemas/authority-request-read-response.dispute.v2.schema.json" with { type: "json" };
+import disputeExportV5Schema from "../schemas/dispute-result-export.v5.schema.json" with { type: "json" };
 import investigationV3Schema from "../schemas/investigation.v3.schema.json" with { type: "json" };
 import preparationWorkV5Schema from "../schemas/preparation-work.v5.schema.json" with { type: "json" };
 import preparationPackV6Schema from "../schemas/preparation-pack.v6.schema.json" with { type: "json" };
@@ -96,6 +102,12 @@ const reviewValidators = {
   }),
 };
 
+ajv.addSchema(schemaDisputeResultV2);
+ajv.addSchema(schemaAuthorityCommandDisputeV2);
+ajv.addSchema(schemaAuthorityReviewSupportDisputeV2);
+ajv.addSchema(schemaAuthorityRequestJournalEntryDisputeV2);
+ajv.addSchema(schemaAuthorityRequestReadResponseDisputeV2);
+ajv.addSchema(disputeExportV5Schema);
 ajv.addSchema(schemaDisputeResultV1);
 ajv.addSchema(schemaAuthorityCommandDisputeV1);
 ajv.addSchema(schemaAuthorityReviewSupportDisputeV1);
@@ -715,4 +727,59 @@ export function assertValidDisputeExportV4(
   value: unknown,
 ): asserts value is Record<string, unknown> {
   assertContract(validateDisputeExportV4, value, "dispute-result-export.v4");
+}
+
+const syntheticDisputeValidators = Object.fromEntries(
+  (
+    [
+      "command",
+      "subject",
+      "source",
+      "raw",
+      "observation",
+      "comparison",
+      "basis",
+      "entry",
+      "receipt",
+      "read",
+      "profile",
+      "export",
+    ] as const
+  ).map((kind) => [
+    kind,
+    ajv.compile({ $ref: `${schemaDisputeResultV2.$id}#/$defs/${kind}` }),
+  ]),
+) as Record<keyof typeof disputeValidators | "profile", ValidateFunction>;
+export function assertValidSyntheticDisputeContract(
+  kind: keyof typeof syntheticDisputeValidators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(
+    syntheticDisputeValidators[kind],
+    value,
+    `dispute-result.v2/${kind}`,
+  );
+}
+const syntheticAuthorityValidators = {
+  command: ajv.compile({ $ref: schemaAuthorityCommandDisputeV2.$id }),
+  journal: ajv.compile({
+    $ref: schemaAuthorityRequestJournalEntryDisputeV2.$id,
+  }),
+  read: ajv.compile({ $ref: schemaAuthorityRequestReadResponseDisputeV2.$id }),
+  material: ajv.compile({
+    $ref: `${schemaAuthorityReviewSupportDisputeV2.$id}#/$defs/material`,
+  }),
+  evaluation: ajv.compile({
+    $ref: `${schemaAuthorityReviewSupportDisputeV2.$id}#/$defs/evaluation_snapshot`,
+  }),
+};
+export function assertValidSyntheticDisputeAuthorityContract(
+  kind: keyof typeof syntheticAuthorityValidators,
+  value: unknown,
+): asserts value is Record<string, unknown> {
+  assertContract(
+    syntheticAuthorityValidators[kind],
+    value,
+    `dispute-authority.v2/${kind}`,
+  );
 }

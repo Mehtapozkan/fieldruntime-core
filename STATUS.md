@@ -1,5 +1,15 @@
 # Status
 
+## D-041 generic synthetic dispute result seam — implemented; CI pending
+
+Stacked from open PR #44 at `038b8d44b2e5cb4eb2ad1efd5c798d752161bc8a`; PRs #40–#44 remain unchanged, open and unmerged. The [public boundary and regression guide](docs/guides/generic-synthetic-dispute-result.md) documents explicit v2 profile binding, read-only source injection and the reused D-039/D6 lifecycle. Additive 0015 admits versions in existing tables only. All 82 checked existing contract, migration, ECC, fixed-v1, lockfile and constitution files remain byte-identical.
+
+The fixed $400 regression reaches independent synthetic observation and separate named business acceptance; reliable mismatch supports explicit reopen and removes current success. Closure stays denied. Captured public-API commands, receipts and accepted/reopened exports validate and reproduce exactly after restart. Mixed v1/v2 history and pre-enrollment worker reads retain exact v1 receipts without future evidence or source truth leakage.
+
+Local Node 24.19.0/PostgreSQL 18.4 validation: `pnpm validate` passes **344/344**, plus formatting, lint, types and public-release checks; new generic PostgreSQL suite **22/22**; retained authority/credit/verification/D-039 PostgreSQL/browser checks **255/255**; retained preparation upgrade **1/1**; artifact capture **1/1** with exact final-build export replay. The broad run exposed the new mixed-history worker-read regression; after the v2-only fix all 22 generic tests and all 344 repository tests passed again. Retained v1 code paths are unchanged. ECC **620/620**, 30/30; negative control **152/620**, 0/30, intended exit 1/hard-gate failure. Docker is absent locally (`docker compose config --quiet` exits 127). Final PR CI, including Compose/appliance checks, is pending and must not be represented as passed; its status is recorded in the PR/handoff.
+
+No Platform modification or pin update, model/provider activation, real credential access, customer processing, inference, external business message, financial write, deployment, merge, release, spending, D14 or Case Receipt work. Platform remains `NOT_CORE_BACKED` pending a separately instructed integration with this public Core boundary. Stop after the separate open draft Core PR and handoff.
+
 ## Conditional D-040 activation connection — not a completed comparison
 
 The owner approved frozen v2 at PR #44 `7144571` subject to prerequisites: one send

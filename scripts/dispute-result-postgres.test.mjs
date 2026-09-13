@@ -577,7 +577,7 @@ test("D13 BR7 additive upgrade preserves old migration checksums and Case histor
   ).rows;
   assert.deepEqual(after.slice(0, 10), applied);
   assert.equal(after[10].version, "0011_dispute_result");
-  assert.equal(after.at(-1).version, "0014_investigation_activation");
+  assert.equal(after.at(-1).version, "0015_synthetic_dispute_profile");
   await r.enroll();
   await r.h.restart();
   assert.equal((await r.get()).current.status, "enrolled");

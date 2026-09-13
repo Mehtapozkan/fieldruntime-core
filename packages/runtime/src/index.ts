@@ -62,3 +62,15 @@ export {
 } from "./simulated-credit.js";
 
 export { compareCreditObservation } from "./credit-verification.js";
+
+export {
+  createSyntheticDisputeRuntime,
+  validateSyntheticDisputeExport,
+  replaySyntheticDisputeExport,
+} from "./synthetic-dispute-runtime.js";
+export type {
+  SyntheticDisputeRuntime,
+  SyntheticDisputeRuntimeOptions,
+} from "./synthetic-dispute-runtime.js";
+export { normalizeSyntheticDisputeProfile } from "./synthetic-dispute-profile.js";
+export type { SyntheticDisputeSourcePort } from "./synthetic-dispute-source.js";

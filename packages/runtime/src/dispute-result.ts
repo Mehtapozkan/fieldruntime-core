@@ -1,3 +1,18 @@
+import { assertValidSyntheticDisputeContract } from "../../contracts/src/index.js";
+import {
+  syntheticProfileFor,
+  normalizeSyntheticDisputeProfile,
+  assertSyntheticEvidence,
+  syntheticDisputeCatalog,
+  syntheticDisputeActor,
+  SYNTHETIC_DISPUTE_VERSIONS,
+  type SyntheticDisputeRole,
+} from "./synthetic-dispute-profile.js";
+import {
+  rawSyntheticDisputeRead,
+  compareSyntheticDisputeSource,
+} from "./synthetic-dispute-source.js";
+import { SYNTHETIC_DISPUTE_REVIEW_VERSIONS } from "./authority-review.js";
 import {
   assertValidDisputeExportV2,
   assertValidDisputeExportV3,
@@ -22,6 +37,7 @@ import {
   reviewSnapshot,
   normalizeAuthorityCatalogData,
   executeAuthorityCommand,
+  executeSyntheticDisputeAuthorityCommand,
   DISPUTE_REVIEW_VERSIONS,
   type AuthorityCommandResult,
 } from "./authority-review.js";
@@ -47,6 +63,8 @@ import {
   unavailableDisputeRead,
 } from "./dispute-source.js";
 export interface DisputeState {
+  /** Supplied only by trusted host configuration for initial enrollment. */
+  enrollmentProfile?: Obj;
   /** Historical export adapter retains global positions without other tenants data. */
   authorityPosition?: number;
   work: WorkState;
@@ -59,6 +77,54 @@ export const DISPUTE_VERSIONS = {
   reader: "synthetic-dispute-source.v1",
   material: "dispute-authority-material.v1",
 };
+export function assertResultContract(
+  kind: Parameters<typeof assertValidDisputeResultContract>[0],
+  value: unknown,
+  profile?: Obj,
+): asserts value is Obj {
+  const v = o(value);
+  if (
+    profile ||
+    String(v.schema_version).endsWith(".v2") ||
+    v.schema_version === "dispute-result-export.v5"
+  )
+    assertValidSyntheticDisputeContract(kind, value);
+  else assertValidDisputeResultContract(kind, value);
+}
+export function resultProfile(s: DisputeState, subject: Obj): Obj | undefined {
+  return syntheticProfileFor(s, subject.case_id, subject.record_key);
+}
+export function resultActor(
+  s: DisputeState,
+  data: Obj,
+  role: SyntheticDisputeRole,
+  subject: Obj,
+  at: string,
+): Obj {
+  const p = resultProfile(s, subject);
+  return p
+    ? syntheticDisputeActor(data, role, p, at)
+    : disputeActor(data, role, subject, at);
+}
+export function resultCatalog(
+  s: DisputeState,
+  subject: Obj,
+  previous?: Obj,
+): Obj {
+  const p = resultProfile(s, subject);
+  return p
+    ? syntheticDisputeCatalog(p, previous)
+    : disputeCatalog(subject, previous);
+}
+function compareFor(
+  s: DisputeState,
+  ...args: Parameters<typeof compareDisputeSource>
+): Obj {
+  const p = resultProfile(s, args[0]);
+  return p
+    ? compareSyntheticDisputeSource(p, ...args)
+    : compareDisputeSource(...args);
+}
 const same = (a: unknown, b: unknown): boolean =>
   canonicalJson(a) === canonicalJson(b);
 const hashed = (v: Obj): Obj => ({ ...v, hash: sha256Json(v) });
@@ -76,19 +142,32 @@ const isAuthority = (e: Obj): boolean =>
   ["request_authority", "review_authority"].includes(String(e.operation));
 export const caseEntries = (s: DisputeState, id: unknown): Obj[] =>
   s.entries.filter((e) => e.case_id === id && !isAuthority(e));
-const orderedEvidence = (entries: readonly Obj[]): Obj[] =>
-  [...entries].sort(
+const orderedEvidence = (entries: readonly Obj[]): Obj[] => {
+  const generic = entries.some(
+    (e) => e.schema_version === "dispute-result-entry.v2",
+  );
+  return [...entries].sort(
     (a, b) =>
+      (generic
+        ? String(a.recorded_at).localeCompare(String(b.recorded_at)) ||
+          Number(a.authority_position) - Number(b.authority_position)
+        : 0) ||
       String(a.case_id).localeCompare(String(b.case_id)) ||
       Number(a.sequence) - Number(b.sequence) ||
       Number(isAuthority(a)) - Number(isAuthority(b)) ||
       Number(a.authority_position) - Number(b.authority_position),
   );
+};
 /** Derived receipts are retained solely in the existing D6 command journal, never O. */
 export function disputeAuthorityReceipts(authority: AuthorityState): Obj[] {
   const groups = new Map<string, Obj[]>();
   for (const item of authority.entries)
-    if (item.schema_version === "authority-request-journal-entry.dispute.v1") {
+    if (
+      [
+        "authority-request-journal-entry.dispute.v1",
+        "authority-request-journal-entry.dispute.v2",
+      ].includes(string(item.schema_version))
+    ) {
       const a = o(item),
         key = String(a.command_fingerprint);
       groups.set(key, [...(groups.get(key) ?? []), a]);
@@ -100,7 +179,11 @@ export function disputeAuthorityReceipts(authority: AuthorityState): Obj[] {
       c = o(meta.command),
       binding = o(c.binding);
     return hashed({
-      schema_version: "dispute-result-entry.v1",
+      schema_version:
+        c.schema_version === "dispute-result-command.v2"
+          ? "dispute-result-entry.v2"
+          : "dispute-result-entry.v1",
+      ...(binding.profile_hash ? { profile_hash: binding.profile_hash } : {}),
       id: `result_${sha256Json(c).slice(7)}`,
       tenant_id: INTAKE_TENANT,
       case_id: binding.case_id,
@@ -181,7 +264,33 @@ export function disputeSubject(
     amount_minor: Number(cells.amount_minor),
     currency: cells.currency,
   };
-  assertValidDisputeResultContract("subject", subject);
+  const profile = syntheticProfileFor(s, caseId, key);
+  assertResultContract("subject", subject, profile);
+  if (profile) {
+    normalizeSyntheticDisputeProfile(profile);
+    ensure(
+      same(profile.subject, subject),
+      "SUBJECT_CONFLICT",
+      "Record identifiers, amount or currency differ from trusted enrollment",
+    );
+    for (const item of versions) {
+      const row = o(item),
+        v = o(row.cells);
+      ensure(
+        row.entity === subject.entity &&
+          v.customer_ref === subject.customer &&
+          v.source_record_id === subject.dispute_id &&
+          v.invoice_id === subject.invoice_id &&
+          v.order_ids === subject.order_id &&
+          v.delivery_ids === subject.delivery_id &&
+          Number(v.amount_minor) === subject.amount_minor &&
+          v.currency === subject.currency,
+        "SUBJECT_CONFLICT",
+        "Enrolled subject identity is immutable across retained record versions",
+      );
+    }
+    assertSyntheticEvidence(s, profile);
+  }
   ensure(
     String(cells.order_ids).split(";").length === 1 &&
       String(cells.delivery_ids).split(";").length === 1,
@@ -192,7 +301,10 @@ export function disputeSubject(
   ensure(
     a &&
       o(a.document.case).customer_ref === subject.customer &&
-      same(o(a.document.case).scope_ids, ["scope_entity_north"]),
+      same(
+        o(a.document.case).scope_ids,
+        profile ? profile.scope_ids : ["scope_entity_north"],
+      ),
     "SCOPE_CONFLICT",
     "Case and exact record scope differ",
   );
@@ -208,6 +320,9 @@ export function disputeBinding(
   const h = head(s),
     entries = caseEntries(s, caseId);
   return {
+    ...(syntheticProfileFor(s, caseId, key)
+      ? { profile_hash: sha256Json(syntheticProfileFor(s, caseId, key)) }
+      : {}),
     case_id: caseId,
     record_key: key,
     case_version: a.journal.length,
@@ -257,7 +372,7 @@ export function disputeContext(s: DisputeState, caseId: string): Obj {
   };
 }
 export function normalizeDisputeCommand(v: unknown): Obj {
-  assertValidDisputeResultContract("command", v);
+  assertResultContract("command", v);
   ensure(
     Buffer.byteLength(canonicalJson(v)) <= 131072,
     "INVALID_INPUT",
@@ -283,7 +398,10 @@ export function disputeDuplicate(s: DisputeState, c: Obj): Obj | undefined {
   return undefined;
 }
 export const disputeReceipt = (e: Obj): Obj => ({
-  schema_version: "dispute-result-receipt.v1",
+  schema_version:
+    e.schema_version === "dispute-result-entry.v2"
+      ? "dispute-result-receipt.v2"
+      : "dispute-result-receipt.v1",
   historical_only: true,
   entry: e,
 });
@@ -337,12 +455,28 @@ function currentBasis(s: DisputeState, e: Obj, at: string): Obj {
   );
   const data = catalogData(s),
     policy = list(data.policies).find(
-      (p) => p.policy_id === "policy_dispute_no_adjustment",
+      (p) =>
+        p.policy_id ===
+        (resultProfile(s, o(e.data).subject as Obj)
+          ? o(resultProfile(s, o(e.data).subject as Obj)?.policy).policy_id
+          : "policy_dispute_no_adjustment"),
     );
   ensure(policy, "POLICY_UNAVAILABLE", "Bound policy missing");
+  const enrolled = resultProfile(s, o(e.data).subject as Obj);
+  if (enrolled)
+    ensure(
+      sha256Json(policy) === enrolled.policy_content_hash,
+      "POLICY_UNAVAILABLE",
+      "Current policy differs from the immutable enrolled policy",
+    );
   const source = o(o(o(b.data).observation).read).source;
   return {
-    schema_version: "dispute-result-basis.v1",
+    schema_version: resultProfile(s, o(e.data).subject as Obj)
+      ? "dispute-result-basis.v2"
+      : "dispute-result-basis.v1",
+    ...(resultProfile(s, o(e.data).subject as Obj)
+      ? { profile_hash: sha256Json(resultProfile(s, o(e.data).subject as Obj)) }
+      : {}),
     subject: o(e.data).subject,
     case_version: now.case_version,
     case_head_hash: now.case_head_hash,
@@ -394,7 +528,9 @@ function authorityMaterial(
 ): Obj {
   const a = needed(getCase(intake(s).cases, INTAKE_TENANT, String(e.case_id)));
   return {
-    schema_version: "authority-review-material.dispute.v1",
+    schema_version: resultProfile(s, o(b.subject))
+      ? "authority-review-material.dispute.v2"
+      : "authority-review-material.dispute.v1",
     tenant_id: INTAKE_TENANT,
     case_id: e.case_id,
     case_version: b.case_version,
@@ -420,12 +556,16 @@ function authorityMaterial(
     })),
     conflicts: [],
     unknowns: [
-      "Payment status and DEL-5 remain unresolved; synthetic source evidence is not real customer proof.",
+      resultProfile(s, o(b.subject))
+        ? "Payment and wider Case obligations remain unresolved; synthetic evidence is not customer proof."
+        : "Payment status and DEL-5 remain unresolved; synthetic source evidence is not real customer proof.",
     ],
     freshness_basis:
       "Exact Case, intake, catalog and source bindings; 15 minute observation window.",
     recommendation: reason,
-    implementation_versions: DISPUTE_REVIEW_VERSIONS,
+    implementation_versions: resultProfile(s, o(b.subject))
+      ? SYNTHETIC_DISPUTE_REVIEW_VERSIONS
+      : DISPUTE_REVIEW_VERSIONS,
   };
 }
 export function disputeNeedsSource(c: Obj): boolean {
@@ -457,11 +597,17 @@ export function applyDisputeCommand(
     "Case, catalog, inputs or result head changed; refresh and explicitly resubmit",
   );
   const subject = disputeSubject(s, caseId, key),
+    profile = resultProfile(s, subject),
     context = disputeContext(s, caseId);
   ensure(
     at >= String(context.clock_floor),
     "CLOCK_REGRESSION",
     "Result recording clock regressed",
+  );
+  ensure(
+    (c.schema_version === "dispute-result-command.v2") === !!profile,
+    "NOT_ENROLLED",
+    "Command version requires the exact trusted enrollment profile",
   );
   const op = String(c.operation),
     id = `result_${sha256Json(c).slice(7)}`,
@@ -480,14 +626,25 @@ export function applyDisputeCommand(
     );
     ensure(enrollmentCatalog, "RESULT_INTEGRITY", "Enrollment catalog missing");
     ensure(
-      !s.entries.some((e) => e.operation === "enroll" && e.case_id !== caseId),
+      !!profile ||
+        !s.entries.some(
+          (e) => e.operation === "enroll" && e.case_id !== caseId,
+        ),
       "ENROLLMENT_SCOPE_CONFLICT",
       "This fixed synthetic reader admits one explicitly enrolled Case; no name-based enrollment transfer",
     );
-    actor = head(s)
-      ? disputeActor(catalogData(s), "operator", subject, at)
-      : disputeIdentity("operator");
-    data = { kind: op, subject, catalog_hash: enrollmentCatalog };
+    actor = profile
+      ? o(o(profile.roles).operator)
+      : head(s)
+        ? resultActor(s, catalogData(s), "operator", subject, at)
+        : disputeIdentity("operator");
+    if (profile) normalizeSyntheticDisputeProfile(profile);
+    data = {
+      kind: op,
+      subject,
+      catalog_hash: enrollmentCatalog,
+      ...(profile ? { profile } : {}),
+    };
   } else {
     ensure(
       s.entries.some(
@@ -505,7 +662,7 @@ export function applyDisputeCommand(
           : ["accept", "reject", "reopen"].includes(op)
             ? "recipient"
             : "operator";
-    actor = disputeActor(catalogData(s), role, subject, at);
+    actor = resultActor(s, catalogData(s), role, subject, at);
     ensure(
       !!observation === disputeNeedsSource(c),
       "RESULT_INTEGRITY",
@@ -517,13 +674,14 @@ export function applyDisputeCommand(
         "RESULT_INTEGRITY",
         "Observation recording time changed",
       );
-      disputeActor(
+      resultActor(
+        s,
         catalogData(s),
         "verifier",
         subject,
         String(observation.started_at),
       );
-      disputeActor(catalogData(s), "verifier", subject, at);
+      resultActor(s, catalogData(s), "verifier", subject, at);
     }
     if (op === "candidate") {
       data = { kind: op, subject };
@@ -565,7 +723,14 @@ export function applyDisputeCommand(
             "BINDING_CONFLICT",
             "Exact recorded no-action decision required",
           );
-        const comparison = compareDisputeSource(
+        if (profile && op === "result_check")
+          ensure(
+            last(s, e, "report"),
+            "REPORT_REQUIRED",
+            "An explicit disposition report must precede source-result observation",
+          );
+        const comparison = compareFor(
+          s,
           subject,
           o(observation.read),
           o(observation.recheck),
@@ -614,7 +779,8 @@ export function applyDisputeCommand(
             "Original source changed; check a fresh basis",
           );
           ensure(
-            compareDisputeSource(
+            compareFor(
+              s,
               subject,
               o(observation.read),
               o(observation.recheck),
@@ -657,7 +823,9 @@ export function applyDisputeCommand(
             "Exact authority request/review revision changed",
           );
         const command = {
-          schema_version: "authority-command.dispute.v1",
+          schema_version: profile
+            ? "authority-command.dispute.v2"
+            : "authority-command.dispute.v1",
           type: create
             ? "authority.request.create"
             : "authority.request.decide",
@@ -671,7 +839,16 @@ export function applyDisputeCommand(
             context,
             observation,
             actor,
-            versions: DISPUTE_VERSIONS,
+            versions: profile ? SYNTHETIC_DISPUTE_VERSIONS : DISPUTE_VERSIONS,
+            ...(profile
+              ? {
+                  policy_id: o(profile.policy).policy_id,
+                  operator_identity_id: o(o(profile.roles).operator)
+                    .identity_id,
+                  evaluator_identity_id: o(o(profile.roles).evaluator)
+                    .identity_id,
+                }
+              : {}),
           },
           correlation_id: create
             ? id
@@ -691,7 +868,11 @@ export function applyDisputeCommand(
               }),
         };
         let index = 0;
-        authority = executeAuthorityCommand(
+        authority = (
+          profile
+            ? executeSyntheticDisputeAuthorityCommand
+            : executeAuthorityCommand
+        )(
           s.authority,
           intake(s).cases,
           needed(head(s)),
@@ -743,7 +924,8 @@ export function applyDisputeCommand(
           "Original source/basis changed or expired",
         );
         ensure(
-          compareDisputeSource(
+          compareFor(
+            s,
             subject,
             o(observation.read),
             o(observation.recheck),
@@ -850,7 +1032,8 @@ export function applyDisputeCommand(
           "Result source changed after independent observation",
         );
         ensure(
-          compareDisputeSource(
+          compareFor(
+            s,
             subject,
             o(observation.read),
             o(observation.recheck),
@@ -868,7 +1051,10 @@ export function applyDisputeCommand(
         ensure(
           commitments.length === 1 &&
             commitments[0]?.id === "commitment_payment_follow_up" &&
-            commitments[0].owner_identity_id === DISPUTE_IDS.decision &&
+            commitments[0].owner_identity_id ===
+              (profile
+                ? o(o(profile.roles).decision).identity_id
+                : DISPUTE_IDS.decision) &&
             commitments[0].status === "owned" &&
             String(commitments[0].due_at) > at &&
             commitments[0].evidence_ref ===
@@ -876,15 +1062,19 @@ export function applyDisputeCommand(
           "COMMITMENT_REQUIRED",
           "Payment-status follow-up needs the named current owner, future due time and exact evidence; completion/transfer is not established by this slice",
         );
-        disputeActor(catalogData(s), "decision", subject, at);
+        resultActor(s, catalogData(s), "decision", subject, at);
         data = {
           kind: op,
           outcome_hash: c.outcome_hash,
           observation_hash: c.observation_hash,
           commitments,
           remaining_obligations: [
-            "Payment status remains unknown; Morgan owns the stated follow-up.",
-            "DEL-5 and wider Case obligations remain unresolved.",
+            profile
+              ? "Payment status remains unknown; the enrolled decision owner owns the stated follow-up."
+              : "Payment status remains unknown; Morgan owns the stated follow-up.",
+            profile
+              ? "Wider Case obligations remain unresolved."
+              : "DEL-5 and wider Case obligations remain unresolved.",
           ],
         };
       } else if (op === "reject") {
@@ -913,7 +1103,10 @@ export function applyDisputeCommand(
     }
   }
   const entry = hashed({
-    schema_version: "dispute-result-entry.v1",
+    schema_version: profile
+      ? "dispute-result-entry.v2"
+      : "dispute-result-entry.v1",
+    ...(profile ? { profile_hash: sha256Json(profile) } : {}),
     id,
     tenant_id: INTAKE_TENANT,
     case_id: caseId,
@@ -931,7 +1124,7 @@ export function applyDisputeCommand(
       (authority?.entries.length ?? 0),
     authority_state_revision: head(s)?.revision ?? 0,
     recorded_at: at,
-    versions: DISPUTE_VERSIONS,
+    versions: profile ? SYNTHETIC_DISPUTE_VERSIONS : DISPUTE_VERSIONS,
     source_precondition: [
       "request_authority",
       "review_authority",
@@ -942,7 +1135,7 @@ export function applyDisputeCommand(
       : null,
     data,
   });
-  assertValidDisputeResultContract("entry", entry);
+  assertResultContract("entry", entry);
   return { entry, ...(authority ? { authority } : {}) };
 }
 // Rebuild the exact historical input prefix. Strictly earlier canonical evidence
@@ -1028,7 +1221,21 @@ function historicalState(
   const cases = {
     ...i.cases,
     cases: [
-      ...i.cases.cases.filter((x) => x !== a),
+      ...i.cases.cases
+        .filter((x) => x !== a)
+        .flatMap((other) => {
+          // V5 mixed histories must not apply a later Case's clock to an earlier
+          // v1/v2 authority event. Pure v1 retains its original interpreter.
+          if (
+            !s.enrollmentProfile &&
+            !s.entries.some(
+              (x) => x.schema_version === "dispute-result-entry.v2",
+            )
+          )
+            return [other];
+          const journal = other.journal.filter((x) => x.recorded_at <= at);
+          return journal.length ? [replayCaseJournal(journal)] : [];
+        }),
       replayCaseJournal(a.journal.slice(0, count)),
     ],
   };
@@ -1038,6 +1245,10 @@ function historicalState(
     ...commits.map((x) => string(x.recorded_at)),
     ...work.map((x) => string(x.recorded_at)),
     ...a.journal.slice(0, count).map((x) => x.recorded_at),
+    ...(s.enrollmentProfile ||
+    s.entries.some((x) => x.schema_version === "dispute-result-entry.v2")
+      ? cases.cases.flatMap((c) => c.journal.map((x) => x.recorded_at))
+      : []),
     string(catalog?.content.recorded_at ?? ""),
   ];
   ensure(
@@ -1088,13 +1299,29 @@ function historicalState(
 export function assertDisputeState(s: DisputeState): void {
   const prefix: Obj[] = [];
   const keys = new Set<string>(),
-    sourceVersions = new Map<number, string>();
+    sourceVersions = new Map<string, string>();
   for (const e of orderedEvidence(s.entries)) {
-    assertValidDisputeResultContract("entry", e);
+    assertResultContract("entry", e);
     const key = `${String(e.operation)}:${String(e.idempotency_key)}`;
     ensure(!keys.has(key), "RESULT_INTEGRITY", "Duplicate result command");
     keys.add(key);
-    const past = historicalState(s, e, prefix),
+    const retainedProfile =
+      e.schema_version === "dispute-result-entry.v2"
+        ? syntheticProfileFor(s, e.case_id, e.record_key)
+        : undefined;
+    ensure(
+      e.schema_version !== "dispute-result-entry.v2" || retainedProfile,
+      "RESULT_INTEGRITY",
+      "Recorded v2 enrollment profile missing",
+    );
+    const past = historicalState(
+        {
+          ...s,
+          ...(retainedProfile ? { enrollmentProfile: retainedProfile } : {}),
+        },
+        e,
+        prefix,
+      ),
       ob = e.source_precondition === null ? null : o(e.source_precondition);
     for (const obs of [
       ob,
@@ -1114,7 +1341,7 @@ export function assertDisputeState(s: DisputeState): void {
           const reconstructed =
             value.status === "unavailable"
               ? unavailableDisputeRead()
-              : rawDisputeRead(
+              : (retainedProfile ? rawSyntheticDisputeRead : rawDisputeRead)(
                   Buffer.from(String(value.bytes_base64), "base64"),
                 );
           ensure(
@@ -1127,7 +1354,7 @@ export function assertDisputeState(s: DisputeState): void {
             (obs === ob || o(o(e.data).comparison).status === "match")
           ) {
             const source = o(value.source),
-              rev = Number(source.revision),
+              rev = `${string(e.profile_hash ?? "v1")}:${String(source.revision)}`,
               hash = sha256Json(source),
               known = sourceVersions.get(rev);
             ensure(
@@ -1157,7 +1384,8 @@ export function assertDisputeState(s: DisputeState): void {
             (previous?.snapshot_hash ?? null) &&
           same(
             snap.content.data,
-            disputeCatalog(
+            resultCatalog(
+              past,
               o(o(e.data).subject),
               previous ? catalogData(past) : undefined,
             ),
@@ -1194,8 +1422,11 @@ export function assertDisputeState(s: DisputeState): void {
         );
     prefix.push(e);
   }
-  for (const a of s.authority.entries.filter(
-    (x) => x.schema_version === "authority-request-journal-entry.dispute.v1",
+  for (const a of s.authority.entries.filter((x) =>
+    [
+      "authority-request-journal-entry.dispute.v1",
+      "authority-request-journal-entry.dispute.v2",
+    ].includes(string(x.schema_version)),
   ))
     ensure(
       s.entries.some(
@@ -1219,6 +1450,7 @@ export function readDispute(
 ): Obj {
   const binding = disputeBinding(s, caseId, key),
     subject = disputeSubject(s, caseId, key),
+    profile = resultProfile(s, subject),
     history = s.entries.filter(
       (e) => e.case_id === caseId && e.record_key === key,
     ),
@@ -1314,7 +1546,7 @@ export function readDispute(
       accepted = verified && !!a && o(a.data).observation_hash === v.hash;
       if (accepted) {
         try {
-          disputeActor(catalogData(s), "recipient", subject, at);
+          resultActor(s, catalogData(s), "recipient", subject, at);
         } catch {
           accepted = false;
           blockers.push(
@@ -1365,7 +1597,9 @@ export function readDispute(
     }
   }
   const result = {
-    schema_version: "dispute-result-read.v1",
+    schema_version: profile
+      ? "dispute-result-read.v2"
+      : "dispute-result-read.v1",
     simulation: true,
     binding,
     evaluated_at: at,
@@ -1394,11 +1628,30 @@ export function readDispute(
       human_attention_released: null,
     },
   };
-  assertValidDisputeResultContract("read", result);
+  if (profile) {
+    result.current.remaining_obligations = [
+      "Payment status remains unknown; no cash or credit is inferred.",
+      "Wider Case obligations remain unresolved; Case closure is denied.",
+    ];
+    result.current.next_action = result.current.next_action
+      .replaceAll("Morgan", String(o(o(profile.roles).decision).identity_id))
+      .replaceAll("Robin", String(o(o(profile.roles).recipient).identity_id))
+      .replaceAll(
+        "DEL-5 and the Case remain unresolved",
+        "wider Case obligations remain unresolved",
+      );
+    result.current.responsible_role = result.current.responsible_role
+      .replaceAll("Morgan", String(o(o(profile.roles).decision).identity_id))
+      .replaceAll("Robin", String(o(o(profile.roles).recipient).identity_id))
+      .replaceAll("North AR", "enrolled");
+  }
+  assertResultContract("read", result);
   return result;
 }
 const checkDisputeExport = (value: unknown): Obj => {
-  if (o(value).schema_version === "dispute-result-export.v4")
+  if (o(value).schema_version === "dispute-result-export.v5")
+    assertValidSyntheticDisputeContract("export", value);
+  else if (o(value).schema_version === "dispute-result-export.v4")
     assertValidDisputeExportV4(value);
   else if (o(value).schema_version === "dispute-result-export.v3")
     assertValidDisputeExportV3(value);
@@ -1407,11 +1660,29 @@ const checkDisputeExport = (value: unknown): Obj => {
   else assertValidDisputeResultContract("export", value);
   return value;
 };
+const resultHeads = (s: DisputeState): Obj[] =>
+  [
+    ...new Set(
+      s.entries.filter((e) => !isAuthority(e)).map((e) => String(e.case_id)),
+    ),
+  ]
+    .sort()
+    .map((caseId) => {
+      const entries = caseEntries(s, caseId);
+      return {
+        case_id: caseId,
+        revision: entries.length,
+        head_hash: entries.at(-1)?.hash,
+      };
+    });
 export function exportDispute(s: DisputeState): Obj {
   const work = exportWorkState(s.work);
   const e = hashed({
-    schema_version:
-      work.schema_version === "preparation-work-export.v5"
+    schema_version: s.entries.some(
+      (e) => e.schema_version === "dispute-result-entry.v2",
+    )
+      ? "dispute-result-export.v5"
+      : work.schema_version === "preparation-work-export.v5"
         ? "dispute-result-export.v4"
         : work.schema_version === "preparation-work-export.v4"
           ? "dispute-result-export.v3"
@@ -1419,6 +1690,9 @@ export function exportDispute(s: DisputeState): Obj {
             ? "dispute-result-export.v2"
             : "dispute-result-export.v1",
     work,
+    ...(s.entries.some((e) => e.schema_version === "dispute-result-entry.v2")
+      ? { result_heads: resultHeads(s) }
+      : {}),
     authority: {
       entries: s.authority.entries.filter((e) => e.tenant_id === INTAKE_TENANT),
       snapshots: s.authority.snapshots.filter(
@@ -1499,6 +1773,12 @@ export function validateDisputeExport(raw: unknown): DisputeState {
       "Export clock guard drift",
     );
   }
+  if (value.schema_version === "dispute-result-export.v5")
+    ensure(
+      same(value.result_heads, resultHeads(s)),
+      "RESULT_INTEGRITY",
+      "Export result heads do not bind the complete retained history",
+    );
   assertDisputeState(s);
   return s;
 }

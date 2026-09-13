@@ -43,6 +43,8 @@
 | D-039 | [Define one synthetic no-adjustment result for an imported dispute, independently checked and separately accepted.](docs/architecture/d13-imported-dispute-result.md)                                | Accepted   | Owner approved `1f387d47` on 2026-09-10 UTC, including corrected product clarifications. Synthetic result API implemented for review; D-038 and all closure, financial, real-data and bundle limits remain unchanged.                                                                                 |
 | D-040 | [Bound one synthetic model-assisted investigation task and retain its exact proposal/evaluation evidence.](docs/architecture/d13-bounded-investigation-task.md)                                      | Accepted   | Implementation-only approval at PR #42 `1954f929` on 2026-09-10: optional adapter, versioned preparation evidence and additive compatibility. Conditional frozen-v2 comparison approval at PR #44 `7144571` is recorded below; account/custody/input gates remain. Customer processing is unapproved. |
 
+| D-041 | [Version explicitly enrolled synthetic dispute result profiles and a trusted read-only source port.](docs/architecture/d13-generic-synthetic-dispute-result.md) | Accepted | Owner authorized the bounded Core-only seam on September 12, 2026. Preserve D-039 v1, reuse the existing lifecycle/journals, and leave Platform and all prior PRs unchanged. No model, customer, write, merge, release, deployment or Case Receipt scope. |
+
 D-039 was explicitly approved by the owner on 2026-09-10 at
 `1f387d470a90dfe41df69335732b3c48c831750a`, including the corrected handoff product
 clarifications. This authorizes the single synthetic result API, not an individual

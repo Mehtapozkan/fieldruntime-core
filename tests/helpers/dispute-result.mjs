@@ -26,7 +26,12 @@ export const sourceFixture = () =>
   ).then(JSON.parse);
 export async function resultHost(
   t,
-  { prepare = false, beforeResult = false, input } = {},
+  {
+    prepare = false,
+    beforeResult = false,
+    beforeSynthetic = false,
+    input,
+  } = {},
 ) {
   let h, first, second, workBefore, flow;
   if (prepare) {
@@ -40,7 +45,7 @@ export async function resultHost(
     second = flow.second;
     workBefore = await h.ok(flow.path + "&representation=export");
   } else {
-    h = await intakeHost(t, { work: true, beforeResult });
+    h = await intakeHost(t, { work: true, beforeResult, beforeSynthetic });
     let v = await h.prepare(input ?? (await queueInput()));
     first = (await h.ok("/v1/intake/commits", await h.selection(v, 0))).receipt;
     v = await h.ok(`/v1/intake/bundles/${v.bundle.id}`);
