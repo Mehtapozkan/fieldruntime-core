@@ -1,0 +1,22 @@
+{
+  "baseline_commit": "8f0344b443fca0166a14288ef61ce6d48e0677c5",
+  "baseline_tree": "0a2f02b4af22a47811aea94976d2b8907febca0d",
+  "candidate_commit": "4ea7508a60634e370d3ae14284beedfb1678e61b",
+  "candidate_tree": "d210bbaef6d9fc5703f518189db1736f2969764b",
+  "stages": {
+    "v1": {
+      "input_schema": "preparation-worker-input.v1",
+      "input_fingerprint": "sha256:8ecfb2f011b0f5456698ad9c9752b157ac30f39a126b1ad378c2500e15f093b5",
+      "pack_fingerprint": "sha256:6734b0bab850f5b11c1e6017da31c6262f318eb47cd17ae7613217a258a63d6d",
+      "result_hash": "sha256:7801fb06689c84566893bbd57d7466f8598be55b4af0b46174c62ab2a1573540",
+      "result_bytes": 10105
+    },
+    "v2": {
+      "input_schema": "preparation-worker-input.v2",
+      "input_fingerprint": "sha256:45b0d1e5b5da74ef5e8fe32a218166d5df28059bb84532024de909f09a910280",
+      "pack_fingerprint": "sha256:ed110f68631406dee3926a7836e4f00ef0f92d91cea338e0cc9f662b7cccdb3f",
+      "result_hash": "sha256:df9521b8cffc8faebcfa102b563581b2ca563076c7f6ee9af5dd47cf4afbc7b3",
+      "result_bytes": 11415
+    }
+  }
+}

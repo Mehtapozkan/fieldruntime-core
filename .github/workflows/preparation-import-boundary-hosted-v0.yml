@@ -1,0 +1,95 @@
+name: preparation import boundary hosted v0
+
+on:
+  push:
+    branches: [ci/preparation-import-boundary-hosted-v0]
+
+permissions:
+  contents: read
+
+jobs:
+  compare-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    env:
+      TZ: UTC
+      CORE_EXPERIMENT_OUTPUT: ${{ github.workspace }}/experiment-output
+      CORE_EXPERIMENT_CANDIDATE: ${{ github.workspace }}/candidate
+      D9_POSTGRES_URL: postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime
+      D6_POSTGRES_URL: postgresql://fieldruntime:local-evaluation-only@127.0.0.1:5432/fieldruntime
+      PGPASSFILE: /dev/null
+    steps:
+      - name: Check out the separate carrier
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          path: carrier
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check out the exact baseline
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 8f0344b443fca0166a14288ef61ce6d48e0677c5
+          path: baseline
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check out the exact product candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 4ea7508a60634e370d3ae14284beedfb1678e61b
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          version: 11.24.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+          cache: pnpm
+          cache-dependency-path: candidate/pnpm-lock.yaml
+      - name: Preregister exact refs, harness and eight slots
+        run: node carrier/scripts/ci/preparation-import-boundary-hosted-v0/run-bounded.mjs plan baseline candidate "$CORE_EXPERIMENT_OUTPUT"
+      - name: Clean frozen baseline install and separate build
+        working-directory: baseline
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+      - name: Clean frozen candidate install and separate build
+        working-directory: candidate
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+      - name: Install the pinned project browser normally
+        working-directory: candidate
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm exec playwright --version | tee "$CORE_EXPERIMENT_OUTPUT/public/Browser-Version.txt"
+      - name: Start only the disposable synthetic PostgreSQL service
+        working-directory: candidate
+        run: docker compose --project-name preparation-import-boundary-hosted-v0 up --detach --wait postgres
+      - name: Untimed qualification through the unchanged trusted fixture
+        run: node --test carrier/scripts/ci/preparation-import-boundary-hosted-v0/qualify.mjs | tee "$CORE_EXPERIMENT_OUTPUT/public/Qualification.log"
+      - name: Inspect emitted graphs and public binding equivalence
+        run: |
+          node carrier/scripts/ci/preparation-import-boundary-hosted-v0/inspect-graph.mjs baseline candidate "$CORE_EXPERIMENT_OUTPUT"
+          node carrier/scripts/ci/preparation-import-boundary-hosted-v0/inspect-bindings.mjs baseline candidate "$CORE_EXPERIMENT_OUTPUT"
+      - name: Execute the eight fixed fresh-parent and fresh-worker slots
+        run: node carrier/scripts/ci/preparation-import-boundary-hosted-v0/run-bounded.mjs run baseline candidate "$CORE_EXPERIMENT_OUTPUT"
+      - name: Exact serial retained gates and ECC receipts on the product candidate
+        run: node carrier/scripts/ci/preparation-import-boundary-hosted-v0/acceptance.mjs candidate "$CORE_EXPERIMENT_OUTPUT"
+      - name: Clean up only this experiment's service and volume
+        if: always()
+        working-directory: candidate
+        run: docker compose --project-name preparation-import-boundary-hosted-v0 down --volumes
+      - name: Retain only public Core synthetic test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: preparation-import-boundary-hosted-v0-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ github.workspace }}/experiment-output/public/
+          if-no-files-found: warn
+          retention-days: 14
