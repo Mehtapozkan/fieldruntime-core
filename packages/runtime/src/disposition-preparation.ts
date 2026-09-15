@@ -1,12 +1,15 @@
 // Fixed, deterministic preparation port. No database, clock, filesystem, network,
 // IDs or command gateway. The parent independently reconstructs this exact result.
-import { sha256Json, immutableJson } from "../../contracts/src/index.js";
+import {
+  sha256Json,
+  immutableJson,
+} from "../../contracts/src/canonical-json.js";
 import {
   intakeObject as o,
   intakeList as l,
   type IntakeObject as Obj,
-} from "./intake.js";
-import { WORK_MEASURES } from "./preparation-worker-profile.js";
+} from "./intake-values.js";
+import { WORK_MEASURES } from "./preparation-work-measures.js";
 const strings = (v: unknown): string[] => v as string[];
 const unique = (v: string[]): string[] => [...new Set(v)].sort();
 const refs = (values: readonly Obj[]): string[] =>

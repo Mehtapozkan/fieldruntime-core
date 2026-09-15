@@ -70,13 +70,7 @@ export function syntheticInvestigationProfile(): Obj {
 export function syntheticContinuationProfile(): Obj {
   return immutableJson(profileV2);
 }
-export const WORK_MEASURES = [
-  "cash_collected",
-  "disputes_resolved",
-  "credits_issued",
-  "work_newly_attended_to",
-  "human_attention_released",
-] as const;
+export { WORK_MEASURES } from "./preparation-work-measures.js";
 export function syntheticWorkerProfile(): Obj {
   return immutableJson(profile);
 }
