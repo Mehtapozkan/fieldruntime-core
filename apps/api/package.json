@@ -7,6 +7,6 @@
   "dependencies": {
     "@fieldruntime/runtime": "workspace:*",
     "@fieldruntime/worker": "workspace:*",
-    "pg": "8.23.0"
+    "pg": "8.23.1"
   }
 }
